@@ -1,0 +1,771 @@
+# Epistemics Ontology — Subjective vs Objective Reality, Fiction Classification,
+# Intentionality, Behaviour Grounding, Sentiment Analysis
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: epi:
+# Imports: agency.n3, provenance.n3, investigation.n3, research.n3, presentation.n3
+#
+# This ontology models the epistemic status of claims, observations, behaviours,
+# and expressions — whether they are grounded in objective reality, subjective
+# perspective, or fictional construction. It is agent-centric: any entity (human,
+# software agent, sensor, organisation) can be an epistemic agent with a
+# perspective. Spatio-temporal and social relations contextually shape what is
+# subjective vs objective.
+
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://purl.org/qualia/ontology/agency#> .
+@prefix prov:   <https://purl.org/qualia/ontology/provenance#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Epistemic Status — subjective, objective, intersubjective
+# ────────────────────────────────────────────────────────────────────
+
+epi:EpistemicStatus a rdfs:Class ;
+    rdfs:label "Epistemic Status" ;
+    rdfs:comment "The epistemic standing of a claim, observation, behaviour, or expression. Classifies whether it is grounded in objective reality (verifiable, measurable), subjective perspective (agent-dependent, experiential), intersubjective (shared among agents), or contested (agents disagree on status). Epistemic status is not fixed — it may shift as evidence accumulates, perspectives are reconciled, or context changes." .
+
+epi:EpistemicMode a rdfs:Class ; rdfs:label "Epistemic Mode" .
+
+epi:Objective a epi:EpistemicMode ;
+    rdfs:label "objective" ;
+    rdfs:comment "Verifiable by any appropriately positioned agent. Measurable, reproducible, independent of any single agent's perspective. Example: temperature reading, GPS coordinate, transaction record." .
+
+epi:Subjective a epi:EpistemicMode ;
+    rdfs:label "subjective" ;
+    rdfs:comment "Dependent on an agent's perspective, experience, or interpretation. Not directly verifiable by other agents without access to the agent's internal state. Example: emotional response, aesthetic judgement, personal memory." .
+
+epi:Intersubjective a epi:EpistemicMode ;
+    rdfs:label "intersubjective" ;
+    rdfs:comment "Shared among multiple agents through convention, agreement, or collective observation. Verifiable within a community but not universally. Example: social norms, legal facts, institutional facts, collective memory." .
+
+epi:Contested a epi:EpistemicMode ;
+    rdfs:label "contested" ;
+    rdfs:comment "Agents disagree on whether the claim is objective or subjective. The status itself is disputed. Example: historical events with conflicting accounts, disputed measurements, politically charged facts." .
+
+epi:Ambiguous a epi:EpistemicMode ;
+    rdfs:label "ambiguous" ;
+    rdfs:comment "The epistemic status cannot be determined from available information. May be objective, subjective, or intersubjective — insufficient evidence to classify." .
+
+epi:Fictional a epi:EpistemicMode ;
+    rdfs:label "fictional" ;
+    rdfs:comment "The claim, behaviour, or expression is a fictional construction — not asserted as real. May be creative, hypothetical, simulated, or counterfactual. Fictional does not mean false — it means not-asserted-as-real." .
+
+epi:hasEpistemicMode a rdf:Property ;
+    rdfs:label "has epistemic mode" ;
+    rdfs:range epi:EpistemicMode ;
+    rdfs:comment "The epistemic mode of a claim, observation, behaviour, or expression." .
+
+epi:epistemicConfidence a rdf:Property ;
+    rdfs:label "epistemic confidence" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Confidence in the epistemic classification (0.0 to 1.0). Low confidence means the classification may change with new information." .
+
+epi:epistemicAssessedBy a rdf:Property ;
+    rdfs:label "assessed by" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that assessed the epistemic status." .
+
+epi:epistemicAssessedAt a rdf:Property ;
+    rdfs:label "assessed at" ;
+    rdfs:range xsd:dateTime .
+
+epi:epistemicReasoning a rdf:Property ;
+    rdfs:label "epistemic reasoning" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Reasoning behind the epistemic classification — why is this objective/subjective/contested/fictional?" .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Agent Perspective — how an agent perceives and reports reality
+# ────────────────────────────────────────────────────────────────────
+
+epi:AgentPerspective a rdfs:Class ;
+    rdfs:label "Agent Perspective" ;
+    rdfs:comment "The perceptual and interpretive frame of an epistemic agent. Any entity — human, software agent, sensor, organisation, AI model — has a perspective that shapes what it can observe, how it interprets observations, and what biases it brings. Perspective is not error — it is the inherent situatedness of any agent. Understanding perspective is essential for evaluating whether claims are objective (perspective-independent) or subjective (perspective-dependent)." .
+
+epi:perspectiveAgent a rdf:Property ;
+    rdfs:label "perspective agent" ;
+    rdfs:domain epi:AgentPerspective ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor whose perspective this is." .
+
+epi:perspectiveType a rdf:Property ;
+    rdfs:label "perspective type" ;
+    rdfs:domain epi:AgentPerspective ;
+    rdfs:range epi:PerspectiveType .
+
+epi:PerspectiveType a rdfs:Class ; rdfs:label "Perspective Type" .
+
+epi:PerspHuman a epi:PerspectiveType ; rdfs:label "human" ;
+    rdfs:comment "Human perspective — embodied, emotional, culturally situated, with sensory limits." .
+epi:PerspSoftwareAgent a epi:PerspectiveType ; rdfs:label "software-agent" ;
+    rdfs:comment "Software agent perspective — may access data streams humans cannot, but lacks embodied experience. May have programmed biases." .
+epi:PerspSensor a epi:PerspectiveType ; rdfs:label "sensor" ;
+    rdfs:comment "Sensor perspective — raw measurement with calibration limits and noise. No interpretation — just signal." .
+epi:PerspOrganisation a epi:PerspectiveType ; rdfs:label "organisation" ;
+    rdfs:comment "Organisational perspective — collective, institutional, with formal procedures and cultural norms." .
+epi:PerspAIModel a epi:PerspectiveType ; rdfs:label "ai-model" ;
+    rdfs:comment "AI model perspective — trained on a corpus, with model-specific biases, ungrounded-generation risk, and context window limits." .
+epi:PerspCollective a epi:PerspectiveType ; rdfs:label "collective" ;
+    rdfs:comment "Collective perspective — emergent from multiple agents. Not reducible to any single agent's perspective." .
+
+epi:perspectiveAccessLevel a rdf:Property ;
+    rdfs:label "access level" ;
+    rdfs:domain epi:AgentPerspective ;
+    rdfs:range xsd:string ;
+    rdfs:comment "What the agent can access — physical (sensory range), informational (data access), social (network position), temporal (time period)." .
+
+epi:perspectiveBias a rdf:Property ;
+    rdfs:label "perspective bias" ;
+    rdfs:domain epi:AgentPerspective ;
+    rdfs:range epi:Bias .
+
+epi:Bias a rdfs:Class ;
+    rdfs:label "Bias" ;
+    rdfs:comment "A systematic tendency in an agent's perception or interpretation. Bias is not inherently error — it is the shape of an agent's perspective. Recognising bias is essential for epistemic evaluation." .
+
+epi:CognitiveBias a rdfs:Class ; rdfs:subClassOf epi:Bias ;
+    rdfs:label "Cognitive Bias" ;
+    rdfs:comment "Human cognitive biases — confirmation, availability, anchoring, framing, etc." .
+
+epi:ConfirmationBias a epi:CognitiveBias ; rdfs:label "confirmation-bias" .
+epi:AvailabilityBias a epi:CognitiveBias ; rdfs:label "availability-bias" .
+epi:AnchoringBias a epi:CognitiveBias ; rdfs:label "anchoring-bias" .
+epi:FramingBias a epi:CognitiveBias ; rdfs:label "framing-bias" .
+epi:SelectionBias a epi:CognitiveBias ; rdfs:label "selection-bias" .
+epi:RecencyBias a epi:CognitiveBias ; rdfs:label "recency-bias" .
+
+epi:AlgorithmicBias a rdfs:Class ; rdfs:subClassOf epi:Bias ;
+    rdfs:label "Algorithmic Bias" ;
+    rdfs:comment "Biases in software agents and AI models — training data bias, model architecture bias, optimisation target bias." .
+
+epi:TrainingDataBias a epi:AlgorithmicBias ; rdfs:label "training-data-bias" .
+epi:ModelArchitectureBias a epi:AlgorithmicBias ; rdfs:label "model-architecture-bias" .
+epi:OptimisationBias a epi:AlgorithmicBias ; rdfs:label "optimisation-bias" .
+epi:UngroundedGenerationBias a epi:AlgorithmicBias ; rdfs:label "ungrounded-generation-bias" ;
+    rdfs:comment "AI model generates plausible but fabricated content — tokens not grounded in input context or verifiable training data. A statistical artefact of probabilistic token prediction, not a perceptual or cognitive phenomenon. Has multiple distinct causes (see §10 Ungrounded Generation)." .
+
+epi:InstitutionalBias a rdfs:Class ; rdfs:subClassOf epi:Bias ;
+    rdfs:label "Institutional Bias" ;
+    rdfs:comment "Biases embedded in organisational procedures, legal frameworks, or social structures." .
+
+epi:ProceduralBias a epi:InstitutionalBias ; rdfs:label "procedural-bias" .
+epi:StructuralBias a epi:InstitutionalBias ; rdfs:label "structural-bias" .
+epi:CulturalBias a epi:InstitutionalBias ; rdfs:label "cultural-bias" .
+
+epi:SensorBias a rdfs:Class ; rdfs:subClassOf epi:Bias ;
+    rdfs:label "Sensor Bias" ;
+    rdfs:comment "Biases in sensor measurements — calibration drift, environmental interference, resolution limits." .
+
+epi:CalibrationDrift a epi:SensorBias ; rdfs:label "calibration-drift" .
+epi:EnvironmentalInterference a epi:SensorBias ; rdfs:label "environmental-interference" .
+epi:ResolutionLimit a epi:SensorBias ; rdfs:label "resolution-limit" .
+
+epi:hasPerspective a rdf:Property ;
+    rdfs:label "has perspective" ;
+    rdfs:range epi:AgentPerspective ;
+    rdfs:comment "Links a claim, observation, or behaviour to the agent perspective that produced it." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Reality Classification — fiction vs non-fiction
+# ────────────────────────────────────────────────────────────────────
+
+epi:RealityClassification a rdfs:Class ;
+    rdfs:label "Reality Classification" ;
+    rdfs:comment "Classifies whether a claim, narrative, document, behaviour, or expression is fiction or non-fiction, and into which sub-category. The boundary between fiction and non-fiction is not always sharp — historical fiction blends both, satire uses fictional frames for real commentary, and simulations model real systems with fictional parameters. Classification is agent-relative: what one agent treats as fiction another may treat as non-fiction (e.g. religious texts, myths, thought experiments)." .
+
+epi:RealityCategory a rdfs:Class ; rdfs:label "Reality Category" .
+
+# — Non-fiction categories —
+
+epi:NonFiction a rdfs:Class ; rdfs:subClassOf epi:RealityCategory ;
+    rdfs:label "non-fiction" ;
+    rdfs:comment "Asserted as real — the content is presented as factual, verifiable, or normative." .
+
+epi:Empirical a epi:NonFiction ; rdfs:label "empirical" ;
+    rdfs:comment "Based on observation, measurement, or experiment. Verifiable by replication." .
+epi:Testimonial a epi:NonFiction ; rdfs:label "testimonial" ;
+    rdfs:comment "First-person account of an event or experience. Verifiable through corroboration." .
+epi:Documentary a epi:NonFiction ; rdfs:label "documentary" ;
+    rdfs:comment "Record or documentation of events, processes, or states. Archival, administrative, legal." .
+epi:Analytical a epi:NonFiction ; rdfs:label "analytical" ;
+    rdfs:comment "Analysis or interpretation of data, events, or texts. Verifiable through method transparency." .
+epi:Theoretical a epi:NonFiction ; rdfs:label "theoretical" ;
+    rdfs:comment "Theoretical construction — model, framework, hypothesis. Asserted as potentially real, not yet confirmed." .
+epi:Procedural a epi:NonFiction ; rdfs:label "procedural" ;
+    rdfs:comment "Instructions, protocols, methods. Asserted as effective ways to achieve outcomes." .
+epi:Normative a epi:NonFiction ; rdfs:label "normative" ;
+    rdfs:comment "Normative claims — what should be, not what is. Ethical, legal, prescriptive." .
+epi:Journalistic a epi:NonFiction ; rdfs:label "journalistic" ;
+    rdfs:comment "Journalistic report — factual account with editorial framing. Verifiable through source checking." .
+epi:Administrative a epi:NonFiction ; rdfs:label "administrative" ;
+    rdfs:comment "Administrative record — bureaucratic, institutional. Verifiable through institutional processes." .
+
+# — Fiction categories —
+
+epi:Fiction a rdfs:Class ; rdfs:subClassOf epi:RealityCategory ;
+    rdfs:label "fiction" ;
+    rdfs:comment "Not asserted as real — the content is presented as constructed, imagined, or hypothetical. Fiction may reference real entities and events but does not claim to be a factual account." .
+
+epi:SpeculativeFiction a epi:Fiction ; rdfs:label "speculative-fiction" ;
+    rdfs:comment "Explores 'what if' scenarios — possible futures, alternate histories, hypothetical worlds." .
+epi:HistoricalFiction a epi:Fiction ; rdfs:label "historical-fiction" ;
+    rdfs:comment "Fictional narrative set in a real historical period. Blends real events with fictional characters or plot." .
+epi:RealisticFiction a epi:Fiction ; rdfs:label "realistic-fiction" ;
+    rdfs:comment "Fiction that could be real — plausible characters and events in a realistic setting." .
+epi:Fantasy a epi:Fiction ; rdfs:label "fantasy" ;
+    rdfs:comment "Fiction with impossible or supernatural elements. Not constrained by real-world physics or logic." .
+epi:ScienceFiction a epi:Fiction ; rdfs:label "science-fiction" ;
+    rdfs:comment "Fiction extrapolating from scientific or technological premises. May become real (self-fulfilling)." .
+epi:Allegorical a epi:Fiction ; rdfs:label "allegorical" ;
+    rdfs:comment "Fiction that symbolises real situations, agents, or concepts. The surface is fictional; the meaning is real." .
+epi:Satirical a epi:Fiction ; rdfs:label "satirical" ;
+    rdfs:comment "Fiction that critiques real situations through exaggeration, irony, or ridicule. Uses fictional frame for real commentary." .
+epi:Hypothetical a epi:Fiction ; rdfs:label "hypothetical" ;
+    rdfs:comment "Hypothetical construction — a thought experiment or what-if scenario used for reasoning. Not asserted as real but used to explore implications." .
+epi:Counterfactual a epi:Fiction ; rdfs:label "counterfactual" ;
+    rdfs:comment "Counterfactual construction — what would have happened if a past event were different. Used for causal reasoning." .
+epi:Simulated a epi:Fiction ; rdfs:label "simulated" ;
+    rdfs:comment "Simulation output — modelled reality with parameters that may or may not correspond to real values. The simulation is real; its content is constructed." .
+epi:Roleplay a epi:Fiction ; rdfs:label "roleplay" ;
+    rdfs:comment "Agent adopts a fictional persona or scenario. The agent is real; the persona is constructed. May blend with reality (e.g. undercover operations)." .
+epi:Deceptive a epi:Fiction ; rdfs:label "deceptive-fiction" ;
+    rdfs:comment "Fiction presented as non-fiction with intent to deceive. The content is fictional but the assertion of reality is the deception. Distinct from fiction that is openly fictional." .
+
+# — Blended categories —
+
+epi:Blended a rdfs:Class ; rdfs:subClassOf epi:RealityCategory ;
+    rdfs:label "blended" ;
+    rdfs:comment "Content that blends fiction and non-fiction in ways that make clean classification impossible. The boundary is itself contested or ambiguous." .
+
+epi:Mythological a epi:Blended ; rdfs:label "mythological" ;
+    rdfs:comment "Myth or sacred narrative — treated as non-fiction by believers, fiction by non-believers. The classification is agent-relative and culturally situated." .
+epi:Legendary a epi:Blended ; rdfs:label "legendary" ;
+    rdfs:comment "Legend — historical core with fictional accretion. The boundary between fact and embellishment is unclear." .
+epi:Propagandistic a epi:Blended ; rdfs:label "propagandistic" ;
+    rdfs:comment "Propaganda — blends factual elements with selective framing, omission, or exaggeration to advance a political objective." .
+epi:Marketing a epi:Blended ; rdfs:label "marketing" ;
+    rdfs:comment "Marketing content — blends factual product attributes with aspirational or emotional framing." .
+
+epi:hasRealityCategory a rdf:Property ;
+    rdfs:label "has reality category" ;
+    rdfs:range epi:RealityCategory ;
+    rdfs:comment "The fiction/non-fiction/blended category of a claim, document, behaviour, or expression." .
+
+epi:realityCategoryConfidence a rdf:Property ;
+    rdfs:label "category confidence" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Confidence in the reality classification (0.0 to 1.0)." .
+
+epi:realityCategoryAgent a rdf:Property ;
+    rdfs:label "classified by" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that classified the reality category." .
+
+epi:realityCategoryDisputed a rdf:Property ;
+    rdfs:label "category disputed" ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Whether the reality classification is disputed by other agents." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Intentionality — intentional vs unintentional
+# ────────────────────────────────────────────────────────────────────
+
+epi:IntentionalityAssessment a rdfs:Class ;
+    rdfs:label "Intentionality Assessment" ;
+    rdfs:comment "Assesses whether an action, behaviour, statement, or outcome was intentional or unintentional, and classifies the type of intentionality. This is critical for evaluating mistakes — a deliberate falsehood (deception) is different from an accidental error (mistake), which is different from a systematic bias (negligence). Intentionality is agent-centric: it depends on the agent's internal state, which may not be directly observable. Assessment combines behavioural evidence, context, and agent history." .
+
+epi:IntentionalityType a rdfs:Class ; rdfs:label "Intentionality Type" .
+
+epi:Deliberate a epi:IntentionalityType ; rdfs:label "deliberate" ;
+    rdfs:comment "The agent intended the action and its outcome. Full awareness and purpose." .
+epi:Intentional a epi:IntentionalityType ; rdfs:label "intentional" ;
+    rdfs:comment "The agent intended the action but may not have intended all consequences." .
+epi:Negligent a epi:IntentionalityType ; rdfs:label "negligent" ;
+    rdfs:comment "The agent did not intend the outcome but failed to take reasonable precautions. The action was voluntary; the harm was foreseeable but not intended." .
+epi:Reckless a epi:IntentionalityType ; rdfs:label "reckless" ;
+    rdfs:comment "The agent disregarded a known risk. More culpable than negligence — the risk was known and consciously ignored." .
+epi:Accidental a epi:IntentionalityType ; rdfs:label "accidental" ;
+    rdfs:comment "The agent did not intend the action or outcome. No foresight, no negligence. Pure accident." .
+epi:Mistaken a epi:IntentionalityType ; rdfs:label "mistaken" ;
+    rdfs:comment "The agent intended the action but based on a false belief or incorrect information. The action was intentional; the basis was wrong." .
+epi:Systematic a epi:IntentionalityType ; rdfs:label "systematic" ;
+    rdfs:comment "The outcome results from a systematic bias or structural issue, not from any single agent's intention. Emergent from system design." .
+epi:Emergent a epi:IntentionalityType ; rdfs:label "emergent" ;
+    rdfs:comment "The outcome was not intended by any agent but emerged from the interaction of multiple agents or systems. No single agent is responsible." .
+epi:Coerced a epi:IntentionalityType ; rdfs:label "coerced" ;
+    rdfs:comment "The agent was forced or pressured into the action. The action was performed but not freely willed." .
+epi:Habitual a epi:IntentionalityType ; rdfs:label "habitual" ;
+    rdfs:comment "The action was performed out of habit or routine, without conscious deliberation. Not fully intentional, not fully accidental." .
+
+epi:hasIntentionality a rdf:Property ;
+    rdfs:label "has intentionality" ;
+    rdfs:range epi:IntentionalityType .
+
+epi:intentionalityConfidence a rdf:Property ;
+    rdfs:label "intentionality confidence" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Confidence in the intentionality assessment (0.0 to 1.0). Low confidence when agent internal state is not observable." .
+
+epi:intentionalityEvidence a rdf:Property ;
+    rdfs:label "intentionality evidence" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRIs of evidence supporting the intentionality assessment — behavioural patterns, communications, context, agent history." .
+
+epi:intentionalityAssessedBy a rdf:Property ;
+    rdfs:label "assessed by" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that assessed intentionality." .
+
+epi:intentionalityReasoning a rdf:Property ;
+    rdfs:label "intentionality reasoning" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Reasoning behind the intentionality assessment — why deliberate vs accidental vs negligent?" .
+
+# — Mistake classification —
+
+epi:MistakeClassification a rdfs:Class ;
+    rdfs:label "Mistake Classification" ;
+    rdfs:comment "Classifies a mistake — an action or outcome that deviates from a standard, expectation, or intended result. The classification combines intentionality with cause: was the mistake due to false belief, skill deficit, attention failure, system design, or deliberate deviation? This is essential for determining whether a mistake is a learning opportunity, a systemic issue, or a signal of deception." .
+
+epi:MistakeType a rdfs:Class ; rdfs:label "Mistake Type" .
+
+epi:MistakeFalseBelief a epi:MistakeType ; rdfs:label "false-belief" ;
+    rdfs:comment "Agent acted on incorrect information. The action was reasonable given the belief; the belief was wrong." .
+epi:MistakeSkillDeficit a epi:MistakeType ; rdfs:label "skill-deficit" ;
+    rdfs:comment "Agent lacked the skill or knowledge to perform correctly. Training or experience gap." .
+epi:MistakeAttentionFailure a epi:MistakeType ; rdfs:label "attention-failure" ;
+    rdfs:comment "Agent failed to attend to relevant information. Distraction, fatigue, or cognitive overload." .
+epi:MistakePerceptionError a epi:MistakeType ; rdfs:label "perception-error" ;
+    rdfs:comment "Agent misperceived the situation. Sensory limitation, ambiguity, or perspective bias." .
+epi:MistakeJudgementError a epi:MistakeType ; rdfs:label "judgement-error" ;
+    rdfs:comment "Agent perceived correctly but judged wrongly. Reasoning failure, bias, or overconfidence." .
+epi:MistakeSystemDesign a epi:MistakeType ; rdfs:label "system-design" ;
+    rdfs:comment "The mistake was built into the system — confusing interface, inadequate procedure, missing safeguard." .
+epi:MistakeDeliberateDeviation a epi:MistakeType ; rdfs:label "deliberate-deviation" ;
+    rdfs:comment "Agent knowingly deviated from the standard. May be justified (creative deviation) or unjustified (rule-breaking)." .
+epi:MistakeUngroundedGeneration a epi:MistakeType ; rdfs:label "ungrounded-generation" ;
+    rdfs:comment "AI model generated fabricated content with no grounding in input or training data. A statistical artefact of probabilistic token prediction — not a cognitive or perceptual error. Has multiple distinct causes and consequences (see §10 Ungrounded Generation). Specific to AI models." .
+epi:MistakeSimulation a epi:MistakeType ; rdfs:label "simulation-artefact" ;
+    rdfs:comment "The 'mistake' is an artefact of a simulation or model — not a real-world error but a modelling limitation." .
+
+epi:hasMistakeType a rdf:Property ;
+    rdfs:label "has mistake type" ;
+    rdfs:range epi:MistakeType .
+
+epi:mistakeSeverity a rdf:Property ;
+    rdfs:label "mistake severity" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Severity of the mistake (trivial, minor, moderate, major, critical)." .
+
+epi:mistakeCorrectable a rdf:Property ;
+    rdfs:label "correctable" ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Whether the mistake can be corrected." .
+
+epi:mistakeRecurrence a rdf:Property ;
+    rdfs:label "recurrence" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Whether this is a one-off or recurring mistake (one-off, occasional, frequent, systematic)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Behaviour Grounding — what grounds an agent's behaviour
+# ────────────────────────────────────────────────────────────────────
+
+epi:BehaviourGrounding a rdfs:Class ;
+    rdfs:label "Behaviour Grounding" ;
+    rdfs:comment "What grounds an agent's behaviour — the basis on which the agent acted. Behaviour may be grounded in observation, hypothesis, interpretation, belief, assumption, inference, instruction, emotion, instinct, habit, or simulation. Grounding is essential for evaluating whether behaviour is well-founded, speculative, or fictional. An agent acting on a hypothesis is different from one acting on a belief, which is different from one acting on a fictional premise." .
+
+epi:GroundingType a rdfs:Class ; rdfs:label "Grounding Type" .
+
+epi:GroundObservation a epi:GroundingType ; rdfs:label "observation" ;
+    rdfs:comment "Behaviour grounded in direct observation — the agent saw, measured, or sensed the relevant phenomenon." .
+epi:GroundHypothesis a epi:GroundingType ; rdfs:label "hypothesis" ;
+    rdfs:comment "Behaviour grounded in a hypothesis — the agent is testing a conjecture. The behaviour is exploratory." .
+epi:GroundInterpretation a epi:GroundingType ; rdfs:label "interpretation" ;
+    rdfs:comment "Behaviour grounded in interpretation — the agent has assigned meaning to observations. The interpretation may be contested." .
+epi:GroundBelief a epi:GroundingType ; rdfs:label "belief" ;
+    rdfs:comment "Behaviour grounded in belief — the agent holds a proposition to be true without full verification. May be well-founded or not." .
+epi:GroundAssumption a epi:GroundingType ; rdfs:label "assumption" ;
+    rdfs:comment "Behaviour grounded in assumption — the agent is taking something as given for practical purposes. May be explicit or implicit." .
+epi:GroundInference a epi:GroundingType ; rdfs:label "inference" ;
+    rdfs:comment "Behaviour grounded in inference — the agent concluded from premises. May be deductive, inductive, abductive, etc." .
+epi:GroundInstruction a epi:GroundingType ; rdfs:label "instruction" ;
+    rdfs:comment "Behaviour grounded in instruction — the agent is following directions from another agent or system." .
+epi:GroundEmotion a epi:GroundingType ; rdfs:label "emotion" ;
+    rdfs:comment "Behaviour grounded in emotional response — the agent's affective state is driving behaviour." .
+epi:GroundInstinct a epi:GroundingType ; rdfs:label "instinct" ;
+    rdfs:comment "Behaviour grounded in instinct — hardwired or deeply conditioned response. No deliberation." .
+epi:GroundHabit a epi:GroundingType ; rdfs:label "habit" ;
+    rdfs:comment "Behaviour grounded in habit — routine, automatic. Not deliberated but not instinctive." .
+epi:GroundSimulation a epi:GroundingType ; rdfs:label "simulation" ;
+    rdfs:comment "Behaviour grounded in simulation output — the agent is acting on modelled predictions." .
+epi:GroundFiction a epi:GroundingType ; rdfs:label "fiction" ;
+    rdfs:comment "Behaviour grounded in a fictional premise — the agent is roleplaying, acting, or exploring a hypothetical." .
+epi:GroundNorm a epi:GroundingType ; rdfs:label "norm" ;
+    rdfs:comment "Behaviour grounded in social norm or convention — the agent follows what is expected." .
+epi:GroundValues a epi:GroundingType ; rdfs:label "values" ;
+    rdfs:comment "Behaviour grounded in personal or institutional values — the agent acts on principle." .
+
+epi:hasGrounding a rdf:Property ;
+    rdfs:label "has grounding" ;
+    rdfs:range epi:GroundingType .
+
+epi:groundingConfidence a rdf:Property ;
+    rdfs:label "grounding confidence" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Confidence in the grounding assessment (0.0 to 1.0)." .
+
+epi:groundingBasis a rdf:Property ;
+    rdfs:label "grounding basis" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "What specifically grounds the behaviour — the observation, hypothesis, belief, or assumption in question." .
+
+epi:groundingVerifiable a rdf:Property ;
+    rdfs:label "grounding verifiable" ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Whether the grounding can be verified by other agents. Observations are verifiable; beliefs and emotions are not (without the agent's report)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Sentiment — evaluation and analysis
+# ────────────────────────────────────────────────────────────────────
+
+epi:Sentiment a rdfs:Class ;
+    rdfs:label "Sentiment" ;
+    rdfs:comment "The affective orientation of an agent towards an entity, event, claim, or behaviour. Sentiment is subjective but may be intersubjective (shared by a community). Sentiment analysis evaluates the type, intensity, and target of sentiment, and whether it is genuine, performed, or manipulated. Sentiment interacts with epistemic status: strong negative sentiment towards a claim may indicate subjective rejection rather than objective refutation." .
+
+epi:SentimentType a rdfs:Class ; rdfs:label "Sentiment Type" .
+
+epi:SentPositive a epi:SentimentType ; rdfs:label "positive" .
+epi:SentNegative a epi:SentimentType ; rdfs:label "negative" .
+epi:SentNeutral a epi:SentimentType ; rdfs:label "neutral" .
+epi:SentMixed a epi:SentimentType ; rdfs:label "mixed" ;
+    rdfs:comment "Both positive and negative elements." .
+epi:SentAmbivalent a epi:SentimentType ; rdfs:label "ambivalent" ;
+    rdfs:comment "Agent is conflicted — simultaneously drawn and repelled." .
+
+epi:SentimentIntensity a rdfs:Class ; rdfs:label "Sentiment Intensity" .
+
+epi:IntensityMild a epi:SentimentIntensity ; rdfs:label "mild" .
+epi:IntensityModerate a epi:SentimentIntensity ; rdfs:label "moderate" .
+epi:IntensityStrong a epi:SentimentIntensity ; rdfs:label "strong" .
+epi:IntensityExtreme a epi:SentimentIntensity ; rdfs:label "extreme" .
+
+epi:SentimentAuthenticity a rdfs:Class ; rdfs:label "Sentiment Authenticity" .
+
+epi:AuthGenuine a epi:SentimentAuthenticity ; rdfs:label "genuine" ;
+    rdfs:comment "The sentiment is authentically felt by the agent." .
+epi:AuthPerformed a epi:SentimentAuthenticity ; rdfs:label "performed" ;
+    rdfs:comment "The sentiment is performed — the agent expresses it for social or strategic reasons but may not feel it. Not necessarily deceptive — social conventions often require performed sentiment." .
+epi:AuthManipulated a epi:SentimentAuthenticity ; rdfs:label "manipulated" ;
+    rdfs:comment "The sentiment has been manipulated — by framing, repetition, social pressure, or algorithmic amplification. The agent feels it but the feeling was engineered." .
+epi:AuthSimulated a epi:SentimentAuthenticity ; rdfs:label "simulated" ;
+    rdfs:comment "The sentiment is simulated by an AI model. No felt experience — pattern-matched output." .
+
+epi:hasSentimentType a rdf:Property ;
+    rdfs:label "sentiment type" ;
+    rdfs:range epi:SentimentType .
+
+epi:hasSentimentIntensity a rdf:Property ;
+    rdfs:label "sentiment intensity" ;
+    rdfs:range epi:SentimentIntensity .
+
+epi:hasSentimentAuthenticity a rdf:Property ;
+    rdfs:label "sentiment authenticity" ;
+    rdfs:range epi:SentimentAuthenticity .
+
+epi:sentimentScore a rdf:Property ;
+    rdfs:label "sentiment score" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Numeric sentiment score (-1.0 to 1.0). -1.0 = extremely negative, 0.0 = neutral, 1.0 = extremely positive." .
+
+epi:sentimentTarget a rdf:Property ;
+    rdfs:label "sentiment target" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the entity, event, claim, or behaviour the sentiment is directed towards." .
+
+epi:sentimentAgent a rdf:Property ;
+    rdfs:label "sentiment agent" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor whose sentiment this is." .
+
+epi:sentimentContext a rdf:Property ;
+    rdfs:label "sentiment context" ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The context in which the sentiment was expressed — social setting, medium, audience, temporal situation." .
+
+# — Sentiment dimensions —
+
+epi:SentimentDimension a rdfs:Class ;
+    rdfs:label "Sentiment Dimension" ;
+    rdfs:comment "A dimension along which sentiment can be analysed beyond positive/negative. Multi-dimensional sentiment analysis captures nuance that simple polarity misses." .
+
+epi:DimValence a epi:SentimentDimension ; rdfs:label "valence" ;
+    rdfs:comment "Positive vs negative (pleasure/displeasure)." .
+epi:DimArousal a epi:SentimentDimension ; rdfs:label "arousal" ;
+    rdfs:comment "High energy vs low energy (calm/excited)." .
+epi:DimDominance a epi:SentimentDimension ; rdfs:label "dominance" ;
+    rdfs:comment "In control vs controlled (dominant/submissive)." .
+epi:DimCertainty a epi:SentimentDimension ; rdfs:label "certainty" ;
+    rdfs:comment "Confident vs uncertain. Epistemic sentiment — how sure the agent feels." .
+epi:DimMoral a epi:SentimentDimension ; rdfs:label "moral" ;
+    rdfs:comment "Right vs wrong. Moral sentiment — ethical approval/disapproval." .
+epi:DimAesthetic a epi:SentimentDimension ; rdfs:label "aesthetic" ;
+    rdfs:comment "Beautiful vs ugly. Aesthetic sentiment." .
+epi:DimIrony a epi:SentimentDimension ; rdfs:label "irony" ;
+    rdfs:comment "Sincere vs ironic. Whether the expressed sentiment matches the felt sentiment." .
+epi:DimSarcasm a epi:SentimentDimension ; rdfs:label "sarcasm" ;
+    rdfs:comment "Literal vs sarcastic. Whether the surface meaning is the intended meaning." .
+
+epi:hasSentimentDimension a rdf:Property ;
+    rdfs:label "has sentiment dimension" ;
+    rdfs:range epi:SentimentDimension .
+
+epi:dimensionScore a rdf:Property ;
+    rdfs:label "dimension score" ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Score on this dimension (-1.0 to 1.0)." .
+
+# — Sentiment towards fiction vs non-fiction —
+
+epi:sentimentTowardsReality a rdf:Property ;
+    rdfs:label "towards reality category" ;
+    rdfs:range epi:RealityCategory ;
+    rdfs:comment "Whether the sentiment is directed towards something classified as fiction, non-fiction, or blended. Sentiment towards fiction (e.g. emotional response to a novel) is different from sentiment towards non-fiction (e.g. anger at a policy)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Spatio-Temporal Context — how space and time shape epistemics
+# ────────────────────────────────────────────────────────────────────
+
+epi:SpatioTemporalContext a rdfs:Class ;
+    rdfs:label "Spatio-Temporal Context" ;
+    rdfs:comment "The spatio-temporal framing within which an epistemic assessment is made. What is objective in one spatio-temporal frame may be subjective in another. Example: a temperature reading is objective at a specific time and place but becomes historical (and potentially contested) once the moment passes. Social norms (intersubjective) vary across space and time. This class captures the spatial location, temporal scope, and their interaction." .
+
+epi:stcSpatialScope a rdf:Property ;
+    rdfs:label "spatial scope" ;
+    rdfs:domain epi:SpatioTemporalContext ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Spatial scope — point, region, network, global. May be a named place, coordinate, or bounding box." .
+
+epi:stcTemporalScope a rdf:Property ;
+    rdfs:label "temporal scope" ;
+    rdfs:domain epi:SpatioTemporalContext ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Temporal scope — instant, interval, period, open-ended. May be exact, approximate, or estimated." .
+
+epi:stcResolution a rdf:Property ;
+    rdfs:label "resolution" ;
+    rdfs:domain epi:SpatioTemporalContext ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Spatio-temporal resolution — how fine-grained the context is. Coarse resolution (decade, continent) vs fine (second, metre)." .
+
+epi:stcAgentPosition a rdf:Property ;
+    rdfs:label "agent position" ;
+    rdfs:domain epi:SpatioTemporalContext ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The agent's position in space and time relative to the assessed phenomenon. Co-located and contemporaneous = direct observation. Remote or posterior = indirect, mediated." .
+
+epi:stcMediation a rdf:Property ;
+    rdfs:label "mediation" ;
+    rdfs:domain epi:SpatioTemporalContext ;
+    rdfs:range epi:MediationType ;
+    rdfs:comment "How the agent's access to the phenomenon is mediated by space and time." .
+
+epi:MediationType a rdfs:Class ; rdfs:label "Mediation Type" .
+
+epi:MedDirect a epi:MediationType ; rdfs:label "direct" ;
+    rdfs:comment "Agent is co-located and contemporaneous — direct observation." .
+epi:MedRecorded a epi:MediationType ; rdfs:label "recorded" ;
+    rdfs:comment "Agent accesses the phenomenon through a recording — photo, video, sensor log. Spatially/temporally mediated but with a material trace." .
+epi:MedReported a epi:MediationType ; rdfs:label "reported" ;
+    rdfs:comment "Agent accesses the phenomenon through another agent's report. Double mediation — space/time plus agent perspective." .
+epi:MedInferred a epi:MediationType ; rdfs:label "inferred" ;
+    rdfs:comment "Agent infers the phenomenon from indirect evidence. No direct, recorded, or reported access." .
+epi:MedSimulated a epi:MediationType ; rdfs:label "simulated" ;
+    rdfs:comment "Agent accesses a simulation of the phenomenon. The simulation may or may not correspond to reality." .
+epi:MedAbsent a epi:MediationType ; rdfs:label "absent" ;
+    rdfs:comment "Agent has no access to the phenomenon — direct, recorded, reported, or inferred. The assessment is speculative." .
+
+epi:hasSpatioTemporalContext a rdf:Property ;
+    rdfs:label "has spatio-temporal context" ;
+    rdfs:range epi:SpatioTemporalContext .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Social Relation Context — how social relations shape epistemics
+# ────────────────────────────────────────────────────────────────────
+
+epi:SocialRelationContext a rdfs:Class ;
+    rdfs:label "Social Relation Context" ;
+    rdfs:comment "The social relational framing within which an epistemic assessment is made. Social relations shape what counts as objective, subjective, or intersubjective. Power asymmetries may make a dominant agent's subjective view appear objective. Trust networks determine whose testimony is credited. Community consensus defines intersubjective reality. This class captures the social relations, power structures, and trust networks that contextualise epistemic assessment." .
+
+epi:srcRelationType a rdf:Property ;
+    rdfs:label "relation type" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range epi:SocialRelationType .
+
+epi:SocialRelationType a rdfs:Class ; rdfs:label "Social Relation Type" .
+
+epi:RelHierarchical a epi:SocialRelationType ; rdfs:label "hierarchical" ;
+    rdfs:comment "Power asymmetry — one agent has authority over another. May make the subordinate's perspective less visible." .
+epi:RelPeer a epi:SocialRelationType ; rdfs:label "peer" ;
+    rdfs:comment "Equal standing — agents are peers. Perspectives may carry equal weight." .
+epi:RelCollaborative a epi:SocialRelationType ; rdfs:label "collaborative" ;
+    rdfs:comment "Agents are working together towards a shared goal." .
+epi:RelAdversarial a epi:SocialRelationType ; rdfs:label "adversarial" ;
+    rdfs:comment "Agents are in opposition. Each has incentive to misrepresent." .
+epi:RelDependent a epi:SocialRelationType ; rdfs:label "dependent" ;
+    rdfs:comment "One agent depends on another — economic, informational, or emotional dependency." .
+epi:RelCommunity a epi:SocialRelationType ; rdfs:label "community" ;
+    rdfs:comment "Agents share a community — norms, values, and shared practices shape what counts as objective." .
+epi:RelStranger a epi:SocialRelationType ; rdfs:label "stranger" ;
+    rdfs:comment "No prior relation. Assessment must rely on evidence alone, without relational context." .
+
+epi:srcPowerAsymmetry a rdf:Property ;
+    rdfs:label "power asymmetry" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Degree of power asymmetry (0.0 = equal, 1.0 = total domination). High asymmetry may make the dominant agent's subjective view appear objective." .
+
+epi:srcTrustLevel a rdf:Property ;
+    rdfs:label "trust level" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Trust between agents (0.0 = no trust, 1.0 = complete trust). Low trust increases the burden of evidence for claims." .
+
+epi:srcCommunityConsensus a rdf:Property ;
+    rdfs:label "community consensus" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Degree of community consensus on the assessed claim (0.0 = no consensus, 1.0 = unanimous). High consensus supports intersubjective status." .
+
+epi:srcIncentiveToMisrepresent a rdf:Property ;
+    rdfs:label "incentive to misrepresent" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Degree to which the agent has incentive to misrepresent (0.0 = none, 1.0 = strong). High incentive increases scepticism." .
+
+epi:srcSocialPressure a rdf:Property ;
+    rdfs:label "social pressure" ;
+    rdfs:domain epi:SocialRelationContext ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Degree of social pressure on the agent to conform (0.0 = none, 1.0 = extreme). High pressure may make expressed sentiment performed rather than genuine." .
+
+epi:hasSocialRelationContext a rdf:Property ;
+    rdfs:label "has social relation context" ;
+    rdfs:range epi:SocialRelationContext .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Epistemic Assessment — the composite evaluation
+# ────────────────────────────────────────────────────────────────────
+
+epi:EpistemicAssessment a rdfs:Class ;
+    rdfs:label "Epistemic Assessment" ;
+    rdfs:comment "A composite assessment that combines epistemic status, agent perspective, reality classification, intentionality, behaviour grounding, sentiment, spatio-temporal context, and social relation context into a unified evaluation. This is the top-level class for evaluating whether a claim, behaviour, or expression is objective, subjective, fictional, or contested — and why. Each assessment is agent-relative: the assessor has their own perspective, and the assessment may itself be assessed by other agents (recursive epistemics)." .
+
+epi:assessmentTarget a rdf:Property ;
+    rdfs:label "assessment target" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the claim, behaviour, expression, or document being assessed." .
+
+epi:assessmentAgent a rdf:Property ;
+    rdfs:label "assessment agent" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor performing the assessment." .
+
+epi:assessmentTimestamp a rdf:Property ;
+    rdfs:label "assessment timestamp" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:dateTime .
+
+epi:assessmentConclusion a rdf:Property ;
+    rdfs:label "conclusion" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The overall conclusion — a natural language summary of the epistemic evaluation." .
+
+epi:assessmentConfidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Overall confidence in the assessment (0.0 to 1.0)." .
+
+epi:assessmentContested a rdf:Property ;
+    rdfs:label "contested" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Whether the assessment is contested by other agents." .
+
+epi:assessmentProvenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the provenance record for this assessment." .
+
+# — Recursive epistemics —
+
+epi:assessedByAssessment a rdf:Property ;
+    rdfs:label "assessed by assessment" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range epi:EpistemicAssessment ;
+    rdfs:comment "Another assessment that evaluates this assessment. Enables recursive epistemics — assessments of assessments. Essential for multi-agent contexts where agents disagree." .
+
+# — Links to existing ontologies —
+
+epi:assessmentLinksToInvestigation a rdf:Property ;
+    rdfs:label "links to investigation" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of an inv:Hypothesis or inv:Evidence that this assessment informs." .
+
+epi:assessmentLinksToResearch a rdf:Property ;
+    rdfs:label "links to research" ;
+    rdfs:domain epi:EpistemicAssessment ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of a res:Finding or res:Inference that this assessment informs." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Agent-Type Nomenclature Scoping — see agent-nomenclature.n3
+# ────────────────────────────────────────────────────────────────────
+#
+# §11 Agent-Type Nomenclature Scoping has been split into a separate
+# module file:
+#
+#   agent-nomenclature.n3
+#
+# This keeps epistemics.n3 under the 800-line project limit. The split
+# module uses the same `epi:` prefix and defines:
+#
+#   - epi:AgentType, epi:NaturalAgent, epi:LegalPerson, epi:SoftwareAgent
+#   - epi:applicableAgentType (scoping property)
+#   - epi:NomenclatureMapping (natural → legal → software term equivalents)
+#   - Agent-type scoping for bias classes, intentionality types,
+#     mistake types, and grounding types
+#   - epi:RecordAppendable, epi:RecordClarification (appendable record support)
+#
+# See: qualia-db-standards/agent-nomenclature-rules.md for the full
+# human-readable rules and nomenclature isolation table.
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Ungrounded Generation — see ungrounded-generation.n3
+# ────────────────────────────────────────────────────────────────────
+#
+# §10 Ungrounded Generation (causes, consequences, and classification)
+# has been split into a separate module file:
+#
+#   ungrounded-generation.n3
+#
+# This keeps epistemics.n3 under the 800-line project limit. The split
+# module uses the same `epi:` prefix and defines:
+#
+#   - epi:UngroundedGeneration (instance class)
+#   - epi:UGCause (18 causes across 7 influence families)
+#   - epi:UGConsequence (12 consequence types)
+#   - Properties: ugCause, ugConsequence, ugModelId, ugSamplingParams,
+#     ugContextLength, ugRetrievalUsed, ugDetectionMethod, ugMitigation,
+#     ugConfidenceCalibration
+#   - epi:UGCauseConsequenceMatrix (cause-consequence pairing heuristics)

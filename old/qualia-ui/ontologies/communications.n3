@@ -1,0 +1,416 @@
+# Communications Manifold Ontology — Pulse Events, Message Routing,
+# Protocol Handling, Interaction Patterns, Channel Management
+#
+# Authoring form (N3) — compiled to communications.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# In the QualiaDB branding architecture:
+#   - Pulse = communications and networking
+#   - Aura = ontology and semantics
+#   - Vibe = scripting language
+#   - Poet = engine
+#
+# This ontology defines the communications manifold — the system that
+# governs how messages, events, and interactions flow between agents
+# (natural, legal, software), components, and external systems. It
+# covers: pulse events, channels, routing, protocols, interaction
+# patterns, and the social/communications manifold UI surface.
+#
+# The communications manifold is the backbone of all real-time
+# interaction in QualiaDB — it carries VibeScript payloads (via the
+# Intent Bus), pulse events (via Pulse channels), and structured
+# communications between agents.
+#
+# Nomenclature:
+#   - Natural persons communicate (mind-dependent: intend, express,
+#     feel). Legal persons transmit (institutional: issue, publish,
+#     notify). Software agents dispatch (computational: emit, route,
+#     forward).
+#   - "Communicate" is a mind-dependent term for natural persons.
+#   - "Transmit" is an institutional term for legal persons.
+#   - "Dispatch" is a computational term for software agents.
+#   - All are sub-types of PulseEvent.
+#
+# Imports: agency.n3, container.n3, settings.n3, provenance.n3,
+#          personhood.n3, obligations.n3, agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix manifold:   <https://qualiadb.org/schema/ui/manifold#> .
+@prefix set:        <https://qualiadb.org/schema/ui/settings#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix obl:        <https://qualiadb.org/schema/ui/obligations#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix comm:       <https://qualiadb.org/schema/ui/communications#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Pulse Event — the base unit of communication
+# ────────────────────────────────────────────────────────────────────
+
+comm:PulseEvent a rdfs:Class ;
+    rdfs:label "Pulse Event" ;
+    rdfs:comment "The base unit of communication in QualiaDB. A pulse event is a structured, provenance-stamped message that flows through a channel from a source to one or more targets. Pulse events are the heartbeat of the system — they carry VibeScript payloads, graph mutations, notifications, telemetry, and agent-to-agent messages. Every pulse event has: a source (who/what emitted it), a channel (what topic/path it flows through), a payload (the content), a timestamp, and provenance. Pulse events are appendable — they are never modified or deleted, only superseded by newer events." .
+
+comm:pulseSource a rdf:Property ;
+    rdfs:label "source" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that emitted this pulse — a natural person, legal person, or software agent." .
+
+comm:pulseChannel a rdf:Property ;
+    rdfs:label "channel" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  comm:Channel ;
+    rdfs:comment "The channel through which this pulse flows." .
+
+comm:pulsePayload a rdf:Property ;
+    rdfs:label "payload" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The payload of the pulse — typically a CBOR-LD encoded VibeScript payload or structured data. Typed by pulsePayloadType." .
+
+comm:pulsePayloadType a rdf:Property ;
+    rdfs:label "payload type" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  comm:PayloadType .
+
+comm:PayloadType a rdfs:Class ;
+    rdfs:label "Payload Type" .
+
+comm:ptVibeScript a comm:PayloadType ; rdfs:label "vibescript" ;
+    rdfs:comment "A VibeScript payload — structured intent for the Intent Bus." .
+comm:ptGraphMutation a comm:PayloadType ; rdfs:label "graph-mutation" ;
+    rdfs:comment "A graph mutation — insert, retract, or transaction commit." .
+comm:ptNotification a comm:PayloadType ; rdfs:label "notification" ;
+    rdfs:comment "A notification — user-facing alert, message, or update." .
+comm:ptTelemetry a comm:PayloadType ; rdfs:label "telemetry" ;
+    rdfs:comment "Telemetry data — IoT, sensor, system metrics." .
+comm:ptAgentMessage a comm:PayloadType ; rdfs:label "agent-message" ;
+    rdfs:comment "A message between agents — natural, legal, or software." .
+comm:ptPresence a comm:PayloadType ; rdfs:label "presence" ;
+    rdfs:comment "Presence information — online/offline, availability, focus state." .
+comm:ptSync a comm:PayloadType ; rdfs:label "sync" ;
+    rdfs:comment "Synchronisation data — differential Merkle DAG sync, replication." .
+
+comm:pulseTimestamp a rdf:Property ;
+    rdfs:label "timestamp" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  xsd:dateTime .
+
+comm:pulseProvenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Provenance record for this pulse — source, timestamp, capability used, and chain of custody if forwarded." .
+
+comm:pulsePriority a rdf:Property ;
+    rdfs:label "priority" ;
+    rdfs:domain comm:PulseEvent ;
+    rdfs:range  comm:Priority .
+
+comm:Priority a rdfs:Class ;
+    rdfs:label "Priority" .
+
+comm:prioCritical a comm:Priority ; rdfs:label "critical" ;
+    rdfs:comment "Critical priority — immediate delivery required, interrupts current activity. Safety, security, system failure." .
+comm:prioHigh a comm:Priority ; rdfs:label "high" ;
+    rdfs:comment "High priority — delivered before normal pulses. Urgent user messages, time-sensitive notifications." .
+comm:prioNormal a comm:Priority ; rdfs:label "normal" ;
+    rdfs:comment "Normal priority — standard delivery. Most pulses." .
+comm:prioLow a comm:Priority ; rdfs:label "low" ;
+    rdfs:comment "Low priority — delivered when capacity allows. Background sync, non-urgent updates." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Channel — the routing path
+# ────────────────────────────────────────────────────────────────────
+
+comm:Channel a rdfs:Class ;
+    rdfs:label "Channel" ;
+    rdfs:comment "A routing path through which pulse events flow. Channels are typed by their transport mechanism and scope. A channel may be: a direct connection between two agents, a topic broadcast to multiple subscribers, a request-response pair, or a stream of continuous data. Channels have access control — a capability is required to publish or subscribe to a channel." .
+
+comm:channelType a rdf:Property ;
+    rdfs:label "type" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  comm:ChannelType .
+
+comm:ChannelType a rdfs:Class ;
+    rdfs:label "Channel Type" .
+
+comm:ctDirect a comm:ChannelType ; rdfs:label "direct" ;
+    rdfs:comment "Direct channel — point-to-point between two agents. Private, no intermediaries." .
+comm:ctTopic a comm:ChannelType ; rdfs:label "topic" ;
+    rdfs:comment "Topic channel — broadcast to all subscribers of a topic. Pub/sub model." .
+comm:ctRequestResponse a comm:ChannelType ; rdfs:label "request-response" ;
+    rdfs:comment "Request-response channel — a request pulse expects a response pulse. Synchronous or asynchronous." .
+comm:ctStream a comm:ChannelType ; rdfs:label "stream" ;
+    rdfs:comment "Stream channel — continuous flow of data. Telemetry, sensor data, live updates." .
+comm:ctGroup a comm:ChannelType ; rdfs:label "group" ;
+    rdfs:comment "Group channel — multi-party communication among a defined set of participants. Chat, collaboration." .
+comm:ctFederation a comm:ChannelType ; rdfs:label "federation" ;
+    rdfs:comment "Federation channel — inter-system communication between QualiaDB instances. Server-to-server." .
+
+comm:channelTopic a rdf:Property ;
+    rdfs:label "topic" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The topic identifier for topic channels — e.g. 'topic:alerts', 'topic:graph-updates', 'topic:presence'." .
+
+comm:channelParticipants a rdf:Property ;
+    rdfs:label "participants" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The set of entities participating in this channel — publishers and subscribers for topic channels, parties for direct and group channels." .
+
+comm:channelTransport a rdf:Property ;
+    rdfs:label "transport" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  comm:Transport .
+
+comm:Transport a rdfs:Class ;
+    rdfs:label "Transport" .
+
+comm:tWebRTC a comm:Transport ; rdfs:label "webrtc" ;
+    rdfs:comment "WebRTC — peer-to-peer real-time communication. Low latency, direct browser-to-browser." .
+comm:tWebSocket a comm:Transport ; rdfs:label "websocket" ;
+    rdfs:comment "WebSocket — persistent bidirectional connection over TCP. Server-to-client and client-to-server." .
+comm:tMQTT a comm:Transport ; rdfs:label "mqtt" ;
+    rdfs:comment "MQTT — lightweight publish/subscribe for IoT and edge devices. Low bandwidth, high reliability." .
+comm:tHTTP a comm:Transport ; rdfs:label "http" ;
+    rdfs:comment "HTTP — request-response over TCP. Standard web protocol. Higher latency, universal compatibility." .
+comm:tSSE a comm:Transport ; rdfs:label "sse" ;
+    rdfs:comment "Server-Sent Events — one-way server-to-client stream over HTTP. Simpler than WebSocket for server pushes." .
+comm:tInternal a comm:Transport ; rdfs:label "internal" ;
+    rdfs:comment "Internal — in-process communication within the QualiaDB engine. Zero network overhead." .
+comm:tDAGSync a comm:Transport ; rdfs:label "dag-sync" ;
+    rdfs:comment "Differential Merkle DAG synchronisation — content-addressed replication between nodes." .
+
+comm:channelCapability a rdf:Property ;
+    rdfs:label "required capability" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  set:Capability ;
+    rdfs:comment "The capability required to publish or subscribe to this channel. Enforced by the Sentinel VM." .
+
+comm:channelEncrypted a rdf:Property ;
+    rdfs:label "encrypted" ;
+    rdfs:domain comm:Channel ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the channel uses end-to-end encryption. Direct and group channels are encrypted by default; topic channels may or may not be." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Interaction Patterns — how agents communicate
+# ────────────────────────────────────────────────────────────────────
+
+comm:InteractionPattern a rdfs:Class ;
+    rdfs:label "Interaction Pattern" ;
+    rdfs:comment "A reusable pattern for how agents interact through the communications manifold. Patterns define the expected sequence of pulses, the roles of participants, and the state transitions that occur. Patterns are not protocols — they are higher-level templates that may be implemented over different transports." .
+
+comm:ipConversation a comm:InteractionPattern ; rdfs:label "conversation" ;
+    rdfs:comment "A conversation — two or more natural persons exchanging messages over time. Messages are ordered, may reference previous messages, and form a thread. Conversations may be: direct (two persons), group (multiple persons), or channel-based (topic subscribers). Conversations have state: active, paused, archived. Restricted to natural persons as primary participants; software agents may participate as assistants or translators." .
+
+comm:ipRequestResponse a comm:InteractionPattern ; rdfs:label "request-response" ;
+    rdfs:comment "A request-response — one agent sends a request pulse, another responds. May be synchronous (blocking) or asynchronous (callback). Used for: queries, capability invocations, API calls, and agent-to-agent negotiation. The response may be: a direct answer, a referral, a refusal, or a request for more information." .
+
+comm:ipBroadcast a comm:InteractionPattern ; rdfs:label "broadcast" ;
+    rdfs:comment "A broadcast — one agent emits a pulse to all subscribers of a topic. No response is expected. Used for: notifications, presence updates, system alerts, and telemetry. Broadcasts are fire-and-forget — the emitter does not track who received the pulse." .
+
+comm:ipCollaboration a comm:InteractionPattern ; rdfs:label "collaboration" ;
+    rdfs:comment "A collaboration — multiple agents working on a shared work artifact (see container.n3). Collaboration involves: presence (who is online), awareness (who is editing what), synchronization (graph mutations), and conflict resolution (when edits collide). Collaboration uses a combination of direct, topic, and stream channels." .
+
+comm:ipNegotiation a comm:InteractionPattern ; rdfs:label "negotiation" ;
+    rdfs:comment "A negotiation — two or more agents exchange pulses to reach agreement. Negotiation has phases: propose, counter-propose, accept, reject, withdraw. Used for: contract formation (agency.n3), values agreement (values.n3), capability delegation, and access requests. Negotiation pulses are appendable — each proposal is a new record." .
+
+comm:ipDelegation a comm:InteractionPattern ; rdfs:label "delegation" ;
+    rdfs:comment "A delegation — one agent authorises another to act on its behalf. Delegation involves: a request (from the delegate), a grant (from the delegator), an optional exercise (the delegate acts), and a revocation (the delegator withdraws). Delegation is capability-based — the delegate receives a specific capability, not broad authority. Links to agency.n3 delegation and settings.n3 capability management." .
+
+comm:ipNotification a comm:InteractionPattern ; rdfs:label "notification" ;
+    rdfs:comment "A notification — a system-generated pulse informing an agent of an event. Notifications may be: user-facing (message received, mention, deadline), system-facing (sync complete, capability expired, threshold exceeded), or institutional (policy violation, compliance alert). Notifications are governed by communication preferences (settings.n3) — the user controls which notifications they receive and how." .
+
+comm:ipPresence a comm:InteractionPattern ; rdfs:label "presence" ;
+    rdfs:comment "A presence pattern — agents broadcast their availability state. Presence states: online, away, busy, focused, offline. Presence enables: awareness (who is available), routing (direct messages to available agents), and etiquette (do not interrupt focused agents). Presence is governed by privacy preferences — an agent may hide or selectively reveal their presence." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Protocol Handling — transport-level concerns
+# ────────────────────────────────────────────────────────────────────
+
+comm:ProtocolHandler a rdfs:Class ;
+    rdfs:label "Protocol Handler" ;
+    rdfs:comment "A handler that manages the transport-level concerns of a channel — connection establishment, message framing, encryption, retry, and error handling. Protocol handlers are software components — they are not agents and do not make decisions. They implement the mechanical aspects of communication. The Intent Bus routes payloads to protocol handlers based on the channel's transport type." .
+
+comm:phTransport a rdf:Property ;
+    rdfs:label "transport" ;
+    rdfs:domain comm:ProtocolHandler ;
+    rdfs:range  comm:Transport .
+
+comm:phState a rdf:Property ;
+    rdfs:label "state" ;
+    rdfs:domain comm:ProtocolHandler ;
+    rdfs:range  comm:HandlerState .
+
+comm:HandlerState a rdfs:Class ;
+    rdfs:label "Handler State" .
+
+comm:hsConnected a comm:HandlerState ; rdfs:label "connected" .
+comm:hsConnecting a comm:HandlerState ; rdfs:label "connecting" .
+comm:hsDisconnected a comm:HandlerState ; rdfs:label "disconnected" .
+comm:hsError a comm:HandlerState ; rdfs:label "error" .
+comm:hsReconnecting a comm:HandlerState ; rdfs:label "reconnecting" .
+
+comm:phRetryPolicy a rdf:Property ;
+    rdfs:label "retry policy" ;
+    rdfs:domain comm:ProtocolHandler ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Retry policy for failed connections — e.g. 'exponential-backoff:1s:30s:5', 'linear:10s:3', 'none'." .
+
+comm:phEncryption a rdf:Property ;
+    rdfs:label "encryption" ;
+    rdfs:domain comm:ProtocolHandler ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Encryption method — e.g. 'tls', 'dtls', 'noise-protocol', 'none'. Direct and group channels require encryption; topic channels may optionally encrypt." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Message Routing — how pulses reach their targets
+# ────────────────────────────────────────────────────────────────────
+
+comm:RoutingRule a rdfs:Class ;
+    rdfs:label "Routing Rule" ;
+    rdfs:comment "A rule that determines how a pulse event is routed from source to target(s). Routing rules are evaluated by the Intent Bus in order of priority. The first matching rule determines the route. Rules may match on: payload type, channel type, source entity, target entity, topic, priority, or capability. Routing rules are software configuration — they do not make decisions, they apply deterministic logic." .
+
+comm:rrMatch a rdf:Property ;
+    rdfs:label "match" ;
+    rdfs:domain comm:RoutingRule ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The match condition — e.g. 'payloadType=notification', 'channelType=direct', 'topic=alerts', 'priority>=high'." .
+
+comm:rrAction a rdf:Property ;
+    rdfs:label "action" ;
+    rdfs:domain comm:RoutingRule ;
+    rdfs:range  comm:RoutingAction .
+
+comm:RoutingAction a rdfs:Class ;
+    rdfs:label "Routing Action" .
+
+comm:raDeliver a comm:RoutingAction ; rdfs:label "deliver" ;
+    rdfs:comment "Deliver the pulse to the target(s) immediately." .
+comm:raQueue a comm:RoutingAction ; rdfs:label "queue" ;
+    rdfs:comment "Queue the pulse for later delivery — used when the target is offline or the channel is congested." .
+comm:raDrop a comm:RoutingAction ; rdfs:label "drop" ;
+    rdfs:comment "Drop the pulse — used for spam, invalid pulses, or rate-limited sources." .
+comm:raRedirect a comm:RoutingAction ; rdfs:label "redirect" ;
+    rdfs:comment "Redirect the pulse to a different channel or target — used for forwarding, delegation, or channel migration." .
+comm:raTransform a comm:RoutingAction ; rdfs:label "transform" ;
+    rdfs:comment "Transform the pulse payload before delivery — used for format conversion, filtering, or enrichment." .
+comm:raBatch a comm:RoutingAction ; rdfs:label "batch" ;
+    rdfs:comment "Batch the pulse with others for bulk delivery — used for digest notifications and sync optimisation." .
+
+comm:rrPriority a rdf:Property ;
+    rdfs:label "priority" ;
+    rdfs:domain comm:RoutingRule ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Evaluation priority — lower numbers evaluated first. Rules with the same priority are evaluated in declaration order." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Agent Communication — typed by agent type
+# ────────────────────────────────────────────────────────────────────
+
+comm:AgentCommunication a rdfs:Class ;
+    rdfs:label "Agent Communication" ;
+    rdfs:comment "A communication act typed by the agent type of the source. The terminology differs by agent type: natural persons communicate, legal persons transmit, software agents dispatch. All produce pulse events, but the semantics differ. This class provides the type-safe wrapper for ensuring nomenclature compliance." .
+
+comm:PersonCommunication a rdfs:Class ;
+    rdfs:label "Person Communication" ;
+    rdfs:subClassOf comm:AgentCommunication ;
+    rdfs:comment "A communication act by a natural person — the person intends to express something to another agent. The communication may be: a message, a response, a reaction, an expression, or a statement. Person communications are mind-dependent — they involve intent and expression. Restricted to natural persons." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+comm:InstitutionalTransmission a rdfs:Class ;
+    rdfs:label "Institutional Transmission" ;
+    rdfs:subClassOf comm:AgentCommunication ;
+    rdfs:comment "A transmission by a legal person — the institution issues, publishes, or notifies through an authorised representative. The transmission may be: a notice, an announcement, a directive, a report, or a notification. Institutional transmissions are not mind-dependent — they are institutional acts with institutional authority. Restricted to legal persons." ;
+    epi:applicableAgentType epi:LegalAgent .
+
+comm:AgentDispatch a rdfs:Class ;
+    rdfs:label "Agent Dispatch" ;
+    rdfs:subClassOf comm:AgentCommunication ;
+    rdfs:comment "A dispatch by a software agent — the agent emits, routes, or forwards a pulse event. The dispatch may be: a notification, a telemetry report, a sync event, a status update, or a forwarded message. Agent dispatches are computational — they do not involve intent or expression. Restricted to software agents." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Communications Manifold — the UI surface
+# ────────────────────────────────────────────────────────────────────
+
+comm:CommunicationsManifold a rdfs:Class ;
+    rdfs:label "Communications Manifold" ;
+    rdfs:subClassOf manifold:Manifold ;
+    rdfs:comment "The communications manifold — the UI surface for all communication activities. Corresponds to the social manifold in container.n3 but focuses on the communication mechanics rather than the social graph. Contains: message containers, channel browsers, presence indicators, notification panels, and pulse inspectors. The communications manifold is where users see their conversations, manage their channels, monitor their notifications, and configure their communication preferences." .
+
+comm:commSubManifold a rdf:Property ;
+    rdfs:label "sub-manifold" ;
+    rdfs:domain comm:CommunicationsManifold ;
+    rdfs:range  comm:CommSubManifold .
+
+comm:CommSubManifold a rdfs:Class ;
+    rdfs:label "Communications Sub-Manifold" .
+
+comm:csmConversations a comm:CommSubManifold ; rdfs:label "conversations" ;
+    rdfs:comment "Conversations sub-manifold — active and archived conversations, direct and group messages." .
+comm:csmChannels a comm:CommSubManifold ; rdfs:label "channels" ;
+    rdfs:comment "Channels sub-manifold — browse, subscribe, unsubscribe, create topic channels." .
+comm:csmNotifications a comm:CommSubManifold ; rdfs:label "notifications" ;
+    rdfs:comment "Notifications sub-manifold — notification feed, filters, preferences, quiet hours." .
+comm:csmPresence a comm:CommSubManifold ; rdfs:label "presence" ;
+    rdfs:comment "Presence sub-manifold — who is online, availability states, focus modes." .
+comm:csmPulseInspector a comm:CommSubManifold ; rdfs:label "pulse-inspector" ;
+    rdfs:comment "Pulse inspector sub-manifold — developer tool for inspecting raw pulse events, routing, and channel state." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (communications.n3) links to:
+#
+# agency.n3:
+#   - Pulse sources and channel participants are entities
+#   - Delegation pattern links to agency delegation
+#   - Negotiation pattern links to agency contracts
+#
+# container.n3:
+#   - Communications manifold is a sub-class of manifold:Manifold
+#   - Social container hosts conversation views
+#   - Pulse panel docks at bottom of social manifold
+#
+# settings.n3:
+#   - Communication preferences govern notification delivery
+#   - Capabilities gate channel access
+#   - Runtime profile determines available transports
+#
+# provenance.n3:
+#   - All pulse events have provenance
+#   - Forwarded pulses carry chain-of-custody provenance
+#
+# personhood.n3:
+#   - Conversations are social relations
+#   - Presence is a social signal
+#
+# obligations.n3:
+#   - Confidential communications may be subject to
+#     confidentiality instruments
+#   - Disclosure exceptions may require forwarding certain
+#     pulses to authorities (child protection, imminent harm)
+#
+# agent-nomenclature.n3:
+#   - PersonCommunication = natural person (mind-dependent)
+#   - InstitutionalTransmission = legal person (institutional)
+#   - AgentDispatch = software agent (computational)
+#
+# epistemics.n3:
+#   - Pulse events have epistemic status
+#   - Message delivery confirmation is an epistemic assessment

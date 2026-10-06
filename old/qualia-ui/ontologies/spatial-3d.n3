@@ -1,0 +1,292 @@
+# Spatial 3D Ontology — meshes, rigs, animation, materials, narratives
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: sp3: (spatial 3D domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix sp3:    <https://purl.org/qualia/ontology/spatial-3d#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Scene
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Scene3D a rdfs:Class ;
+    rdfs:label "3D Scene" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A 3D scene containing objects, cameras, lights, and materials." .
+
+sp3:SceneObject a rdfs:Class ;
+    rdfs:label "Scene Object" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "An object in a 3D scene — mesh, camera, light, or group." .
+
+sp3:position a rdf:Property ;
+    rdfs:domain sp3:SceneObject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Position [x, y, z]." .
+
+sp3:rotation a rdf:Property ;
+    rdfs:domain sp3:SceneObject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Rotation [x, y, z] in degrees or quaternion." .
+
+sp3:scale a rdf:Property ;
+    rdfs:domain sp3:SceneObject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Scale [x, y, z]." .
+
+sp3:parentObject a rdf:Property ;
+    rdfs:domain sp3:SceneObject ;
+    rdfs:range  sp3:SceneObject ;
+    rdfs:comment "Parent object in the scene hierarchy." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Mesh Asset
+# ────────────────────────────────────────────────────────────────────
+
+sp3:MeshAsset a rdfs:Class ;
+    rdfs:label "Mesh Asset" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A 3D mesh — static, rigged, morph-target, or procedural." .
+
+sp3:MeshType a rdfs:Class ;
+    rdfs:label "Mesh Type" .
+
+sp3:StaticMesh a sp3:MeshType ; rdfs:label "static" .
+sp3:RiggedMesh a sp3:MeshType ; rdfs:label "rigged" .
+sp3:MorphTargetMesh a sp3:MeshType ; rdfs:label "morph-target" .
+sp3:ProceduralMesh a sp3:MeshType ; rdfs:label "procedural" .
+
+sp3:meshType a rdf:Property ;
+    rdfs:domain sp3:MeshAsset ;
+    rdfs:range  sp3:MeshType .
+
+sp3:vertexCount a rdf:Property ;
+    rdfs:domain sp3:MeshAsset ;
+    rdfs:range  xsd:integer .
+
+sp3:polygonCount a rdf:Property ;
+    rdfs:domain sp3:MeshAsset ;
+    rdfs:range  xsd:integer .
+
+sp3:uvMaps a rdf:Property ;
+    rdfs:domain sp3:MeshAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of UV maps." .
+
+sp3:meshFormat a rdf:Property ;
+    rdfs:domain sp3:MeshAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Mesh format — glTF, OBJ, FBX, STL, PLY." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Animation
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Animation a rdfs:Class ;
+    rdfs:label "Animation" ;
+    rdfs:comment "An animation — keyframe, skeletal, morph, procedural, or constraint-based." .
+
+sp3:AnimationType a rdfs:Class ;
+    rdfs:label "Animation Type" .
+
+sp3:KeyframeAnim a sp3:AnimationType ; rdfs:label "keyframe" .
+sp3:SkeletalAnim a sp3:AnimationType ; rdfs:label "skeletal" .
+sp3:MorphAnim a sp3:AnimationType ; rdfs:label "morph" .
+sp3:ProceduralAnim a sp3:AnimationType ; rdfs:label "procedural" .
+sp3:ConstraintAnim a sp3:AnimationType ; rdfs:label "constraint" .
+
+sp3:animationType a rdf:Property ;
+    rdfs:domain sp3:Animation ;
+    rdfs:range  sp3:AnimationType .
+
+sp3:keyframe a rdfs:Class ;
+    rdfs:label "Keyframe" ;
+    rdfs:comment "A single keyframe — frame number, value, interpolation type." .
+
+sp3:kfFrame a rdf:Property ;
+    rdfs:domain sp3:keyframe ;
+    rdfs:range  xsd:integer .
+
+sp3:kfValue a rdf:Property ;
+    rdfs:domain sp3:keyframe ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Keyframe value (CBOR-LD encoded)." .
+
+sp3:kfInterpolation a rdf:Property ;
+    rdfs:domain sp3:keyframe ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Interpolation — linear, bezier, step, ease-in, ease-out, ease-in-out." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Material
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Material a rdfs:Class ;
+    rdfs:label "Material" ;
+    rdfs:comment "A material applied to a mesh — PBR, unlit, custom-shader, or texture-set." .
+
+sp3:MaterialType a rdfs:Class ;
+    rdfs:label "Material Type" .
+
+sp3:PBRMaterial a sp3:MaterialType ; rdfs:label "pbr" .
+sp3:UnlitMaterial a sp3:MaterialType ; rdfs:label "unlit" .
+sp3:CustomShaderMaterial a sp3:MaterialType ; rdfs:label "custom-shader" .
+sp3:TextureSetMaterial a sp3:MaterialType ; rdfs:label "texture-set" .
+
+sp3:materialType a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  sp3:MaterialType .
+
+sp3:baseColour a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Base colour (hex or IRI of texture)." .
+
+sp3:metallic a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Metallic factor (0.0–1.0)." .
+
+sp3:roughness a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Roughness factor (0.0–1.0)." .
+
+sp3:normalMap a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of normal map texture." .
+
+sp3:emissiveMap a rdf:Property ;
+    rdfs:domain sp3:Material ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of emissive map texture." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Camera and Light
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Camera a rdfs:Class ;
+    rdfs:label "Camera" ;
+    rdfs:subClassOf sp3:SceneObject ;
+    rdfs:comment "A 3D camera — perspective, orthographic, panoramic, or stereo." .
+
+sp3:CameraType a rdfs:Class ;
+    rdfs:label "Camera Type" .
+
+sp3:PerspectiveCamera a sp3:CameraType ; rdfs:label "perspective" .
+sp3:OrthographicCamera a sp3:CameraType ; rdfs:label "orthographic" .
+sp3:PanoramicCamera a sp3:CameraType ; rdfs:label "panoramic" .
+sp3:StereoCamera a sp3:CameraType ; rdfs:label "stereo" .
+
+sp3:cameraType a rdf:Property ;
+    rdfs:domain sp3:Camera ;
+    rdfs:range  sp3:CameraType .
+
+sp3:lensFocalLength a rdf:Property ;
+    rdfs:domain sp3:Camera ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Focal length in mm." .
+
+sp3:Light a rdfs:Class ;
+    rdfs:label "Light" ;
+    rdfs:subClassOf sp3:SceneObject ;
+    rdfs:comment "A 3D light source — point, directional, spot, area, or HDRI." .
+
+sp3:LightType a rdfs:Class ;
+    rdfs:label "Light Type" .
+
+sp3:PointLight a sp3:LightType ; rdfs:label "point" .
+sp3:DirectionalLight a sp3:LightType ; rdfs:label "directional" .
+sp3:SpotLight a sp3:LightType ; rdfs:label "spot" .
+sp3:AreaLight a sp3:LightType ; rdfs:label "area" .
+sp3:HDRILight a sp3:LightType ; rdfs:label "hdri" .
+
+sp3:lightType a rdf:Property ;
+    rdfs:domain sp3:Light ;
+    rdfs:range  sp3:LightType .
+
+sp3:lightIntensity a rdf:Property ;
+    rdfs:domain sp3:Light ;
+    rdfs:range  xsd:float .
+
+sp3:lightColour a rdf:Property ;
+    rdfs:domain sp3:Light ;
+    rdfs:range  xsd:string .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Rig
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Rig a rdfs:Class ;
+    rdfs:label "Rig" ;
+    rdfs:comment "A skeletal rig for a mesh — bones, weights, constraints." .
+
+sp3:Bone a rdfs:Class ;
+    rdfs:label "Bone" ;
+    rdfs:subClassOf sp3:SceneObject ;
+    rdfs:comment "A bone in a skeletal rig." .
+
+sp3:boneParent a rdf:Property ;
+    rdfs:domain sp3:Bone ;
+    rdfs:range  sp3:Bone .
+
+sp3:boneWeights a rdf:Property ;
+    rdfs:domain sp3:Bone ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Vertex weights (CBOR-LD encoded array of [vertex_index, weight])." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Narrative
+# ────────────────────────────────────────────────────────────────────
+
+sp3:Narrative a rdfs:Class ;
+    rdfs:label "Narrative" ;
+    rdfs:comment "A narrative structure for 3D scenes — story-board, scene-sequence, camera-path, triggers." .
+
+sp3:NarrativeScene a rdfs:Class ;
+    rdfs:label "Narrative Scene" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A scene within a narrative — has a duration, camera, and trigger zones." .
+
+sp3:sceneDuration a rdf:Property ;
+    rdfs:domain sp3:NarrativeScene ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Scene duration in seconds." .
+
+sp3:sceneCamera a rdf:Property ;
+    rdfs:domain sp3:NarrativeScene ;
+    rdfs:range  sp3:Camera .
+
+sp3:TriggerZone a rdfs:Class ;
+    rdfs:label "Trigger Zone" ;
+    rdfs:comment "A trigger zone in a narrative scene — activates an action when entered." .
+
+sp3:triggerGeometry a rdf:Property ;
+    rdfs:domain sp3:TriggerZone ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Trigger zone geometry (CBOR-LD encoded)." .
+
+sp3:triggerAction a rdf:Property ;
+    rdfs:domain sp3:TriggerZone ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Action to execute when triggered (CBOR-LD encoded)." .
+
+sp3:StoryboardFrame a rdfs:Class ;
+    rdfs:label "Storyboard Frame" ;
+    rdfs:comment "A storyboard frame — visual reference for a narrative scene." .
+
+sp3:sbImage a rdf:Property ;
+    rdfs:domain sp3:StoryboardFrame ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of storyboard image." .
+
+sp3:sbDescription a rdf:Property ;
+    rdfs:domain sp3:StoryboardFrame ;
+    rdfs:range  xsd:string .

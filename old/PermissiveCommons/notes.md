@@ -1,0 +1,3 @@
+# Permissive Commons
+
+Permissive commons is a framework for storing and making available content of various forms, in a manner that relates both to permissions and social contracts.  It is intended to support the distribution and availability of content, in a manner that can both be decentralised, open and/or socially defined, and in-turn, respects a rights ontology relating to the nature, purpose, sensitivity, provonance, intents, purposes, characterisation and nature of linked-contents artefacts.

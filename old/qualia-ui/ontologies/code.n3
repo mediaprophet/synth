@@ -1,0 +1,549 @@
+# Code Ontology — QApp Projects, Build Targets, Capabilities, 10D Scenes, AI Stack
+# Authoring form (N3) — compiled to code.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix pres:       <https://qualiadb.org/schema/ui/presentation#> .
+@prefix code:       <https://qualiadb.org/schema/ui/code#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. QApp — QualiaDB / Webizen Application
+# ────────────────────────────────────────────────────────────────────
+
+code:QApp a rdfs:Class ;
+    rdfs:label "QApp" ;
+    rdfs:comment "A QualiaDB / Webizen application. A QApp is a WorkArtifact composed of VibeScript modules, ontologies (N3 → CBOR-LD), capability declarations, and optional native (Rust/WASM) components. QApps are human-centric — they are built for humans and agents, not for servers." .
+
+code:QAppType a rdfs:Class ;
+    rdfs:label "QApp Type" ;
+    rdfs:comment "The type of QApp, determining structure and required components." .
+
+code:QAppDocument a code:QAppType ;
+    rdfs:label "Document QApp" ;
+    rdfs:comment "A document-centric QApp — extends the office toolbox with custom VibeScript logic, datasource bindings, and context markup rules. Example: a research workbench with custom NLP pipelines." .
+
+code:QAppSpatial a code:QAppType ;
+    rdfs:label "Spatial QApp" ;
+    rdfs:comment "A spatial/3D QApp — uses the 10D browser interface, scene graphs, and rendering. Example: an anatomy visualiser, a GIS tool, a 3D data explorer." .
+
+code:QAppAgent a code:QAppType ;
+    rdfs:label "Agent QApp" ;
+    rdfs:comment "An agent-centric QApp — wraps an AI stack (symbolic, neural, or neuro-symbolic) as a user-facing application. Example: an NLP extraction workbench, a GraphRAG query tool, a constrained-decoding playground." .
+
+code:QAppSocial a code:QAppType ;
+    rdfs:label "Social QApp" ;
+    rdfs:comment "A social/communication QApp — chat graphs, peer connections, field notes. Example: a collaborative research notebook, a fiduciary communication tool." .
+
+code:QAppLibrary a code:QAppType ;
+    rdfs:label "Library QApp" ;
+    rdfs:comment "A library/module QApp — not a standalone application but a reusable component for other QApps. Example: an ontology pack, a gazetteer module, a render plugin." .
+
+# — QApp properties —
+
+code:hasModule a rdf:Property ;
+    rdfs:label "has module" ;
+    rdfs:domain code:QApp ;
+    rdfs:range  code:Module ;
+    rdfs:comment "A VibeScript or Rust/WASM module in the QApp." .
+
+code:hasOntology a rdf:Property ;
+    rdfs:label "has ontology" ;
+    rdfs:domain code:QApp ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "An ontology (N3 source → CBOR-LD compiled) bundled with the QApp." .
+
+code:hasCapabilityDeclaration a rdf:Property ;
+    rdfs:label "has capability declaration" ;
+    rdfs:domain code:QApp ;
+    rdfs:range  code:CapabilityDeclaration ;
+    rdfs:comment "A capability that the QApp declares it requires. The Sentinel enforces these at runtime." .
+
+code:hasBuildTarget a rdf:Property ;
+    rdfs:label "has build target" ;
+    rdfs:domain code:QApp ;
+    rdfs:range  code:BuildTarget .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Module — VibeScript or native code
+# ────────────────────────────────────────────────────────────────────
+
+code:Module a rdfs:Class ;
+    rdfs:label "Module" ;
+    rdfs:comment "A code module within a QApp. May be VibeScript (interpreted by Poet) or Rust/WASM (compiled native)." .
+
+code:moduleType a rdf:Property ;
+    rdfs:label "module type" ;
+    rdfs:domain code:Module ;
+    rdfs:range  code:ModuleType .
+
+code:ModuleType a rdfs:Class ;
+    rdfs:label "Module Type" .
+
+code:vibeScript a code:ModuleType ; rdfs:label "VibeScript" ;
+    rdfs:comment "Interpreted by the Poet engine. No JIT, no compilation step. Capability-bounded." .
+code:nativeWasm a code:ModuleType ; rdfs:label "Native WASM" ;
+    rdfs:comment "Compiled Rust → WASM. Used for performance-critical paths (rendering, NLP pipelines, crypto)." .
+code:ontologyModule a code:ModuleType ; rdfs:label "Ontology Module" ;
+    rdfs:comment "An N3 ontology compiled to CBOR-LD. Not executable code but a declarative module loaded by the ontology registry." .
+code:hybridModule a code:ModuleType ; rdfs:label "Hybrid Module" ;
+    rdfs:comment "A module that combines VibeScript orchestration with native WASM kernels. VibeScript handles control flow; WASM handles computation." .
+
+code:moduleSource a rdf:Property ;
+    rdfs:label "module source" ;
+    rdfs:domain code:Module ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Source file path or IRI." .
+
+code:moduleEntry a rdf:Property ;
+    rdfs:label "module entry" ;
+    rdfs:domain code:Module ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Entry point function name (e.g. 'main', 'on_load', 'handle_intent')." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Capability Declaration
+# ────────────────────────────────────────────────────────────────────
+
+code:CapabilityDeclaration a rdfs:Class ;
+    rdfs:label "Capability Declaration" ;
+    rdfs:comment "A declared capability that a QApp or module requires. The Sentinel checks these at load time — no ambient authority. If a capability is not declared, it cannot be used." .
+
+code:capabilityScope a rdf:Property ;
+    rdfs:label "capability scope" ;
+    rdfs:domain code:CapabilityDeclaration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The capability namespace (e.g. 'graph:read', 'graph:mutate', 'nlp:analyze', 'render:scene', 'pulse:publish', 'datasource:query', 'capability:invoke')." .
+
+code:capabilityReason a rdf:Property ;
+    rdfs:label "capability reason" ;
+    rdfs:domain code:CapabilityDeclaration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable explanation of why this capability is needed. Required for audit." .
+
+code:capabilityOptional a rdf:Property ;
+    rdfs:label "capability optional" ;
+    rdfs:domain code:CapabilityDeclaration ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "If true, the QApp can degrade gracefully if this capability is not granted. If false, the QApp will not load without it." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Build Target
+# ────────────────────────────────────────────────────────────────────
+
+code:BuildTarget a rdfs:Class ;
+    rdfs:label "Build Target" ;
+    rdfs:comment "A target for building and packaging a QApp." .
+
+code:TargetWasm a code:BuildTarget ;
+    rdfs:label "WASM Bundle" ;
+    rdfs:comment "Compiles to a WASM bundle for browser/WASM runtime. The default target for most QApps." .
+
+code:TargetNative a code:BuildTarget ;
+    rdfs:label "Native Binary" ;
+    rdfs:comment "Compiles to a native binary for desktop execution. Used for performance-critical or offline QApps." .
+
+code:TargetHCF a code:BuildTarget ;
+    rdfs:label "HCF Package" ;
+    rdfs:comment "Packages as an HCF (Hypermedia Content Format) bundle — the canonical distribution format. Includes VibeScript, CBOR-LD ontologies, manifests, and assets." .
+
+code:TargetCborLD a code:BuildTarget ;
+    rdfs:label "CBOR-LD Serialisation" ;
+    rdfs:comment "Serialises the QApp's entire state (code + data + ontologies) as CBOR-LD. Used for snapshotting, sharing, and agent consumption." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. 10D Scene — Q42 10D Volumetric Tensor [q, v, w, x, y, z, t, α, μ, σ]
+#
+# Normative reference: q42-10d-tensor-standard.md (v1.2)
+# The 10D tensor is a 40-byte, zero-heap, stack-allocated structure.
+# Dimensions are NOT "3 spatial + 1 temporal + 6 semantic" — they are
+# structural/quantum (q, v, w), spacetime (x, y, z, t), and
+# spectral-logical (α, μ, σ). The spectral dimensions use the EMF
+# spectrum, not colour space alone — some agents perceive more spectrum
+# than humans.
+# ────────────────────────────────────────────────────────────────────
+
+code:Tensor10D a rdfs:Class ;
+    rdfs:label "Tensor10D" ;
+    rdfs:comment "The Q42 10D volumetric tensor: [q, v, w, x, y, z, t, alpha, mu, sigma]. 40 bytes, zero-heap, stack-allocated, f32 per dimension. Normative reference: q42-10d-tensor-standard.md v1.2." .
+
+# — Structural & Quantum Identifiers —
+
+code:q a rdf:Property ;
+    rdfs:label "q — Quantum Context" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Epistemic superposition index. q=0: collapsed ground truth / classical axiom (permanent, verified fact). q>0: parallel epistemic contexts, pending GSR resolutions, branching what-if scenarios." .
+
+code:v a rdf:Property ;
+    rdfs:label "v — Topological Class" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Defines geometric physics rules for manifold regions. v=0: Euclidean (flat semantic proximity). v=1: Cyclic/Toroidal (feedback loops, periodic states). v=2: Hyperbolic/Tree (hierarchies, taxonomies). v>=3: Boundary clique / community classes." .
+
+code:w a rdf:Property ;
+    rdfs:label "w — Manifold Index" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Domain index for multi-head bifurcation. w=0: Biological/Medical. w=1: Legal/Jurisdictional. w=2: Personal/Agency (DIDs, consents). w=3: Environmental/Sensor. w=4: Socioeconomic/Wellbeing." .
+
+# — Spacetime Dimensions —
+
+code:x a rdf:Property ;
+    rdfs:label "x — Semantic Topology X" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "3D spatial coordinate X of concepts. Related concepts are physically clustered. Distance dictates semantic relevance." .
+
+code:y a rdf:Property ;
+    rdfs:label "y — Semantic Topology Y" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float .
+
+code:z a rdf:Property ;
+    rdfs:label "z — Semantic Topology Z" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float .
+
+code:t a rdf:Property ;
+    rdfs:label "t — Temporal State" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Explicit time or state-version dimension. Enables verifiable ledger for historical state queries. Medical: biomarker normal at t=0, critical at t=1. Legal: claim valid at t=2024, superseded at t=2026." .
+
+# — Spectral-Logical Payload (EMF spectrum, not colour space alone) —
+
+code:alpha a rdf:Property ;
+    rdfs:label "α — Spectral Amplitude" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Linear floating-point intensity, energy density, trust/consensus weight. In audio: linear gain staging (preserves dynamic-range sovereignty). Not gamma-encoded — linear only." .
+
+code:mu a rdf:Property ;
+    rdfs:label "μ — Spectral Modulation" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Encodes phase, frequency modulation, or bit-packed metadata for DIDs and cryptographic provenance. In audio: phase/provenance modulation, drives FM index with epistemic q." .
+
+code:sigma a rdf:Property ;
+    rdfs:label "σ — Spectral Signature" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "EMF spectral profile — the shared truth index for both vision (U2) and hearing (U3). NOT colour space alone: σ encodes a position in the EMF spectrum. fract(σ) maps to wavelength λ_nm = 400 + fract(σ)×300 for human-visible projection. Agents that perceive more spectrum (UV, IR, radio, X-ray) use the full σ range without human-range clamping. Integer wraps on σ must not change either projection." .
+
+# — σ phenomenal projection (U2 visual + U3 auditory) —
+
+code:SigmaProjection a rdfs:Class ;
+    rdfs:label "σ Projection" ;
+    rdfs:comment "The phenomenal portal projects the same σ field into two last-mile modalities without duplicating storage: visual (U2 viewport) and auditory (U3 acoustic plane). Both derive from the same σ — no separate colour/audio storage." .
+
+code:visualProjection a rdf:Property ;
+    rdfs:label "visual projection (U2)" ;
+    rdfs:domain code:SigmaProjection ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "λ_nm = 400 + fract(σ)×300 → CIE 1931 XYZ → linear sRGB. Human-visible range only (400-700nm). Agents with broader spectral perception access σ directly without this projection." .
+
+code:auditoryProjection a rdf:Property ;
+    rdfs:label "auditory projection (U3)" ;
+    rdfs:domain code:SigmaProjection ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Same λ_nm → f_hz = lerp(1760, 110, t) where t = (λ_nm−400)/300. Synaesthetic mapping from EMF spectrum to audible frequency." .
+
+code:spectralPreviewBins a rdf:Property ;
+    rdfs:label "spectral preview bins" ;
+    rdfs:domain code:Tensor10D ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of preview bins derived from σ for hot-path parametric synthesis (normative: 64). Full SPD (vision) and STFT/CQT (audio) live in mmap sidecars, not in the 40-byte tensor stride." .
+
+# — Spectral perception range (human vs agent) —
+
+code:SpectralPerceptionRange a rdfs:Class ;
+    rdfs:label "Spectral Perception Range" ;
+    rdfs:comment "Defines the range of the EMF spectrum that a perceiver (human or agent) can access. Humans perceive a narrow band (visible light 400-700nm + audible 20Hz-20kHz). Agents may perceive the full EMF spectrum — UV, IR, radio, microwave, X-ray — mapped through σ without human-range clamping." .
+
+code:humanVisible a code:SpectralPerceptionRange ;
+    rdfs:label "human visible" ;
+    rdfs:comment "Human visible light: 400-700nm. σ projected via CIE 1931 XYZ → sRGB." .
+
+code:humanAudible a code:SpectralPerceptionRange ;
+    rdfs:label "human audible" ;
+    rdfs:comment "Human audible range: 20Hz-20kHz. σ projected via synaesthetic λ→f mapping." .
+
+code:agentFullSpectrum a code:SpectralPerceptionRange ;
+    rdfs:label "agent full spectrum" ;
+    rdfs:comment "Agent perception: full EMF spectrum via σ without clamping. Includes UV (<400nm), IR (>700nm), radio, microwave, X-ray. The agent accesses σ directly — the phenomenal portal projection is a human-facing fallback, not the canonical representation." .
+
+code:agentCustomRange a code:SpectralPerceptionRange ;
+    rdfs:label "agent custom range" ;
+    rdfs:comment "An agent with a specific spectral range (e.g. an IR sensor array, a radio telescope, a multi-spectral imager). Defined by the agent's capability declaration." .
+
+# — Topological distance metrics (normative, from §4 of the standard) —
+
+code:DistanceMetric a rdfs:Class ;
+    rdfs:label "Distance Metric" ;
+    rdfs:comment "The volume-search distance metric, selected by the query's topological class ⌊Q.v⌋. GPU and CPU paths MUST compute identical results." .
+
+code:euclideanMetric a code:DistanceMetric ;
+    rdfs:label "Euclidean (v=0)" ;
+    rdfs:comment "d = √(Δx² + Δy² + Δz² + Δt² + Δα² + Δμ² + Δσ²). Full 7-dimensional form. q, v, w are NOT part of the metric." .
+
+code:cyclicMetric a code:DistanceMetric ;
+    rdfs:label "Cyclic/Toroidal (v=1)" ;
+    rdfs:comment "d = √(c(Δx)² + c(Δy)² + c(Δz)²), c(δ) = min(|δ|, 1−|δ|). Toroidal wrap on each spatial axis." .
+
+code:hyperbolicMetric a code:DistanceMetric ;
+    rdfs:label "Hyperbolic (v=2)" ;
+    rdfs:comment "d = ln(e^|Δx| + e^|Δy| + e^|Δz|). Exponential hierarchy over spatial axes." .
+
+code:boundaryMetric a code:DistanceMetric ;
+    rdfs:label "Boundary Clique (v≥3)" ;
+    rdfs:comment "d = 0 if Q.v == N.v else 1. Clique membership." .
+
+# — Scene graph (built on top of Tensor10D) —
+
+code:Scene a rdfs:Class ;
+    rdfs:label "10D Scene" ;
+    rdfs:comment "A scene graph for the 10D browser interface. Scene nodes carry Tensor10D coordinates — not just 3D geometry but the full 10-dimensional manifold position including quantum context, topological class, manifold domain, temporal state, and EMF spectral payload." .
+
+code:SceneNode a rdfs:Class ;
+    rdfs:label "Scene Node" ;
+    rdfs:comment "A node in a 10D scene graph. Has a Tensor10D coordinate, optional mesh, optional material, optional children, and optional semantic link to a knowledge graph node." .
+
+code:hasNode a rdf:Property ;
+    rdfs:label "has node" ;
+    rdfs:domain code:Scene ;
+    rdfs:range  code:SceneNode .
+
+code:nodeTensor a rdf:Property ;
+    rdfs:label "node tensor" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  code:Tensor10D ;
+    rdfs:comment "The 10D tensor coordinate of this scene node. Position in the full manifold." .
+
+code:nodeMesh a rdf:Property ;
+    rdfs:label "node mesh" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the mesh asset (3D model, point cloud, volumetric data)." .
+
+code:nodeMaterial a rdf:Property ;
+    rdfs:label "node material" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  code:Material .
+
+code:Material a rdfs:Class ;
+    rdfs:label "Material" ;
+    rdfs:comment "A rendering material — WGSL shader, textures, uniforms. May reference σ for spectral rendering." .
+
+code:materialShader a rdf:Property ;
+    rdfs:label "shader" ;
+    rdfs:domain code:Material ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "WGSL shader source or IRI." .
+
+code:materialUniform a rdf:Property ;
+    rdfs:label "uniform" ;
+    rdfs:domain code:Material ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Uniform values (roughness, metalness, σ-derived spectral weights, etc.)." .
+
+code:nodeLight a rdf:Property ;
+    rdfs:label "node light" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  code:Light .
+
+code:Light a rdfs:Class ;
+    rdfs:label "Light" .
+
+code:directionalLight a code:Light ; rdfs:label "directional" .
+code:pointLight       a code:Light ; rdfs:label "point" .
+code:spotLight        a code:Light ; rdfs:label "spot" .
+code:ambientLight     a code:Light ; rdfs:label "ambient" .
+
+code:nodeCamera a rdf:Property ;
+    rdfs:label "node camera" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  code:Camera .
+
+code:Camera a rdfs:Class ;
+    rdfs:label "Camera" .
+
+code:perspectiveCamera  a code:Camera ; rdfs:label "perspective" .
+code:orthographicCamera a code:Camera ; rdfs:label "orthographic" .
+code:manifoldCamera     a code:Camera ; rdfs:label "manifold" ;
+    rdfs:comment "A camera that navigates the full 10D manifold — can shift along q (epistemic context), v (topology), w (domain), x/y/z (spatial), t (temporal), and α/μ/σ (spectral). Not just spatial navigation." .
+
+code:nodeChildren a rdf:Property ;
+    rdfs:label "node children" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  code:SceneNode ;
+    rdfs:comment "Child nodes (forms a tree within the scene graph)." .
+
+code:nodeSemanticLink a rdf:Property ;
+    rdfs:label "node semantic link" ;
+    rdfs:domain code:SceneNode ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI linking this node to a knowledge graph node, ontology term, or context markup. The semantic link is encoded in the node's Tensor10D (w, x, y, z position) but this property provides the explicit IRI for traversal." .
+
+# — Hardware capability tiers (from §2 of the standard) —
+
+code:HardwareTier a rdfs:Class ;
+    rdfs:label "Hardware Tier" ;
+    rdfs:comment "Hardware capability tier for 10D tensor execution. Determines dispatch strategy." .
+
+code:tier0 a code:HardwareTier ; rdfs:label "Tier 0 — Strict Edge" ;
+    rdfs:comment "Mobile CPUs, Raspberry Pi, battery reserves. SIMD kernels, aggressive quantization. <1W idle, <5W active, ≤48MB working set." .
+code:tier1 a code:HardwareTier ; rdfs:label "Tier 1 — Mainstream Native" ;
+    rdfs:comment "Standard laptops, mobile Neural Engines. Hybrid CPU/NPU. <10W idle, <20W active, ≤256MB working set." .
+code:tier2 a code:HardwareTier ; rdfs:label "Tier 2 — High-Performance Local" ;
+    rdfs:comment "Dedicated GPUs (A2000, Apple Silicon). GPU VRAM mapping, parallel TMUs. <10W idle, <50W active, ≤2GB working set." .
+code:tier3 a code:HardwareTier ; rdfs:label "Tier 3 — Ground-State Resolver / QPU" ;
+    rdfs:comment "Scarce QPUs, classical exhaustion first. Async, proof-of-demand mesh aggregation, stateless escrow." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. AI Stack — symbolic, neural, neuro-symbolic
+# ────────────────────────────────────────────────────────────────────
+
+code:AIStack a rdfs:Class ;
+    rdfs:label "AI Stack" ;
+    rdfs:comment "The AI processing stack for QualiaDB. Not just LLMs — includes symbolic AI (deterministic NLP, gazetteers, FSTs), neural models (transformers, embeddings), and the neuro-symbolic bridge that connects them." .
+
+code:AIStackLayer a rdfs:Class ;
+    rdfs:label "AI Stack Layer" ;
+    rdfs:comment "A layer in the AI stack. Each layer has a distinct role and different capability requirements." .
+
+# — Layer 1: Symbolic (deterministic, no ML) —
+
+code:SymbolicLayer a code:AIStackLayer ;
+    rdfs:label "Symbolic Layer" ;
+    rdfs:comment "Deterministic symbolic AI — no machine learning. Includes gazetteers (Aho-Corasick), morphology (FSTs), rule-based sieves (coreference), frame semantics, TimeML/GeoSPARQL/QUDT normalizers. This is the foundation — it produces structured, verified substrates." .
+
+code:SymbolicComponent a rdfs:Class ;
+    rdfs:label "Symbolic Component" .
+
+code:gazetteer     a code:SymbolicComponent ; rdfs:label "gazetteer" ;
+    rdfs:comment "Aho-Corasick automaton for lexicon/gazetteer matching over custom ontologies." .
+code:fst           a code:SymbolicComponent ; rdfs:label "FST" ;
+    rdfs:comment "Finite-State Transducer for morphology and dictionary lookups." .
+code:corefSieve    a code:SymbolicComponent ; rdfs:label "coreference sieve" ;
+    rdfs:comment "Rule-based multi-pass sieve for coreference/anaphora resolution." .
+code:frameSemantics a code:SymbolicComponent ; rdfs:label "frame semantics" ;
+    rdfs:comment "Frame semantic parsing — identifying frame elements and roles." .
+code:temporalParser a code:SymbolicComponent ; rdfs:label "temporal parser" ;
+    rdfs:comment "TimeML-style temporal expression extraction and normalisation." .
+code:geoParser     a code:SymbolicComponent ; rdfs:label "geo parser" ;
+    rdfs:comment "GeoSPARQL-compatible geographic entity extraction and normalisation." .
+code:quantityNormalizer a code:SymbolicComponent ; rdfs:label "quantity normalizer" ;
+    rdfs:comment "QUDT-compatible unit detection, conversion, and normalisation." .
+code:relationExtractor a code:SymbolicComponent ; rdfs:label "relation extractor" ;
+    rdfs:comment "Rule-based relation extraction over parsed text, producing RDF-Star triples." .
+
+# — Layer 2: Neural (ML models) —
+
+code:NeuralLayer a code:AIStackLayer ;
+    rdfs:label "Neural Layer" ;
+    rdfs:comment "Neural models — transformers, embeddings, classifiers. These consume the structured substrate produced by the symbolic layer and perform inference (generation, classification, retrieval). The neural layer does NOT replace the symbolic layer — it builds on top of it." .
+
+code:NeuralComponent a rdfs:Class ;
+    rdfs:label "Neural Component" .
+
+code:embedder      a code:NeuralComponent ; rdfs:label "embedder" ;
+    rdfs:comment "Text/entity embedder — produces vector representations for similarity search and retrieval." .
+code:transformer   a code:NeuralComponent ; rdfs:label "transformer" ;
+    rdfs:comment "Transformer model for generation, summarisation, or classification. May be local (WASM) or remote (API)." .
+code:classifier    a code:NeuralComponent ; rdfs:label "classifier" ;
+    rdfs:comment "Neural classifier for entity typing, sentiment, stance, or custom classification tasks." .
+code:reranker      a code:NeuralComponent ; rdfs:label "reranker" ;
+    rdfs:comment "Cross-encoder reranker for improving retrieval precision in GraphRAG pipelines." .
+code:decoder       a code:NeuralComponent ; rdfs:label "constrained decoder" ;
+    rdfs:comment "Constrained decoding engine — guides generation using grammar constraints, ontology shapes, or retrieved graph context." .
+
+# — Layer 3: Neuro-Symbolic Bridge —
+
+code:BridgeLayer a code:AIStackLayer ;
+    rdfs:label "Neuro-Symbolic Bridge" ;
+    rdfs:comment "The bridge between symbolic and neural. Extracts structured substrates via symbolic AI, verifies them, and feeds them to neural models for grounded inference. Also feeds neural outputs back into the symbolic graph for verification. This is the core innovation — LLMs do not replace symbolic AI; they are grounded by it." .
+
+code:BridgeComponent a rdfs:Class ;
+    rdfs:label "Bridge Component" .
+
+code:substrateExtractor a code:BridgeComponent ; rdfs:label "substrate extractor" ;
+    rdfs:comment "Runs the full symbolic pipeline (gazetteer → FST → coref → frames → temporal/geo/quantity) to produce a verified structured substrate from raw text." .
+code:graphIndexer  a code:BridgeComponent ; rdfs:label "graph indexer" ;
+    rdfs:comment "Builds a graph index from extracted triples and entities for GraphRAG retrieval." .
+code:graphRAG      a code:BridgeComponent ; rdfs:label "GraphRAG" ;
+    rdfs:comment "Retrieves relevant graph context for neural model grounding. Combines symbolic graph queries with neural embedding similarity." .
+code:groundingVerifier a code:BridgeComponent ; rdfs:label "grounding verifier" ;
+    rdfs:comment "Verifies that neural model outputs are grounded in the symbolic substrate. Flags ungrounded generations, unsupported claims, and ontology violations." .
+code:feedbackLoop  a code:BridgeComponent ; rdfs:label "feedback loop" ;
+    rdfs:comment "Feeds neural outputs back into the symbolic graph for human or agent verification. Closed-loop neuro-symbolic refinement." .
+
+# — Layer 4: Agent Runtime —
+
+code:AgentLayer a code:AIStackLayer ;
+    rdfs:label "Agent Runtime Layer" ;
+    rdfs:comment "The agent runtime — orchestrates the AI stack for autonomous or semi-autonomous task execution. Agents are capability-bounded (like VibeScript) and operate through the IntentBus. No ambient authority." .
+
+code:AgentComponent a rdfs:Class ;
+    rdfs:label "Agent Component" .
+
+code:agentRuntime  a code:AgentComponent ; rdfs:label "agent runtime" ;
+    rdfs:comment "The runtime that executes agent tasks — planning, tool selection, execution, verification. Local only (no Ollama, no remote agent APIs)." .
+code:goldenCorpus  a code:AgentComponent ; rdfs:label "golden corpus" ;
+    rdfs:comment "A curated corpus of verified examples used for agent evaluation and constrained decoding." .
+code:diagnostics   a code:AgentComponent ; rdfs:label "diagnostics" ;
+    rdfs:comment "Diagnostics for agent behaviour — traces, capability usage, grounding scores, error rates." .
+code:sentinel      a code:AgentComponent ; rdfs:label "sentinel" ;
+    rdfs:comment "The Sentinel — capability enforcement and agency claim evaluation for agent actions." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Project structure
+# ────────────────────────────────────────────────────────────────────
+
+code:ProjectStructure a rdfs:Class ;
+    rdfs:label "Project Structure" ;
+    rdfs:comment "The directory structure of a QApp project." .
+
+code:hasSourceDir a rdf:Property ;
+    rdfs:label "source directory" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "VibeScript source files (.vibe)." .
+
+code:hasNativeDir a rdf:Property ;
+    rdfs:label "native directory" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Rust source files (.rs) compiled to WASM." .
+
+code:hasOntologyDir a rdf:Property ;
+    rdfs:label "ontology directory" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "N3 ontology files (.n3) compiled to CBOR-LD (.cbor)." .
+
+code:hasAssetDir a rdf:Property ;
+    rdfs:label "asset directory" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Static assets (meshes, textures, audio, fonts)." .
+
+code:hasTestDir a rdf:Property ;
+    rdfs:label "test directory" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Test files — unit tests, integration tests, golden corpus tests." .
+
+code:hasManifest a rdf:Property ;
+    rdfs:label "manifest" ;
+    rdfs:domain code:ProjectStructure ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Project manifest (CBOR-LD) — declares QApp type, modules, capabilities, build targets." .

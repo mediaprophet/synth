@@ -1,0 +1,609 @@
+# Settings Ontology — Configuration, Capabilities, Preferences,
+# Access Control, Ontology Loading, Runtime Parameters
+#
+# Authoring form (N3) — compiled to settings.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# This ontology models the settings system for QualiaDB / Webizen.
+# It covers: user preferences, system configuration, capability
+# management, access control, ontology loading, runtime parameters,
+# fiduciary VM configuration, and profile management.
+#
+# Settings are distinct from obligations (obligations.n3) — settings
+# are the mechanism by which a person or institution configures their
+# relationship with the system; obligations are the duties that arise
+# from that relationship. Settings enable; obligations constrain.
+#
+# Settings are appendable — any change creates a new settings record
+# with provenance, rather than overwriting the previous value. This
+# ensures auditability and recoverability.
+#
+# Nomenclature:
+#   - Natural persons have preferences (mind-dependent: comfort,
+#     aesthetic, sensory pacing). Legal persons have configuration
+#     (institutional: policy, compliance, operational). Software
+#     agents have parameters (computational: threshold, mode,
+#     allocation).
+#   - "Preference" is a mind-dependent term for natural persons only.
+#   - "Configuration" is an institutional term for legal persons.
+#   - "Parameter" is a computational term for software agents.
+#   - All three are sub-types of Setting.
+#
+# Imports: agency.n3, personhood.n3, selfhood.n3, obligations.n3,
+#          container.n3, agent-nomenclature.n3, provenance.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+@prefix obl:        <https://qualiadb.org/schema/ui/obligations#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix manifold:   <https://qualiadb.org/schema/ui/manifold#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix set:        <https://qualiadb.org/schema/ui/settings#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Setting — the base class
+# ────────────────────────────────────────────────────────────────────
+
+set:Setting a rdfs:Class ;
+    rdfs:label "Setting" ;
+    rdfs:comment "A configurable value that governs how the system operates for a specific entity. Settings are appendable — each change creates a new record with provenance rather than overwriting. The current value is the most recent record. Settings are typed by who they apply to: preferences (natural persons), configuration (legal persons), parameters (software agents). All settings have a scope, a value, a provenance record, and may have a validity period." .
+
+set:settingScope a rdf:Property ;
+    rdfs:label "scope" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  set:SettingScope ;
+    rdfs:comment "The scope at which this setting applies — global, profile, session, or container." .
+
+set:SettingScope a rdfs:Class ;
+    rdfs:label "Setting Scope" .
+
+set:scopeGlobal    a set:SettingScope ; rdfs:label "global" ;
+    rdfs:comment "Applies system-wide, across all profiles and sessions." .
+set:scopeProfile   a set:SettingScope ; rdfs:label "profile" ;
+    rdfs:comment "Applies to a specific user or entity profile." .
+set:scopeSession   a set:SettingScope ; rdfs:label "session" ;
+    rdfs:comment "Applies to the current session only — not persisted." .
+set:scopeContainer a set:SettingScope ; rdfs:label "container" ;
+    rdfs:comment "Applies to a specific container or manifold context." .
+
+set:settingValue a rdf:Property ;
+    rdfs:label "value" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The value of the setting — typed according to the setting's value type." .
+
+set:settingValueType a rdf:Property ;
+    rdfs:label "value type" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  set:SettingValueType ;
+    rdfs:comment "The data type of the setting value." .
+
+set:SettingValueType a rdfs:Class ;
+    rdfs:label "Setting Value Type" .
+
+set:vtBoolean  a set:SettingValueType ; rdfs:label "boolean" .
+set:vtString   a set:SettingValueType ; rdfs:label "string" .
+set:vtInteger  a set:SettingValueType ; rdfs:label "integer" .
+set:vtFloat    a set:SettingValueType ; rdfs:label "float" .
+set:vtEnum     a set:SettingValueType ; rdfs:label "enum" .
+set:vtIRI      a set:SettingValueType ; rdfs:label "iri" .
+set:vtJSON     a set:SettingValueType ; rdfs:label "json" .
+set:vtCBOR     a set:SettingValueType ; rdfs:label "cbor-ld" .
+
+set:settingProvenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Provenance record for this setting — who changed it, when, and why. Settings are appendable, so each change is a new record." .
+
+set:settingValidFrom a rdf:Property ;
+    rdfs:label "valid from" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  xsd:dateTime .
+
+set:settingValidUntil a rdf:Property ;
+    rdfs:label "valid until" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "If set, the setting is no longer current after this datetime. If unset, the setting is current until superseded by a newer record." .
+
+set:settingAppliesTo a rdf:Property ;
+    rdfs:label "applies to" ;
+    rdfs:domain set:Setting ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity this setting applies to — a natural person, legal person, or software agent." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Preference — natural person settings (mind-dependent)
+# ────────────────────────────────────────────────────────────────────
+
+set:Preference a rdfs:Class ;
+    rdfs:label "Preference" ;
+    rdfs:subClassOf set:Setting ;
+    rdfs:comment "A setting that reflects the subjective preferences of a natural person — aesthetic, sensory, comfort, accessibility, and workflow choices. 'Preference' is a mind-dependent term applicable to natural persons only. Legal persons have configuration; software agents have parameters. Preferences are personal and protected — they are part of the person's relationship with the system, not subject to institutional override unless the preference creates a safety risk (see obligations.n3 disclosure exceptions)." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+set:prefCategory a rdf:Property ;
+    rdfs:label "category" ;
+    rdfs:domain set:Preference ;
+    rdfs:range  set:PreferenceCategory .
+
+set:PreferenceCategory a rdfs:Class ;
+    rdfs:label "Preference Category" .
+
+set:pcAccessibility a set:PreferenceCategory ; rdfs:label "accessibility" ;
+    rdfs:comment "Accessibility preferences — font size, contrast, screen reader, keyboard navigation, reduced motion, captions, audio descriptions." .
+set:pcSensory a set:PreferenceCategory ; rdfs:label "sensory-pacing" ;
+    rdfs:comment "Sensory pacing preferences — notification frequency, visual complexity, audio volume, animation speed, information density. Links to selfhood.n3 sensory pacing." .
+set:pcAesthetic a set:PreferenceCategory ; rdfs:label "aesthetic" ;
+    rdfs:comment "Aesthetic preferences — theme, colour scheme, icon style, layout density, typography." .
+set:pcWorkflow a set:PreferenceCategory ; rdfs:label "workflow" ;
+    rdfs:comment "Workflow preferences — default manifold, default containers, tool placement, keyboard shortcuts, auto-save interval." .
+set:pcLanguage a set:PreferenceCategory ; rdfs:label "language" ;
+    rdfs:comment "Language and locale preferences — interface language, date format, number format, timezone, first day of week." .
+set:pcPrivacy a set:PreferenceCategory ; rdfs:label "privacy" ;
+    rdfs:comment "Privacy preferences — default visibility, share prompts, telemetry opt-in, data retention period, selfhood access controls. Links to selfhood.n3 and obligations.n3." .
+set:pcCommunication a set:PreferenceCategory ; rdfs:label "communication" ;
+    rdfs:comment "Communication preferences — notification channels (email, push, in-app), quiet hours, digest frequency, message formatting." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Configuration — legal person / institutional settings
+# ────────────────────────────────────────────────────────────────────
+
+set:Configuration a rdfs:Class ;
+    rdfs:label "Configuration" ;
+    rdfs:subClassOf set:Setting ;
+    rdfs:comment "A setting that reflects the institutional configuration of a legal person — policy, compliance, operational, and security parameters. 'Configuration' is an institutional term for legal persons. Configurations are set by authorised representatives of the legal person and may be subject to regulatory requirements, audit, and governance processes." ;
+    epi:applicableAgentType epi:LegalAgent .
+
+set:configCategory a rdf:Property ;
+    rdfs:label "category" ;
+    rdfs:domain set:Configuration ;
+    rdfs:range  set:ConfigurationCategory .
+
+set:ConfigurationCategory a rdfs:Class ;
+    rdfs:label "Configuration Category" .
+
+set:ccPolicy a set:ConfigurationCategory ; rdfs:label "policy" ;
+    rdfs:comment "Policy configuration — acceptable use, data governance, retention schedules, information classification." .
+set:ccCompliance a set:ConfigurationCategory ; rdfs:label "compliance" ;
+    rdfs:comment "Compliance configuration — regulatory frameworks, reporting requirements, audit trails, mandatory controls." .
+set:ccSecurity a set:ConfigurationCategory ; rdfs:label "security" ;
+    rdfs:comment "Security configuration — authentication requirements, encryption standards, access control policies, intrusion detection." .
+set:ccOperational a set:ConfigurationCategory ; rdfs:label "operational" ;
+    rdfs:comment "Operational configuration — deployment profile, resource limits, backup schedules, maintenance windows." .
+set:ccIntegration a set:ConfigurationCategory ; rdfs:label "integration" ;
+    rdfs:comment "Integration configuration — external system connections, API endpoints, data sync schedules, federation partners." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Parameter — software agent settings (computational)
+# ────────────────────────────────────────────────────────────────────
+
+set:Parameter a rdfs:Class ;
+    rdfs:label "Parameter" ;
+    rdfs:subClassOf set:Setting ;
+    rdfs:comment "A setting that reflects the computational parameters of a software agent — thresholds, modes, allocations, and operational bounds. 'Parameter' is a computational term for software agents. Parameters do not reflect preferences or policy — they reflect computational configuration. Parameters may be set by a natural person (user tuning) or legal person (institutional policy) but are applied to the software agent's operation." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+
+set:paramCategory a rdf:Property ;
+    rdfs:label "category" ;
+    rdfs:domain set:Parameter ;
+    rdfs:range  set:ParameterCategory .
+
+set:ParameterCategory a rdfs:Class ;
+    rdfs:label "Parameter Category" .
+
+set:pcThreshold a set:ParameterCategory ; rdfs:label "threshold" ;
+    rdfs:comment "Threshold parameters — confidence thresholds, similarity thresholds, detection sensitivity, error tolerance." .
+set:pcMode a set:ParameterCategory ; rdfs:label "mode" ;
+    rdfs:comment "Mode parameters — processing mode (batch/streaming), output mode (verbose/compact), inference mode (strict/permissive)." .
+set:pcAllocation a set:ParameterCategory ; rdfs:label "allocation" ;
+    rdfs:comment "Resource allocation parameters — memory limits, CPU allocation, cache size, queue depth, concurrency limits." .
+set:pcTimeout a set:ParameterCategory ; rdfs:label "timeout" ;
+    rdfs:comment "Timeout parameters — request timeout, session timeout, cache expiry, retry interval, heartbeat interval." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Capability Management — what the system is allowed to do
+# ────────────────────────────────────────────────────────────────────
+
+set:Capability a rdfs:Class ;
+    rdfs:label "Capability" ;
+    rdfs:comment "A declared capability that the system or a specific agent may exercise. Capabilities are the primary access control mechanism in QualiaDB — rather than granting broad permissions, the system grants specific capabilities that are scoped, bounded, and auditable. Capabilities link to VibeScript capability declarations and the Sentinel VM. A capability specifies: what action is permitted, who may exercise it, what scope it applies to, what constraints it has, and whether it is currently active." .
+
+set:capabilityName a rdf:Property ;
+    rdfs:label "name" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The declared name of the capability — e.g. 'n3-ontology:load', 'hcf:compile', 'capability:grant'. Matches VibeScript capability declarations." .
+
+set:capabilityHolder a rdf:Property ;
+    rdfs:label "holder" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that holds this capability — the entity authorised to exercise it." .
+
+set:capabilityGrantor a rdf:Property ;
+    rdfs:label "grantor" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that granted this capability. Capabilities are delegated, not self-originated — every capability has a grantor (except root capabilities, which are self-granted by the system)." .
+
+set:capabilityScope a rdf:Property ;
+    rdfs:label "scope" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  set:CapabilityScope ;
+    rdfs:comment "The scope at which this capability may be exercised." .
+
+set:CapabilityScope a rdfs:Class ;
+    rdfs:label "Capability Scope" .
+
+set:csSystem    a set:CapabilityScope ; rdfs:label "system" ;
+    rdfs:comment "Capability applies to system-level operations." .
+set:csProfile   a set:CapabilityScope ; rdfs:label "profile" ;
+    rdfs:comment "Capability applies to a specific profile." .
+set:csContainer a set:CapabilityScope ; rdfs:label "container" ;
+    rdfs:comment "Capability applies to a specific container or manifold." .
+set:csOntology  a set:CapabilityScope ; rdfs:label "ontology" ;
+    rdfs:comment "Capability applies to a specific ontology module." .
+set:csAsset     a set:CapabilityScope ; rdfs:label "asset" ;
+    rdfs:comment "Capability applies to a specific hypermedia asset." .
+
+set:capabilityStatus a rdf:Property ;
+    rdfs:label "status" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  set:CapabilityStatus .
+
+set:CapabilityStatus a rdfs:Class ;
+    rdfs:label "Capability Status" .
+
+set:cstActive     a set:CapabilityStatus ; rdfs:label "active" ;
+    rdfs:comment "Capability is currently granted and exercisable." .
+set:cstSuspended  a set:CapabilityStatus ; rdfs:label "suspended" ;
+    rdfs:comment "Capability is temporarily suspended — may be reactivated." .
+set:cstRevoked    a set:CapabilityStatus ; rdfs:label "revoked" ;
+    rdfs:comment "Capability is permanently revoked — cannot be reactivated. A new capability must be granted." .
+set:cstExpired    a set:CapabilityStatus ; rdfs:label "expired" ;
+    rdfs:comment "Capability has passed its validity period." .
+set:cstPending    a set:CapabilityStatus ; rdfs:label "pending" ;
+    rdfs:comment "Capability has been requested but not yet granted." .
+
+set:capabilityConstraint a rdf:Property ;
+    rdfs:label "constraint" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Constraints on the capability — e.g. 'read-only', 'no-network', 'sandbox-only', 'budget-limit:1000'. Constraints are enforced by the Sentinel VM." .
+
+set:capabilityBudget a rdf:Property ;
+    rdfs:label "budget" ;
+    rdfs:domain set:Capability ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "A computational budget for the capability — maximum operations, maximum memory, maximum calls. Enforced by the Sentinel VM." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Access Control — who can see and modify what
+# ────────────────────────────────────────────────────────────────────
+
+set:AccessControlPolicy a rdfs:Class ;
+    rdfs:label "Access Control Policy" ;
+    rdfs:comment "A policy that governs access to settings, capabilities, and data. Access control in QualiaDB is capability-based (not role-based) — access is granted through specific capabilities, not through broad roles. However, policies may group capabilities into policy sets for management convenience. Policies specify: what is protected, who may access it, what capabilities are required, and what conditions apply." .
+
+set:acpProtects a rdf:Property ;
+    rdfs:label "protects" ;
+    rdfs:domain set:AccessControlPolicy ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What this policy protects — a setting category, a data type, a capability set, an ontology module." .
+
+set:acpRequiresCapability a rdf:Property ;
+    rdfs:label "requires capability" ;
+    rdfs:domain set:AccessControlPolicy ;
+    rdfs:range  set:Capability ;
+    rdfs:comment "The capability required to access the protected resource." .
+
+set:acpCondition a rdf:Property ;
+    rdfs:label "condition" ;
+    rdfs:domain set:AccessControlPolicy ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Conditions that must be met for access — e.g. 'during-business-hours', 'from-trusted-device', 'with-mfa', 'non-anonymous'. Conditions are evaluated at access time." .
+
+set:acpSelfhoodProtection a set:AccessControlPolicy ;
+    rdfs:label "selfhood-protection" ;
+    set:acpProtects "selfhood — inner experience, private keys, biometric baselines" ;
+    set:acpRequiresCapability set:capSelfhoodAccess ;
+    set:acpCondition "owner-only, non-delegable, non-transferable" ;
+    rdfs:comment "The foundational access control policy — selfhood is protected from all external access. Only the natural person who owns the selfhood may access it. This right is non-delegable and non-transferable. No institution, agent, or third party may override this policy. Links to selfhood.n3." .
+
+set:capSelfhoodAccess a set:Capability ;
+    set:capabilityName "selfhood:access" ;
+    set:capabilityScope set:csProfile ;
+    set:capabilityStatus set:cstActive ;
+    set:capabilityConstraint "owner-only, non-delegable" ;
+    rdfs:comment "The capability to access one's own selfhood. Automatically granted to the natural person at profile creation. Cannot be granted to any other entity." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Ontology Loading — which ontologies are loaded
+# ────────────────────────────────────────────────────────────────────
+
+set:OntologyLoadConfig a rdfs:Class ;
+    rdfs:label "Ontology Load Configuration" ;
+    rdfs:subClassOf set:Configuration ;
+    rdfs:comment "Configuration that governs which ontology modules are loaded, in what order, and with what prefixes. The ontology loading system determines the available vocabulary for the system. Ontologies may be loaded at system startup (core ontologies) or on demand (domain ontologies). The loading order matters — later ontologies may import earlier ones." .
+
+set:olcModule a rdf:Property ;
+    rdfs:label "module" ;
+    rdfs:domain set:OntologyLoadConfig ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The ontology module file — e.g. 'agency.n3', 'personhood.n3'." .
+
+set:olcPrefix a rdf:Property ;
+    rdfs:label "prefix" ;
+    rdfs:domain set:OntologyLoadConfig ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The prefix assigned to this ontology — e.g. 'agency:', 'person:'." .
+
+set:olcLoadOrder a rdf:Property ;
+    rdfs:label "load order" ;
+    rdfs:domain set:OntologyLoadConfig ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "The order in which this ontology is loaded — lower numbers first. Core ontologies have low numbers; domain ontologies have higher numbers." .
+
+set:olcLoadStatus a rdf:Property ;
+    rdfs:label "load status" ;
+    rdfs:domain set:OntologyLoadConfig ;
+    rdfs:range  set:OntologyLoadStatus .
+
+set:OntologyLoadStatus a rdfs:Class ;
+    rdfs:label "Ontology Load Status" .
+
+set:olsLoaded    a set:OntologyLoadStatus ; rdfs:label "loaded" .
+set:olsPending   a set:OntologyLoadStatus ; rdfs:label "pending" .
+set:olsFailed    a set:OntologyLoadStatus ; rdfs:label "failed" .
+set:olsDisabled  a set:OntologyLoadStatus ; rdfs:label "disabled" .
+set:olsOptional  a set:OntologyLoadStatus ; rdfs:label "optional" ;
+    rdfs:comment "Ontology is available but not loaded by default — loaded on demand when a container or tool requires it." .
+
+set:olcImports a rdf:Property ;
+    rdfs:label "imports" ;
+    rdfs:domain set:OntologyLoadConfig ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Other ontology modules that this module imports — used for dependency resolution." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Runtime Parameters — system-level operational settings
+# ────────────────────────────────────────────────────────────────────
+
+set:RuntimeParameter a rdfs:Class ;
+    rdfs:label "Runtime Parameter" ;
+    rdfs:subClassOf set:Parameter ;
+    rdfs:comment "System-level runtime parameters that govern the operation of the QualiaDB engine — memory allocation, cache sizes, processing modes, WASM constraints, and performance tuning. These parameters affect the software agent's operation, not the user's experience." .
+
+set:rpProfile a rdf:Property ;
+    rdfs:label "runtime profile" ;
+    rdfs:domain set:RuntimeParameter ;
+    rdfs:range  set:RuntimeProfile .
+
+set:RuntimeProfile a rdfs:Class ;
+    rdfs:label "Runtime Profile" ;
+    rdfs:comment "The execution profile for the system — determines resource limits, available features, and performance characteristics." .
+
+set:rpSovereign a set:RuntimeProfile ; rdfs:label "sovereign-native" ;
+    rdfs:comment "Sovereign Native profile — full 64-bit architecture, unlimited virtual memory, native hardware access. Webizen Desktop & Mobile." .
+set:rpWASM a set:RuntimeProfile ; rdfs:label "wasm-web" ;
+    rdfs:comment "WASM Web Compatibility profile — 32-bit WASM linear memory sandbox (2-4 GB limit), browser-hosted." .
+set:rpEdge a set:RuntimeProfile ; rdfs:label "edge" ;
+    rdfs:comment "Edge profile — constrained resources, minimal ontology loading, offline-capable. For IoT and embedded contexts." .
+
+set:rpMaxMemory a rdf:Property ;
+    rdfs:label "max memory" ;
+    rdfs:domain set:RuntimeParameter ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Maximum memory allocation for the engine — in bytes." .
+
+set:rpCacheSize a rdf:Property ;
+    rdfs:label "cache size" ;
+    rdfs:domain set:RuntimeParameter ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Cache size for ontology and graph data — in bytes." .
+
+set:rpProcessingMode a rdf:Property ;
+    rdfs:label "processing mode" ;
+    rdfs:domain set:RuntimeParameter ;
+    rdfs:range  set:ProcessingMode .
+
+set:ProcessingMode a rdfs:Class ;
+    rdfs:label "Processing Mode" .
+
+set:pmBatch a set:ProcessingMode ; rdfs:label "batch" ;
+    rdfs:comment "Batch processing — operations queued and processed in bulk. Higher throughput, higher latency." .
+set:pmStreaming a set:ProcessingMode ; rdfs:label "streaming" ;
+    rdfs:comment "Streaming processing — operations processed as they arrive. Lower latency, lower throughput." .
+set:pmInteractive a set:ProcessingMode ; rdfs:label "interactive" ;
+    rdfs:comment "Interactive processing — operations processed immediately with user feedback. Lowest latency, highest resource use." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Fiduciary VM Configuration — Sentinel settings
+# ────────────────────────────────────────────────────────────────────
+
+set:FiduciaryVMConfig a rdfs:Class ;
+    rdfs:label "Fiduciary VM Configuration" ;
+    rdfs:subClassOf set:Configuration ;
+    rdfs:comment "Configuration for the Sentinel (fiduciary) VM — the sandboxed execution environment that enforces capability bounds, budget limits, and access controls. The Sentinel VM is the enforcement layer for all capability and access control decisions. This configuration governs: sandbox strictness, budget enforcement, event bridge settings, and legacy JavaScript isolation." .
+
+set:fvmSandboxStrictness a rdf:Property ;
+    rdfs:label "sandbox strictness" ;
+    rdfs:domain set:FiduciaryVMConfig ;
+    rdfs:range  set:SandboxStrictness .
+
+set:SandboxStrictness a rdfs:Class ;
+    rdfs:label "Sandbox Strictness" .
+
+set:ssStrict a set:SandboxStrictness ; rdfs:label "strict" ;
+    rdfs:comment "Strict sandboxing — zero direct host access, capability-gated event bridge only, no filesystem, no network without explicit capability." .
+set:ssPermissive a set:SandboxStrictness ; rdfs:label "permissive" ;
+    rdfs:comment "Permissive sandboxing — limited host access for trusted modules, broader event bridge, controlled filesystem access. Used for development and trusted internal tools." .
+set:ssLocked a set:SandboxStrictness ; rdfs:label "locked" ;
+    rdfs:comment "Locked sandboxing — no event bridge, no host access, no network. Used for untrusted code execution and evidence preservation." .
+
+set:fvmBudgetEnforcement a rdf:Property ;
+    rdfs:label "budget enforcement" ;
+    rdfs:domain set:FiduciaryVMConfig ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether capability budgets are enforced — when true, operations that exceed their budget are terminated." .
+
+set:fvmEventBridge a rdf:Property ;
+    rdfs:label "event bridge" ;
+    rdfs:domain set:FiduciaryVMConfig ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the typed event bridge (window.qualia) is enabled for communication between sandboxed code and the parent VibeScript engine." .
+
+set:fvmLegacyJSEnabled a rdf:Property ;
+    rdfs:label "legacy JS enabled" ;
+    rdfs:domain set:FiduciaryVMConfig ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether legacy JavaScript execution is permitted in the www/ partition. When disabled, only VibeScript and WASM are executed." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Profile Management — user and entity profiles
+# ────────────────────────────────────────────────────────────────────
+
+set:Profile a rdfs:Class ;
+    rdfs:label "Profile" ;
+    rdfs:comment "A named collection of settings, capabilities, and preferences that together define how the system operates for a specific entity. A natural person may have multiple profiles (work, personal, shared-device); a legal person may have profiles per department or role; a software agent may have profiles per deployment context. Profiles are switchable — the user can change the active profile, which changes the active set of settings, capabilities, and preferences." .
+
+set:profileName a rdf:Property ;
+    rdfs:label "name" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  xsd:string .
+
+set:profileOwner a rdf:Property ;
+    rdfs:label "owner" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that owns this profile." .
+
+set:profileActive a rdf:Property ;
+    rdfs:label "active" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this profile is currently active. Only one profile per entity may be active at a time." .
+
+set:profileSettings a rdf:Property ;
+    rdfs:label "settings" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  set:Setting ;
+    rdfs:comment "The settings associated with this profile." .
+
+set:profileCapabilities a rdf:Property ;
+    rdfs:label "capabilities" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  set:Capability ;
+    rdfs:comment "The capabilities granted to this profile." .
+
+set:profileType a rdf:Property ;
+    rdfs:label "type" ;
+    rdfs:domain set:Profile ;
+    rdfs:range  set:ProfileType .
+
+set:ProfileType a rdfs:Class ;
+    rdfs:label "Profile Type" .
+
+set:ptPersonal a set:ProfileType ; rdfs:label "personal" ;
+    rdfs:comment "Personal profile for a natural person — full preferences, selfhood access, personal capabilities." .
+set:ptWork a set:ProfileType ; rdfs:label "work" ;
+    rdfs:comment "Work profile — institutional capabilities, compliance configuration, restricted selfhood access." .
+set:ptShared a set:ProfileType ; rdfs:label "shared-device" ;
+    rdfs:comment "Shared device profile — limited preferences, no selfhood access, time-limited capabilities." .
+set:ptInstitutional a set:ProfileType ; rdfs:label "institutional" ;
+    rdfs:comment "Institutional profile for a legal person — policy configuration, compliance, operational parameters." .
+set:ptAgent a set:ProfileType ; rdfs:label "agent" ;
+    rdfs:comment "Software agent profile — computational parameters, capability bounds, no preferences." .
+set:ptGuest a set:ProfileType ; rdfs:label "guest" ;
+    rdfs:comment "Guest profile — minimal capabilities, no selfhood access, no persistent settings, session-only." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Settings Manifold — the UI surface for settings
+# ────────────────────────────────────────────────────────────────────
+
+set:SettingsManifold a rdfs:Class ;
+    rdfs:label "Settings Manifold" ;
+    rdfs:subClassOf manifold:Manifold ;
+    rdfs:comment "The settings manifold — the UI surface where users manage their settings, capabilities, profiles, and configuration. Corresponds to manifold:settings in container.n3. The settings manifold contains sub-manifolds for each settings category: preferences, capabilities, access control, ontology loading, runtime parameters, fiduciary VM, and profile management." .
+
+set:settingsSubManifold a rdf:Property ;
+    rdfs:label "sub-manifold" ;
+    rdfs:domain set:SettingsManifold ;
+    rdfs:range  set:SettingsSubManifold .
+
+set:SettingsSubManifold a rdfs:Class ;
+    rdfs:label "Settings Sub-Manifold" .
+
+set:ssmPreferences a set:SettingsSubManifold ; rdfs:label "preferences" ;
+    rdfs:comment "Preferences sub-manifold — accessibility, sensory pacing, aesthetic, workflow, language, privacy, communication." .
+set:ssmCapabilities a set:SettingsSubManifold ; rdfs:label "capabilities" ;
+    rdfs:comment "Capabilities sub-manifold — view, grant, revoke, suspend, audit capabilities." .
+set:ssmAccessControl a set:SettingsSubManifold ; rdfs:label "access-control" ;
+    rdfs:comment "Access control sub-manifold — policies, conditions, selfhood protection." .
+set:ssmOntologies a set:SettingsSubManifold ; rdfs:label "ontologies" ;
+    rdfs:comment "Ontology loading sub-manifold — enable/disable modules, view load order, check imports." .
+set:ssmRuntime a set:SettingsSubManifold ; rdfs:label "runtime" ;
+    rdfs:comment "Runtime parameters sub-manifold — profile, memory, cache, processing mode." .
+set:ssmFiduciaryVM a set:SettingsSubManifold ; rdfs:label "fiduciary-vm" ;
+    rdfs:comment "Fiduciary VM sub-manifold — sandbox strictness, budget enforcement, event bridge, legacy JS." .
+set:ssmProfiles a set:SettingsSubManifold ; rdfs:label "profiles" ;
+    rdfs:comment "Profile management sub-manifold — create, switch, edit, delete profiles." .
+
+# ────────────────────────────────────────────────────────────────────
+# 12. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (settings.n3) links to:
+#
+# agency.n3:
+#   - Settings apply to entities (NaturalPerson, LegalPerson,
+#     SoftwareEntity)
+#   - Capabilities are held by and granted by entities
+#   - Profiles are owned by entities
+#
+# personhood.n3:
+#   - Privacy preferences link to personhood (social relations,
+#     legal status)
+#   - Access control policies protect personhood data
+#
+# selfhood.n3:
+#   - Selfhood protection is the foundational access control policy
+#   - Sensory pacing preferences link to selfhood sensory pacing
+#   - Selfhood access capability is non-delegable, non-transferable
+#
+# obligations.n3:
+#   - Settings enable; obligations constrain
+#   - Confidentiality instruments may override privacy preferences
+#     in specific contexts (e.g. mandatory reporting)
+#   - Capability constraints may include obligation compliance
+#
+# container.n3:
+#   - Settings manifold is a sub-class of manifold:Manifold
+#   - Container-scoped settings apply to specific containers
+#   - Capability badges display capability status in the UI
+#
+# provenance.n3:
+#   - All settings changes have provenance
+#   - Capability grants and revocations have provenance
+#   - Profile switches have provenance
+#
+# agent-nomenclature.n3:
+#   - Preference = natural person (mind-dependent)
+#   - Configuration = legal person (institutional)
+#   - Parameter = software agent (computational)
+#
+# epistemics.n3:
+#   - Settings have epistemic status (declared, applied, overridden)
+#   - Capability status is an epistemic assessment

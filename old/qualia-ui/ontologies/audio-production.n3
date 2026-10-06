@@ -1,0 +1,293 @@
+# Audio Production Ontology — tracks, synthesis, MIDI, effects, mixing
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: aud: (audio production domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix aud:    <https://purl.org/qualia/ontology/audio-production#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Audio Asset
+# ────────────────────────────────────────────────────────────────────
+
+aud:AudioAsset a rdfs:Class ;
+    rdfs:label "Audio Asset" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "An audio asset — wave recording, MIDI composition, sample library, or synthesiser preset." .
+
+aud:AudioType a rdfs:Class ;
+    rdfs:label "Audio Type" .
+
+aud:WaveAsset a aud:AudioType ; rdfs:label "wave" .
+aud:MIDIAsset a aud:AudioType ; rdfs:label "midi" .
+aud:SampleAsset a aud:AudioType ; rdfs:label "sample" .
+aud:RecordingAsset a aud:AudioType ; rdfs:label "recording" .
+
+aud:audioType a rdf:Property ;
+    rdfs:domain aud:AudioAsset ;
+    rdfs:range  aud:AudioType .
+
+aud:sampleRate a rdf:Property ;
+    rdfs:domain aud:AudioAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Sample rate in Hz (44100, 48000, 96000, 192000)." .
+
+aud:bitDepth a rdf:Property ;
+    rdfs:domain aud:AudioAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Bit depth (16, 24, 32)." .
+
+aud:channels a rdf:Property ;
+    rdfs:domain aud:AudioAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Channel count (1 = mono, 2 = stereo, 6 = 5.1, 8 = 7.1)." .
+
+aud:duration a rdf:Property ;
+    rdfs:domain aud:AudioAsset ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Duration in seconds." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Track
+# ────────────────────────────────────────────────────────────────────
+
+aud:Track a rdfs:Class ;
+    rdfs:label "Track" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A track in a multi-track project — audio, MIDI, instrument, bus, or send." .
+
+aud:TrackType a rdfs:Class ;
+    rdfs:label "Track Type" .
+
+aud:AudioTrack a aud:TrackType ; rdfs:label "audio" .
+aud:MIDITrack a aud:TrackType ; rdfs:label "midi" .
+aud:InstrumentTrack a aud:TrackType ; rdfs:label "instrument" .
+aud:BusTrack a aud:TrackType ; rdfs:label "bus" .
+aud:SendTrack a aud:TrackType ; rdfs:label "send" .
+
+aud:trackType a rdf:Property ;
+    rdfs:domain aud:Track ;
+    rdfs:range  aud:TrackType .
+
+aud:trackVolume a rdf:Property ;
+    rdfs:domain aud:Track ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Volume in dB." .
+
+aud:trackPan a rdf:Property ;
+    rdfs:domain aud:Track ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Pan (-1.0 = left, 0.0 = centre, 1.0 = right)." .
+
+aud:trackOutput a rdf:Property ;
+    rdfs:domain aud:Track ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Output routing — IRI of bus, master, or send target." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Clip
+# ────────────────────────────────────────────────────────────────────
+
+aud:Clip a rdfs:Class ;
+    rdfs:label "Clip" ;
+    rdfs:comment "A clip on a track — audio clip, MIDI clip, or automation clip. Positioned in time." .
+
+aud:ClipType a rdfs:Class ;
+    rdfs:label "Clip Type" .
+
+aud:AudioClip a aud:ClipType ; rdfs:label "audio-clip" .
+aud:MIDIClip a aud:ClipType ; rdfs:label "midi-clip" .
+aud:AutomationClip a aud:ClipType ; rdfs:label "automation-clip" .
+
+aud:clipType a rdf:Property ;
+    rdfs:domain aud:Clip ;
+    rdfs:range  aud:ClipType .
+
+aud:clipStart a rdf:Property ;
+    rdfs:domain aud:Clip ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Start position in seconds." .
+
+aud:clipDuration a rdf:Property ;
+    rdfs:domain aud:Clip ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Duration in seconds." .
+
+aud:clipOffset a rdf:Property ;
+    rdfs:domain aud:Clip ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Offset into source asset in seconds." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Synthesiser
+# ────────────────────────────────────────────────────────────────────
+
+aud:Synthesiser a rdfs:Class ;
+    rdfs:label "Synthesiser" ;
+    rdfs:comment "A synthesiser configuration — oscillators, filters, envelopes, LFOs, modulators." .
+
+aud:Oscillator a rdfs:Class ;
+    rdfs:label "Oscillator" .
+
+aud:oscWaveform a rdf:Property ;
+    rdfs:domain aud:Oscillator ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Waveform — sine, saw, square, triangle, noise, wavetable." .
+
+aud:oscFrequency a rdf:Property ;
+    rdfs:domain aud:Oscillator ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Frequency in Hz." .
+
+aud:oscDetune a rdf:Property ;
+    rdfs:domain aud:Oscillator ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Detune in cents." .
+
+aud:Filter a rdfs:Class ;
+    rdfs:label "Filter" .
+
+aud:filterType a rdf:Property ;
+    rdfs:domain aud:Filter ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Filter type — low-pass, high-pass, band-pass, notch, comb." .
+
+aud:filterCutoff a rdf:Property ;
+    rdfs:domain aud:Filter ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Cutoff frequency in Hz." .
+
+aud:filterResonance a rdf:Property ;
+    rdfs:domain aud:Filter ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Resonance/Q (0.0–1.0)." .
+
+aud:Envelope a rdfs:Class ;
+    rdfs:label "Envelope" ;
+    rdfs:comment "ADSR envelope — attack, decay, sustain, release." .
+
+aud:envAttack a rdf:Property ;
+    rdfs:domain aud:Envelope ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Attack time in seconds." .
+
+aud:envDecay a rdf:Property ;
+    rdfs:domain aud:Envelope ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Decay time in seconds." .
+
+aud:envSustain a rdf:Property ;
+    rdfs:domain aud:Envelope ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Sustain level (0.0–1.0)." .
+
+aud:envRelease a rdf:Property ;
+    rdfs:domain aud:Envelope ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Release time in seconds." .
+
+aud:LFO a rdfs:Class ;
+    rdfs:label "LFO" ;
+    rdfs:comment "Low-frequency oscillator for modulation." .
+
+aud:lfoRate a rdf:Property ;
+    rdfs:domain aud:LFO ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "LFO rate in Hz." .
+
+aud:lfoDepth a rdf:Property ;
+    rdfs:domain aud:LFO ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Modulation depth (0.0–1.0)." .
+
+aud:lfoTarget a rdf:Property ;
+    rdfs:domain aud:LFO ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Modulation target — pitch, filter-cutoff, amplitude, pan." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Effect
+# ────────────────────────────────────────────────────────────────────
+
+aud:Effect a rdfs:Class ;
+    rdfs:label "Effect" ;
+    rdfs:comment "An audio effect in a track's effect chain." .
+
+aud:EffectType a rdfs:Class ;
+    rdfs:label "Effect Type" .
+
+aud:Reverb a aud:EffectType ; rdfs:label "reverb" .
+aud:Delay a aud:EffectType ; rdfs:label "delay" .
+aud:Compression a aud:EffectType ; rdfs:label "compression" .
+aud:EQ a aud:EffectType ; rdfs:label "eq" .
+aud:Distortion a aud:EffectType ; rdfs:label "distortion" .
+aud:Modulation a aud:EffectType ; rdfs:label "modulation" .
+
+aud:effectType a rdf:Property ;
+    rdfs:domain aud:Effect ;
+    rdfs:range  aud:EffectType .
+
+aud:effectBypass a rdf:Property ;
+    rdfs:domain aud:Effect ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the effect is bypassed." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. MIDI
+# ────────────────────────────────────────────────────────────────────
+
+aud:MIDIEvent a rdfs:Class ;
+    rdfs:label "MIDI Event" ;
+    rdfs:comment "A MIDI event — note-on, note-off, CC, pitch-bend, program-change, sysex." .
+
+aud:MIDIEventType a rdfs:Class ;
+    rdfs:label "MIDI Event Type" .
+
+aud:NoteOn a aud:MIDIEventType ; rdfs:label "note-on" .
+aud:NoteOff a aud:MIDIEventType ; rdfs:label "note-off" .
+aud:CCEvent a aud:MIDIEventType ; rdfs:label "cc" .
+aud:PitchBend a aud:MIDIEventType ; rdfs:label "pitch-bend" .
+aud:ProgramChange a aud:MIDIEventType ; rdfs:label "program-change" .
+aud:Sysex a aud:MIDIEventType ; rdfs:label "sysex" .
+
+aud:midiEventType a rdf:Property ;
+    rdfs:domain aud:MIDIEvent ;
+    rdfs:range  aud:MIDIEventType .
+
+aud:midiNote a rdf:Property ;
+    rdfs:domain aud:MIDIEvent ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "MIDI note number (0–127)." .
+
+aud:midiVelocity a rdf:Property ;
+    rdfs:domain aud:MIDIEvent ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Velocity (0–127)." .
+
+aud:midiChannel a rdf:Property ;
+    rdfs:domain aud:MIDIEvent ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "MIDI channel (0–15)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Tempo Map
+# ────────────────────────────────────────────────────────────────────
+
+aud:TempoMap a rdfs:Class ;
+    rdfs:label "Tempo Map" ;
+    rdfs:comment "Tempo and time-signature map for a project." .
+
+aud:bpm a rdf:Property ;
+    rdfs:domain aud:TempoMap ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Beats per minute." .
+
+aud:timeSignature a rdf:Property ;
+    rdfs:domain aud:TempoMap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Time signature — 4/4, 3/4, 6/8, etc." .

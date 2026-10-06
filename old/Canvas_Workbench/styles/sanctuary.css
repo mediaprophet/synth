@@ -1,0 +1,372 @@
+/* ==========================================================================
+   Sanctuary: Human-Centric Inforg & Infosphere Enclave Styles
+   ========================================================================== */
+
+.sanctuary-enclave-viewport {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, #0d1527 0%, #040813 70%, #020409 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  overflow-y: auto;
+  gap: 20px;
+  z-index: 100;
+  animation: sanctuaryFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes sanctuaryFadeIn {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 1. Header & Airgap Shield Bar */
+.sanctuary-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-medium);
+  padding-bottom: 14px;
+}
+
+.sanctuary-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sanctuary-header-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 12px var(--accent-cyan-glow));
+}
+
+.sanctuary-header-text h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.sanctuary-header-text p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 2px 0 0 0;
+}
+
+.sanctuary-airgap-shield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--accent-emerald);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-emerald);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15);
+}
+
+.shield-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: shieldPulse 2s infinite ease-in-out;
+}
+
+@keyframes shieldPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* 2. Main Enclave Layout Grid */
+.sanctuary-grid-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  flex: 1;
+}
+
+/* Left Column: Sovereign Inforg Core Card */
+.inforg-core-card {
+  background: var(--surface-glass-heavy);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-cyan-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.inforg-core-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald), var(--accent-purple));
+}
+
+.inforg-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.inforg-avatar-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0ea5e9 0%, #0369a1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  border: 2px solid var(--accent-cyan);
+  box-shadow: 0 0 16px var(--accent-cyan-glow);
+}
+
+.inforg-identity-info h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.inforg-identity-info .inforg-did {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-cyan);
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.inforg-attributes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-size: 11px;
+}
+
+.inforg-attr-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inforg-attr-label {
+  color: var(--text-secondary);
+}
+
+.inforg-attr-val {
+  font-family: var(--font-mono);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Right Column: Infosphere Concentric Rings & Confidential Decks */
+.sanctuary-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Infosphere Rings Grid */
+.infosphere-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infosphere-rings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.infosphere-ring-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.infosphere-ring-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+.ring-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ring-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ring-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-medium);
+}
+
+.ring-card-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ring-card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 6px;
+}
+
+/* Sensory Pacing & Human-Centric Controls */
+.sensory-pacing-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sensory-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sensory-control-item {
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sensory-control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.sensory-control-desc {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* Confidential Vaults Deck */
+.confidential-vaults-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.vault-card {
+  background: var(--surface-glass-heavy);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vault-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vault-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vault-status-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.vault-summary {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.vault-action-btn {
+  margin-top: auto;
+  background: var(--surface-panel-elevated);
+  border: 1px solid var(--border-medium);
+  color: var(--accent-cyan);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.vault-action-btn:hover {
+  background: var(--accent-cyan);
+  color: #000;
+}

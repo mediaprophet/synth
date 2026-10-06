@@ -1,0 +1,738 @@
+# Faith Systems Ontology — Systems of Faith, Belief, Practice,
+# Sacred Communities, Oral Traditions, Indigenous Knowledge Systems,
+# and Moral Frameworks
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Defines vocabulary for modelling systems of faith comprehensively —
+# from text-based world religions to oral indigenous traditions, from
+# organised religious institutions to personal spiritual practices,
+# from ancient mythological systems to living belief frameworks.
+#
+# Key design principles:
+#   - Epistemic respect: faith systems are modelled as intersubjective
+#     within their community. The ontology does not assert or deny the
+#     truth claims of any system. Reality classification is agent-relative
+#     (see epi:Mythological — "treated as non-fiction by believers,
+#     fiction by non-believers").
+#   - Non-reductionism: oral, practice-based, and place-based traditions
+#     are not modelled as lesser forms of text-based religions. Each
+#     transmission mode has its own integrity.
+#   - Indigenous sovereignty: indigenous knowledge systems are modelled
+#     with access controls, custodianship, and cultural protocols.
+#     Not all indigenous knowledge is freely shareable.
+#   - Nomenclature: "belief" is used for natural agents only. Software
+#     agents do not believe — they process data. Legal persons
+#     (institutions) do not believe — they have institutional positions
+#     and practices.
+#
+# Imports: epistemics.n3, agency.n3, personhood.n3, provenance.n3,
+#          learning-core.n3, learning-experience-modality.n3,
+#          production-document.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix pd:     <https://qualiadb.org/schema/ui/production-document#> .
+@prefix prov:   <https://qualiadb.org/schema/ui/provenance#> .
+@prefix lrn:    <https://qualiadb.org/schema/ui/learning-core#> .
+@prefix faith:  <https://qualiadb.org/schema/ui/faith-systems#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Faith System — the top-level concept
+# ────────────────────────────────────────────────────────────────────
+
+faith:FaithSystem a rdfs:Class ;
+    rdfs:label "Faith System" ;
+    rdfs:comment "A system of faith, belief, spiritual practice, or sacred worldview. Encompasses organised world religions (Christianity, Islam, Hinduism, Buddhism, Judaism), indigenous and traditional knowledge systems (First Nations, Aboriginal, Maori, San, Inuit, Celtic, Norse), ancient or historical systems (Egyptian, Greek, Roman, Mesopotamian, Mayan), philosophical systems with spiritual dimensions (Confucianism, Taoism, Stoicism), modern and new religious movements, and personal or eclectic spiritual practices. A faith system is not defined by having a sacred text — many systems are oral, practice-based, place-based, or embodied in daily living. A faith system includes its cosmology, moral principles, practices, community structures, transmission methods, and relationship to place and heritage. The ontology does not assess the truth claims of any faith system — it models them as intersubjective within their community (see epi:Intersubjective, epi:Mythological)." .
+
+faith:systemName a rdf:Property ;
+    rdfs:label "system name" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  xsd:string .
+
+faith:systemDescription a rdf:Property ;
+    rdfs:label "system description" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  xsd:string .
+
+faith:systemType a rdf:Property ;
+    rdfs:label "system type" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  faith:SystemType .
+
+faith:SystemType a rdfs:Class ;
+    rdfs:label "Faith System Type" .
+
+faith:textBasedReligion    a faith:SystemType ; rdfs:label "text-based-religion" ;
+    rdfs:comment "Text-based religion — has one or more sacred texts as central authority. e.g. Christianity (Bible), Islam (Quran), Judaism (Torah/Tanakh), Hinduism (Vedas, Bhagavad Gita), Buddhism (Tripitaka, sutras). The text is the primary transmission medium, supplemented by oral teaching, ritual, and community." .
+faith:oralTradition        a faith:SystemType ; rdfs:label "oral-tradition" ;
+    rdfs:comment "Oral tradition — transmitted through spoken word, song, story, ceremony, and practice, without a central sacred text. Includes many indigenous and traditional knowledge systems. The knowledge is carried by elders, custodians, and practitioners — it is not written down, or writing is not the primary mode. Oral traditions may be more resilient than texts (they adapt and live) but also more vulnerable (custodian loss can destroy knowledge). Not a lesser form — a different transmission mode with its own integrity." .
+faith:practiceBased        a faith:SystemType ; rdfs:label "practice-based" ;
+    rdfs:comment "Practice-based — transmitted primarily through doing: ritual, ceremony, dance, song, art, daily practice. The knowledge is in the practice, not in a text or even in explicit verbal teaching. A child learns by participating, not by studying. Includes many indigenous systems where ceremony and daily life are the curriculum. Also includes monastic traditions where practice (meditation, prayer, labour) is the primary mode of transmission." .
+faith:placeBased           a faith:SystemType ; rdfs:label "place-based" ;
+    rdfs:comment "Place-based — the faith system is inseparable from a specific land, place, or landscape. Sacred sites, geographic features, and the relationship between people and land are central. The knowledge cannot be fully separated from its place — removing the people from the land severs the knowledge connection. Includes Aboriginal Dreaming, First Nations relationships to territory, Celtic place-based traditions, and many indigenous systems. Place-based faith systems challenge text-centric models of religion." .
+faith:philosophical        a faith:SystemType ; rdfs:label "philosophical-spiritual" ;
+    rdfs:comment "Philosophical-spiritual — a philosophical system with spiritual or ethical dimensions that functions as a faith system for its adherents. e.g. Confucianism, Taoism, Stoicism, certain forms of humanism. May or may not involve supernatural claims. The distinction between 'philosophy' and 'religion' is itself culturally situated — what one culture calls philosophy, another calls religion." .
+faith:eclecticSyncretic   a faith:SystemType ; rdfs:label "eclectic-syncretic" ;
+    rdfs:comment "Eclectic or syncretic — combines elements from multiple faith systems. Syncretism is not impurity — it is a natural process where traditions in contact influence each other. Includes Afro-Caribbean traditions (Santeria, Candomble), many modern spiritual practices, and historically syncretic traditions like Shinto-Buddhism." .
+faith:historicalAncient   a faith:SystemType ; rdfs:label "historical-ancient" ;
+    rdfs:comment "Historical or ancient — a faith system that is no longer actively practiced, or is practiced only in reconstructed or revived form. e.g. ancient Egyptian religion, Greek/Roman mythology, Norse traditions, Celtic traditions, Mesoamerican systems. May be studied as history, mythology, or cultural heritage. Some are being revived by modern communities (Heathenry, Hellenism, Druidic traditions) — the revival is a new tradition that draws on the ancient one." .
+faith:personalEclectic    a faith:SystemType ; rdfs:label "personal-eclectic" ;
+    rdfs:comment "Personal eclectic — an individual's personal spiritual practice or worldview that draws from multiple sources without formal adherence to a single tradition. May include elements of organised religion, indigenous practices (where culturally appropriate), philosophical frameworks, and personal experience. Not the same as 'no faith' — it is a specific, individual system." .
+
+faith:systemTransmissionMode a rdf:Property ;
+    rdfs:label "transmission mode" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  faith:TransmissionMode ;
+    rdfs:comment "How the faith system is primarily transmitted — text, oral, practice, place, or mixed." .
+
+faith:TransmissionMode a rdfs:Class ;
+    rdfs:label "Transmission Mode" .
+
+faith:transText     a faith:TransmissionMode ; rdfs:label "text" ;
+    rdfs:comment "Text — sacred texts are the primary transmission medium." .
+faith:transOral     a faith:TransmissionMode ; rdfs:label "oral" ;
+    rdfs:comment "Oral — spoken word, story, song, chant. No central text." .
+faith:transPractice a faith:TransmissionMode ; rdfs:label "practice" ;
+    rdfs:comment "Practice — ritual, ceremony, daily practice. Knowledge is in the doing." .
+faith:transPlace    a faith:TransmissionMode ; rdfs:label "place" ;
+    rdfs:comment "Place — connection to specific land or sacred sites." .
+faith:transMixed    a faith:TransmissionMode ; rdfs:label "mixed" ;
+    rdfs:comment "Mixed — multiple transmission modes. Most faith systems use mixed modes, even text-based ones." .
+
+faith:systemEra a rdf:Property ;
+    rdfs:label "system era" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  faith:SystemEra ;
+    rdfs:comment "The historical era of the faith system's origin or primary development." .
+
+faith:SystemEra a rdfs:Class ;
+    rdfs:label "System Era" .
+
+faith:eraAncient      a faith:SystemEra ; rdfs:label "ancient" ;
+    rdfs:comment "Ancient — origins in antiquity (pre-500 CE). e.g. ancient Egyptian, Vedic, ancient Greek, Aboriginal Dreaming (timeless/ancestral)." .
+faith:eraClassical    a faith:SystemEra ; rdfs:label "classical" ;
+    rdfs:comment "Classical — origins in the classical period (500 BCE – 500 CE). e.g. Buddhism, Christianity, Taoism, Confucianism." .
+faith:eraMedieval     a faith:SystemEra ; rdfs:label "medieval" ;
+    rdfs:comment "Medieval — origins or major development in the medieval period (500-1500 CE). e.g. Islam, many Hindu traditions in current form." .
+faith:eraEarlyModern  a faith:SystemEra ; rdfs:label "early-modern" ;
+    rdfs:comment "Early modern — origins in the early modern period (1500-1800 CE). e.g. Sikhism, many Protestant traditions." .
+faith:eraModern       a faith:SystemEra ; rdfs:label "modern" ;
+    rdfs:comment "Modern — origins in the modern period (1800-present). e.g. Bahá'í, Latter-day Saints, many new religious movements." .
+faith:eraTimeless     a faith:SystemEra ; rdfs:label "timeless" ;
+    rdfs:comment "Timeless — the faith system does not have a known historical origin point. Many indigenous traditions are understood by their adherents as having existed since the beginning, or since the ancestors. 'Timeless' does not mean 'unchanging' — it means the origin is not historically datable and is understood cosmologically rather than chronologically." .
+
+faith:systemEpistemicMode a rdf:Property ;
+    rdfs:label "epistemic mode" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  epi:EpistemicMode ;
+    rdfs:comment "The epistemic mode of the faith system's truth claims — typically intersubjective (shared within the community of adherents). Links to epistemics.n3." .
+
+faith:systemRealityCategory a rdf:Property ;
+    rdfs:label "reality category" ;
+    rdfs:domain faith:FaithSystem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The reality classification of the system's sacred narratives — typically epi:Mythological (blended: non-fiction for believers, fiction for non-believers). Agent-relative and culturally situated. The ontology does not adjudicate." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Sacred Text — texts that carry faith system authority
+# ────────────────────────────────────────────────────────────────────
+
+faith:SacredText a rdfs:Class ;
+    rdfs:label "Sacred Text" ;
+    rdfs:comment "A text that carries authority within a faith system — may be scripture (canonical, closed), commentary (interpretive, open), or inspirational (guidance, not doctrine). Not all faith systems have sacred texts — oral, practice-based, and place-based systems may have no texts, or texts may be secondary to other transmission modes. Sacred texts may be subClass of pd:BookPublication where applicable." .
+
+faith:textTitle a rdf:Property ;
+    rdfs:label "text title" ;
+    rdfs:domain faith:SacredText ;
+    rdfs:range  xsd:string .
+
+faith:textFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:SacredText ;
+    rdfs:range  faith:FaithSystem .
+
+faith:textAuthority a rdf:Property ;
+    rdfs:label "text authority" ;
+    rdfs:domain faith:SacredText ;
+    rdfs:range  faith:TextAuthority .
+
+faith:TextAuthority a rdfs:Class ;
+    rdfs:label "Text Authority" .
+
+faith:authScriptural   a faith:TextAuthority ; rdfs:label "scriptural" ;
+    rdfs:comment "Scriptural — canonical, closed canon. Considered directly sacred or divinely revealed. e.g. Quran, Bible, Torah." .
+faith:authCanonical    a faith:TextAuthority ; rdfs:label "canonical" ;
+    rdfs:comment "Canonical — authoritative but compiled through human process. e.g. Buddhist sutras, Hadith collections." .
+faith:authCommentary   a faith:TextAuthority ; rdfs:label "commentary" ;
+    rdfs:comment "Commentary — interpretive tradition. Explains and applies scripture. e.g. Talmud, Church Fathers, Buddhist commentaries." .
+faith:authInspirational a faith:TextAuthority ; rdfs:label "inspirational" ;
+    rdfs:comment "Inspirational — guidance and inspiration, not doctrine. e.g. devotional literature, spiritual biographies." .
+faith:authLiturgical   a faith:TextAuthority ; rdfs:label "liturgical" ;
+    rdfs:comment "Liturgical — texts used in worship and ceremony. Prayer books, hymnals, ritual manuals." .
+
+faith:textOriginalLanguage a rdf:Property ;
+    rdfs:label "original language" ;
+    rdfs:domain faith:SacredText ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Original language of the text — e.g. Classical Arabic, Biblical Hebrew, Sanskrit, Pali, Classical Chinese." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Oral Tradition — knowledge carried by people, not texts
+# ────────────────────────────────────────────────────────────────────
+
+faith:OralTradition a rdfs:Class ;
+    rdfs:label "Oral Tradition" ;
+    rdfs:comment "A body of knowledge, story, song, ceremony, or practice transmitted orally within a faith system. Oral traditions are carried by custodians — elders, knowledge holders, songmen, story keepers — who are responsible for maintaining and transmitting the knowledge. Oral traditions are not 'unwritten texts' — they are a fundamentally different mode of transmission that is embodied, performative, and context-dependent. The same story may be told differently in different contexts — this is not error but contextual adaptation. Oral traditions may be more resilient than texts (they survive through people) but also more vulnerable (if the custodians are lost, the knowledge may be lost). Oral traditions may have protocols — who can tell the story, when, where, to whom. These protocols are part of the tradition, not barriers to it." .
+
+faith:oralTraditionName a rdf:Property ;
+    rdfs:label "tradition name" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  xsd:string .
+
+faith:oralTraditionFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  faith:FaithSystem .
+
+faith:oralTraditionForm a rdf:Property ;
+    rdfs:label "form" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  faith:OralForm .
+
+faith:OralForm a rdfs:Class ;
+    rdfs:label "Oral Form" .
+
+faith:formStory      a faith:OralForm ; rdfs:label "story" ;
+    rdfs:comment "Story — narrative, myth, legend, teaching story." .
+faith:formSong       a faith:OralForm ; rdfs:label "song" ;
+    rdfs:comment "Song — sacred song, chant, hymn, corroboree song, ceremonial music. The music carries knowledge as much as the words." .
+faith:formCeremony   a faith:OralForm ; rdfs:label "ceremony" ;
+    rdfs:comment "Ceremony — structured ritual performance. The knowledge is in the performance, not in a description of it." .
+faith:formTeaching   a faith:OralForm ; rdfs:label "teaching" ;
+    rdfs:comment "Teaching — direct oral instruction from elder to learner, master to apprentice, custodian to successor." .
+faith:formLaw        a faith:OralForm ; rdfs:label "law-custom" ;
+    rdfs:comment "Law or custom — oral law, customary practice, ethical instruction transmitted through practice and word." .
+faith:formGenealogy  a faith:OralForm ; rdfs:label "genealogy" ;
+    rdfs:comment "Genealogy — oral histories of descent, kinship, and connection to land and ancestors. Central to many indigenous systems." .
+
+faith:oralTraditionCustodian a rdf:Property ;
+    rdfs:label "custodian" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person or collective entity that is the custodian of this oral tradition. Custodianship is a responsibility, not ownership — the custodian maintains the tradition for the community and future generations." .
+
+faith:oralTraditionProtocol a rdf:Property ;
+    rdfs:label "protocol" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Cultural protocols governing the tradition — who may know, tell, hear, or participate. Protocols may restrict access based on initiation, age, gender, role, or season. These are not 'barriers' — they are part of the tradition's integrity. Violating protocols may cause harm to the community, the custodian, or the tradition itself." .
+
+faith:oralTraditionSeasonal a rdf:Property ;
+    rdfs:label "seasonal" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the tradition is tied to a season, time of year, or ceremonial cycle. Many indigenous traditions can only be told or performed at specific times." .
+
+faith:oralTraditionPlaceBased a rdf:Property ;
+    rdfs:label "place-based" ;
+    rdfs:domain faith:OralTradition ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the tradition is tied to a specific place — stories that belong to a land, songs that belong to a site." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Sacred Place — land, sites, and geographic sacredness
+# ────────────────────────────────────────────────────────────────────
+
+faith:SacredPlace a rdfs:Class ;
+    rdfs:label "Sacred Place" ;
+    rdfs:comment "A place, site, landscape, or geographic feature that holds sacred significance within a faith system. Sacred places are not merely 'religious buildings' — they include natural features (mountains, rivers, trees, rock formations), ancestral lands, ceremonial grounds, pilgrimage destinations, and built structures (churches, temples, mosques, shrines, stone circles). For place-based faith systems, the relationship between people and land is the faith system — the land is not a setting for the faith, it is the faith. Sacred places may have access restrictions, protocols, or seasonal conditions. Some sacred places are not publicly known — their location may be restricted knowledge." .
+
+faith:placeName a rdf:Property ;
+    rdfs:label "place name" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Name of the sacred place — may be the public name, the traditional name, or both." .
+
+faith:placeFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  faith:FaithSystem .
+
+faith:placeType a rdf:Property ;
+    rdfs:label "place type" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  faith:PlaceType .
+
+faith:PlaceType a rdfs:Class ;
+    rdfs:label "Sacred Place Type" .
+
+faith:placeNatural      a faith:PlaceType ; rdfs:label "natural-feature" ;
+    rdfs:comment "Natural feature — mountain, river, rock formation, tree, spring, cave. Sacred in itself, not built." .
+faith:placeCeremonial   a faith:PlaceType ; rdfs:label "ceremonial-ground" ;
+    rdfs:comment "Ceremonial ground — site used for ceremony, initiation, corroboree, gathering. May have no visible structures." .
+faith:placeBuilt        a faith:PlaceType ; rdfs:label "built-structure" ;
+    rdfs:comment "Built structure — church, temple, mosque, synagogue, shrine, stupa, stone circle. Constructed for worship or ceremony." .
+faith:placeAncestral    a faith:PlaceType ; rdfs:label "ancestral-land" ;
+    rdfs:comment "Ancestral land — the traditional land of a people, understood as sacred in its entirety. Not a single site but a landscape." .
+faith:placePilgrimage   a faith:PlaceType ; rdfs:label "pilgrimage-site" ;
+    rdfs:comment "Pilgrimage site — a destination for pilgrimage journeys. e.g. Mecca, Varanasi, Jerusalem, Uluru." .
+faith:placeBurial       a faith:PlaceType ; rdfs:label "burial-site" ;
+    rdfs:comment "Burial or ancestral remains site — where ancestors are buried or remains are kept. Sacred due to connection to ancestors." .
+
+faith:placeLocation a rdf:Property ;
+    rdfs:label "location" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Geographic location — coordinates, region, or descriptive location. May be restricted for culturally sensitive sites." .
+
+faith:placeAccessProtocol a rdf:Property ;
+    rdfs:label "access protocol" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Access restrictions or protocols — who may visit, when, under what conditions. Some sites are closed to outsiders, some require permission, some have seasonal closures, some are restricted to initiated members." .
+
+faith:placePubliclyKnown a rdf:Property ;
+    rdfs:label "publicly known" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the place's existence and location is publicly known. Some sacred places are secret — their location is restricted to custodians and community members." .
+
+faith:placeRestrictedKnowledge a rdf:Property ;
+    rdfs:label "restricted knowledge" ;
+    rdfs:domain faith:SacredPlace ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether knowledge about this place is restricted. If true, details should not be stored or displayed without community consent." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Faith Community — communities of faith
+# ────────────────────────────────────────────────────────────────────
+
+faith:FaithCommunity a rdfs:Class ;
+    rdfs:label "Faith Community" ;
+    rdfs:comment "A community of people who share a faith system or tradition. Faith communities range from formal institutions (a diocese, a sangha, a ummah) to informal gatherings (a prayer circle, a ceremony group) to entire peoples (a First Nation whose faith system is inseparable from their identity). A faith community is a collective entity (see agency:CollectiveEntity) — it acts as a unit but may or may not have legal personality. Faith communities may overlap — a person may belong to multiple communities (e.g. a Catholic who also participates in indigenous ceremony). The community is the social body through which the faith system is lived, transmitted, and maintained." .
+
+faith:communityName a rdf:Property ;
+    rdfs:label "community name" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  xsd:string .
+
+faith:communityFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  faith:FaithSystem .
+
+faith:communityType a rdf:Property ;
+    rdfs:label "community type" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  faith:CommunityType .
+
+faith:CommunityType a rdfs:Class ;
+    rdfs:label "Community Type" .
+
+faith:commInstitution    a faith:CommunityType ; rdfs:label "institution" ;
+    rdfs:comment "Formal institution — has structure, hierarchy, legal status. e.g. a diocese, a mosque foundation, a temple trust. May be a legal person (agency:LegalPerson)." .
+faith:commCongregation   a faith:CommunityType ; rdfs:label "congregation" ;
+    rdfs:comment "Congregation — a local gathering of adherents. e.g. a parish, a sangha, a havurah, a jamaat. May or may not have formal structure." .
+faith:commPeople         a faith:CommunityType ; rdfs:label "people-nation" ;
+    rdfs:comment "A people or nation — the faith community is inseparable from a people. e.g. First Nations, Aboriginal peoples, the Jewish people (ethno-religious). The faith system is part of the people's identity, not a separate affiliation." .
+faith:commOrder          a faith:CommunityType ; rdfs:label "order-tradition" ;
+    rdfs:comment "Order or tradition — a sub-community within a larger faith system with specific practices. e.g. Franciscan order, Zen lineage, Sufi tariqa, Hindu sampradaya." .
+faith:commInformal       a faith:CommunityType ; rdfs:label "informal-gathering" ;
+    rdfs:comment "Informal gathering — an informal group that meets for prayer, ceremony, study, or practice. No formal structure." .
+faith:commDiaspora       a faith:CommunityType ; rdfs:label "diaspora-community" ;
+    rdfs:comment "Diaspora community — adherents living outside their tradition's homeland. May maintain practices in modified form, or develop new traditions. e.g. diaspora Hindu, Buddhist, or Muslim communities." .
+
+faith:communityGatheringPlace a rdf:Property ;
+    rdfs:label "gathering place" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  faith:SacredPlace ;
+    rdfs:comment "The sacred place where this community gathers — church, temple, mosque, ceremonial ground." .
+
+faith:communityLeader a rdf:Property ;
+    rdfs:label "leader" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the community's spiritual leader or leaders — priest, elder, imam, rabbi, lama, custodian, chief." .
+
+faith:communitySize a rdf:Property ;
+    rdfs:label "community size" ;
+    rdfs:domain faith:FaithCommunity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Approximate size — '10 members', '500 parishioners', 'entire nation (~3000 people)'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Practice and Ritual — what adherents do
+# ────────────────────────────────────────────────────────────────────
+
+faith:Practice a rdfs:Class ;
+    rdfs:label "Faith Practice" ;
+    rdfs:comment "A practice, ritual, ceremony, or observance within a faith system. Practices are the lived expression of the faith — prayer, meditation, pilgrimage, fasting, feast, initiation, ceremony, daily observance. For practice-based and oral traditions, practices are the primary transmission mode — the knowledge is in the doing. Practices may be daily (prayer, meditation), seasonal (festivals, ceremonies), life-cycle (birth, coming of age, marriage, death), or extraordinary (vision quest, pilgrimage, retreat)." .
+
+faith:practiceName a rdf:Property ;
+    rdfs:label "practice name" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  xsd:string .
+
+faith:practiceFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  faith:FaithSystem .
+
+faith:practiceType a rdf:Property ;
+    rdfs:label "practice type" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  faith:PracticeType .
+
+faith:PracticeType a rdfs:Class ;
+    rdfs:label "Practice Type" .
+
+faith:pracDaily        a faith:PracticeType ; rdfs:label "daily-observance" ;
+    rdfs:comment "Daily observance — prayer, meditation, scripture reading, mindfulness practice. Performed regularly as part of daily life." .
+faith:pracSeasonal     a faith:PracticeType ; rdfs:label "seasonal-ceremony" ;
+    rdfs:comment "Seasonal ceremony — festival, seasonal ritual, harvest ceremony, solstice ceremony. Tied to natural or liturgical calendar." .
+faith:pracLifeCycle    a faith:PracticeType ; rdfs:label "life-cycle" ;
+    rdfs:comment "Life-cycle rite — birth, naming, coming of age, initiation, marriage, death, funeral. Marks transitions in a person's life." .
+faith:pracPilgrimage   a faith:PracticeType ; rdfs:label "pilgrimage" ;
+    rdfs:comment "Pilgrimage — journey to a sacred place. May be obligatory (Hajj) or voluntary." .
+faith:pracInitiation   a faith:PracticeType ; rdfs:label "initiation" ;
+    rdfs:comment "Initiation — entry into a community, role, or level of knowledge. May involve ceremony, teaching, testing, or transformation." .
+faith:pracHealing      a faith:PracticeType ; rdfs:label "healing" ;
+    rdfs:comment "Healing practice — spiritual healing, cleansing, energy work, traditional medicine with spiritual dimension." .
+faith:pracOffering     a faith:PracticeType ; rdfs:label "offering-sacrifice" ;
+    rdfs:comment "Offering or sacrifice — giving to the sacred: food, incense, time, wealth, service." .
+faith:pracCommunal     a faith:PracticeType ; rdfs:label "communal-gathering" ;
+    rdfs:comment "Communal gathering — collective worship, ceremony, festival, communal meal." .
+
+faith:practiceFrequency a rdf:Property ;
+    rdfs:label "frequency" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How often the practice is performed — 'daily', 'weekly', 'seasonally', 'once in lifetime', 'as needed'." .
+
+faith:practiceProtocol a rdf:Property ;
+    rdfs:label "protocol" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Protocols governing the practice — who may participate, who may lead, what preparation is required, what restrictions apply." .
+
+faith:practicePlace a rdf:Property ;
+    rdfs:label "practice place" ;
+    rdfs:domain faith:Practice ;
+    rdfs:range  faith:SacredPlace ;
+    rdfs:comment "Where the practice is performed — may be a specific sacred place or any suitable location." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Moral Framework — ethical principles and systems of living
+# ────────────────────────────────────────────────────────────────────
+
+faith:MoralFramework a rdfs:Class ;
+    rdfs:label "Moral Framework" ;
+    rdfs:comment "The ethical principles, moral codes, and systems of living that a faith system provides for its adherents. Moral frameworks may be codified (Ten Commandments, Eightfold Path, Sharia) or embodied in practice and story (Aboriginal Law, customary ethics). A moral framework guides behaviour, defines virtues and vices, establishes obligations and prohibitions, and provides a basis for ethical reasoning. Moral frameworks are not unique to faith systems — secular philosophies also have moral frameworks — but faith-based moral frameworks ground their authority in the sacred, the ancestral, or the cosmological rather than in reason alone. A moral framework may include: virtues to cultivate, vices to avoid, obligations to community, relationship to land and non-human beings, and principles for ethical reasoning." .
+
+faith:moralFrameworkName a rdf:Property ;
+    rdfs:label "framework name" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string .
+
+faith:moralFrameworkFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  faith:FaithSystem .
+
+faith:moralFrameworkForm a rdf:Property ;
+    rdfs:label "form" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  faith:MoralForm .
+
+faith:MoralForm a rdfs:Class ;
+    rdfs:label "Moral Framework Form" .
+
+faith:moralCodified   a faith:MoralForm ; rdfs:label "codified" ;
+    rdfs:comment "Codified — explicit rules, commandments, or legal codes. Written or formally articulated. e.g. Ten Commandments, Sharia, Buddhist Vinaya." .
+faith:moralEmbodied   a faith:MoralForm ; rdfs:label "embodied-in-practice" ;
+    rdfs:comment "Embodied in practice — moral principles are lived through practice, not articulated as rules. The right way to act is learned by doing, observing, and being corrected. e.g. Aboriginal Law, many indigenous ethical systems." .
+faith:moralNarrative  a faith:MoralForm ; rdfs:label "narrative" ;
+    rdfs:comment "Narrative — moral principles are embedded in stories, myths, and legends. The story teaches the principle without abstracting it. e.g. parables, Dreaming stories, Jataka tales." .
+faith:moralPhilosophical a faith:MoralForm ; rdfs:label "philosophical" ;
+    rdfs:comment "Philosophical — moral principles are articulated through philosophical reasoning. e.g. Buddhist ethics, Confucian ethics, Stoic ethics." .
+
+faith:moralFrameworkVirtues a rdf:Property ;
+    rdfs:label "virtues" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Virtues cultivated by this framework — e.g. compassion, wisdom, courage, hospitality, respect for elders, care for land." .
+
+faith:moralFrameworkProhibitions a rdf:Property ;
+    rdfs:label "prohibitions" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Prohibitions — what the framework forbids. May be absolute or contextual." .
+
+faith:moralFrameworkObligations a rdf:Property ;
+    rdfs:label "obligations" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Obligations — what the framework requires. Obligations to community, to land, to ancestors, to the sacred." .
+
+faith:moralFrameworkRelationToLand a rdf:Property ;
+    rdfs:label "relation to land" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The framework's teaching on relationship to land and non-human beings — stewardship, custodianship, kinship with nature, dominion, harmony, reciprocity. For place-based traditions, this is central, not peripheral." .
+
+faith:moralFrameworkRelationToCommunity a rdf:Property ;
+    rdfs:label "relation to community" ;
+    rdfs:domain faith:MoralFramework ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The framework's teaching on relationship to community — obligations to others, social structure, care for vulnerable, conflict resolution." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Cosmology — understanding of reality, origins, and meaning
+# ────────────────────────────────────────────────────────────────────
+
+faith:Cosmology a rdfs:Class ;
+    rdfs:label "Cosmology" ;
+    rdfs:comment "A faith system's understanding of the nature of reality — origins, structure, meaning, and the place of humans within it. Cosmology includes creation narratives, understanding of the sacred or divine, the structure of the cosmos (heavens, underworlds, realms), the nature of time (cyclic, linear, timeless), and the relationship between the visible and invisible worlds. Cosmology is not 'primitive science' — it is a different mode of understanding that addresses questions science does not: meaning, purpose, value, and the sacred. A cosmology may be text-based (Genesis creation narrative), oral (Dreaming stories), practice-based (ritual re-enactment of cosmological events), or place-based (the land itself as cosmological text)." .
+
+faith:cosmologyFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:Cosmology ;
+    rdfs:range  faith:FaithSystem .
+
+faith:cosmologyCreationNarrative a rdf:Property ;
+    rdfs:label "creation narrative" ;
+    rdfs:domain faith:Cosmology ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the cosmos originated — creation story, emergence narrative, Dreaming. May be text, oral tradition, or embodied in place." .
+
+faith:cosmologyTimeModel a rdf:Property ;
+    rdfs:label "time model" ;
+    rdfs:domain faith:Cosmology ;
+    rdfs:range  faith:TimeModel .
+
+faith:TimeModel a rdfs:Class ;
+    rdfs:label "Cosmological Time Model" .
+
+faith:timeLinear    a faith:TimeModel ; rdfs:label "linear" ;
+    rdfs:comment "Linear — time has a beginning (creation) and moves toward an end (eschaton). e.g. Abrahamic traditions." .
+faith:timeCyclic    a faith:TimeModel ; rdfs:label "cyclic" ;
+    rdfs:comment "Cyclic — time repeats in cycles (ages, kalpas, seasons). e.g. Hindu, Buddhist, many indigenous traditions." .
+faith:timeTimeless  a faith:TimeModel ; rdfs:label "timeless-present" ;
+    rdfs:comment "Timeless present — the sacred time is always present, not past or future. The Dreaming is not in the past — it is now. Ancestors are not gone — they are here." .
+faith:timeLayered   a faith:TimeModel ; rdfs:label "layered" ;
+    rdfs:comment "Layered — multiple temporal layers coexist. Sacred time and ordinary time are different layers that intersect at certain moments (ceremony, ritual)." .
+
+faith:cosmologyDivineNature a rdf:Property ;
+    rdfs:label "divine nature" ;
+    rdfs:domain faith:Cosmology ;
+    rdfs:range  faith:DivineNature .
+
+faith:DivineNature a rdfs:Class ;
+    rdfs:label "Divine Nature" .
+
+faith:divineMonotheistic  a faith:DivineNature ; rdfs:label "monotheistic" ;
+    rdfs:comment "One God — single, unified divine. e.g. Abrahamic traditions." .
+faith:divinePolytheistic  a faith:DivineNature ; rdfs:label "polytheistic" ;
+    rdfs:comment "Many gods — multiple divine beings. e.g. Hindu, ancient Greek, Norse, Shinto." .
+faith:divinePantheistic   a faith:DivineNature ; rdfs:label "pantheistic-panentheistic" ;
+    rdfs:comment "Divine in all / all in divine — the sacred is immanent in the world. e.g. many indigenous traditions, some Hindu and Buddhist philosophies." .
+faith:divineNonTheistic   a faith:DivineNature ; rdfs:label "non-theistic" ;
+    rdfs:comment "No personal god — the sacred is understood as principle, law, way, or nature rather than a being. e.g. Theravada Buddhism, Taoism, Confucianism." .
+faith:divineAncestral     a faith:DivineNature ; rdfs:label "ancestral" ;
+    rdfs:comment "Ancestral — the sacred is understood through ancestors who continue to be present and active. Ancestors are not gods but are sacred beings with ongoing relationship to the living. e.g. many African, Pacific Islander, Aboriginal, and First Nations traditions." .
+faith:divineAnimistic     a faith:DivineNature ; rdfs:label "animistic" ;
+    rdfs:comment "Animistic — the world is filled with spirit or agency — rocks, rivers, animals, plants may have their own agency or spirit. Not 'primitive' — a sophisticated ontology of relational existence. e.g. many indigenous traditions, Shinto." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Indigenous Knowledge Protocol — access and custodianship
+# ────────────────────────────────────────────────────────────────────
+
+faith:IndigenousKnowledgeProtocol a rdfs:Class ;
+    rdfs:label "Indigenous Knowledge Protocol" ;
+    rdfs:comment "Protocols governing the access, use, sharing, and storage of indigenous knowledge — including sacred knowledge, ceremonial knowledge, traditional ecological knowledge, and cultural heritage. Indigenous knowledge is not public domain — it is owned (collectively) by the people, community, or custodians who hold it. Protocols may restrict: who may know, who may tell, who may hear, who may record, where knowledge may be shared, when (seasonal restrictions), and with whom (insider/outsider distinctions). These protocols are not 'barriers to access' — they are the governance structure of the knowledge system. Violating protocols may cause spiritual, social, and legal harm. The system must support protocol enforcement — not circumvention. This includes: access controls on stored knowledge, consent requirements for display or sharing, and community control over how their knowledge is represented." .
+
+faith:protocolCommunity a rdf:Property ;
+    rdfs:label "protocol community" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the faith community or collective entity that holds this protocol." .
+
+faith:protocolKnowledgeScope a rdf:Property ;
+    rdfs:label "knowledge scope" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What knowledge the protocol covers — e.g. 'men's business', 'women's business', 'initiation knowledge', 'sacred songs of the [clan]', 'traditional ecological knowledge of [area]'." .
+
+faith:protocolAccessLevel a rdf:Property ;
+    rdfs:label "access level" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  faith:AccessLevel .
+
+faith:AccessLevel a rdfs:Class ;
+    rdfs:label "Access Level" .
+
+faith:accessPublic      a faith:AccessLevel ; rdfs:label "public" ;
+    rdfs:comment "Public — knowledge may be freely shared. Some indigenous knowledge is public — not all is restricted." .
+faith:accessCommunity   a faith:AccessLevel ; rdfs:label "community-only" ;
+    rdfs:comment "Community only — knowledge may be shared within the community but not with outsiders." .
+faith:accessInitiated   a faith:AccessLevel ; rdfs:label "initiated-only" ;
+    rdfs:comment "Initiated only — knowledge is restricted to those who have been initiated. May have sub-levels of initiation." .
+faith:accessCustodian   a faith:AccessLevel ; rdfs:label "custodian-only" ;
+    rdfs:comment "Custodian only — knowledge is held by specific custodians (elders, knowledge holders) and shared only through proper process." .
+faith:accessGendered    a faith:AccessLevel ; rdfs:label "gender-restricted" ;
+    rdfs:comment "Gender restricted — knowledge is restricted to men or women. 'Men's business' and 'women's business' are common in many indigenous traditions." .
+faith:accessSeasonal    a faith:AccessLevel ; rdfs:label "seasonal" ;
+    rdfs:comment "Seasonal — knowledge may only be shared or performed at certain times of year." .
+faith:accessSacred      a faith:AccessLevel ; rdfs:label "sacred-secret" ;
+    rdfs:comment "Sacred secret — the most restricted level. Knowledge that must not be shared with unauthorised persons under any circumstances. The system must prevent storage, display, or transmission of this knowledge to unauthorised agents." .
+
+faith:protocolConsentRequired a rdf:Property ;
+    rdfs:label "consent required" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether community consent is required before storing, displaying, or sharing the knowledge. If true, the system must obtain and record consent." .
+
+faith:protocolConsentRecord a rdf:Property ;
+    rdfs:label "consent record" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the consent record — who consented, when, for what purpose, with what scope. Consent may be withdrawn." .
+
+faith:protocolAttributionRequired a rdf:Property ;
+    rdfs:label "attribution required" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether attribution to the community or tradition is required when the knowledge is referenced or displayed." .
+
+faith:protocolCommercialUse a rdf:Property ;
+    rdfs:label "commercial use" ;
+    rdfs:domain faith:IndigenousKnowledgeProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Whether commercial use is permitted, prohibited, or requires specific agreement. Many indigenous communities prohibit commercialisation of sacred knowledge." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Faith Adherence — a person's relationship to a faith system
+# ────────────────────────────────────────────────────────────────────
+
+faith:FaithAdherence a rdfs:Class ;
+    rdfs:label "Faith Adherence" ;
+    rdfs:comment "A person's relationship to a faith system — their adherence, practice, and identification. Adherence is not binary (believer/non-believer) — it is a spectrum from cultural identification through active practice to spiritual leadership. A person may adhere to multiple faith systems (syncretism, dual heritage, conversion history). Adherence may be inherited (raised in the tradition), chosen (conversion), or both. Adherence changes over time — a person may deepen, drift, return, convert, or synthesise. Adherence is modelled as a relationship, not an attribute — it exists between a person and a faith system, and has a history." .
+
+faith:adherencePerson a rdf:Property ;
+    rdfs:label "person" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person." .
+
+faith:adherenceFaithSystem a rdf:Property ;
+    rdfs:label "faith system" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  faith:FaithSystem .
+
+faith:adherenceLevel a rdf:Property ;
+    rdfs:label "adherence level" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  faith:AdherenceLevel .
+
+faith:AdherenceLevel a rdfs:Class ;
+    rdfs:label "Adherence Level" .
+
+faith:adhCultural      a faith:AdherenceLevel ; rdfs:label "cultural-identification" ;
+    rdfs:comment "Cultural identification — the person identifies with the tradition culturally or heritage-wise but does not actively practice. Common in secularised societies. The person may still possess cultural knowledge from upbringing." .
+faith:adhNominal       a faith:AdherenceLevel ; rdfs:label "nominal" ;
+    rdfs:comment "Nominal — the person nominally belongs to the tradition (may be on a register, may attend major festivals) but is not actively practicing." .
+faith:adhPracticing    a faith:AdherenceLevel ; rdfs:label "practicing" ;
+    rdfs:comment "Practicing — the person actively practices the tradition: regular prayer, ceremony attendance, following moral framework." .
+faith:adhDevoted       a faith:AdherenceLevel ; rdfs:label "devoted" ;
+    rdfs:comment "Devoted — the person's faith practice is central to their daily life and identity. May include regular spiritual discipline, community leadership, or deep study." .
+faith:adhLeader        a faith:AdherenceLevel ; rdfs:label "leader-custodian" ;
+    rdfs:comment "Leader or custodian — the person holds a leadership or custodial role in the tradition: elder, priest, teacher, custodian, initiated knowledge holder." .
+faith:adhSeeker        a faith:AdherenceLevel ; rdfs:label "seeker" ;
+    rdfs:comment "Seeker — the person is exploring the tradition but has not committed. May be considering conversion or simply learning." .
+
+faith:adherenceOrigin a rdf:Property ;
+    rdfs:label "origin" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  faith:AdherenceOrigin .
+
+faith:AdherenceOrigin a rdfs:Class ;
+    rdfs:label "Adherence Origin" .
+
+faith:originInherited  a faith:AdherenceOrigin ; rdfs:label "inherited" ;
+    rdfs:comment "Inherited — the person was raised in the tradition. See lrn:UpbringingFactor with lrn:upFaithTradition." .
+faith:originChosen     a faith:AdherenceOrigin ; rdfs:label "chosen-conversion" ;
+    rdfs:comment "Chosen — the person chose the tradition through conversion or conscious commitment." .
+faith:originSyncretic  a faith:AdherenceOrigin ; rdfs:label "syncretic" ;
+    rdfs:comment "Syncretic — the person combines this tradition with others, creating a personal synthesis." .
+faith:originReversion  a faith:AdherenceOrigin ; rdfs:label "reversion-return" ;
+    rdfs:comment "Reversion or return — the person returns to a tradition they were raised in but had left." .
+
+faith:adherenceCommunity a rdf:Property ;
+    rdfs:label "community" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  faith:FaithCommunity ;
+    rdfs:comment "The faith community the person belongs to, if any." .
+
+faith:adherenceStartDate a rdf:Property ;
+    rdfs:label "start date" ;
+    rdfs:domain faith:FaithAdherence ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the adherence began — may be birth (inherited), conversion date, or date of conscious commitment." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (faith-systems.n3) links to:
+#
+# epistemics.n3:
+#   - Faith system truth claims are intersubjective (epi:Intersubjective)
+#     within the community of adherents
+#   - Sacred narratives are epi:Mythological (blended: non-fiction for
+#     believers, fiction for non-believers) — agent-relative
+#   - The ontology does not adjudicate truth claims
+#   - Faith adherence may shape epistemic perspective (epi:AgentPerspective)
+#
+# agency.n3:
+#   - Faith communities are agency:CollectiveEntity or agency:LegalPerson
+#     (for formal institutions)
+#   - Faith community leaders are agency:Actor
+#   - Indigenous knowledge protocols govern agency:Actor access to knowledge
+#
+# personhood.n3:
+#   - Faith adherence is part of personhood — social and cultural identity
+#   - Faith communities are social relations (person:SocialRelation)
+#   - Moral frameworks may inform legal obligations and rights
+#   - Faith-based legal systems (Sharia, Halakha, canon law) interact
+#     with personhood legal status
+#
+# learning-core.n3 / learning-experience-modality.n3:
+#   - Faith traditions are transmitted through learning events
+#   - Upbringing in a faith tradition is lrn:UpbringingFactor with
+#     lrn:upFaithTradition
+#   - Faith knowledge includes propositional (theology, doctrine),
+#     practical (ritual, practice), experiential (what it is like to
+#     practice), and interpersonal (community knowledge) types
+#   - Oral traditions are transmitted through lrn:interpersonalExperience
+#     and lrn:experientialLearning
+#   - Sacred texts are learning sources (lrn:sourceBook)
+#   - Faith communities may be learning manifolds — teaching traditions,
+#     initiation processes, study circles
+#
+# production-document.n3:
+#   - Sacred texts may be subClass of pd:BookPublication
+#   - Liturgical texts may be production documents
+#   - Commentaries and theological works are production documents
+#
+# provenance.n3:
+#   - All faith system records have provenance
+#   - Indigenous knowledge protocols require provenance for consent
+#     and access control
+#   - Sacred text provenance includes transmission history

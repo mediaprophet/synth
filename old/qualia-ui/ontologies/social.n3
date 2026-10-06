@@ -1,0 +1,616 @@
+# Social Manifold Ontology — Social Graph, Relationships, Communities,
+# Social Interaction Protocols, Reputation, Social Context
+#
+# Authoring form (N3) — compiled to social.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# This ontology defines the social manifold — the system that models
+# the social graph, relationships, communities, social interactions,
+# reputation, and social context within QualiaDB / Webizen.
+#
+# The social manifold is distinct from the communications manifold
+# (communications.n3): communications covers the mechanics of message
+# routing and pulse events; social covers the semantics of who is
+# related to whom, how they are related, what communities they belong
+# to, and how social context affects interaction.
+#
+# The social manifold is also distinct from personhood.n3: personhood
+# models the legal and socially situated exterior of an entity (social
+# relations, legal status, rights, obligations); social models the
+# living, dynamic social graph — who is talking to whom, who is in
+# what community, who has what reputation, and how social context
+# shapes the interpretation of content and communication.
+#
+# Nomenclature:
+#   - Natural persons have social relationships (mind-dependent:
+#     trust, affinity, rapport, conflict). Legal persons have
+#     institutional affiliations (organisational: membership,
+#     partnership, sponsorship). Software agents have connection
+#     states (computational: linked, federated, subscribed).
+#   - "Trust" is a mind-dependent term for natural persons only.
+#   - "Affiliation" is an institutional term for legal persons.
+#   - "Connection" is a computational term for software agents.
+#
+# Imports: agency.n3, personhood.n3, selfhood.n3, communications.n3,
+#          container.n3, settings.n3, values.n3, provenance.n3,
+#          obligations.n3, agent-nomenclature.n3, epistemics.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+@prefix comm:       <https://qualiadb.org/schema/ui/communications#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix manifold:   <https://qualiadb.org/schema/ui/manifold#> .
+@prefix set:        <https://qualiadb.org/schema/ui/settings#> .
+@prefix values:     <https://qualiadb.org/schema/ui/values#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix obl:        <https://qualiadb.org/schema/ui/obligations#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix soc:        <https://qualiadb.org/schema/ui/social#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Social Graph — the network of relationships
+# ────────────────────────────────────────────────────────────────────
+
+soc:SocialGraph a rdfs:Class ;
+    rdfs:label "Social Graph" ;
+    rdfs:comment "The graph of social relationships among entities in QualiaDB. The social graph is a living, dynamic structure — it changes as relationships form, evolve, and dissolve. The social graph is distinct from the Q42 knowledge graph: the Q42 graph stores all knowledge (including social relations); the social graph is the view of that knowledge that focuses on who is related to whom and how. The social graph is queried to determine: social context (who knows whom), reputation (what do others think), community membership (who belongs where), and access (who is trusted with what)." .
+
+soc:graphOwner a rdf:Property ;
+    rdfs:label "owner" ;
+    rdfs:domain soc:SocialGraph ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity whose social graph this is — each entity has its own view of the social graph, filtered by access control and privacy preferences." .
+
+soc:graphEdge a rdf:Property ;
+    rdfs:label "edge" ;
+    rdfs:domain soc:SocialGraph ;
+    rdfs:range  soc:SocialEdge ;
+    rdfs:comment "A relationship edge in the social graph — links two entities with a typed relationship." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Social Edge — a relationship between entities
+# ────────────────────────────────────────────────────────────────────
+
+soc:SocialEdge a rdfs:Class ;
+    rdfs:label "Social Edge" ;
+    rdfs:comment "A relationship between two entities in the social graph. Social edges are typed, directional, and have enumerable characteristics beyond the edge type label — a relationship is not adequately modelled by the label 'friend' alone. The edge carries: type, strength, duration, interaction frequency, reciprocity, power dynamics, disclosure level, support types, conflict history, tags, context, and provenance. Each characteristic is independently enumerable, enabling the system to distinguish between relationships that share the same label but differ fundamentally in nature — e.g. a 'friend' of 10 years with daily interaction and mutual support vs a 'friend' met once at a conference. Social edges are appendable — the relationship may change over time, and each change creates a new edge record with provenance. The current state of the relationship is the most recent edge." .
+
+soc:edgeSource a rdf:Property ;
+    rdfs:label "source" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  agency:Entity .
+
+soc:edgeTarget a rdf:Property ;
+    rdfs:label "target" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  agency:Entity .
+
+soc:edgeType a rdf:Property ;
+    rdfs:label "type" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:EdgeType .
+
+soc:EdgeType a rdfs:Class ;
+    rdfs:label "Edge Type" ;
+    rdfs:comment "The type of social relationship. Edge types are typed by agent type — personal relationships (natural persons), institutional affiliations (legal persons), connections (software agents)." .
+
+# Personal edge types (natural persons)
+soc:etFriendship a soc:EdgeType ; rdfs:label "friendship" ;
+    rdfs:comment "A friendship — mutual affinity and trust between natural persons. Mind-dependent: involves trust, rapport, shared experience." ;
+    epi:applicableAgentType epi:NaturalAgent .
+soc:etFamily a soc:EdgeType ; rdfs:label "family" ;
+    rdfs:comment "A family relationship — parent, child, sibling, spouse, partner, extended family. Family edges may be asymmetric (parent-child) or symmetric (sibling)." ;
+    epi:applicableAgentType epi:NaturalAgent .
+soc:etProfessional a soc:EdgeType ; rdfs:label "professional" ;
+    rdfs:comment "A professional relationship — colleague, mentor, collaborator, employer, employee. Professional edges may carry role information." ;
+    epi:applicableAgentType epi:NaturalAgent .
+soc:etCommunity a soc:EdgeType ; rdfs:label "community-member" ;
+    rdfs:comment "A community membership — the person is a member of a community. Links to soc:Community." ;
+    epi:applicableAgentType epi:NaturalAgent .
+soc:etAcquaintance a soc:EdgeType ; rdfs:label "acquaintance" ;
+    rdfs:comment "An acquaintance — a known person without strong affinity. May develop into friendship or remain casual." ;
+    epi:applicableAgentType epi:NaturalAgent .
+soc:etAdversarial a soc:EdgeType ; rdfs:label "adversarial" ;
+    rdfs:comment "An adversarial relationship — the person has identified another as acting against their interests. Links to adversarial-conduct.n3 and adversarial-relational.n3. Adversarial edges are not symmetric — A may identify B as adversarial without B's knowledge." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# Institutional edge types (legal persons)
+soc:etMembership a soc:EdgeType ; rdfs:label "institutional-membership" ;
+    rdfs:comment "Institutional membership — a person or entity is a member of an institution. Institutional, not mind-dependent." ;
+    epi:applicableAgentType epi:LegalAgent .
+soc:etPartnership a soc:EdgeType ; rdfs:label "partnership" ;
+    rdfs:comment "An institutional partnership — two legal persons have a formal partnership agreement. Links to agency.n3 contracts." ;
+    epi:applicableAgentType epi:LegalAgent .
+soc:etSponsorship a soc:EdgeType ; rdfs:label "sponsorship" ;
+    rdfs:comment "An institutional sponsorship — one legal person sponsors another. Asymmetric." ;
+    epi:applicableAgentType epi:LegalAgent .
+
+# Connection edge types (software agents)
+soc:etConnection a soc:EdgeType ; rdfs:label "connection" ;
+    rdfs:comment "A computational connection — two software agents are linked. Computational, not mind-dependent." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+soc:etFederation a soc:EdgeType ; rdfs:label "federation" ;
+    rdfs:comment "A federation link — two QualiaDB instances are federated. Computational." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+
+soc:edgeStrength a rdf:Property ;
+    rdfs:label "strength" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:EdgeStrength ;
+    rdfs:comment "The strength of the relationship — how close, how trusted, how active. Strength is assessed, not declared — it is based on interaction history, shared context, and duration." .
+
+soc:EdgeStrength a rdfs:Class ;
+    rdfs:label "Edge Strength" .
+
+soc:esStrong a soc:EdgeStrength ; rdfs:label "strong" ;
+    rdfs:comment "Strong relationship — high trust, frequent interaction, shared history." .
+soc:esModerate a soc:EdgeStrength ; rdfs:label "moderate" ;
+    rdfs:comment "Moderate relationship — some trust, occasional interaction, developing history." .
+soc:esWeak a soc:EdgeStrength ; rdfs:label "weak" ;
+    rdfs:comment "Weak relationship — low trust, rare interaction, limited history." .
+soc:esSevered a soc:EdgeStrength ; rdfs:label "severed" ;
+    rdfs:comment "Severed relationship — the relationship was once active but has been deliberately ended. The edge remains for historical context but is no longer active." .
+
+soc:edgeContext a rdf:Property ;
+    rdfs:label "context" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The context in which the relationship exists — e.g. 'work', 'school', 'neighbourhood', 'online-community', 'family-event'. A relationship may have multiple contexts." .
+
+soc:edgeProvenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Provenance for this edge — when it was established, by whom, and any changes since." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2a. Relationship Characteristics — enumerable properties
+# ────────────────────────────────────────────────────────────────────
+# A relationship is not adequately modelled by a type label alone.
+# The following properties enable the system to enumerate the
+# multidimensional characteristics that distinguish relationships
+# of the same type. These characteristics support: semantic
+# precision, harm protection (e.g. detecting power asymmetry,
+# isolation, grooming patterns), and social context derivation.
+
+soc:edgeDuration a rdf:Property ;
+    rdfs:label "duration" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:DurationCategory ;
+    rdfs:comment "How long the relationship has existed — measured in categories, not exact dates, to protect privacy." .
+
+soc:DurationCategory a rdfs:Class ; rdfs:label "Duration Category" .
+soc:dcNew        a soc:DurationCategory ; rdfs:label "new" ;
+    rdfs:comment "Less than 1 month." .
+soc:dcRecent     a soc:DurationCategory ; rdfs:label "recent" ;
+    rdfs:comment "1-6 months." .
+soc:dcEstablished a soc:DurationCategory ; rdfs:label "established" ;
+    rdfs:comment "6 months - 2 years." .
+soc:dcLongTerm   a soc:DurationCategory ; rdfs:label "long-term" ;
+    rdfs:comment "2-5 years." .
+soc:dcEnduring   a soc:DurationCategory ; rdfs:label "enduring" ;
+    rdfs:comment "5+ years." .
+
+soc:edgeInteractionFrequency a rdf:Property ;
+    rdfs:label "interaction frequency" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:InteractionFrequency ;
+    rdfs:comment "How often the parties interact — assessed from communication history, not declared." .
+
+soc:InteractionFrequency a rdfs:Class ; rdfs:label "Interaction Frequency" .
+soc:ifDaily     a soc:InteractionFrequency ; rdfs:label "daily" .
+soc:ifWeekly    a soc:InteractionFrequency ; rdfs:label "weekly" .
+soc:ifMonthly   a soc:InteractionFrequency ; rdfs:label "monthly" .
+soc:ifQuarterly a soc:InteractionFrequency ; rdfs:label "quarterly" .
+soc:ifRare      a soc:InteractionFrequency ; rdfs:label "rare" ;
+    rdfs:comment "Less than quarterly — includes one-time interactions." .
+soc:ifNone      a soc:InteractionFrequency ; rdfs:label "none" ;
+    rdfs:comment "No current interaction — the relationship is dormant but not severed." .
+
+soc:edgeReciprocity a rdf:Property ;
+    rdfs:label "reciprocity" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:Reciprocity ;
+    rdfs:comment "The balance of give-and-take in the relationship. Important for detecting one-sided relationships that may indicate exploitation, grooming, or coercive control." .
+
+soc:Reciprocity a rdfs:Class ; rdfs:label "Reciprocity" .
+soc:recMutual      a soc:Reciprocity ; rdfs:label "mutual" ;
+    rdfs:comment "Balanced — both parties contribute and receive roughly equally." .
+soc:recAsymmetric  a soc:Reciprocity ; rdfs:label "asymmetric" ;
+    rdfs:comment "One party contributes more than the other — may be benign (mentor/mentee) or concerning (exploitation)." .
+soc:recOneSided    a soc:Reciprocity ; rdfs:label "one-sided" ;
+    rdfs:comment "One party gives, the other takes — flag for potential exploitation or coercive control. Links to adversarial-relational.n3." .
+soc:recTransactional a soc:Reciprocity ; rdfs:label "transactional" ;
+    rdfs:comment "Exchange-based — each interaction is a discrete transaction. Common in commercial relationships." .
+
+soc:edgePowerDynamic a rdf:Property ;
+    rdfs:label "power dynamic" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:PowerDynamic ;
+    rdfs:comment "The power balance in the relationship. Critical for detecting grooming, coercive control, and exploitation — power asymmetry is a key instrumentalisation factor (see adversarial-relational-scenarios.n3)." .
+
+soc:PowerDynamic a rdfs:Class ; rdfs:label "Power Dynamic" .
+soc:pdPeer         a soc:PowerDynamic ; rdfs:label "peer" ;
+    rdfs:comment "Equal power — both parties have similar agency, resources, and social standing." .
+soc:pdHierarchical a soc:PowerDynamic ; rdfs:label "hierarchical" ;
+    rdfs:comment "Formal hierarchy — one party has authority over the other (employer/employee, teacher/student, parent/child). May be legitimate or exploitative depending on conduct." .
+soc:pdAsymmetric   a soc:PowerDynamic ; rdfs:label "asymmetric" ;
+    rdfs:comment "Informal power imbalance — one party has more resources, social standing, or leverage. Not formal but consequential. Flag for risk assessment." .
+soc:pdDependent    a soc:PowerDynamic ; rdfs:label "dependent" ;
+    rdfs:comment "One party depends on the other for survival, housing, income, or custody. Highest risk — links to coercive control patterns in adversarial-relational.n3." .
+
+soc:edgeDisclosureLevel a rdf:Property ;
+    rdfs:label "disclosure level" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:DisclosureLevel ;
+    rdfs:comment "What level of personal information is shared — affects privacy settings and access control." .
+
+soc:DisclosureLevel a rdfs:Class ; rdfs:label "Disclosure Level" .
+soc:dlPublic      a soc:DisclosureLevel ; rdfs:label "public" ;
+    rdfs:comment "Only public information shared." .
+soc:dlAcquaintance a soc:DisclosureLevel ; rdfs:label "acquaintance" ;
+    rdfs:comment "Basic personal information — name, general location, profession." .
+soc:dlPersonal    a soc:DisclosureLevel ; rdfs:label "personal" ;
+    rdfs:comment "Personal details — contact information, interests, daily activities." .
+soc:dlIntimate    a soc:DisclosureLevel ; rdfs:label "intimate" ;
+    rdfs:comment "Sensitive personal information — health, relationships, financial situation. Links to obligations.n3 human dignity protections." .
+soc:dlSelfhood    a soc:DisclosureLevel ; rdfs:label "selfhood" ;
+    rdfs:comment "Access to selfhood — dreams, reflections, qualia, private keys. Non-delegable, restricted to the person themselves. No edge should carry this level for another entity." .
+
+soc:edgeSupportType a rdf:Property ;
+    rdfs:label "support type" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:SupportType ;
+    rdfs:comment "The types of support provided in the relationship — emotional, practical, financial, informational, social. A relationship may provide multiple support types." .
+
+soc:SupportType a rdfs:Class ; rdfs:label "Support Type" .
+soc:stEmotional    a soc:SupportType ; rdfs:label "emotional" ;
+    rdfs:comment "Emotional support — listening, empathy, encouragement. Mind-dependent term for natural persons." ; epi:applicableAgentType epi:NaturalAgent .
+soc:stPractical    a soc:SupportType ; rdfs:label "practical" ;
+    rdfs:comment "Practical support — help with tasks, transportation, childcare." .
+soc:stFinancial    a soc:SupportType ; rdfs:label "financial" ;
+    rdfs:comment "Financial support — loans, gifts, shared expenses." .
+soc:stInformational a soc:SupportType ; rdfs:label "informational" ;
+    rdfs:comment "Informational support — advice, guidance, knowledge sharing." .
+soc:stSocial       a soc:SupportType ; rdfs:label "social" ;
+    rdfs:comment "Social support — introduction to networks, community inclusion." .
+
+soc:edgeConflictHistory a rdf:Property ;
+    rdfs:label "conflict history" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:ConflictHistory ;
+    rdfs:comment "Whether the relationship has experienced conflict, and what form it took. Important for detecting escalating patterns." .
+
+soc:ConflictHistory a rdfs:Class ; rdfs:label "Conflict History" .
+soc:chNone        a soc:ConflictHistory ; rdfs:label "none" ;
+    rdfs:comment "No recorded conflict." .
+soc:chMinor       a soc:ConflictHistory ; rdfs:label "minor" ;
+    rdfs:comment "Minor disagreements — resolved without escalation." .
+soc:chRecurring   a soc:ConflictHistory ; rdfs:label "recurring" ;
+    rdfs:comment "Recurring conflicts — pattern of disagreement that has not escalated to harm." .
+soc:chEscalated   a soc:ConflictHistory ; rdfs:label "escalated" ;
+    rdfs:comment "Escalated conflict — conflict that has involved adversarial conduct. Links to adversarial-relational.n3." .
+soc:chResolved    a soc:ConflictHistory ; rdfs:label "resolved" ;
+    rdfs:comment "Past conflict that has been resolved — the relationship recovered." .
+
+soc:edgeTag a rdf:Property ;
+    rdfs:label "tag" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "User-defined or system-defined tags that further characterise the relationship — e.g. 'school-friend', 'ex-colleague', 'met-at-conference', 'mutual-friend-of-X', 'co-parent'. Tags are free-form but may be suggested by the system based on shared context, community overlap, or interaction patterns. Tags improve semantic precision without requiring new edge types." .
+
+soc:edgeEstablishedVia a rdf:Property ;
+    rdfs:label "established via" ;
+    rdfs:domain soc:SocialEdge ;
+    rdfs:range  soc:ConnectionRequest ;
+    rdfs:comment "The connection request through which this edge was established — links to the ZKP-verified connection workflow." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Community — groups of entities with shared context
+# ────────────────────────────────────────────────────────────────────
+
+soc:Community a rdfs:Class ;
+    rdfs:label "Community" ;
+    rdfs:comment "A group of entities with a shared context, purpose, or identity. Communities are distinct from social edges: an edge links two entities; a community links many. Communities may be: formal (institutions, organisations), informal (friend groups, interest groups), place-based (neighbourhoods, regions), interest-based (hobby groups, professional networks), or event-based (conference attendees, project teams). Communities have: members, leaders, rules, and a shared context." .
+
+soc:communityName a rdf:Property ;
+    rdfs:label "name" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  xsd:string .
+
+soc:communityType a rdf:Property ;
+    rdfs:label "type" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  soc:CommunityType .
+
+soc:CommunityType a rdfs:Class ;
+    rdfs:label "Community Type" .
+
+soc:ctFormal a soc:CommunityType ; rdfs:label "formal" ;
+    rdfs:comment "Formal community — registered organisation, institution, or legal entity. Has formal membership, rules, and governance." .
+soc:ctInformal a soc:CommunityType ; rdfs:label "informal" ;
+    rdfs:comment "Informal community — friend group, interest group, or social circle. No formal membership or governance." .
+soc:ctPlaceBased a soc:CommunityType ; rdfs:label "place-based" ;
+    rdfs:comment "Place-based community — neighbourhood, region, or geographic community. Membership is defined by location." .
+soc:ctInterestBased a soc:CommunityType ; rdfs:label "interest-based" ;
+    rdfs:comment "Interest-based community — hobby group, professional network, or topic community. Membership is defined by shared interest." .
+soc:ctEventBased a soc:CommunityType ; rdfs:label "event-based" ;
+    rdfs:comment "Event-based community — conference attendees, project team, or time-limited group. Membership is defined by participation in an event." .
+soc:ctOnline a soc:CommunityType ; rdfs:label "online" ;
+    rdfs:comment "Online community — digital-only community with no physical meeting space. Membership is defined by online participation." .
+soc:ctFaith a soc:CommunityType ; rdfs:label "faith" ;
+    rdfs:comment "Faith community — religious or spiritual community. Links to faith-systems.n3." .
+
+soc:communityMembers a rdf:Property ;
+    rdfs:label "members" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  agency:Entity .
+
+soc:communityLeaders a rdf:Property ;
+    rdfs:label "leaders" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The leaders or organisers of the community — may be formal (elected, appointed) or informal (emergent, recognised)." .
+
+soc:communityRules a rdf:Property ;
+    rdfs:label "rules" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The rules or norms of the community — may be formal (code of conduct, terms of service) or informal (social norms, expectations)." .
+
+soc:communityValues a rdf:Property ;
+    rdfs:label "values" ;
+    rdfs:domain soc:Community ;
+    rdfs:range  values:ValuesInstrument ;
+    rdfs:comment "The values instruments that the community adheres to — links to values.n3. May be a community charter, code of conduct, or shared principles." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Reputation — social assessment of trustworthiness
+# ────────────────────────────────────────────────────────────────────
+
+soc:Reputation a rdfs:Class ;
+    rdfs:label "Reputation" ;
+    rdfs:comment "The social assessment of an entity's trustworthiness, competence, and character within a community or context. Reputation is not a score — it is a multidimensional assessment that varies by context, community, and assessor. An entity may have high reputation in one community and low in another; high reputation for technical competence and low for interpersonal reliability. Reputation is assessed, not declared — it is based on observed behaviour, enumerated values (values.n3), and social feedback. Reputation is appendable — each assessment is a new record with provenance." .
+
+soc:repSubject a rdf:Property ;
+    rdfs:label "subject" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity being assessed." .
+
+soc:repAssessor a rdf:Property ;
+    rdfs:label "assessor" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity making the assessment — may be a person, community, or institution." .
+
+soc:repDimension a rdf:Property ;
+    rdfs:label "dimension" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  soc:ReputationDimension .
+
+soc:ReputationDimension a rdfs:Class ;
+    rdfs:label "Reputation Dimension" .
+
+soc:rdTrustworthiness a soc:ReputationDimension ; rdfs:label "trustworthiness" ;
+    rdfs:comment "Trustworthiness — does the entity keep their word, honour commitments, act with integrity? Mind-dependent term for natural persons; institutional reliability for legal persons; computational reliability for software agents." .
+soc:rdCompetence a soc:ReputationDimension ; rdfs:label "competence" ;
+    rdfs:comment "Competence — does the entity have the skills, knowledge, and capacity they claim? Links to learning-core.n3 for verified skills." .
+soc:rdReliability a soc:ReputationDimension ; rdfs:label "reliability" ;
+    rdfs:comment "Reliability — does the entity consistently deliver, respond, and follow through?" .
+soc:rdIntegrity a soc:ReputationDimension ; rdfs:label "integrity" ;
+    rdfs:comment "Integrity — does the entity act in accordance with their stated values? Links to values.n3 values gap analysis." .
+soc:rdConduct a soc:ReputationDimension ; rdfs:label "conduct" ;
+    rdfs:comment "Conduct — has the entity engaged in adversarial conduct? Links to adversarial-conduct.n3 and adversarial-relational.n3. Negative conduct assessments are based on documented conduct, not rumour." .
+
+soc:repLevel a rdf:Property ;
+    rdfs:label "level" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  soc:ReputationLevel .
+
+soc:ReputationLevel a rdfs:Class ;
+    rdfs:label "Reputation Level" .
+
+soc:rlHigh a soc:ReputationLevel ; rdfs:label "high" .
+soc:rlModerate a soc:ReputationLevel ; rdfs:label "moderate" .
+soc:rlLow a soc:ReputationLevel ; rdfs:label "low" .
+soc:rlNegative a soc:ReputationLevel ; rdfs:label "negative" ;
+    rdfs:comment "Negative reputation — the entity has demonstrated harmful conduct or chronic unreliability. Based on documented evidence, not rumour." .
+soc:rlUnknown a soc:ReputationLevel ; rdfs:label "unknown" ;
+    rdfs:comment "Unknown reputation — insufficient information to assess. This is the default for new entities." .
+
+soc:repContext a rdf:Property ;
+    rdfs:label "context" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The context in which this reputation assessment applies — e.g. 'professional', 'community:X', 'online', 'personal'. Reputation is context-dependent." .
+
+soc:repEvidence a rdf:Property ;
+    rdfs:label "evidence" ;
+    rdfs:domain soc:Reputation ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Evidence supporting this reputation assessment — documented behaviour, values gap analysis, conduct records, or community feedback. Reputation assessments must be evidence-based; unsupported assessments are flagged." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Social Context — how relationships shape interpretation
+# ────────────────────────────────────────────────────────────────────
+
+soc:SocialContext a rdfs:Class ;
+    rdfs:label "Social Context" ;
+    rdfs:comment "The social context in which a communication, content item, or interaction is interpreted. Social context affects: who can see what, how messages are interpreted, what norms apply, and what obligations are active. Social context is derived from the social graph — it is not stored separately, but computed from the current state of relationships, communities, and reputation. Social context is the lens through which content and communication are understood." .
+
+soc:scRelationships a rdf:Property ;
+    rdfs:label "relationships" ;
+    rdfs:domain soc:SocialContext ;
+    rdfs:range  soc:SocialEdge ;
+    rdfs:comment "The relevant relationships for this context — e.g. the relationship between sender and receiver of a message." .
+
+soc:scCommunities a rdf:Property ;
+    rdfs:label "communities" ;
+    rdfs:domain soc:SocialContext ;
+    rdfs:range  soc:Community ;
+    rdfs:comment "The relevant communities for this context — e.g. the community in which a conversation takes place." .
+
+soc:scNorms a rdf:Property ;
+    rdfs:label "norms" ;
+    rdfs:domain soc:SocialContext ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The social norms that apply in this context — derived from community rules, relationship types, and cultural context. Norms are not laws — they are expectations that govern social interaction." .
+
+soc:scObligations a rdf:Property ;
+    rdfs:label "obligations" ;
+    rdfs:domain soc:SocialContext ;
+    rdfs:range  obl:Obligation ;
+    rdfs:comment "The obligations that are active in this context — derived from relationships (fiduciary, familial, professional), community membership, and legal status. Links to obligations.n3." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Social Interaction Protocols — how social interactions work
+# ────────────────────────────────────────────────────────────────────
+
+soc:SocialProtocol a rdfs:Class ;
+    rdfs:label "Social Protocol" ;
+    rdfs:comment "A protocol that governs social interactions within a community or relationship. Social protocols are not technical protocols — they are social norms encoded as structured rules that the system can reference. Social protocols specify: who may initiate, what forms of address are appropriate, what topics are permitted, what confidentiality applies, and how conflicts are resolved." .
+
+soc:spCommunity a rdf:Property ;
+    rdfs:label "community" ;
+    rdfs:domain soc:SocialProtocol ;
+    rdfs:range  soc:Community .
+
+soc:spInitiationRule a rdf:Property ;
+    rdfs:label "initiation rule" ;
+    rdfs:domain soc:SocialProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Who may initiate interaction — e.g. 'any member', 'leaders only', 'mutual consent required'." .
+
+soc:spConfidentiality a rdf:Property ;
+    rdfs:label "confidentiality" ;
+    rdfs:domain soc:SocialProtocol ;
+    rdfs:range  obl:ConfidentialityInstrument ;
+    rdfs:comment "The confidentiality that applies to interactions under this protocol — links to obligations.n3." .
+
+soc:spConflictResolution a rdf:Property ;
+    rdfs:label "conflict resolution" ;
+    rdfs:domain soc:SocialProtocol ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How conflicts are resolved — e.g. 'mediation by community leader', 'community vote', 'external arbitration', 'no formal process'." .
+
+# Connection requests, ZKP verification, risk assessment, and child
+# protection policies are modelled in social-connections.n3 — a
+# companion file that covers the connection request workflow, ZKP
+# verification steps, risk indicators (fake accounts, trolling,
+# grooming), settings recommendations, and child protection policies
+# (guardian approval, monitoring, alert triggers).
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Social Manifold — the UI surface
+# ────────────────────────────────────────────────────────────────────
+
+soc:SocialManifold a rdfs:Class ;
+    rdfs:label "Social Manifold" ;
+    rdfs:subClassOf manifold:Manifold ;
+    rdfs:comment "The social manifold — the UI surface for social activities. Corresponds to manifold:social in container.n3. Contains: social graph visualisation, community browsers, conversation views, reputation panels, and social context inspectors. The social manifold is where users see their social world — their relationships, communities, reputation, and the social context of their interactions. The social manifold integrates with the communications manifold: the social manifold shows who and why; the communications manifold shows what and how." .
+
+soc:socialSubManifold a rdf:Property ;
+    rdfs:label "sub-manifold" ;
+    rdfs:domain soc:SocialManifold ;
+    rdfs:range  soc:SocialSubManifold .
+
+soc:SocialSubManifold a rdfs:Class ;
+    rdfs:label "Social Sub-Manifold" .
+
+soc:ssmGraph a soc:SocialSubManifold ; rdfs:label "social-graph" ;
+    rdfs:comment "Social graph sub-manifold — visualisation of relationships, edge types, strengths, and history." .
+soc:ssmCommunities a soc:SocialSubManifold ; rdfs:label "communities" ;
+    rdfs:comment "Communities sub-manifold — browse, join, leave, create communities; view community rules and members." .
+soc:ssmReputation a soc:SocialSubManifold ; rdfs:label "reputation" ;
+    rdfs:comment "Reputation sub-manifold — view reputation assessments (given and received), evidence, and context." .
+soc:ssmContext a soc:SocialSubManifold ; rdfs:label "social-context" ;
+    rdfs:comment "Social context sub-manifold — inspect the social context of a conversation, content item, or interaction: relationships, communities, norms, obligations." .
+soc:ssmProtocols a soc:SocialSubManifold ; rdfs:label "protocols" ;
+    rdfs:comment "Social protocols sub-manifold — view and configure social protocols for communities you lead." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (social.n3) links to:
+#
+# agency.n3:
+#   - Social edges connect entities (NaturalPerson, LegalPerson,
+#     SoftwareEntity)
+#   - Community leaders are entities
+#   - Social protocols reference agency contracts
+#
+# personhood.n3:
+#   - Social edges are a dynamic view of person:SocialRelation
+#   - Family edges link to personhood familial relations
+#   - Professional edges link to personhood professional relations
+#
+# selfhood.n3:
+#   - Social context does not access selfhood
+#   - Reputation assessments are external; selfhood is protected
+#
+# communications.n3:
+#   - Social manifold shows who and why; communications shows what
+#     and how
+#   - Social context shapes communication interpretation
+#   - Presence and conversation patterns link to social edges
+#
+# container.n3:
+#   - Social manifold is a sub-class of manifold:Manifold
+#   - Social container hosts social graph and community views
+#   - Pulse panel docks at bottom of social manifold
+#
+# settings.n3:
+#   - Privacy preferences control social graph visibility
+#   - Communication preferences control notification delivery
+#   - Capabilities gate community management actions
+#
+# values.n3:
+#   - Community values link to values instruments
+#   - Reputation integrity dimension links to values gap analysis
+#   - Values agreements may be community-level
+#
+# provenance.n3:
+#   - All social edges and reputation assessments have provenance
+#   - Community membership changes have provenance
+#
+# obligations.n3:
+#   - Social context activates obligations
+#   - Social protocols reference confidentiality instruments
+#   - Community rules may create obligations for members
+#
+# social-connections.n3 (companion file):
+#   - ConnectionRequest creates SocialEdge instances
+#   - Risk assessment evaluates connection requests
+#   - Child protection policies govern minor connections
+#   - ZKP verification validates identity and credentials
+#   - Settings recommendations suggest connection parameters
+#
+# adversarial-conduct.n3 / adversarial-relational.n3:
+#   - Adversarial edge type links to adversarial conduct records
+#   - Reputation conduct dimension links to documented conduct
+#   - Social isolation is both a social graph change and an
+#     adversarial method
+#
+# faith-systems.n3:
+#   - Faith community type links to faith-systems communities
+#   - Faith community rules may be social protocols
+#
+# agent-nomenclature.n3:
+#   - Personal edges = natural person (mind-dependent: trust, affinity)
+#   - Institutional edges = legal person (organisational: membership)
+#   - Connection edges = software agent (computational: linked)
+#
+# epistemics.n3:
+#   - Reputation assessments have epistemic status
+#   - Social context has epistemic mode (intersubjective, contested)

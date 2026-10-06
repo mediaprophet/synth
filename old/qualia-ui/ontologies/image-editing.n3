@@ -1,0 +1,229 @@
+# Image Editing Ontology — layers, filters, brushes, masks, colour management
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: img: (image editing domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix img:    <https://purl.org/qualia/ontology/image-editing#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Image Asset
+# ────────────────────────────────────────────────────────────────────
+
+img:ImageAsset a rdfs:Class ;
+    rdfs:label "Image Asset" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A raster, vector, or hybrid image. Contains a stack of layers and has a colour profile." .
+
+img:ImageType a rdfs:Class ;
+    rdfs:label "Image Type" .
+
+img:RasterImage a img:ImageType ; rdfs:label "raster" .
+img:VectorImage a img:ImageType ; rdfs:label "vector" .
+img:HybridImage a img:ImageType ; rdfs:label "hybrid" .
+
+img:imageType a rdf:Property ;
+    rdfs:domain img:ImageAsset ;
+    rdfs:range  img:ImageType .
+
+img:width a rdf:Property ;
+    rdfs:domain img:ImageAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Width in pixels." .
+
+img:height a rdf:Property ;
+    rdfs:domain img:ImageAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Height in pixels." .
+
+img:dpi a rdf:Property ;
+    rdfs:domain img:ImageAsset ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Dots per inch for print resolution." .
+
+img:colourProfile a rdf:Property ;
+    rdfs:domain img:ImageAsset ;
+    rdfs:range  img:ColourProfile ;
+    rdfs:comment "ICC colour profile assigned to the image." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Colour Profile
+# ────────────────────────────────────────────────────────────────────
+
+img:ColourProfile a rdfs:Class ;
+    rdfs:label "Colour Profile" .
+
+img:sRGB a img:ColourProfile ; rdfs:label "sRGB" .
+img:AdobeRGB a img:ColourProfile ; rdfs:label "AdobeRGB" .
+img:ProPhoto a img:ColourProfile ; rdfs:label "ProPhoto" .
+img:DCIP3 a img:ColourProfile ; rdfs:label "DCI-P3" .
+img:Rec2020 a img:ColourProfile ; rdfs:label "Rec.2020" .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Layer
+# ────────────────────────────────────────────────────────────────────
+
+img:Layer a rdfs:Class ;
+    rdfs:label "Layer" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A composable layer within an image. Types: pixel, adjustment, vector, text, mask, smart-object." .
+
+img:LayerType a rdfs:Class ;
+    rdfs:label "Layer Type" .
+
+img:PixelLayer a img:LayerType ; rdfs:label "pixel" .
+img:AdjustmentLayer a img:LayerType ; rdfs:label "adjustment" .
+img:VectorLayer a img:LayerType ; rdfs:label "vector" .
+img:TextLayer a img:LayerType ; rdfs:label "text" .
+img:MaskLayer a img:LayerType ; rdfs:label "mask" .
+img:SmartObjectLayer a img:LayerType ; rdfs:label "smart-object" .
+
+img:layerType a rdf:Property ;
+    rdfs:domain img:Layer ;
+    rdfs:range  img:LayerType .
+
+img:blendMode a rdf:Property ;
+    rdfs:domain img:Layer ;
+    rdfs:range  img:BlendMode ;
+    rdfs:comment "Blend mode for compositing this layer with layers below." .
+
+img:BlendMode a rdfs:Class ;
+    rdfs:label "Blend Mode" .
+
+img:Normal a img:BlendMode ; rdfs:label "normal" .
+img:Multiply a img:BlendMode ; rdfs:label "multiply" .
+img:Screen a img:BlendMode ; rdfs:label "screen" .
+img:Overlay a img:BlendMode ; rdfs:label "overlay" .
+img:SoftLight a img:BlendMode ; rdfs:label "soft-light" .
+img:HardLight a img:BlendMode ; rdfs:label "hard-light" .
+img:ColourDodge a img:BlendMode ; rdfs:label "colour-dodge" .
+img:ColourBurn a img:BlendMode ; rdfs:label "colour-burn" .
+img:Difference a img:BlendMode ; rdfs:label "difference" .
+img:Exclusion a img:BlendMode ; rdfs:label "exclusion" .
+img:HueBlend a img:BlendMode ; rdfs:label "hue" .
+img:SaturationBlend a img:BlendMode ; rdfs:label "saturation" .
+img:ColourBlend a img:BlendMode ; rdfs:label "colour" .
+img:LuminosityBlend a img:BlendMode ; rdfs:label "luminosity" .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Filter
+# ────────────────────────────────────────────────────────────────────
+
+img:Filter a rdfs:Class ;
+    rdfs:label "Filter" ;
+    rdfs:comment "An image processing filter applied to a layer or selection." .
+
+img:FilterType a rdfs:Class ;
+    rdfs:label "Filter Type" .
+
+img:BlurFilter a img:FilterType ; rdfs:label "blur" .
+img:SharpenFilter a img:FilterType ; rdfs:label "sharpen" .
+img:ColourAdjustFilter a img:FilterType ; rdfs:label "colour-adjust" .
+img:DistortFilter a img:FilterType ; rdfs:label "distort" .
+img:NoiseFilter a img:FilterType ; rdfs:label "noise" .
+img:StyliseFilter a img:FilterType ; rdfs:label "stylise" .
+
+img:filterType a rdf:Property ;
+    rdfs:domain img:Filter ;
+    rdfs:range  img:FilterType .
+
+img:filterParams a rdf:Property ;
+    rdfs:domain img:Filter ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Filter parameters as CBOR-LD encoded string." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Brush
+# ────────────────────────────────────────────────────────────────────
+
+img:Brush a rdfs:Class ;
+    rdfs:label "Brush" ;
+    rdfs:comment "A brush configuration for painting on a pixel layer." .
+
+img:BrushType a rdfs:Class ;
+    rdfs:label "Brush Type" .
+
+img:PixelBrush a img:BrushType ; rdfs:label "pixel" .
+img:VectorBrush a img:BrushType ; rdfs:label "vector" .
+img:EraserBrush a img:BrushType ; rdfs:label "eraser" .
+img:CloneBrush a img:BrushType ; rdfs:label "clone" .
+img:HealBrush a img:BrushType ; rdfs:label "heal" .
+img:GradientBrush a img:BrushType ; rdfs:label "gradient" .
+
+img:brushType a rdf:Property ;
+    rdfs:domain img:Brush ;
+    rdfs:range  img:BrushType .
+
+img:brushSize a rdf:Property ;
+    rdfs:domain img:Brush ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Brush diameter in pixels." .
+
+img:brushOpacity a rdf:Property ;
+    rdfs:domain img:Brush ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Brush opacity (0.0–1.0)." .
+
+img:brushHardness a rdf:Property ;
+    rdfs:domain img:Brush ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Edge hardness (0.0 = soft, 1.0 = hard)." .
+
+img:brushFlow a rdf:Property ;
+    rdfs:domain img:Brush ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Flow rate (0.0–1.0)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Selection
+# ────────────────────────────────────────────────────────────────────
+
+img:Selection a rdfs:Class ;
+    rdfs:label "Selection" ;
+    rdfs:comment "A selection region on an image — rectangular, lasso, magic-wand, or vector-path." .
+
+img:SelectionType a rdfs:Class ;
+    rdfs:label "Selection Type" .
+
+img:RectSelect a img:SelectionType ; rdfs:label "rectangular" .
+img:LassoSelect a img:SelectionType ; rdfs:label "lasso" .
+img:MagicWandSelect a img:SelectionType ; rdfs:label "magic-wand" .
+img:VectorPathSelect a img:SelectionType ; rdfs:label "vector-path" .
+
+img:selectionType a rdf:Property ;
+    rdfs:domain img:Selection ;
+    rdfs:range  img:SelectionType .
+
+img:featherRadius a rdf:Property ;
+    rdfs:domain img:Selection ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Feather radius for soft edges." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Mask
+# ────────────────────────────────────────────────────────────────────
+
+img:Mask a rdfs:Class ;
+    rdfs:label "Mask" ;
+    rdfs:comment "A mask controlling layer visibility — layer-mask, clipping-mask, or vector-mask." .
+
+img:MaskType a rdfs:Class ;
+    rdfs:label "Mask Type" .
+
+img:LayerMask a img:MaskType ; rdfs:label "layer-mask" .
+img:ClippingMask a img:MaskType ; rdfs:label "clipping-mask" .
+img:VectorMask a img:MaskType ; rdfs:label "vector-mask" .
+
+img:maskType a rdf:Property ;
+    rdfs:domain img:Mask ;
+    rdfs:range  img:MaskType .
+
+img:maskData a rdf:Property ;
+    rdfs:domain img:Mask ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Mask data — pixel buffer IRI for layer masks, path IRI for vector masks." .

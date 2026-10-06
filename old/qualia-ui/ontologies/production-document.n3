@@ -1,0 +1,657 @@
+# Production Document Ontology — Scripts, Specifications, Style Guides,
+# and Structured Documents for Agent-Driven Production
+#
+# Authoring form (N3) — compiled to production-document.cbor (CBOR-LD)
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# This ontology defines vocabulary for production documents — structured
+# documents that describe what to produce and how. Production documents
+# are authored by humans (or collaboratively with software agents) and
+# may be processed by software agents to generate or assist in producing
+# hypermedia assets, software, publications, or reports.
+#
+# Production documents are distinct from hypermedia assets:
+#   - An asset IS the produced output (a film, a song, a 3D model)
+#   - A production document DESCRIBES what to produce (a script, a spec,
+#     a style guide)
+# A production document may reference assets (mood boards, reference
+# clips) and may be used to generate assets (a script becomes a film).
+#
+# Document types covered:
+#   - Film/TV script (scenes, characters, dialogue, action)
+#   - Functional specification (features, requirements, acceptance)
+#   - Style guide (visual, audio, code, brand)
+#   - Book/publication (chapters, topics, narrative structure)
+#   - Research report (queries, findings, layout, citations)
+#   - Production brief (scope, deliverables, constraints)
+#
+# Key concepts:
+#   - ProductionDocument: the umbrella class
+#   - DocumentSection: structural elements (scenes, chapters, features)
+#   - DocumentEntity: referable things within a document (characters,
+#     requirements, terms)
+#   - DocumentStyle: style rules and constraints
+#   - AgentProcessingDirective: instructions for software agents
+#   - DocumentLayout: how output should be presented
+#   - KnowledgeQuery: for research reports that query knowledge bases
+#
+# Imports: hypermedia.n3, agency.n3, epistemics.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix hm:         <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix pd:         <https://qualiadb.org/schema/ui/production-document#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Production Document — the umbrella class
+# ────────────────────────────────────────────────────────────────────
+
+pd:ProductionDocument a rdfs:Class ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:label "Production Document" ;
+    rdfs:comment "A structured document that describes what to produce and how. Production documents are authored by humans (or collaboratively with software agents) and may be processed by software agents to generate or assist in producing hypermedia assets, software, publications, or reports. A production document is distinct from the assets it describes — it is the blueprint, not the building. Production documents have their own provenance, version history, and may reference assets (mood boards, reference clips, existing styles) and other documents (a spec may reference a style guide)." .
+
+pd:documentType a rdf:Property ;
+    rdfs:label "document type" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentType ;
+    rdfs:comment "The type of production document." .
+
+pd:DocumentType a rdfs:Class ;
+    rdfs:label "Document Type" .
+
+pd:scriptDocument       a pd:DocumentType ; rdfs:label "script" ;
+    rdfs:comment "A film, TV, or theatrical script — scenes, characters, dialogue, action descriptions. May be processed by software agents to generate shot lists, storyboards, schedules, or preliminary edits." .
+pd:functionalSpec       a pd:DocumentType ; rdfs:label "functional-spec" ;
+    rdfs:comment "A functional specification for software or a system — features, requirements, acceptance criteria, constraints. May be processed by software agents to generate code scaffolding, test cases, or documentation." .
+pd:styleGuide           a pd:DocumentType ; rdfs:label "style-guide" ;
+    rdfs:comment "A style guide — visual, audio, code, brand, or editorial rules that constrain production. May be referenced by scripts, specs, and other documents to enforce consistency." .
+pd:bookPublication      a pd:DocumentType ; rdfs:label "book-publication" ;
+    rdfs:comment "A book or larger body of work — chapters, topics, narrative structure. May be fiction (novel, novella, short story collection) or non-fiction (textbook, monograph, essay collection). May be processed by software agents to generate layouts, indices, or format-specific outputs." .
+pd:researchReport       a pd:DocumentType ; rdfs:label "research-report" ;
+    rdfs:comment "A research or investigation report — queries a knowledge base or knowledge cloud, presents findings in a user-specified layout. May be processed by software agents to gather, filter, and structure information from knowledge bases, then format it according to the document's layout specification." .
+pd:productionBrief      a pd:DocumentType ; rdfs:label "production-brief" ;
+    rdfs:comment "A production brief — scope, deliverables, timeline, constraints, and objectives for a production. May reference scripts, specs, and style guides. Used to define the overall parameters of a production before detailed documents are created." .
+pd:treatmentOutline     a pd:DocumentType ; rdfs:label "treatment-outline" ;
+    rdfs:comment "A treatment or outline — a preliminary narrative or structural outline that precedes a full script or specification. May be processed by software agents to expand into a full script or spec." .
+pd:shotList             a pd:DocumentType ; rdfs:label "shot-list" ;
+    rdfs:comment "A shot list — derived from a script, lists each shot with camera, lighting, and blocking notes. May be generated by software agents from a script document." .
+pd:storyboard           a pd:DocumentType ; rdfs:label "storyboard" ;
+    rdfs:comment "A storyboard — visual representation of scenes or sequences, typically derived from a script. May be generated by software agents from a script document, combining visual generation with scene descriptions." .
+pd:technicalSpec        a pd:DocumentType ; rdfs:label "technical-spec" ;
+    rdfs:comment "A technical specification — implementation details, architecture, data models, APIs. Distinct from a functional spec (which describes what) — a technical spec describes how. May be processed by software agents to generate code, schemas, or deployment configurations." .
+pd:editorialGuideline   a pd:DocumentType ; rdfs:label "editorial-guideline" ;
+    rdfs:comment "An editorial guideline — rules for content creation, review, and publication. Covers tone, voice, fact-checking standards, citation requirements, and approval workflows. May be referenced by research reports and publications." .
+
+pd:documentVersion a rdf:Property ;
+    rdfs:label "document version" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Version identifier — e.g. 'draft-1', 'v2.3', 'final'. Production documents are versioned; each version is a distinct asset with provenance." .
+
+pd:documentStatus a rdf:Property ;
+    rdfs:label "document status" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentStatus ;
+    rdfs:comment "The lifecycle status of the document." .
+
+pd:DocumentStatus a rdfs:Class ;
+    rdfs:label "Document Status" .
+
+pd:statusDraft      a pd:DocumentStatus ; rdfs:label "draft" .
+pd:statusInReview   a pd:DocumentStatus ; rdfs:label "in-review" .
+pd:statusRevised    a pd:DocumentStatus ; rdfs:label "revised" .
+pd:statusApproved   a pd:DocumentStatus ; rdfs:label "approved" .
+pd:statusFinal      a pd:DocumentStatus ; rdfs:label "final" .
+pd:statusSuperseded a pd:DocumentStatus ; rdfs:label "superseded" .
+pd:statusArchived   a pd:DocumentStatus ; rdfs:label "archived" .
+
+pd:referencesDocument a rdf:Property ;
+    rdfs:label "references document" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:ProductionDocument ;
+    rdfs:comment "Links a document to another document it references — e.g. a script references a style guide, a spec references a production brief, a shot list references a script." .
+
+pd:derivedFromDocument a rdf:Property ;
+    rdfs:label "derived from document" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:ProductionDocument ;
+    rdfs:comment "Links a derived document to its source — e.g. a shot list derived from a script, a storyboard derived from a script, a technical spec derived from a functional spec." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Document Section — structural elements
+# ────────────────────────────────────────────────────────────────────
+
+pd:DocumentSection a rdfs:Class ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:label "Document Section" ;
+    rdfs:comment "A structural element within a production document. Sections are ordered, may be nested, and have a type that determines their content structure. Examples: a scene in a script, a chapter in a book, a feature in a spec, a finding in a research report." .
+
+pd:sectionType a rdf:Property ;
+    rdfs:label "section type" ;
+    rdfs:domain pd:DocumentSection ;
+    rdfs:range  pd:SectionType ;
+    rdfs:comment "The type of section — determines what content structure is expected." .
+
+pd:SectionType a rdfs:Class ;
+    rdfs:label "Section Type" .
+
+# Script section types
+pd:scene           a pd:SectionType ; rdfs:label "scene" ;
+    rdfs:comment "A scene in a script — has a heading (INT/EXT, location, time), action description, and dialogue. Scenes are the primary structural unit of a script." .
+pd:act             a pd:SectionType ; rdfs:label "act" ;
+    rdfs:comment "An act in a script or play — a group of scenes forming a dramatic unit." .
+pd:sequence        a pd:SectionType ; rdfs:label "sequence" ;
+    rdfs:comment "A sequence in a script — a group of scenes forming a narrative unit within an act." .
+pd:dialogue        a pd:SectionType ; rdfs:label "dialogue" ;
+    rdfs:comment "A dialogue block — character name, parenthetical, and speech. Nested within a scene." .
+pd:action          a pd:SectionType ; rdfs:label "action" ;
+    rdfs:comment "An action description — what happens visually in a scene. Nested within a scene." .
+pd:transition      a pd:SectionType ; rdfs:label "transition" ;
+    rdfs:comment "A transition instruction — CUT TO, FADE OUT, DISSOLVE, etc." .
+
+# Spec section types
+pd:feature         a pd:SectionType ; rdfs:label "feature" ;
+    rdfs:comment "A feature in a functional spec — describes a capability of the system. Has requirements, acceptance criteria, and priority." .
+pd:requirement     a pd:SectionType ; rdfs:label "requirement" ;
+    rdfs:comment "A requirement — a specific condition that must be met. Nested within a feature or standalone." .
+pd:acceptanceCriteria a pd:SectionType ; rdfs:label "acceptance-criteria" ;
+    rdfs:comment "Acceptance criteria — conditions that must be true for a feature to be considered complete. Nested within a feature." .
+pd:useCase         a pd:SectionType ; rdfs:label "use-case" ;
+    rdfs:comment "A use case — describes how a user interacts with the system to achieve a goal." .
+pd:userStory       a pd:SectionType ; rdfs:label "user-story" ;
+    rdfs:comment "A user story — 'As a [role], I want [goal], so that [benefit]'. Agile format." .
+pd:constraint      a pd:SectionType ; rdfs:label "constraint" ;
+    rdfs:comment "A constraint — a limitation or boundary on the solution space. Technical, budgetary, temporal, or regulatory." .
+pd:architecture    a pd:SectionType ; rdfs:label "architecture" ;
+    rdfs:comment "An architecture section — describes system structure, components, and interactions. Used in technical specs." .
+pd:dataModel       a pd:SectionType ; rdfs:label "data-model" ;
+    rdfs:comment "A data model section — describes entities, relationships, and schemas. Used in technical specs." .
+pd:apiSpec         a pd:SectionType ; rdfs:label "api-spec" ;
+    rdfs:comment "An API specification section — endpoints, methods, request/response schemas, authentication." .
+
+# Book/publication section types
+pd:chapter         a pd:SectionType ; rdfs:label "chapter" ;
+    rdfs:comment "A chapter in a book or publication — a major structural division. May contain sections and subsections." .
+pd:section         a pd:SectionType ; rdfs:label "section" ;
+    rdfs:comment "A section within a chapter — a thematic or narrative subdivision." .
+pd:prologue        a pd:SectionType ; rdfs:label "prologue" ;
+    rdfs:comment "A prologue — introductory material before the main work." .
+pd:epilogue        a pd:SectionType ; rdfs:label "epilogue" ;
+    rdfs:comment "An epilogue — concluding material after the main work." .
+pd:part            a pd:SectionType ; rdfs:label "part" ;
+    rdfs:comment "A part — a major division of a book containing multiple chapters. Used in longer works." .
+pd:topic           a pd:SectionType ; rdfs:label "topic" ;
+    rdfs:comment "A topic — a thematic division used in non-fiction, research, or educational works. May span multiple chapters." .
+
+# Research report section types
+pd:abstract        a pd:SectionType ; rdfs:label "abstract" ;
+    rdfs:comment "An abstract — summary of the research report's scope, methods, and findings." .
+pd:introduction    a pd:SectionType ; rdfs:label "introduction" ;
+    rdfs:comment "An introduction — context, background, and scope of the research." .
+pd:methodology     a pd:SectionType ; rdfs:label "methodology" ;
+    rdfs:comment "A methodology section — how the research was conducted, including queries, sources, and analytical methods." .
+pd:findings        a pd:SectionType ; rdfs:label "findings" ;
+    rdfs:comment "A findings section — results of the research, organised by topic or query. May contain tables, charts, and evidence references." .
+pd:discussion      a pd:SectionType ; rdfs:label "discussion" ;
+    rdfs:comment "A discussion section — interpretation of findings, implications, and limitations." .
+pd:conclusion      a pd:SectionType ; rdfs:label "conclusion" ;
+    rdfs:comment "A conclusion — summary of key findings and their significance." .
+pd:references      a pd:SectionType ; rdfs:label "references" ;
+    rdfs:comment "A references section — citations and sources used in the research." .
+
+# Style guide section types
+pd:visualStyle     a pd:SectionType ; rdfs:label "visual-style" ;
+    rdfs:comment "A visual style section — colour palette, typography, layout grids, iconography, imagery guidelines." .
+pd:audioStyle      a pd:SectionType ; rdfs:label "audio-style" ;
+    rdfs:comment "An audio style section — sound design rules, music guidelines, voice/tone for narration, audio levels." .
+pd:codeStyle       a pd:SectionType ; rdfs:label "code-style" ;
+    rdfs:comment "A code style section — naming conventions, formatting rules, architecture patterns, testing standards." .
+pd:brandStyle      a pd:SectionType ; rdfs:label "brand-style" ;
+    rdfs:comment "A brand style section — brand voice, messaging guidelines, logo usage, brand personality." .
+pd:editorialStyle  a pd:SectionType ; rdfs:label "editorial-style" ;
+    rdfs:comment "An editorial style section — grammar rules, citation format, heading conventions, fact-checking standards." .
+
+# Production brief section types
+pd:scope           a pd:SectionType ; rdfs:label "scope" ;
+    rdfs:comment "A scope section — what is and is not included in the production." .
+pd:deliverables    a pd:SectionType ; rdfs:label "deliverables" ;
+    rdfs:comment "A deliverables section — what the production will output, with formats and specifications." .
+pd:timeline        a pd:SectionType ; rdfs:label "timeline" ;
+    rdfs:comment "A timeline section — milestones, deadlines, and dependencies." .
+pd:budget          a pd:SectionType ; rdfs:label "budget" ;
+    rdfs:comment "A budget section — cost estimates and allocations." .
+
+pd:hasSection a rdf:Property ;
+    rdfs:label "has section" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentSection ;
+    rdfs:comment "Links a document to its top-level sections." .
+
+pd:hasSubsection a rdf:Property ;
+    rdfs:label "has subsection" ;
+    rdfs:domain pd:DocumentSection ;
+    rdfs:range  pd:DocumentSection ;
+    rdfs:comment "Links a section to its nested subsections — e.g. a scene has dialogue blocks, a chapter has sections." .
+
+pd:sectionContent a rdf:Property ;
+    rdfs:label "section content" ;
+    rdfs:domain pd:DocumentSection ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The text content of the section — may be plain text, markdown, or structured markup. For dialogue blocks, this is the speech text. For action descriptions, this is the action text. For requirements, this is the requirement statement." .
+
+pd:sectionOrder a rdf:Property ;
+    rdfs:label "section order" ;
+    rdfs:domain pd:DocumentSection ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "The order of this section within its parent — 0-indexed. Inherits ordering semantics from hm:elementOrder." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Document Entity — referable things within a document
+# ────────────────────────────────────────────────────────────────────
+
+pd:DocumentEntity a rdfs:Class ;
+    rdfs:label "Document Entity" ;
+    rdfs:comment "A referable entity within a production document — a character, a requirement, a term, a citation, a location, a prop. Document entities can be referenced from multiple sections and have their own properties. They are the 'noun' layer of a document — the things that sections describe, mention, or prescribe." .
+
+pd:entityType a rdf:Property ;
+    rdfs:label "entity type" ;
+    rdfs:domain pd:DocumentEntity ;
+    rdfs:range  pd:EntityType ;
+    rdfs:comment "The type of document entity." .
+
+pd:EntityType a rdfs:Class ;
+    rdfs:label "Entity Type" .
+
+# Script entities
+pd:character       a pd:EntityType ; rdfs:label "character" ;
+    rdfs:comment "A character in a script — has a name, description, relationships, and arc. Characters appear in scenes and speak dialogue." .
+pd:location        a pd:EntityType ; rdfs:label "location" ;
+    rdfs:comment "A location in a script — where scenes take place. Has a name, type (INT/EXT), and description." .
+pd:prop            a pd:EntityType ; rdfs:label "prop" ;
+    rdfs:comment "A prop — an object used in a scene. Has a name and description." .
+pd:plotPoint       a pd:EntityType ; rdfs:label "plot-point" ;
+    rdfs:comment "A plot point — a key event or turning point in the narrative. Has a description and occurs at a specific point in the script structure." .
+
+# Spec entities
+pd:actor           a pd:EntityType ; rdfs:label "actor" ;
+    rdfs:comment "An actor in a spec — a user role or system component that interacts with the system. Distinct from a character (script) — an actor is a functional role." .
+pd:systemComponent  a pd:EntityType ; rdfs:label "system-component" ;
+    rdfs:comment "A system component in a technical spec — a module, service, or subsystem with defined interfaces and responsibilities." .
+pd:dataEntity      a pd:EntityType ; rdfs:label "data-entity" ;
+    rdfs:comment "A data entity in a technical spec — a table, class, or structured type with fields and relationships." .
+pd:apiEndpoint     a pd:EntityType ; rdfs:label "api-endpoint" ;
+    rdfs:comment "An API endpoint — a URL path with method, parameters, and response schema." .
+
+# Shared entities
+pd:term            a pd:EntityType ; rdfs:label "term" ;
+    rdfs:comment "A defined term — a word or phrase with a specific meaning in the document's context. Used in glossaries, style guides, and specs." .
+pd:citation        a pd:EntityType ; rdfs:label "citation" ;
+    rdfs:comment "A citation — a reference to an external source. Has a bibliographic reference and may link to the source asset." .
+pd:assetReference  a pd:EntityType ; rdfs:label "asset-reference" ;
+    rdfs:comment "A reference to a hypermedia asset — a mood board image, a reference clip, a style example. Links the document to existing assets." .
+
+pd:entityName a rdf:Property ;
+    rdfs:label "entity name" ;
+    rdfs:domain pd:DocumentEntity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The name or label of the entity — e.g. 'JANE', 'Authentication Module', 'Chapter 3: The Forest'." .
+
+pd:entityDescription a rdf:Property ;
+    rdfs:label "entity description" ;
+    rdfs:domain pd:DocumentEntity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A description of the entity — for a character, their personality and background; for a component, its responsibility; for a term, its definition." .
+
+pd:hasEntity a rdf:Property ;
+    rdfs:label "has entity" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentEntity ;
+    rdfs:comment "Links a document to its entities — the characters, requirements, terms, and other referable things defined within it." .
+
+pd:referencesEntity a rdf:Property ;
+    rdfs:label "references entity" ;
+    rdfs:domain pd:DocumentSection ;
+    rdfs:range  pd:DocumentEntity ;
+    rdfs:comment "Links a section to the entities it references — e.g. a dialogue block references a character, a scene references a location, a requirement references an actor." .
+
+pd:entityRelationship a rdf:Property ;
+    rdfs:label "entity relationship" ;
+    rdfs:domain pd:DocumentEntity ;
+    rdfs:range  pd:DocumentEntity ;
+    rdfs:comment "A relationship between two entities — e.g. character A is the parent of character B, component A depends on component B, data entity A references data entity B." .
+
+pd:relationshipType a rdf:Property ;
+    rdfs:label "relationship type" ;
+    rdfs:domain pd:DocumentEntity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The type of relationship — e.g. 'parent-of', 'depends-on', 'references', 'appears-in', 'spouse-of', 'antagonist-of'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Document Style — style rules and constraints
+# ────────────────────────────────────────────────────────────────────
+
+pd:DocumentStyle a rdfs:Class ;
+    rdfs:label "Document Style" ;
+    rdfs:comment "A style rule or constraint that applies to a production document or its output. Style rules may be inherited from a referenced style guide or defined inline. They constrain how content is written, formatted, or produced. For scripts: formatting conventions (Courier 12pt, scene heading format). For specs: documentation format (markdown, docx). For publications: house style, citation format. For output: visual style, audio style, code style." .
+
+pd:styleRule a rdf:Property ;
+    rdfs:label "style rule" ;
+    rdfs:domain pd:DocumentStyle ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The rule itself — e.g. 'scene headings in ALL CAPS', 'use Oxford comma', 'maximum line length 80 characters', 'primary colour #0A0E14', 'narration voice: calm, authoritative'." .
+
+pd:styleCategory a rdf:Property ;
+    rdfs:label "style category" ;
+    rdfs:domain pd:DocumentStyle ;
+    rdfs:range  pd:StyleCategory ;
+    rdfs:comment "The category of style rule." .
+
+pd:StyleCategory a rdfs:Class ;
+    rdfs:label "Style Category" .
+
+pd:styleFormatting   a pd:StyleCategory ; rdfs:label "formatting" ;
+    rdfs:comment "Formatting rules — font, size, margins, spacing, heading styles." .
+pd:styleVisual       a pd:StyleCategory ; rdfs:label "visual" ;
+    rdfs:comment "Visual style rules — colour palette, typography, imagery, layout. Applies to visual output generated from the document." .
+pd:styleAudio        a pd:StyleCategory ; rdfs:label "audio" ;
+    rdfs:comment "Audio style rules — sound design, music, voice, levels. Applies to audio output generated from the document." .
+pd:styleCode         a pd:StyleCategory ; rdfs:label "code" ;
+    rdfs:comment "Code style rules — naming, formatting, architecture, testing. Applies to code output generated from the document." .
+pd:styleEditorial    a pd:StyleCategory ; rdfs:label "editorial" ;
+    rdfs:comment "Editorial style rules — grammar, tone, voice, citation format, fact-checking standards." .
+pd:styleBrand        a pd:StyleCategory ; rdfs:label "brand" ;
+    rdfs:comment "Brand style rules — brand voice, messaging, logo usage, brand personality. Applies to branded output." .
+pd:styleNarrative    a pd:StyleCategory ; rdfs:label "narrative" ;
+    rdfs:comment "Narrative style rules — tense, POV, pacing, dialogue conventions, narrative voice. Applies to scripts and publications." .
+
+pd:hasStyle a rdf:Property ;
+    rdfs:label "has style" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentStyle ;
+    rdfs:comment "Links a document to its style rules. Styles may be inherited from a referenced style guide or defined inline." .
+
+pd:inheritsStyleFrom a rdf:Property ;
+    rdfs:label "inherits style from" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:ProductionDocument ;
+    rdfs:comment "Links a document to a style guide it inherits style rules from. The document may override specific rules locally." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Agent Processing Directive — instructions for software agents
+# ────────────────────────────────────────────────────────────────────
+
+pd:AgentProcessingDirective a rdfs:Class ;
+    rdfs:label "Agent Processing Directive" ;
+    rdfs:comment "Instructions for a software agent that will process this production document. Directives specify what the agent should do with the document — generate output, validate content, extract information, or assist the human author. Directives are computational instructions — they describe what to compute, not how to think. Software agents process directives using computation; they do not have intent, understanding, or creative judgement. Directives may specify: the output type (shot list, storyboard, code scaffold, formatted report), the constraints (style rules, budget, time), the inputs (referenced assets, knowledge queries), and the quality criteria (what constitutes acceptable output). All agent output is marked with its provenance — the agent that produced it, the directive it followed, and the document it processed." .
+
+pd:directiveType a rdf:Property ;
+    rdfs:label "directive type" ;
+    rdfs:domain pd:AgentProcessingDirective ;
+    rdfs:range  pd:DirectiveType ;
+    rdfs:comment "What the agent should do with the document." .
+
+pd:DirectiveType a rdfs:Class ;
+    rdfs:label "Directive Type" .
+
+pd:generateOutput   a pd:DirectiveType ; rdfs:label "generate-output" ;
+    rdfs:comment "Generate an output asset from the document — e.g. generate a shot list from a script, generate code scaffolding from a spec, generate a formatted report from research findings. The output is a new asset with provenance linking it to the document and directive." .
+pd:validateContent  a pd:DirectiveType ; rdfs:label "validate-content" ;
+    rdfs:comment "Validate the document's content against its constraints — check that all scenes have locations, that all requirements have acceptance criteria, that all citations have sources. Reports violations for the human author to fix." .
+pd:extractInfo      a pd:DirectiveType ; rdfs:label "extract-info" ;
+    rdfs:comment "Extract structured information from the document — e.g. extract all characters and their relationships from a script, extract all requirements and their priorities from a spec, extract all terms and definitions from a style guide. The extracted information is structured as RDF triples." .
+pd:assistAuthor     a pd:DirectiveType ; rdfs:label "assist-author" ;
+    rdfs:comment "Assist the human author — suggest next steps, identify gaps, propose alternatives, check consistency. The agent provides suggestions; the human author decides. The agent does not write content autonomously — it provides computational assistance." .
+pd:queryKnowledgeBase a pd:DirectiveType ; rdfs:label "query-knowledge-base" ;
+    rdfs:comment "Query a knowledge base or knowledge cloud to gather information for a research report. The directive specifies the queries, the sources, and the filtering criteria. The agent executes the queries and structures the results for the author to review and incorporate." .
+pd:formatLayout     a pd:DirectiveType ; rdfs:label "format-layout" ;
+    rdfs:comment "Format the document's content according to a layout specification — arrange sections, apply styles, generate tables of contents, indices, and cross-references. The output is a formatted version of the document." .
+pd:translateDocument a pd:DirectiveType ; rdfs:label "translate-document" ;
+    rdfs:comment "Translate the document from one format or language to another — e.g. translate a script from English to French, convert a spec from markdown to docx, adapt a style guide for a different medium. The translation preserves the document's structure and meaning." .
+
+pd:directiveOutputType a rdf:Property ;
+    rdfs:label "directive output type" ;
+    rdfs:domain pd:AgentProcessingDirective ;
+    rdfs:range  pd:DocumentType ;
+    rdfs:comment "For generate-output directives, the type of document to generate — e.g. generate a shot-list from a script, generate a technical-spec from a functional-spec." .
+
+pd:directiveConstraints a rdf:Property ;
+    rdfs:label "directive constraints" ;
+    rdfs:domain pd:AgentProcessingDirective ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Constraints on the agent's output — e.g. 'maximum 30 scenes', 'use only open-source dependencies', 'cite at least 10 peer-reviewed sources', 'output in CBOR-LD format'." .
+
+pd:directiveQualityCriteria a rdf:Property ;
+    rdfs:label "directive quality criteria" ;
+    rdfs:domain pd:AgentProcessingDirective ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Criteria for acceptable output — e.g. 'all scenes must have a location and time', 'all requirements must be testable', 'all citations must be verifiable'. The agent checks its output against these criteria before presenting it." .
+
+pd:directiveAgentType a rdf:Property ;
+    rdfs:label "directive agent type" ;
+    rdfs:domain pd:AgentProcessingDirective ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The type of software agent required — e.g. 'natural-language-processor', 'code-generator', 'visual-generator', 'knowledge-query-engine', 'layout-formatter'. Specifies the computational capabilities needed." .
+
+pd:hasDirective a rdf:Property ;
+    rdfs:label "has directive" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:AgentProcessingDirective ;
+    rdfs:comment "Links a document to the processing directives that apply to it. A document may have multiple directives — e.g. a script may have a generate-shot-list directive and a generate-storyboard directive." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Document Layout — how output should be presented
+# ────────────────────────────────────────────────────────────────────
+
+pd:DocumentLayout a rdfs:Class ;
+    rdfs:label "Document Layout" ;
+    rdfs:comment "A specification of how a document's content should be presented in its output form. Layouts define the visual structure — page size, margins, columns, heading styles, table of contents, index, figure placement, citation format. Layouts may be predefined (a publisher's house style) or custom (user-specified for a specific output). For research reports, the layout specifies how queried knowledge is presented — table, chart, narrative, timeline, or spatial map. Layouts are distinct from style guides — style guides define rules (use Oxford comma), layouts define structure (two-column, A4, with sidebar)." .
+
+pd:layoutType a rdf:Property ;
+    rdfs:label "layout type" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  pd:LayoutType ;
+    rdfs:comment "The type of layout." .
+
+pd:LayoutType a rdfs:Class ;
+    rdfs:label "Layout Type" .
+
+pd:layoutPage       a pd:LayoutType ; rdfs:label "page" ;
+    rdfs:comment "A page-based layout — A4, Letter, A3, custom. Used for printable outputs (books, reports, specs)." .
+pd:layoutScreen     a pd:LayoutType ; rdfs:label "screen" ;
+    rdfs:comment "A screen-based layout — responsive web, fixed-width, mobile-first. Used for digital outputs (web reports, interactive specs, online publications)." .
+pd:layoutScript     a pd:LayoutType ; rdfs:label "script-format" ;
+    rdfs:comment "A script-format layout — industry-standard script formatting (Courier 12pt, specific margins, scene heading format). Used for film/TV scripts." .
+pd:layoutPresentation a pd:LayoutType ; rdfs:label "presentation" ;
+    rdfs:comment "A presentation layout — slides, aspect ratio (16:9, 4:3), speaker notes. Used for pitch decks, conference presentations, briefings." .
+pd:layoutPoster     a pd:LayoutType ; rdfs:label "poster" ;
+    rdfs:comment "A poster layout — large format, visual-first, minimal text. Used for conference posters, film posters, promotional materials." .
+pd:layoutInteractive a pd:LayoutType ; rdfs:label "interactive" ;
+    rdfs:comment "An interactive layout — non-linear navigation, hyperlinked sections, expandable content. Used for interactive specs, hypermedia reports, exploratory documents." .
+pd:layoutSpatial    a pd:LayoutType ; rdfs:label "spatial" ;
+    rdfs:comment "A spatial layout — content arranged on a 2D or 3D canvas with spatial relationships. Used for knowledge maps, investigation boards, spatial reports." .
+
+pd:layoutPageSize a rdf:Property ;
+    rdfs:label "layout page size" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For page layouts — e.g. 'A4', 'Letter', 'A3', '250x350mm (pocket)'." .
+
+pd:layoutMargins a rdf:Property ;
+    rdfs:label "layout margins" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For page layouts — e.g. '25mm all sides', 'top 30mm bottom 25mm left 25mm right 20mm'." .
+
+pd:layoutColumns a rdf:Property ;
+    rdfs:label "layout columns" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of columns — 1 for single-column, 2 for two-column, etc." .
+
+pd:layoutHasTOC a rdf:Property ;
+    rdfs:label "layout has table of contents" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the output should include a table of contents." .
+
+pd:layoutHasIndex a rdf:Property ;
+    rdfs:label "layout has index" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the output should include an index (for books, reports)." .
+
+pd:layoutHasFigures a rdf:Property ;
+    rdfs:label "layout has figures" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the output should include figures (charts, diagrams, images)." .
+
+pd:layoutCitationFormat a rdf:Property ;
+    rdfs:label "layout citation format" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Citation format — e.g. 'APA', 'MLA', 'Chicago', 'Harvard', 'IEEE', 'legal (Bluebook)'." .
+
+pd:layoutUserPreferences a rdf:Property ;
+    rdfs:label "layout user preferences" ;
+    rdfs:domain pd:DocumentLayout ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "User-specified layout preferences — e.g. 'dark mode', 'larger font', 'compact view', 'sidebar navigation'. These are user-level preferences that override defaults." .
+
+pd:hasLayout a rdf:Property ;
+    rdfs:label "has layout" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:DocumentLayout ;
+    rdfs:comment "Links a document to its layout specification." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Knowledge Query — for research reports
+# ────────────────────────────────────────────────────────────────────
+
+pd:KnowledgeQuery a rdfs:Class ;
+    rdfs:label "Knowledge Query" ;
+    rdfs:comment "A query against a knowledge base or knowledge cloud, used by research reports to gather information. Queries are structured — they specify what to search for, which sources to include, how to filter, and how to rank results. Queries are executed by software agents (query engines) and the results are structured for the author to review. Queries may be templated (reusable across reports) or ad-hoc (specific to one report). Results include provenance — which knowledge base, which sources, what confidence." .
+
+pd:queryExpression a rdf:Property ;
+    rdfs:label "query expression" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The query expression — may be SPARQL, a natural language query, a structured filter, or a combination. The expression is interpreted by the query engine." .
+
+pd:queryLanguage a rdf:Property ;
+    rdfs:label "query language" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  pd:QueryLanguage ;
+    rdfs:comment "The query language used." .
+
+pd:QueryLanguage a rdfs:Class ;
+    rdfs:label "Query Language" .
+
+pd:langSPARQL       a pd:QueryLanguage ; rdfs:label "sparql" ;
+    rdfs:comment "SPARQL Protocol and RDF Query Language — for querying RDF knowledge bases." .
+pd:langNaturalLanguage a pd:QueryLanguage ; rdfs:label "natural-language" ;
+    rdfs:comment "Natural language query — interpreted by the query engine using NLP. Results are ranked by semantic relevance." .
+pd:langStructured   a pd:QueryLanguage ; rdfs:label "structured" ;
+    rdfs:comment "Structured query — field-value filters, boolean operators, temporal/spatial constraints. Precise but less flexible than natural language." .
+pd:langVisual       a pd:QueryLanguage ; rdfs:label "visual" ;
+    rdfs:comment "Visual query — query by example, sketch, or visual similarity. Used for image and spatial knowledge bases." .
+
+pd:querySources a rdf:Property ;
+    rdfs:label "query sources" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Which knowledge bases or sources to query — e.g. 'local-kb', 'qualiadb:graph:research-01', 'external:pubmed', 'external:arxiv'. Multiple sources may be specified." .
+
+pd:queryFilters a rdf:Property ;
+    rdfs:label "query filters" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Filters to apply to results — e.g. 'date > 2020-01-01', 'epistemic-modality = objective', 'confidence > 0.8', 'language = en'." .
+
+pd:queryResultFormat a rdf:Property ;
+    rdfs:label "query result format" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  pd:ResultFormat ;
+    rdfs:comment "How the query results should be structured for presentation." .
+
+pd:ResultFormat a rdfs:Class ;
+    rdfs:label "Result Format" .
+
+pd:resultTable      a pd:ResultFormat ; rdfs:label "table" ;
+    rdfs:comment "Results presented as a table — rows and columns, sortable." .
+pd:resultChart      a pd:ResultFormat ; rdfs:label "chart" ;
+    rdfs:comment "Results presented as a chart — bar, line, pie, scatter, heatmap." .
+pd:resultNarrative  a pd:ResultFormat ; rdfs:label "narrative" ;
+    rdfs:comment "Results presented as narrative text — prose summary with inline citations." .
+pd:resultTimeline   a pd:ResultFormat ; rdfs:label "timeline" ;
+    rdfs:comment "Results presented as a timeline — events ordered by date." .
+pd:resultSpatial    a pd:ResultFormat ; rdfs:label "spatial" ;
+    rdfs:comment "Results presented on a spatial map — geographic or abstract spatial layout." .
+pd:resultGraph      a pd:ResultFormat ; rdfs:label "graph" ;
+    rdfs:comment "Results presented as a graph — nodes and edges showing relationships." .
+pd:resultRDF        a pd:ResultFormat ; rdfs:label "rdf" ;
+    rdfs:comment "Results as raw RDF triples — for further computational processing." .
+
+pd:queryMaxResults a rdf:Property ;
+    rdfs:label "query max results" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Maximum number of results to return." .
+
+pd:queryMinConfidence a rdf:Property ;
+    rdfs:label "query min confidence" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Minimum confidence threshold for results — 0.0 to 1.0. Filters out low-confidence results." .
+
+pd:hasQuery a rdf:Property ;
+    rdfs:label "has query" ;
+    rdfs:domain pd:ProductionDocument ;
+    rdfs:range  pd:KnowledgeQuery ;
+    rdfs:comment "Links a research report to its knowledge queries. A report may have multiple queries — each targeting different aspects of the research question." .
+
+pd:queryForSection a rdf:Property ;
+    rdfs:label "query for section" ;
+    rdfs:domain pd:KnowledgeQuery ;
+    rdfs:range  pd:DocumentSection ;
+    rdfs:comment "Links a query to the section where its results will be presented — e.g. a query for the 'findings' section, a query for the 'methodology' section." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology links to:
+#
+# hypermedia.n3:
+#   - pd:ProductionDocument is subClassOf hm:HypermediaAsset
+#   - pd:DocumentSection is subClassOf hm:CompositionElement
+#   - Documents may reference assets via hm:referencesAsset
+#   - Document output may be assets (shot lists, storyboards, code)
+#
+# agency.n3:
+#   - Documents have authors (agency:Entity)
+#   - Agent processing directives are executed by software agents
+#     (agency:SoftwareAgent) — the agent has no intent, it executes
+#     computational instructions
+#
+# epistemics.n3:
+#   - Document content may have epistemic modality (objective fact,
+#     subjective interpretation, intersubjective consensus)
+#   - Research report findings should be grounded with epistemic
+#     provenance — what is known, how it is known, confidence level
+#
+# Domain ontologies (image-editing, audio-production, video-production,
+# spatial-3d, interactive-hypermedia, portal-worlds, production-events):
+#   - Documents may reference domain assets as mood boards, references,
+#     or style examples
+#   - Generated outputs (storyboards, shot lists) may produce assets
+#     in these domains

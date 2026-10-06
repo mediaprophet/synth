@@ -1,0 +1,707 @@
+# Adversarial Conduct Ontology — Coercion, Compromise, Undue Influence,
+# and Strategic Harm Against Persons, Projects, Events, and Outcomes
+#
+# Authoring form (N3) — compiled to adversarial-conduct.cbor (CBOR-LD)
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# This ontology defines vocabulary for adversarial conduct — strategies,
+# methods, and patterns used to compromise, coerce, exert undue influence
+# over, pervert, or cause harm to persons, projects, event histories,
+# circumstances, and outcomes.
+#
+# The ontology serves two purposes:
+#   1. Prospective — support agreements and expectations by modelling
+#      threats, vulnerabilities, and protective measures
+#   2. Retrospective — evaluate current or historical events, assess
+#      whether conduct occurred, and document harm and consequences
+#
+# Key concepts:
+#   - AdversarialConduct: the umbrella class for all adversarial actions
+#   - ConductStrategy: the strategic objective (compromise, coerce, etc.)
+#   - ConductMethod: the specific technique (drugs, media, blackmail, etc.)
+#   - ConductTarget: what is being targeted (person, project, event, etc.)
+#   - HarmScope: direct, collateral, social harm
+#   - ConductPattern: coordinated multi-vector campaigns
+#   - ConductEvidence: for retrospective evaluation
+#   - ConductVulnerability: for prospective protection
+#
+# Nomenclature: Adversarial conduct involves intent, coercion, and
+# deception — these are mind-dependent capacities of natural persons.
+# Legal persons (organisations) may engage in institutional adversarial
+# conduct through decision-making processes that direct natural persons
+# to act adversarially. Software agents cannot engage in adversarial
+# conduct (no intent) — but may be used as instruments of adversarial
+# conduct by natural persons who deploy them.
+#
+# Imports: agency.n3, personhood.n3, duty-of-care.n3, care-scope.n3,
+#          agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix care:       <https://qualiadb.org/schema/ui/duty-of-care#> .
+@prefix scope:      <https://qualiadb.org/schema/ui/care-scope#> .
+@prefix adv:        <https://qualiadb.org/schema/ui/adversarial-conduct#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Adversarial Conduct — the umbrella class
+# ────────────────────────────────────────────────────────────────────
+
+adv:AdversarialConduct a rdfs:Class ;
+    rdfs:label "Adversarial Conduct" ;
+    rdfs:comment "An action or campaign that aims to compromise, coerce, exert undue influence over, pervert, or cause harm to a target. The target may be a person, a project, an event history, a circumstance, or an outcome. Adversarial conduct is distinct from lawful opposition or legitimate competition — it involves methods that are unlawful, unethical, or that violate the target's autonomy, rights, or interests. Adversarial conduct is a personhood concept — it involves intent, which is a mind-dependent capacity of natural persons. Legal persons may direct adversarial conduct through institutional decision-making processes. Software agents cannot engage in adversarial conduct (no intent) but may be deployed as instruments of it." .
+
+adv:conductStrategy a rdf:Property ;
+    rdfs:label "conduct strategy" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ConductStrategy ;
+    rdfs:comment "The strategic objective of the conduct — what the actor aims to achieve." .
+
+adv:ConductStrategy a rdfs:Class ;
+    rdfs:label "Conduct Strategy" .
+
+adv:compromise     a adv:ConductStrategy ; rdfs:label "compromise" ;
+    rdfs:comment "To compromise the target — place them in a vulnerable position that can be exploited. The target may not be aware they are compromised until the compromise is leveraged. Examples: compromising a politician with illicit material, compromising a project by inserting a vulnerable dependency, compromising an event record by altering documentation." .
+adv:coerce         a adv:ConductStrategy ; rdfs:label "coerce" ;
+    rdfs:comment "To coerce the target — compel action or inaction through threat, force, or pressure. The target is aware they are being coerced but may be unable to resist. Examples: threatening exposure of compromising material, threatening family, threatening financial ruin. Coercion is a mind-dependent experience — restricted to natural persons as targets. Projects and events can be pressured but not coerced (no will to compel)." .
+adv:undueInfluence a adv:ConductStrategy ; rdfs:label "undue-influence" ;
+    rdfs:comment "To exert undue influence — manipulate the target's decision-making through excessive pressure, manipulation, or exploitation of a relationship of trust or dependency. Distinct from coercion: undue influence may be subtle and the target may not fully recognise it. Examples: a trusted advisor steering decisions to benefit themselves, a family member isolating and controlling an elderly person's finances, a cult leader directing followers' life choices. Undue influence is a mind-dependent experience — restricted to natural persons as targets." .
+adv:pervert        a adv:ConductStrategy ; rdfs:label "pervert" ;
+    rdfs:comment "To pervert a process, institution, or outcome — corrupt the proper course of something so it serves a different purpose. Examples: perverting the course of justice (false evidence, witness intimidation), perverting an election (vote manipulation, disinformation), perverting a project (inserting covert objectives), perverting an event record (falsifying history)." .
+adv:tort           a adv:ConductStrategy ; rdfs:label "tort" ;
+    rdfs:comment "To commit a tort or civil wrong against the target — negligence, nuisance, trespass, defamation, breach of duty causing harm. The harm is actionable in civil law. Examples: defaming a competitor, negligently causing financial loss, trespassing on property rights." .
+adv:harm           a adv:ConductStrategy ; rdfs:label "harm" ;
+    rdfs:comment "To cause direct harm to the target — physical, psychological, financial, reputational, or social. The most general adversarial strategy — all other strategies ultimately aim to cause harm, but this strategy is direct and immediate. Examples: physical assault, reputational destruction, financial sabotage." .
+adv:subvert        a adv:ConductStrategy ; rdfs:label "subvert" ;
+    rdfs:comment "To subvert a system, institution, or process from within — undermine its proper functioning by infiltrating or corrupting its components. Examples: placing agents inside an organisation, corrupting a regulatory process, subverting a project's quality assurance. Distinct from pervert: subversion works from inside, perversion works on the process itself." .
+adv:deceive        a adv:ConductStrategy ; rdfs:label "deceive" ;
+    rdfs:comment "To deceive the target — cause them to act on false information. Examples: fraud, impersonation, disinformation, staged events. Deception is a mind-dependent experience — restricted to natural persons as targets. Projects and events can be corrupted with false data but not deceived (no capacity to act on belief)." .
+adv:isolate        a adv:ConductStrategy ; rdfs:label "isolate" ;
+    rdfs:comment "To isolate the target — cut them off from support networks, information sources, or resources that would enable resistance or recovery. Examples: isolating a victim from family, isolating a project from oversight, isolating an event from independent verification. Isolation is often a precursor to other strategies — a compromised and isolated target is easier to coerce." .
+adv:infiltrate     a adv:ConductStrategy ; rdfs:label "infiltrate" ;
+    rdfs:comment "To infiltrate a target organisation, project, or network — gain access by false pretences or by placing agents inside. Examples: infiltrating a political party, infiltrating a project team, infiltrating a community group. Infiltration is often a precursor to subversion or information access." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Conduct Method — the specific technique
+# ────────────────────────────────────────────────────────────────────
+
+adv:conductMethod a rdf:Property ;
+    rdfs:label "conduct method" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ConductMethod ;
+    rdfs:comment "The specific technique or method used. A single conduct may employ multiple methods." .
+
+adv:ConductMethod a rdfs:Class ;
+    rdfs:label "Conduct Method" .
+
+adv:drugMethod         a adv:ConductMethod ; rdfs:label "drug-facilitation" ;
+    rdfs:comment "Use of drugs to compromise a target — administering substances without consent to incapacitate, disorient, or create compromising situations. Includes sedation, intoxication, and psychoactive manipulation. The target may not remember or may be unable to resist. Restricted to natural person targets." .
+adv:sexualCompromise   a adv:ConductMethod ; rdfs:label "sexual-compromise" ;
+    rdfs:comment "Use of sexual means to compromise a target — prostitution, entrapment, honey-trap operations, covert recording. May involve drugs (combined with drugMethod). The aim is to create compromising material or situations that can be leveraged for blackmail or influence. Restricted to natural person targets." .
+adv:mediaManipulation  a adv:ConductMethod ; rdfs:label "media-manipulation" ;
+    rdfs:comment "Use of media to manipulate perception — disinformation, propaganda, character assassination, coordinated social media campaigns, planted stories, deep-fakes. May target a person (reputation), a project (public opposition), an event (false narrative), or an outcome (public opinion manipulation)." .
+adv:blackmail          a adv:ConductMethod ; rdfs:label "blackmail" ;
+    rdfs:comment "Threat of exposure or harm to compel action or inaction. Leverages compromising material (sexual, financial, personal). Restricted to natural person targets — blackmail requires the target to fear exposure, which is a mind-dependent response." .
+adv:financialPressure  a adv:ConductMethod ; rdfs:label "financial-pressure" ;
+    rdfs:comment "Use of financial leverage — debt manipulation, economic dependency, bribery, controlled financial crises, asset freezing. May target persons (debt bondage), projects (funding withdrawal), or outcomes (bribing decision-makers)." .
+adv:extortion          a adv:ConductMethod ; rdfs:label "extortion" ;
+    rdfs:comment "Obtaining something through force or threats — distinct from blackmail: extortion is the threat itself, blackmail leverages existing compromising material. May include protection rackets, forced payments, forced concessions." .
+adv:bribery            a adv:ConductMethod ; rdfs:label "bribery" ;
+    rdfs:comment "Offering or providing value to influence a decision or action. Targets the decision-maker's integrity. May target persons (bribing an official), projects (bribing a project manager to alter scope), or outcomes (bribing a judge, an auditor, a regulator)." .
+adv:intimidation       a adv:ConductMethod ; rdfs:label "intimidation" ;
+    rdfs:comment "Use of fear or threat of harm to influence behaviour — physical threats, property damage threats, threats to family, stalking, harassment. Restricted to natural person targets — intimidation requires the target to experience fear, which is a mind-dependent response." .
+adv:socialEngineering  a adv:ConductMethod ; rdfs:label "social-engineering" ;
+    rdfs:comment "Manipulation of social dynamics to gain access, information, or influence — exploiting trust, creating false relationships, impersonating authority. May target persons (gaining confidence), projects (inserting agents), or systems (bypassing security through human manipulation)." .
+adv:digitalCompromise  a adv:ConductMethod ; rdfs:label "digital-compromise" ;
+    rdfs:comment "Use of digital means to compromise a target — hacking, surveillance, data theft, account takeover, planting false digital evidence. May target persons (compromising communications), projects (stealing data, inserting vulnerabilities), events (altering digital records), or outcomes (manipulating digital systems)." .
+adv:legalAbuse         a adv:ConductMethod ; rdfs:label "legal-abuse" ;
+    rdfs:comment "Use of legal processes as weapons — strategic lawsuits against public participation (SLAPPs), frivolous litigation, regulatory harassment, malicious prosecution, vexatious litigation. The aim is to drain resources, silence opposition, or delay outcomes through legal process rather than win on merits." .
+adv:isolationMethod    a adv:ConductMethod ; rdfs:label "isolation" ;
+    rdfs:comment "Active isolation of the target — cutting off communication, discrediting support networks, physical confinement, controlling access to information. Often combined with other methods — an isolated target is easier to coerce, deceive, or harm." .
+adv:disinformation     a adv:ConductMethod ; rdfs:label "disinformation" ;
+    rdfs:comment "Deliberate spread of false information to manipulate perception or action — distinct from media manipulation: disinformation is the content, media manipulation is the channel. May target persons (false accusations), projects (false safety claims), events (false narratives about what occurred), or outcomes (false information to influence decisions)." .
+adv:agentInsertion     a adv:ConductMethod ; rdfs:label "agent-insertion" ;
+    rdfs:comment "Placing an agent inside a target organisation, project, or network — the agent acts as a trusted insider while serving the adversary's objectives. May involve false credentials, fabricated backgrounds, or recruitment of existing members." .
+adv:supplyChainCompromise a adv:ConductMethod ; rdfs:label "supply-chain-compromise" ;
+    rdfs:comment "Compromising a target through its supply chain — inserting vulnerabilities in dependencies, corrupting suppliers, intercepting materials. May target projects (compromised components), events (altered records through compromised systems), or outcomes (compromised decision inputs)." .
+adv:witnessTampering   a adv:ConductMethod ; rdfs:label "witness-tampering" ;
+    rdfs:comment "Interfering with witnesses or evidence — intimidation, bribery, coaching, fabrication of testimony, destruction of evidence. Targets the integrity of legal, investigative, or audit processes." .
+adv:softwareAgentWeaponised a adv:ConductMethod ; rdfs:label "software-agent-weaponised" ;
+    rdfs:comment "A software agent deployed as an instrument of adversarial conduct by a natural person — e.g. automated disinformation campaigns, mass surveillance, automated harassment, deep-fake generation. The software agent has no intent — the adversarial conduct is committed by the natural person who deployed it. The software agent's outputs may be classified as ungrounded generation if they produce false content without grounding." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Conduct Target — what is being targeted
+# ────────────────────────────────────────────────────────────────────
+
+adv:conductTarget a rdf:Property ;
+    rdfs:label "conduct target" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ConductTarget ;
+    rdfs:comment "What the conduct targets — a person, project, event, circumstance, or outcome." .
+
+adv:ConductTarget a rdfs:Class ;
+    rdfs:label "Conduct Target" .
+
+adv:targetPerson       a adv:ConductTarget ; rdfs:label "person" ;
+    rdfs:comment "A natural person is the direct target — may be targeted for compromise, coercion, influence, or harm. The person may be a decision-maker, a witness, a public figure, a project lead, or any individual whose actions or position makes them a target." .
+adv:targetLegalPerson  a adv:ConductTarget ; rdfs:label "legal-person" ;
+    rdfs:comment "A legal person (company, institution, organisation) is the direct target — may be targeted for infiltration, subversion, financial harm, or reputational damage. The legal person is targeted through its people, systems, and processes." .
+adv:targetProject      a adv:ConductTarget ; rdfs:label "project" ;
+    rdfs:comment "A project is the direct target — may be targeted for sabotage, subversion, delay, scope perversion, or failure. The project's people, dependencies, data, and processes may all be attack vectors." .
+adv:targetEventHistory a adv:ConductTarget ; rdfs:label "event-history" ;
+    rdfs:comment "The historical record of events is the target — may be targeted for alteration, falsification, suppression, or selective curation. The aim is to pervert what is known about what happened — false narratives, suppressed evidence, altered records, fabricated documentation. Distinct from disinformation: event-history targeting specifically attacks the record of what occurred, not just current perception." .
+adv:targetCircumstance a adv:ConductTarget ; rdfs:label "circumstance" ;
+    rdfs:comment "A circumstance or situation is the target — may be manufactured, altered, or exploited. Examples: manufacturing a crisis to justify emergency powers, creating a false security incident to influence an election, engineering a financial crisis to enable asset acquisition at distressed prices." .
+adv:targetOutcome      a adv:ConductTarget ; rdfs:label "outcome" ;
+    rdfs:comment "An outcome or decision is the target — may be targeted for perversion, reversal, or manipulation. Examples: corrupting a court verdict, manipulating an election result, perverting a regulatory decision, altering a project's deliverable. The outcome may be targeted directly (bribing the decision-maker) or indirectly (compromising inputs to the decision)." .
+adv:targetRelation     a adv:ConductTarget ; rdfs:label "relation" ;
+    rdfs:comment "A relationship between parties is the target — may be targeted for destruction, weakening, or perversion. Examples: destroying trust between business partners, alienating a child from a parent, breaking a political alliance, undermining a duty-of-care relation. See guard:Intervention for intervention-specific targeting of duty-of-care relations." .
+adv:targetInformation  a adv:ConductTarget ; rdfs:label "information" ;
+    rdfs:comment "Information or data is the target — may be targeted for theft, alteration, suppression, or fabrication. Examples: stealing trade secrets, altering financial records, suppressing evidence, fabricating research data. Information targeting may support other strategies — e.g. stealing information to enable blackmail, altering information to pervert an outcome." .
+adv:targetSystem       a adv:ConductTarget ; rdfs:label "system" ;
+    rdfs:comment "A system or process is the target — may be targeted for subversion, disruption, or corruption. Examples: subverting a regulatory process, disrupting an electoral system, corrupting a quality assurance process, compromising a software system. System targeting may affect multiple persons, projects, and outcomes simultaneously." .
+
+adv:targetEntity a rdf:Property ;
+    rdfs:label "target entity" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The specific entity targeted — links to the actual person, organisation, project, or system." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Harm Scope — direct, collateral, social
+# ────────────────────────────────────────────────────────────────────
+
+adv:harmScope a rdf:Property ;
+    rdfs:label "harm scope" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:HarmScope ;
+    rdfs:comment "The scope of harm caused or intended — direct, collateral, or social. A single conduct may cause multiple scopes of harm." .
+
+adv:HarmScope a rdfs:Class ;
+    rdfs:label "Harm Scope" .
+
+adv:directHarm     a adv:HarmScope ; rdfs:label "direct-harm" ;
+    rdfs:comment "Harm to the direct target — the person, project, or outcome that was the intended object of the conduct. Examples: the compromised politician, the sabotaged project, the perverted verdict." .
+adv:collateralHarm a adv:HarmScope ; rdfs:label "collateral-harm" ;
+    rdfs:comment "Harm to parties other than the direct target — family, colleagues, dependents, community members who suffer as a consequence of the conduct. The collateral harm may be intentional (a secondary objective) or unintentional (a side effect). Examples: family of a compromised target, employees of a sabotaged project, community affected by a perverted outcome." .
+adv:socialHarm     a adv:HarmScope ; rdfs:label "social-harm" ;
+    rdfs:comment "Harm to society or social systems — erosion of trust in institutions, normalisation of corruption, chilling effect on participation, undermining of rule of law. Social harm extends beyond the immediate parties and may persist long after the conduct is discovered. Examples: public trust erosion from a compromised election, institutional credibility damage from a perverted justice process, community fear from organised crime intimidation." .
+adv:informationalHarm a adv:HarmScope ; rdfs:label "informational-harm" ;
+    rdfs:comment "Harm to the information environment — pollution of the information ecosystem, erosion of epistemic trust, creation of false historical records. May persist indefinitely if not corrected. Examples: fabricated research that misleads future work, altered event records that distort historical understanding, disinformation that creates persistent false beliefs." .
+
+adv:harmDescription a rdf:Property ;
+    rdfs:label "harm description" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of the specific harm caused — e.g. 'target lost position and reputation', 'project delayed 18 months', 'verdict overturned on false evidence', 'family separated for 3 years'." .
+
+adv:harmSeverity a rdf:Property ;
+    rdfs:label "harm severity" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:HarmSeverity ;
+    rdfs:comment "The severity of harm caused or anticipated." .
+
+adv:HarmSeverity a rdfs:Class ;
+    rdfs:label "Harm Severity" .
+
+adv:severityMinor     a adv:HarmSeverity ; rdfs:label "minor" ;
+    rdfs:comment "Minor harm — inconvenience, small financial loss, temporary disruption." .
+adv:severityModerate  a adv:HarmSeverity ; rdfs:label "moderate" ;
+    rdfs:comment "Moderate harm — significant financial loss, reputational damage, project delay, temporary incapacity." .
+adv:severitySerious   a adv:HarmSeverity ; rdfs:label "serious" ;
+    rdfs:comment "Serious harm — long-term financial ruin, severe reputational destruction, project failure, long-term psychological harm, loss of position." .
+adv:severitySevere    a adv:HarmSeverity ; rdfs:label "severe" ;
+    rdfs:comment "Severe harm — physical injury, long-term incapacity, family destruction, institutional collapse, criminal conviction on false evidence." .
+adv:severityTerminal  a adv:HarmSeverity ; rdfs:label "terminal" ;
+    rdfs:comment "Terminal harm — death, permanent incapacity, irreversible destruction of reputation or project, irreversible perversion of justice." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Conduct Pattern — coordinated multi-vector campaigns
+# ────────────────────────────────────────────────────────────────────
+
+adv:ConductPattern a rdfs:Class ;
+    rdfs:label "Conduct Pattern" ;
+    rdfs:comment "A coordinated campaign of adversarial conduct employing multiple strategies, methods, and targets over time. Conduct patterns model sophisticated adversarial operations — e.g. organised crime compromising a public figure through drugs, sexual compromise, media manipulation, and financial pressure simultaneously. A pattern links multiple AdversarialConduct instances into a coordinated whole, with phases, escalation, and a strategic objective that may differ from the sum of its parts." .
+
+adv:patternObjective a rdf:Property ;
+    rdfs:label "pattern objective" ;
+    rdfs:domain adv:ConductPattern ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The strategic objective of the overall campaign — e.g. 'gain control over city planning decisions', 'silence investigation into criminal network', 'pervert election outcome in district X', 'destroy competitor's project and reputation'." .
+
+adv:patternPhase a rdf:Property ;
+    rdfs:label "pattern phase" ;
+    rdfs:domain adv:ConductPattern ;
+    rdfs:range  adv:PatternPhase ;
+    rdfs:comment "The phase of the campaign — campaigns may have reconnaissance, infiltration, compromise, leverage, execution, and cover-up phases." .
+
+adv:PatternPhase a rdfs:Class ;
+    rdfs:label "Pattern Phase" .
+
+adv:phaseReconnaissance a adv:PatternPhase ; rdfs:label "reconnaissance" ;
+    rdfs:comment "Information gathering — identifying targets, vulnerabilities, relationships, routines, and pressure points." .
+adv:phaseInfiltration   a adv:PatternPhase ; rdfs:label "infiltration" ;
+    rdfs:comment "Gaining access — placing agents, building false relationships, inserting assets into target's environment or organisation." .
+adv:phaseCompromise     a adv:PatternPhase ; rdfs:label "compromise" ;
+    rdfs:comment "Creating the compromising circumstance — drugs, sexual entrapment, financial traps, fabricated evidence, planted information." .
+adv:phaseLeverage       a adv:PatternPhase ; rdfs:label "leverage" ;
+    rdfs:comment "Using the compromise to exert control — blackmail, coercion, undue influence, forced cooperation." .
+adv:phaseExecution      a adv:PatternPhase ; rdfs:label "execution" ;
+    rdfs:comment "Achieving the strategic objective — the compromised target acts as directed, the perverted outcome is delivered, the sabotaged project fails." .
+adv:phaseCoverUp        a adv:PatternPhase ; rdfs:label "cover-up" ;
+    rdfs:comment "Concealing the conduct — destroying evidence, witness tampering, false narratives, eliminating loose ends, creating alternative explanations." .
+adv:phaseMaintenance    a adv:PatternPhase ; rdfs:label "maintenance" ;
+    rdfs:comment "Maintaining the compromised position — ongoing pressure, periodic leverage, preventing the target from breaking free or reporting." .
+
+adv:hasConduct a rdf:Property ;
+    rdfs:label "has conduct" ;
+    rdfs:domain adv:ConductPattern ;
+    rdfs:range  adv:AdversarialConduct ;
+    rdfs:comment "Links a conduct pattern to the individual conduct instances that comprise it. A pattern may have many conduct instances across different phases." .
+
+adv:patternCoordination a rdf:Property ;
+    rdfs:label "pattern coordination" ;
+    rdfs:domain adv:ConductPattern ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the campaign is coordinated — e.g. 'single controller directing multiple agents', 'cell structure with compartmentalised roles', 'decentralised with shared objective', 'state-sponsored with institutional support'." .
+
+adv:patternActor a rdf:Property ;
+    rdfs:label "pattern actor" ;
+    rdfs:domain adv:ConductPattern ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The primary actor or organisation behind the campaign — e.g. a criminal network, a state agency, a competitor, a hostile nation-state." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Conduct Actor — who is behind the conduct
+# ────────────────────────────────────────────────────────────────────
+
+adv:conductActor a rdf:Property ;
+    rdfs:label "conduct actor" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that engaged in the conduct — a natural person, a legal person, or a group. The actor has intent — restricted to natural persons and legal persons (acting through natural persons). Software agents are instruments, not actors." .
+
+adv:actorType a rdf:Property ;
+    rdfs:label "actor type" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ActorType ;
+    rdfs:comment "The type of actor — individual, organised crime, state, corporate, ideological." .
+
+adv:ActorType a rdfs:Class ;
+    rdfs:label "Actor Type" .
+
+adv:actorIndividual    a adv:ActorType ; rdfs:label "individual" ;
+    rdfs:comment "An individual acting alone — personal grievance, personal gain, opportunistic." .
+adv:actorOrganisedCrime a adv:ActorType ; rdfs:label "organised-crime" ;
+    rdfs:comment "Organised criminal network — structured, resourced, multi-vector capability, motivated by profit or power. May employ drugs, prostitution, media, financial leverage, violence, and corruption simultaneously." .
+adv:actorState         a adv:ActorType ; rdfs:label "state" ;
+    rdfs:comment "State or state-sponsored actor — intelligence services, state media, state-aligned proxies. Has institutional resources, legal cover, and strategic objectives beyond individual gain." .
+adv:actorCorporate     a adv:ActorType ; rdfs:label "corporate" ;
+    rdfs:comment "Corporate actor — acting through institutional decision-making processes to harm competitors, silence critics, pervert regulation, or gain market advantage. May use legal abuse, financial pressure, media manipulation, and supply chain compromise." .
+adv:actorIdeological   a adv:ActorType ; rdfs:label "ideological" ;
+    rdfs:comment "Ideologically motivated actor — political, religious, or ideological group conducting adversarial operations to advance their cause. May use disinformation, infiltration, agent insertion, and media manipulation." .
+adv:actorProxy         a adv:ActorType ; rdfs:label "proxy" ;
+    rdfs:comment "A proxy actor acting on behalf of another — a cut-out, a front organisation, a hired agent. The proxy may not know the ultimate actor. Used to maintain deniability." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Conduct Evidence — for retrospective evaluation
+# ────────────────────────────────────────────────────────────────────
+
+adv:ConductEvidence a rdfs:Class ;
+    rdfs:label "Conduct Evidence" ;
+    rdfs:comment "Evidence that adversarial conduct occurred. Evidence may be direct (witness testimony, recordings, documents) or indirect (pattern analysis, circumstantial evidence, digital forensics). Evidence is appendable — new evidence may emerge over time and does not replace existing evidence. Evidence may support or refute the allegation of conduct. All evidence has provenance — who found it, when, how, and what it links to." .
+
+adv:evidenceType a rdf:Property ;
+    rdfs:label "evidence type" ;
+    rdfs:domain adv:ConductEvidence ;
+    rdfs:range  adv:EvidenceType ;
+    rdfs:comment "The type of evidence." .
+
+adv:EvidenceType a rdfs:Class ;
+    rdfs:label "Evidence Type" .
+
+adv:evidenceDirect      a adv:EvidenceType ; rdfs:label "direct" ;
+    rdfs:comment "Direct evidence — witness testimony, recordings, documents, physical evidence that directly shows the conduct occurred." .
+adv:evidenceCircumstantial a adv:EvidenceType ; rdfs:label "circumstantial" ;
+    rdfs:comment "Circumstantial evidence — facts from which the conduct may be inferred. Examples: unexplained wealth, sudden changes in behaviour, unexplained meetings, pattern of decisions favouring a particular party." .
+adv:evidenceDigital     a adv:EvidenceType ; rdfs:label "digital" ;
+    rdfs:comment "Digital evidence — communications metadata, financial transactions, system logs, social media activity, location data, device forensics. May require expert interpretation." .
+adv:evidencePattern     a adv:EvidenceType ; rdfs:label "pattern" ;
+    rdfs:comment "Pattern evidence — the conduct fits a known pattern of adversarial behaviour (e.g. the phases of a compromise campaign). Pattern evidence is inferential — it shows the conduct is consistent with a known adversarial template." .
+adv:evidenceCorroborating a adv:EvidenceType ; rdfs:label "corroborating" ;
+    rdfs:comment "Corroborating evidence — supports other evidence without being direct evidence itself. Examples: a second witness confirming a meeting, financial records confirming a payment described in testimony." .
+adv:evidenceContradicting a adv:EvidenceType ; rdfs:label "contradicting" ;
+    rdfs:comment "Contradicting evidence — undermines or refutes the allegation of conduct. Evidence quality requires considering both supporting and contradicting evidence." .
+
+adv:evidenceDescription a rdf:Property ;
+    rdfs:label "evidence description" ;
+    rdfs:domain adv:ConductEvidence ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of the evidence and what it shows." .
+
+adv:evidenceFoundBy a rdf:Property ;
+    rdfs:label "evidence found by" ;
+    rdfs:domain adv:ConductEvidence ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who found or produced the evidence — investigator, journalist, whistleblower, auditor, forensic analyst." .
+
+adv:evidenceFoundAt a rdf:Property ;
+    rdfs:label "evidence found at" ;
+    rdfs:domain adv:ConductEvidence ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the evidence was found or produced." .
+
+adv:evidenceReliability a rdf:Property ;
+    rdfs:label "evidence reliability" ;
+    rdfs:domain adv:ConductEvidence ;
+    rdfs:range  adv:EvidenceReliability ;
+    rdfs:comment "The assessed reliability of the evidence." .
+
+adv:EvidenceReliability a rdfs:Class ;
+    rdfs:label "Evidence Reliability" .
+
+adv:reliabilityHigh     a adv:EvidenceReliability ; rdfs:label "high" ;
+    rdfs:comment "High reliability — verified, corroborated, from a trusted source, or directly observed." .
+adv:reliabilityMedium   a adv:EvidenceReliability ; rdfs:label "medium" ;
+    rdfs:comment "Medium reliability — plausible, partially corroborated, from a source with some track record." .
+adv:reliabilityLow      a adv:EvidenceReliability ; rdfs:label "low" ;
+    rdfs:comment "Low reliability — unverified, single source, or from a source with questionable motives." .
+adv:reliabilityContested a adv:EvidenceReliability ; rdfs:label "contested" ;
+    rdfs:comment "Contested reliability — the evidence is disputed, possibly fabricated, or its interpretation is debated. May itself be adversarial conduct (planted evidence)." .
+
+adv:hasEvidence a rdf:Property ;
+    rdfs:label "has evidence" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ConductEvidence ;
+    rdfs:comment "Links a conduct instance to its evidence. A conduct may have multiple pieces of evidence." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Conduct Vulnerability — for prospective protection
+# ────────────────────────────────────────────────────────────────────
+
+adv:ConductVulnerability a rdfs:Class ;
+    rdfs:label "Conduct Vulnerability" ;
+    rdfs:comment "A vulnerability that could be exploited by adversarial conduct. Vulnerabilities are assessed prospectively — before conduct occurs — to support agreements, expectations, and protective measures. A vulnerability assessment identifies what could be targeted, by what methods, and what safeguards would reduce the risk. Vulnerabilities may be personal (addiction, debt, isolation), professional (access to sensitive decisions, weak oversight), structural (single points of failure, lack of verification), or informational (unprotected data, traceable communications)." .
+
+adv:vulnerabilityType a rdf:Property ;
+    rdfs:label "vulnerability type" ;
+    rdfs:domain adv:ConductVulnerability ;
+    rdfs:range  adv:VulnerabilityType ;
+    rdfs:comment "The type of vulnerability." .
+
+adv:VulnerabilityType a rdfs:Class ;
+    rdfs:label "Vulnerability Type" .
+
+adv:vulnPersonal       a adv:VulnerabilityType ; rdfs:label "personal" ;
+    rdfs:comment "Personal vulnerability — addiction, debt, isolation, family stress, health issues, past secrets. These make a person susceptible to compromise, coercion, or undue influence. Personal vulnerabilities are selfhood-adjacent — they may involve private information that should not be accessed without consent. Assessment of personal vulnerabilities for protection should be consensual and confidentiality-protected." .
+adv:vulnProfessional   a adv:VulnerabilityType ; rdfs:label "professional" ;
+    rdfs:comment "Professional vulnerability — access to sensitive decisions, weak oversight, conflicts of interest, dependence on a single client or employer, lack of professional accountability. These make a person or role susceptible to bribery, coercion, or subversion." .
+adv:vulnStructural     a adv:VulnerabilityType ; rdfs:label "structural" ;
+    rdfs:comment "Structural vulnerability — single points of failure, lack of verification, concentration of authority, absence of checks and balances, weak audit trails. These make a project, system, or process susceptible to subversion, perversion, or sabotage." .
+adv:vulnInformational  a adv:VulnerabilityType ; rdfs:label "informational" ;
+    rdfs:comment "Informational vulnerability — unprotected data, traceable communications, accessible records, lack of encryption, weak access controls. These make information susceptible to theft, alteration, or fabrication." .
+adv:vulnRelational     a adv:VulnerabilityType ; rdfs:label "relational" ;
+    rdfs:comment "Relational vulnerability — dependence on a single relationship, isolation from support networks, lack of independent verification of claims, power imbalance in a relationship. These make a person susceptible to undue influence, isolation, or coercive control." .
+adv:vulnFinancial      a adv:VulnerabilityType ; rdfs:label "financial" ;
+    rdfs:comment "Financial vulnerability — debt, dependence on a single income source, lack of financial transparency, precarious financial position. These make a person or organisation susceptible to financial pressure, bribery, or extortion." .
+adv:vulnReputational   a adv:VulnerabilityType ; rdfs:label "reputational" ;
+    rdfs:comment "Reputational vulnerability — public profile, controversial positions, past incidents, dependence on public trust. These make a person or organisation susceptible to media manipulation, disinformation, or character assassination." .
+
+adv:vulnerabilityExploitableBy a rdf:Property ;
+    rdfs:label "vulnerability exploitable by" ;
+    rdfs:domain adv:ConductVulnerability ;
+    rdfs:range  adv:ConductMethod ;
+    rdfs:comment "Which conduct methods could exploit this vulnerability." .
+
+adv:vulnerabilityMitigation a rdf:Property ;
+    rdfs:label "vulnerability mitigation" ;
+    rdfs:domain adv:ConductVulnerability ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Safeguards or measures that would reduce the risk — e.g. 'mandatory dual-authorisation for financial decisions', 'regular independent audit of project records', 'encrypted communications with forward secrecy', 'mandatory verification of next-of-kin claims against pre-designated emergency contacts'." .
+
+adv:vulnerabilitySeverity a rdf:Property ;
+    rdfs:label "vulnerability severity" ;
+    rdfs:domain adv:ConductVulnerability ;
+    rdfs:range  adv:HarmSeverity ;
+    rdfs:comment "The severity of harm if this vulnerability is exploited. Reuses the HarmSeverity enum." .
+
+adv:hasVulnerability a rdf:Property ;
+    rdfs:label "has vulnerability" ;
+    rdfs:comment "Links an entity (person, project, system, relation) to its assessed vulnerabilities. Domain is open — any entity may have vulnerabilities." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Conduct Consequence — social and legal consequences
+# ────────────────────────────────────────────────────────────────────
+
+adv:ConductConsequence a rdfs:Class ;
+    rdfs:label "Conduct Consequence" ;
+    rdfs:comment "The consequences of adversarial conduct — legal, social, financial, institutional, and informational. Consequences may affect the actor (penalties), the target (remedies or ongoing harm), and society (systemic effects). Consequences are distinct from harm — harm is what the conduct caused, consequences are what follows from discovery, prosecution, or social response. Links to person:CausalityConsequence for personhood-level consequences." .
+
+adv:consequenceFor a rdf:Property ;
+    rdfs:label "consequence for" ;
+    rdfs:domain adv:ConductConsequence ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who or what the consequence affects — the actor, the target, a collateral party, or society." .
+
+adv:consequenceCategory a rdf:Property ;
+    rdfs:label "consequence category" ;
+    rdfs:domain adv:ConductConsequence ;
+    rdfs:range  adv:ConsequenceCategory ;
+    rdfs:comment "The category of consequence." .
+
+adv:ConsequenceCategory a rdfs:Class ;
+    rdfs:label "Consequence Category" .
+
+adv:consequenceLegalCriminal a adv:ConsequenceCategory ; rdfs:label "legal-criminal" ;
+    rdfs:comment "Criminal legal consequences — prosecution, conviction, imprisonment, criminal penalties for the actor. Links to person:legalPenalty." .
+adv:consequenceLegalCivil   a adv:ConsequenceCategory ; rdfs:label "legal-civil" ;
+    rdfs:comment "Civil legal consequences — tort liability, damages, injunctions, civil penalties. Links to person:contractualLiability." .
+adv:consequenceRegulatory   a adv:ConsequenceCategory ; rdfs:label "regulatory" ;
+    rdfs:comment "Regulatory consequences — licence revocation, regulatory penalties, industry bans, professional deregistration." .
+adv:consequenceSocial       a adv:ConsequenceCategory ; rdfs:label "social" ;
+    rdfs:comment "Social consequences — public exposure, reputation destruction, social exclusion, loss of trust. Links to person:socialRepercussion. May extend to the actor's associates, family, or organisation (collateral social consequence)." .
+adv:consequenceInstitutional a adv:ConsequenceCategory ; rdfs:label "institutional" ;
+    rdfs:comment "Institutional consequences — institutional reform, new safeguards, policy changes, oversight establishment. The institution responds to the conduct by changing its structure to prevent recurrence." .
+adv:consequenceInformational a adv:ConsequenceCategory ; rdfs:label "informational" ;
+    rdfs:comment "Informational consequences — correction of false records, retraction of disinformation, publication of findings, restoration of altered event histories. May be incomplete — once false information is disseminated, full correction is difficult." .
+adv:consequenceRestorative  a adv:ConsequenceCategory ; rdfs:label "restorative" ;
+    rdfs:comment "Restorative consequences — compensation, apology, rehabilitation, reintegration of the target, restoration of relationships or projects damaged by the conduct." .
+
+adv:hasConsequence a rdf:Property ;
+    rdfs:label "has consequence" ;
+    rdfs:domain adv:AdversarialConduct ;
+    rdfs:range  adv:ConductConsequence ;
+    rdfs:comment "Links a conduct instance to its consequences. A conduct may have multiple consequences." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology links to:
+#
+# personhood.n3:
+#   - person:CausalityConsequence → adv:ConductConsequence (consequences
+#     of adversarial conduct are a specific type of causality consequence)
+#   - person:LegalObligation → conduct may breach legal obligations
+#   - person:LegalRight → conduct may violate legal rights
+#
+# duty-of-care.n3:
+#   - care:FraudulentAssumption → may be a conduct method or outcome
+#     (e.g. fraudulent assumption of next-of-kin role to conceal a crime)
+#   - care:VerificationRequirement → mitigates adversarial conduct
+#     (identity/relationship verification prevents fraudulent assumption)
+#   - care:DutyOrigin (fraudulentOrigin) → links to adv:AdversarialConduct
+#
+# care-scope.n3:
+#   - scope:EmergencyInformationAccess → may be targeted by information
+#     access methods
+#   - scope:ConditionalState → adversarial conduct may trigger emergency
+#     or capacity states
+#
+# guardianship.n3:
+#   - guard:Intervention (unlawfulInterference) → a specific form of
+#     adversarial conduct targeting a duty-of-care relation
+#   - guard:FamilyRole → may be targeted for displacement or perversion
+#
+# agent-nomenclature.n3:
+#   - Adversarial conduct concepts (intent, coercion, deception) are
+#     mind-dependent — restricted to natural persons
+#   - Software agents may be instruments (softwareAgentWeaponised) but
+#     not actors
+#   - Legal persons may direct conduct through institutional processes
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Specific Conduct Type — named patterns with legal analogues
+# ────────────────────────────────────────────────────────────────────
+
+adv:SpecificConductType a rdfs:Class ;
+    rdfs:subClassOf adv:AdversarialConduct ;
+    rdfs:label "Specific Conduct Type" ;
+    rdfs:comment "A named, recognisable pattern of adversarial conduct with an established legal or regulatory analogue. Specific conduct types combine strategy, method, and target into patterns that are well-known in law and practice. They are grouped into four categories: fiduciary/governance betrayals, misleading/deceptive practices, financial/market conduct, and digital/networked conduct. Each type has a legalAnalogue property citing the relevant law or doctrine. These types are personhood concepts — they involve intent, negligence, or recklessness, which are mind-dependent capacities of natural persons. Legal persons may engage in these conduct types through institutional decision-making processes that direct natural persons." .
+
+adv:conductCategory a rdf:Property ;
+    rdfs:label "conduct category" ;
+    rdfs:domain adv:SpecificConductType ;
+    rdfs:range  adv:ConductCategory ;
+    rdfs:comment "The category of specific conduct." .
+
+adv:ConductCategory a rdfs:Class ;
+    rdfs:label "Conduct Category" .
+
+adv:catFiduciary    a adv:ConductCategory ; rdfs:label "fiduciary-governance" ;
+    rdfs:comment "Breaches by individuals entrusted with power over an organisation, network, or collaborative project — internal malfeasance." .
+adv:catMisleading   a adv:ConductCategory ; rdfs:label "misleading-deceptive" ;
+    rdfs:comment "Misleading and deceptive practices — external and market-facing conduct that induces reliance on false information or omits material facts." .
+adv:catFinancial    a adv:ConductCategory ; rdfs:label "financial-market" ;
+    rdfs:comment "Financial and market adversarial conduct — behaviours that harm creditors, investors, and the broader collaborative ecosystem." .
+adv:catDigital      a adv:ConductCategory ; rdfs:label "digital-networked" ;
+    rdfs:comment "Digital, networked, and global adversarial conduct — behaviours specific to online, borderless, or decentralised collaborative environments." .
+
+adv:legalAnalogue a rdf:Property ;
+    rdfs:label "legal analogue" ;
+    rdfs:domain adv:SpecificConductType ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The relevant legal doctrine, statute, or common law analogue — e.g. 'US Caremark duties', 'Australian Consumer Law s18', 'UK wrongful trading', 'US FTC Act s5'. For conduct without a direct legal analogue, the closest equivalent." .
+
+# ─── 11a. Fiduciary and Governance Betrayals ───
+
+adv:usurpationOfOpportunity a adv:SpecificConductType ;
+    adv:conductCategory adv:catFiduciary ;
+    adv:conductStrategy adv:subvert, adv:harm ;
+    adv:conductMethod adv:bribery, adv:selfDealing ;
+    adv:legalAnalogue "Corporate opportunity doctrine — breach of fiduciary duty" ;
+    rdfs:label "usurpation-of-opportunity" ;
+    rdfs:comment "Secretly diverting a business opportunity, partnership, or asset that rightfully belongs to the organisation for personal benefit. The fiduciary exploits their position to capture value that should accrue to the organisation." .
+
+adv:selfDealing a adv:SpecificConductType ;
+    adv:conductCategory adv:catFiduciary ;
+    adv:conductStrategy adv:subvert, adv:deceive ;
+    adv:conductMethod adv:bribery ;
+    adv:legalAnalogue "Duty of loyalty — undisclosed conflict of interest" ;
+    rdfs:label "self-dealing" ;
+    rdfs:comment "Executing transactions where a director or key collaborator has an undisclosed financial interest on both sides of the deal. The fiduciary benefits personally from a transaction they present as arm's-length." .
+
+adv:derelictionOfOversight a adv:SpecificConductType ;
+    adv:conductCategory adv:catFiduciary ;
+    adv:conductStrategy adv:pervert ;
+    adv:legalAnalogue "US Caremark duties — systemic oversight failure" ;
+    rdfs:label "dereliction-of-oversight" ;
+    rdfs:comment "Failing to establish or monitor risk-reporting systems. Ignoring red flags regarding cybersecurity, data privacy, or regulatory compliance constitutes a breach of good faith. This is a fiduciary failure — the duty-holder has a responsibility to maintain oversight and their failure to do so enables other adversarial conduct. Restricted to natural persons who hold fiduciary oversight duties — 'negligence' is a mind-dependent concept." .
+
+adv:shadowDirectorEvasion a adv:SpecificConductType ;
+    adv:conductCategory adv:catFiduciary ;
+    adv:conductStrategy adv:subvert, adv:pervert ;
+    adv:conductMethod adv:agentInsertion, adv:socialEngineering ;
+    adv:legalAnalogue "De facto director doctrine — evasion of fiduciary liability" ;
+    rdfs:label "shadow-director-evasion" ;
+    rdfs:comment "Exerting controlling influence over an organisation or project without formally assuming a directorship, deliberately structured to evade legal and fiduciary liabilities. The shadow director controls decisions while maintaining deniability of authority." .
+
+adv:tunnelingAssetStripping a adv:SpecificConductType ;
+    adv:conductCategory adv:catFiduciary ;
+    adv:conductStrategy adv:harm, adv:subvert ;
+    adv:conductMethod adv:financialPressure ;
+    adv:legalAnalogue "Fraudulent conveyance — tunneling (Johnson et al. 2000)" ;
+    rdfs:label "tunneling-asset-stripping" ;
+    rdfs:comment "Transferring assets out of a collaborative entity to another entity controlled by the same insiders, leaving the original entity insolvent or hollowed out. The insiders extract value before the entity collapses, leaving creditors and collaborators with losses." .
+
+# ─── 11b. Misleading and Deceptive Practices ───
+
+adv:fraudulentMisrepresentation a adv:SpecificConductType ;
+    adv:conductCategory adv:catMisleading ;
+    adv:conductStrategy adv:deceive, adv:tort ;
+    adv:conductMethod adv:disinformation ;
+    adv:legalAnalogue "Australian Consumer Law s18 — US FTC Act s5 — UK Consumer Protection Regs" ;
+    rdfs:label "fraudulent-misrepresentation" ;
+    rdfs:comment "Knowingly or recklessly making a false statement of fact that induces another party to enter into a contract or collaboration. 'Recklessly' is a mind-dependent state — restricted to natural persons. Legal persons may engage through institutional decision-making processes that direct natural persons to make false statements." .
+
+adv:negligentMisstatement a adv:SpecificConductType ;
+    adv:conductCategory adv:catMisleading ;
+    adv:conductStrategy adv:tort ;
+    adv:legalAnalogue "Hedley Byrne v Heller — negligent misstatement at common law" ;
+    rdfs:label "negligent-misstatement" ;
+    rdfs:comment "Providing false information or advice where a duty of care exists, causing financial loss, even without deliberate malicious intent. 'Negligent' is a mind-dependent state — restricted to natural persons who owe a duty of care. The distinction from fraudulent misrepresentation is the absence of intent to deceive — the statement is false but the maker failed to exercise reasonable care rather than deliberately lying." .
+
+adv:deceptiveOmission a adv:SpecificConductType ;
+    adv:conductCategory adv:catMisleading ;
+    adv:conductStrategy adv:deceive ;
+    adv:legalAnalogue "Australian Consumer Law s18 — silent deception" ;
+    rdfs:label "deceptive-omission" ;
+    rdfs:comment "Deliberately withholding material facts where there is a reasonable expectation or legal duty of disclosure, rendering the disclosed information misleading. The conduct is in what is NOT said — the omission creates a false impression. Distinct from disinformation: disinformation is false content, deceptive omission is true-but-incomplete content presented in a way that misleads." .
+
+adv:astroturfing a adv:SpecificConductType ;
+    adv:conductCategory adv:catMisleading ;
+    adv:conductStrategy adv:deceive, adv:pervert ;
+    adv:conductMethod adv:mediaManipulation, adv:softwareAgentWeaponised ;
+    adv:legalAnalogue "FTC endorsement guides — astroturfing enforcement" ;
+    rdfs:label "astroturfing" ;
+    rdfs:comment "Falsifying grassroots support, user metrics, or community consensus. In digital networks, this often involves deploying automated agents to simulate independent organic activity — fake reviews, fake social media accounts, coordinated inauthentic behaviour. The software agents have no intent — the astroturfing is committed by the natural person who deployed them. Their output is ungrounded generation (simulated organic activity without genuine human support)." .
+
+adv:greenwashingTechWashing a adv:SpecificConductType ;
+    adv:conductCategory adv:catMisleading ;
+    adv:conductStrategy adv:deceive ;
+    adv:conductMethod adv:disinformation, adv:mediaManipulation ;
+    adv:legalAnalogue "FTC Green Guides — ACCC environmental claims guidance" ;
+    rdfs:label "greenwashing-tech-washing" ;
+    rdfs:comment "Making unsubstantiated claims about an entity's environmental sustainability (greenwashing), or falsely claiming the use of advanced technologies — e.g. claiming a system is decentralised or AI-driven when it is manually operated (tech-washing). The false claim induces reliance by users, investors, or collaborators who believe the entity is more responsible or sophisticated than it is." .
+
+# ─── 11c. Financial and Market Adversarial Conduct ───
+
+adv:wrongfulTrading a adv:SpecificConductType ;
+    adv:conductCategory adv:catFinancial ;
+    adv:conductStrategy adv:harm, adv:tort ;
+    adv:legalAnalogue "UK Insolvency Act 1986 s214 — wrongful trading" ;
+    rdfs:label "wrongful-trading" ;
+    rdfs:comment "Continuing to incur liabilities when the directors or protocol administrators know, or ought to know, that there is no reasonable prospect of avoiding insolvency. 'Ought to know' is an objective standard — it applies to what a reasonable person in the position would know, not what the actor actually knew. Restricted to natural persons who hold directorial or administrative duties." .
+
+adv:frontRunning a adv:SpecificConductType ;
+    adv:conductCategory adv:catFinancial ;
+    adv:conductStrategy adv:subvert, adv:harm ;
+    adv:conductMethod adv:insiderExploitation ;
+    adv:legalAnalogue "Insider trading — US Securities Exchange Act s10(b)" ;
+    rdfs:label "front-running" ;
+    rdfs:comment "Utilising material, non-public information — such as knowledge of an impending partnership, codebase update, or large transaction — to execute personal trades or actions ahead of the public or collaborators. The insider exploits their position of trust for personal gain at the expense of those who transact without the information." .
+
+adv:washTradingSpoofing a adv:SpecificConductType ;
+    adv:conductCategory adv:catFinancial ;
+    adv:conductStrategy adv:deceive, adv:pervert ;
+    adv:conductMethod adv:softwareAgentWeaponised ;
+    adv:legalAnalogue "US Commodity Exchange Act — wash trading and spoofing" ;
+    rdfs:label "wash-trading-spoofing" ;
+    rdfs:comment "Executing superficial transactions to create a false appearance of high market volume, liquidity, or demand for an asset or digital token. Wash trading: buying and selling the same asset through controlled accounts. Spoofing: placing orders with no intention of execution, to mislead other traders about demand. May involve software agents for automated execution — the agents have no intent, the conduct is committed by the natural person who deployed them." .
+
+# ─── 11d. Digital, Networked, and Global Conduct ───
+
+adv:jurisdictionalArbitrage a adv:SpecificConductType ;
+    adv:conductCategory adv:catDigital ;
+    adv:conductStrategy adv:pervert, adv:subvert ;
+    adv:legalAnalogue "Evasion of legal duties — fraudulent conveyance across borders" ;
+    rdfs:label "jurisdictional-arbitrage-for-harm" ;
+    rdfs:comment "Structuring operations across multiple borders specifically to evade accountability, obscure liability, or exploit regulatory gaps, rather than for legitimate operational efficiency. Distinct from legitimate jurisdictional optimisation: the purpose is to evade legal duties, not to operate efficiently. The structuring may involve shell companies, offshore accounts, and choice-of-law provisions designed to prevent enforcement." .
+
+adv:sybilFraud a adv:SpecificConductType ;
+    adv:conductCategory adv:catDigital ;
+    adv:conductStrategy adv:deceive, adv:subvert ;
+    adv:conductMethod adv:softwareAgentWeaponised, adv:digitalCompromise ;
+    adv:legalAnalogue "Misrepresentation — fraud" ;
+    rdfs:label "sybil-fraud" ;
+    rdfs:comment "Forging multiple accounts or nodes to subvert reputation systems, voting mechanisms, or resource allocation in a collaborative environment. The Sybil attack creates false identities to gain disproportionate influence. May involve software agents for automated account creation — the agents have no intent, the fraud is committed by the natural person who deployed them. Named after the case study of Sybil (multiple personality disorder) — the attack creates the appearance of many independent actors who are actually one." .
+
+adv:privilegeEscalationAbuse a adv:SpecificConductType ;
+    adv:conductCategory adv:catDigital ;
+    adv:conductStrategy adv:subvert, adv:harm ;
+    adv:conductMethod adv:digitalCompromise ;
+    adv:legalAnalogue "Breach of trust — misappropriation" ;
+    rdfs:label "privilege-escalation-abuse" ;
+    rdfs:comment "Exploiting administrative rights, multi-signature access, or smart contract parameters in a way that violates the community's established mandate. The privilege holder uses their authority for purposes beyond what was authorised — e.g. a multi-sig holder acting unilaterally, an admin modifying parameters for personal benefit, a key holder accessing restricted data. Distinct from digital compromise: the privilege was legitimately granted but abused, not stolen." .
+
+adv:asymmetricInfoHoarding a adv:SpecificConductType ;
+    adv:conductCategory adv:catDigital ;
+    adv:conductStrategy adv:coerce, adv:subvert ;
+    adv:conductMethod adv:isolationMethod ;
+    adv:legalAnalogue "Breach of duty of good faith — extortionate conduct" ;
+    rdfs:label "asymmetric-information-hoarding" ;
+    rdfs:comment "A project founder or lead developer deliberately withholding critical operational data, codebase keys, or cryptographic identifiers to maintain undue leverage over the collaboration. The hoarder creates dependency — without the withheld information, the project cannot continue or transition. This is a form of coercion: the target (the collaboration) must comply with the hoarder's demands or lose access to critical resources. Distinct from legitimate confidentiality: hoarding is adversarial when the information should be shared under the collaboration's governance but is withheld for leverage." .
+
+# ─── 11e. Additional methods referenced above ───
+
+adv:insiderExploitation a adv:ConductMethod ;
+    rdfs:label "insider-exploitation" ;
+    rdfs:comment "Exploiting insider access to non-public information for personal benefit — distinct from bribery (which induces action) and digital compromise (which bypasses security). Insider exploitation uses legitimately held access for unauthorised purposes." .
+
+adv:selfDealingMethod a adv:ConductMethod ;
+    rdfs:label "self-dealing-method" ;
+    rdfs:comment "Executing transactions where the duty-holder has an undisclosed interest on both sides — the method underlying self-dealing conduct." .
+
+# Relational, psychological, social, and sexual conduct methods are
+# in adversarial-relational.n3 — a dedicated module for methods that
+# operate through relational, social, and psychological channels rather
+# than physical force or technical exploitation. These methods are
+# often overlooked in security models and require dedicated modelling.

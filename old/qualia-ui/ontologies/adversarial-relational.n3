@@ -1,0 +1,789 @@
+# Adversarial Relational & Psychological Methods Ontology —
+# Relational Aggression, Psychological Manipulation, Sexual
+# Manipulation, False Claims, Content Weaponisation, and
+# Social Harm Patterns
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# A dedicated module for adversarial conduct methods that operate
+# through relational, social, psychological, and sexual channels
+# rather than physical force or technical exploitation.
+#
+# These methods are often overlooked in security models that focus
+# on physical and technical threats. They are included here as
+# first-class conduct methods because they cause severe harm and
+# are common in domestic, workplace, community, institutional, and
+# online contexts.
+#
+# On gendered characterisation and the historical blind spot:
+#
+#   Some of these methods are culturally stereotyped as "feminine"
+#   (relational aggression, gossip, social exclusion, emotional
+#   manipulation) while others are stereotyped as "masculine"
+#   (physical intimidation, sexual coercion, direct confrontation).
+#   These characterisations are misleading. All methods in this
+#   ontology may be enacted by persons of any gender against persons
+#   of any gender. The ontology does not assign methods to genders.
+#
+#   It is a historical problem that violence and harm have too often
+#   been characterised as occurring only by men (as perpetrators)
+#   against women and children (as targets). This characterisation
+#   has produced a significant absence in ontological and legal
+#   frameworks: the failure to recognise and model harm perpetrated
+#   by women — against other women, against men, and against
+#   children. This absence causes harm in at least three ways:
+#     1. Targets of female-perpetrated harm are denied recognition
+#        — their experience is not validated because it does not fit
+#        the expected pattern.
+#     2. Perpetrators who are women may exploit the blind spot —
+#        they may act with impunity because their conduct is not
+#        recognised as adversarial by institutions trained to see
+#        only male perpetrators.
+#     3. Proxy perpetration is invisible — a woman may act on
+#        behalf of a man (or vice versa), or a man may use a woman
+#        as an instrument of harm against another woman, and the
+#        proxy relationship is not modelled.
+#
+#   This ontology explicitly models all permutations:
+#     - woman against woman
+#     - woman against man
+#     - woman against child
+#     - man against woman
+#     - man against man
+#     - man against child
+#     - non-binary / other-gendered person against any person
+#     - any person acting as proxy for another (regardless of
+#       gender)
+#     - any person acting under instruction from another
+#     - any person acting as part of a coordinated group
+#
+#   The ontology also recognises that certain professions and social
+#   roles may correlate with particular patterns of harm — not
+#   because of gender, but because of the tools, authority, and
+#   access that the profession provides:
+#     - Trades and physical labour: greater access to physical
+#       methods and physical environments where physical harm can
+#       be disguised as accident.
+#     - Medical and health professionals: greater access to
+#       complex negligence, false documentation, medication
+#       manipulation, pathologising of targets, and exploitation
+#       of the trust and dependency inherent in the care
+#       relationship.
+#     - Legal professionals: greater access to legal abuse
+#       (SLAPPs, vexatious litigation), perjury, false
+#       affidavits, and weaponisation of legal process.
+#     - Political and public figures: greater access to character
+#       attacks, smear campaigns, media manipulation, and
+#       institutional gaslighting.
+#     - Financial professionals: greater access to financial
+#       control, asset hiding, debt manipulation, and economic
+#       coercion.
+#     - Religious and community leaders: greater access to
+#       spiritual manipulation, community ostracism, exploitation
+#       of trust, and weaponisation of faith authority.
+#     - Educators and child-care professionals: greater access to
+#       grooming, infantilisation, boundary testing, and
+#       exploitation of the dependency and trust inherent in the
+#       care relationship.
+#     - Technology professionals: greater access to digital
+#       surveillance, monitoring, deep-fake creation, and
+#       weaponisation of software agents.
+#     - Law enforcement and security: greater access to
+#       intimidation, false arrest, evidence planting, and
+#       exploitation of institutional authority.
+#
+#   These profession-correlated patterns are not deterministic —
+#   not all medical professionals commit medical gaslighting, and
+#   medical gaslighting is not committed only by medical
+#   professionals. The correlation is one of access and
+#   opportunity, not of character or gender.
+#
+#   The core principle:
+#     If the conduct is not friendly — if it is not substantive of
+#     supports to act in good faith — if the potential intent and
+#     purpose is to cause another injury, whether physical,
+#     psychological, relational, social, sexual, financial,
+#     reputational, or institutional — then it should be considered
+#     adversarial conduct, regardless of:
+#       - the gender of the actor
+#       - the gender of the target
+#       - the relationship between actor and target
+#       - the profession or social role of the actor
+#       - whether the actor is acting alone, as proxy, or as part
+#         of a group
+#       - whether the conduct is visible or invisible
+#       - whether the conduct is a single incident or a cumulative
+#         pattern
+#       - whether the conduct is culturally normalised
+#       - whether the conduct is legally recognised
+#
+#   The omission of relational and psychological methods from
+#   security frameworks is itself a form of harm — it leaves
+#   targets of these methods without recognition or protection.
+#
+# On cumulativeness:
+#   Many of these methods are cumulative — a single incident may
+#   seem minor, but the pattern over time constitutes severe
+#   adversarial conduct. The ontology models both individual methods
+#   and the patterns they form (see §7 Cumulative Patterns).
+#
+# Nomenclature:
+#   All methods in this ontology are restricted to natural person
+#   targets — they require the target to have social relationships,
+#   perception, emotional responses, or sexual autonomy, which are
+#   mind-dependent capacities. Legal persons may be targets of
+#   reputation-based methods (defamation, smear campaigns) but not
+#   of psychological or sexual methods. Software agents cannot be
+#   targets — they have no social relationships, perception, or
+#   emotional responses. Software agents may be deployed as
+#   instruments of these methods (e.g. automated harassment,
+#   coordinated inauthentic behaviour) but the conduct is committed
+#   by the natural person who deployed them.
+#
+# Imports: adversarial-conduct.n3, epistemics.n3, agency.n3,
+#          personhood.n3, obligations.n3, duty-of-care.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix adv:    <https://qualiadb.org/schema/ui/adversarial-conduct#> .
+@prefix obl:    <https://qualiadb.org/schema/ui/obligations#> .
+@prefix care:   <https://qualiadb.org/schema/ui/duty-of-care#> .
+@prefix rel:    <https://qualiadb.org/schema/ui/adversarial-relational#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Relational Aggression — harm through social relationships
+# ────────────────────────────────────────────────────────────────────
+
+rel:RelationalAggression a rdfs:Class ;
+    rdfs:label "Relational Aggression" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "Adversarial conduct that harms through the manipulation, damage, or destruction of social relationships rather than through physical force. Relational aggression operates in the social space between people — it targets the target's social bonds, reputation, and standing within a group. Distinct from physical aggression (which targets the body) and psychological aggression (which targets perception and emotional state): relational aggression targets social connections. However, the three often overlap — relational aggression causes psychological harm, and psychological manipulation often uses relational levers. Relational aggression is often cumulative and context-dependent — what constitutes aggression in one social context may be normal in another. The key distinguisher is intent: the behaviour aims to damage the target's social relationships or standing. Restricted to natural person targets." .
+
+rel:socialExclusion a rel:RelationalAggression ;
+    rdfs:label "social-exclusion" ;
+    rdfs:comment "Deliberate exclusion of the target from social groups, activities, or networks — distinct from socialIsolation (which is systematic destruction of the entire support network): socialExclusion may target specific groups or activities. Includes: excluding from group chats, not inviting to events, forming subgroups that deliberately exclude the target, 'accidentally' forgetting to include the target. Often dismissed as 'just how groups work' but when deliberate and sustained, constitutes relational aggression. Common in workplace settings, social groups, schools, and online communities. Restricted to natural person targets." .
+
+rel:gossipRumour a rel:RelationalAggression ;
+    rdfs:label "gossip-rumour-spreading" ;
+    rdfs:comment "Spreading false, misleading, or private information about the target to damage their social standing — distinct from defamation (which is a legal concept targeting reputation in the broader community): gossip and rumour operate within social networks and may not meet the legal threshold for defamation but still cause severe social harm. Includes: sharing private information disclosed in confidence, exaggerating or distorting facts, fabricating stories, spreading information through backchannels. The target may never know what is being said about them — the harm is invisible but cumulative. Particularly damaging in tight-knit communities (workplaces, religious communities, small towns, online communities) where social standing is essential to participation. Restricted to natural person targets." .
+
+rel:relationalSabotage a rel:RelationalAggression ;
+    rdfs:label "relational-sabotage" ;
+    rdfs:comment "Deliberate sabotage of the target's relationships with others — manufacturing conflicts, misrepresenting the target's words or actions to third parties, creating situations that make the target appear unreliable or hostile, positioning oneself as a 'concerned friend' while undermining the target's relationships. Distinct from socialIsolation (which aims to remove all support): relationalSabotage may target specific relationships (e.g. sabotaging a work collaboration, a friendship, a romantic relationship). The saboteur may appear helpful or concerned while acting destructively. Common in workplace politics, romantic triangles, and community conflicts. Restricted to natural person targets." .
+
+rel:friendshipWeaponisation a rel:RelationalAggression ;
+    rdfs:label "friendship-weaponisation" ;
+    rdfs:comment "Using the norms and obligations of friendship as weapons — invoking friendship to extract concessions, using intimate knowledge shared in friendship to harm, positioning the target as a 'bad friend' for setting boundaries, threatening to withdraw friendship to control behaviour. Distinct from emotionalManipulation (which exploits emotional capacities generally): friendshipWeaponisation specifically exploits the trust, intimacy, and obligation norms of friendship. The target may comply because they value the friendship and fear losing it. Common in adolescent and young adult social dynamics but occurs at all ages. Restricted to natural person targets." .
+
+rel:triangulation a rel:RelationalAggression ;
+    rdfs:label "triangulation" ;
+    rdfs:comment "Manipulating communication between two parties by inserting oneself as intermediary — controlling what each party knows about the other, selectively conveying information to manufacture conflict or dependency, preventing direct communication to maintain control. The triangulator may tell each party that the other said or did something different from what actually occurred. Common in family systems (parent triangulating child into marital conflict), workplace dynamics (manager triangulating subordinates), and romantic relationships (partner triangulating with ex or 'friend'). Triangulation prevents the two parties from comparing notes and discovering the manipulation. Restricted to natural person targets." .
+
+rel:flyingMonkey a rel:RelationalAggression ;
+    rdfs:label "flying-monkey-recruitment" ;
+    rdfs:comment "Recruiting third parties to act on the aggressor's behalf — recruiting friends, family, or community members to deliver messages, apply pressure, monitor the target, or participate in harassment. The recruited parties may not know they are being used as instruments of adversarial conduct — they may be told a one-sided story and recruited as 'concerned friends.' The term originates from the Wizard of Oz (the Wicked Witch's flying monkeys). Common in domestic abuse (recruiting family to pressure the victim to return), post-separation abuse (recruiting mutual friends to harass or monitor), and workplace mobbing. Distinct from smearCampaign (which focuses on reputation destruction): flyingMonkey recruitment focuses on deploying people as instruments. Restricted to natural person targets." .
+
+rel:competitiveVictimhood a rel:RelationalAggression ;
+    rdfs:label "competitive-victimhood" ;
+    rdfs:comment "Portraying oneself as the victim to pre-emptively discredit the actual target — a component of DARVO (Deny, Attack, Reverse Victim and Offender). The aggressor claims they are the one being harmed, may file false reports, may recruit others to support their victim narrative. This puts the actual target in the position of having to defend themselves against accusations, diverting attention from the aggressor's conduct. Particularly effective when the aggressor has more social capital or credibility than the target. Common in domestic abuse (perpetrator claiming to be the victim), workplace conflicts (bully claiming to be bullied), and institutional settings. Links to rel:falseClaims. Restricted to natural person targets." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Psychological Manipulation — harm through perception and emotion
+# ────────────────────────────────────────────────────────────────────
+
+rel:PsychologicalManipulation a rdfs:Class ;
+    rdfs:label "Psychological Manipulation" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "Adversarial conduct that harms through the manipulation of the target's perception, emotional state, or psychological wellbeing. Distinct from relational aggression (which targets social bonds): psychological manipulation targets the target's internal experience. However, the two often overlap — gaslighting is both psychological (destabilising perception) and relational (using the relationship as the vehicle). All psychological manipulation methods are restricted to natural person targets — they require the target to have perception, emotional responses, and psychological states, which are mind-dependent capacities." .
+
+rel:gaslighting a rel:PsychologicalManipulation ;
+    rdfs:label "gaslighting" ;
+    rdfs:comment "Systematic manipulation of the target's perception of reality — denying events that occurred, fabricating events that did not, shifting blame, rewriting history, and making the target doubt their own memory, perception, or judgement. The aim is to destabilise the target's epistemic confidence so they become dependent on the gaslighter's version of reality. Named from the film 'Gaslight' (1944). May occur in domestic relationships, workplaces, institutions (institutional gaslighting of whistleblowers), or political contexts. Cumulative — a single denial may seem trivial, but the pattern constitutes severe psychological harm. Links to epistemics.n3 — the target's epistemic status shifts from confident to uncertain to dependent. Restricted to natural person targets." .
+
+rel:gaslightingVariant a rdf:Property ;
+    rdfs:label "gaslighting variant" ;
+    rdfs:domain rel:gaslighting ;
+    rdfs:range  rel:GaslightingVariant ;
+    rdfs:comment "Specific variant of gaslighting — the pattern may manifest differently in different contexts." .
+
+rel:GaslightingVariant a rdfs:Class ;
+    rdfs:label "Gaslighting Variant" .
+
+rel:gasInterpersonal  a rel:GaslightingVariant ; rdfs:label "interpersonal" ;
+    rdfs:comment "Interpersonal gaslighting — within a dyadic relationship (intimate partner, parent-child, supervisor-subordinate). The gaslighter has direct access to the target and can manipulate their shared reality." .
+rel:gasInstitutional  a rel:GaslightingVariant ; rdfs:label "institutional" ;
+    rdfs:comment "Institutional gaslighting — an institution denies a person's experience of harm within the institution. e.g. a workplace denying that bullying occurred, a church denying that abuse was reported, a government denying that a policy caused harm. The institution's power makes the denial more effective — the target's word against the institution's. May involve document destruction, record alteration, or collective denial." .
+rel:gasMedical        a rel:GaslightingVariant ; rdfs:label "medical" ;
+    rdfs:comment "Medical gaslighting — a healthcare provider dismisses, minimises, or misattributes the patient's symptoms, particularly common for women, people of colour, and chronic pain patients. The patient's lived experience of their body is denied by a medical authority. May result in delayed diagnosis, inappropriate treatment, or no treatment." .
+rel:gasRacial         a rel:GaslightingVariant ; rdfs:label "racial" ;
+    rdfs:comment "Racial gaslighting — denying or minimising the target's experience of racism, suggesting they are 'too sensitive' or 'seeing race where there is none.' A form of racism that compounds the original harm by denying the target's perception of it." .
+rel:gasCollective     a rel:GaslightingVariant ; rdfs:label "collective-orchestrated" ;
+    rdfs:comment "Collective or orchestrated gaslighting — multiple actors coordinate to deny the target's reality, creating a consensus that the target is mistaken. More powerful than individual gaslighting because the target faces multiple sources denying their perception. May occur in cults, abusive families, workplaces, or through coordinated online harassment." .
+
+rel:emotionalBlackmail a rel:PsychologicalManipulation ;
+    rdfs:label "emotional-blackmail" ;
+    rdfs:comment "Using the target's emotional bonds and fears to compel compliance — FOG (Fear, Obligation, Guilt). Distinct from emotionalManipulation (which is broader): emotionalBlackmail specifically uses the threat of emotional consequences (withdrawal of love, suicide threats, self-harm threats, public emotional displays) to control behaviour. The blackmailer may frame their demands as care or concern. Common in family relationships, romantic relationships, and cult dynamics. Restricted to natural person targets." .
+
+rel:traumaBonding a rel:PsychologicalManipulation ;
+    rdfs:label "trauma-bonding" ;
+    rdfs:comment "Creating a bond through cycles of abuse and affection — the abuser alternates between harming and comforting the target, creating a strong emotional bond that is difficult to break. The target becomes addicted to the relief from abuse, not the abuse itself. Distinct from loveBombing (which is a precursor strategy): traumaBonding is the ongoing mechanism that maintains the target in the relationship despite harm. Also known as Stockholm Syndrome in hostage contexts. The target may defend the abuser and resist intervention. Restricted to natural person targets." .
+
+rel:narcissisticAbuse a rel:PsychologicalManipulation ;
+    rdfs:label "narcissistic-abuse-pattern" ;
+    rdfs:comment "A pattern of manipulation associated with narcissistic personality traits — love bombing followed by devaluation and discard. The cycle: idealise (love bombing, excessive praise, mirroring), devalue (criticism, gaslighting, isolation, emotional withdrawal), discard (abandonment or expulsion), and hoover (attempts to draw the target back). The target is left confused, dependent, and with diminished self-worth. Not a clinical diagnosis of the actor — a pattern of behaviour that may be exhibited by actors with various personality structures. Restricted to natural person targets." .
+
+rel:silentTreatment a rel:PsychologicalManipulation ;
+    rdfs:label "silent-treatment" ;
+    rdfs:comment "Refusing to communicate with the target as a form of punishment or control — distinct from taking space for oneself (which is healthy): the silent treatment is punitive and aims to make the target feel invisible, unworthy, or desperate for reconnection. May be combined with gaslighting (denying that the silence is happening) or emotionalBlackmail (implying the silence will continue until the target complies). Common in intimate relationships, family dynamics, and workplace settings. Restricted to natural person targets." .
+
+rel:infantilisation a rel:PsychologicalManipulation ;
+    rdfs:label "infantilisation" ;
+    rdfs:comment "Treating the target as a child — undermining their autonomy, competence, and decision-making capacity. Includes: making decisions for them, speaking for them, questioning their judgement, treating them as incapable, preventing them from taking on adult responsibilities. The target may internalise the infantilisation and become dependent. Common in parent-adult-child relationships, intimate partner abuse, elder abuse, and institutional settings (e.g. treating people with disabilities as children). Distinct from duty-of-care (which protects): infantilisation controls under the guise of care. Restricted to natural person targets." .
+
+rel:realityDistortion a rel:PsychologicalManipulation ;
+    rdfs:label "reality-distortion" ;
+    rdfs:comment "Broader than gaslighting — any systematic distortion of the target's understanding of reality. Includes: moving objects and denying it, scheduling changes and denying they were made, rewriting agreements, presenting false information as fact, using the target's known limitations (memory, attention, language) against them. The target may begin to doubt their own competence and rely increasingly on the manipulator. Restricted to natural person targets." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Sexual Manipulation — harm through sexual channels
+# ────────────────────────────────────────────────────────────────────
+
+rel:SexualManipulation a rdfs:Class ;
+    rdfs:label "Sexual Manipulation" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "Adversarial conduct that uses sexual channels to compromise, coerce, or harm the target. Distinct from adv:sexualCompromise (which focuses on creating compromising material for blackmail): sexual manipulation encompasses a broader range of conduct including sexual coercion, sexual exploitation of dependency, reproductive coercion, sexual deception, and the weaponisation of sexual content. All sexual manipulation methods are restricted to natural person targets. Sexual manipulation may co-occur with other methods — coercive control often includes sexual coercion; gaslighting may include denial of sexual boundaries." .
+
+rel:sexualCoercion a rel:SexualManipulation ;
+    rdfs:label "sexual-coercion" ;
+    rdfs:comment "Compelling sexual activity through non-physical pressure — distinct from sexual assault (which involves physical force): sexual coercion uses threats, emotional pressure, exploitation of dependency, or manipulation of consent. Includes: threatening to end the relationship unless sexual acts are performed, using alcohol or drugs to impair capacity to consent, exploiting a power imbalance (employer-employee, teacher-student, carer-dependent), continuing after consent was given for different acts, removing condom without consent (stealthing). The target may not recognise the coercion as sexual violence — they may attribute compliance to relationship obligation. Restricted to natural person targets." .
+
+rel:sexualDeception a rel:SexualManipulation ;
+    rdfs:label "sexual-deception" ;
+    rdfs:comment "Obtaining sexual consent through deception — lying about identity, intentions, health status, fertility, or contraception. Includes: lying about STI status, lying about contraceptive use, pretending to be someone else (identity deception), lying about marital status or relationship exclusivity, lying about fertility (reproductive deception). The consent obtained through deception is not valid consent — the target consented to something different from what occurred. Criminalised as rape by fraud in some jurisdictions. Restricted to natural person targets." .
+
+rel:reproductiveCoercion a rel:SexualManipulation ;
+    rdfs:label "reproductive-coercion" ;
+    rdfs:comment "Controlling the target's reproductive autonomy — includes: sabotaging contraception (replacing pills, removing IUDs, breaking condoms), forcing pregnancy, forcing abortion, controlling access to reproductive healthcare, monitoring menstrual cycles to control fertility. Distinct from sexualCoercion (which compels sexual activity): reproductiveCoercion specifically targets the target's reproductive choices. Common in intimate partner abuse. The target may not recognise the coercion — sabotage may be undetected. Restricted to natural person targets." .
+
+rel:sexualContentWeaponisation a rel:SexualManipulation ;
+    rdfs:label "sexual-content-weaponisation" ;
+    rdfs:comment "Using sexual content (images, videos, recordings) as a weapon against the target — includes: revenge porn (sharing intimate images without consent), threats to share intimate images (sexual blackmail), covert recording of sexual activity, deep-fake sexual content (fabricated intimate images), and the creation or distribution of sexual content depicting the target without consent. The content may be real (covertly recorded) or fabricated (deep-fakes). The aim may be blackmail, reputation destruction, or pure harm. Links to rel:contentDoubleBind for cases where the content itself is illegal. Restricted to natural person targets." .
+
+rel:sexualExploitationDependency a rel:SexualManipulation ;
+    rdfs:label "sexual-exploitation-of-dependency" ;
+    rdfs:comment "Exploiting a relationship of dependency for sexual purposes — the dependency may be economic (employer-employee), professional (mentor-mentee), care-based (carer-dependent), institutional (guard-detainee, doctor-patient), or substance-based (providing drugs in exchange for sex). The target's dependency means they cannot freely refuse — refusal risks losing essential resources or support. The exploiter may frame the exchange as consensual. Distinct from sexualCoercion (which uses pressure): sexualExploitationDependency exploits structural inequality. Restricted to natural person targets." .
+
+rel:sexualBoundaryTesting a rel:SexualManipulation ;
+    rdfs:label "sexual-boundary-testing" ;
+    rdfs:comment "Progressively pushing sexual boundaries to normalise escalating conduct — starting with minor violations (unwanted comments, 'accidental' touches, intrusive questions) and escalating to more serious violations. Each violation is small enough to seem trivial or deniable, but the cumulative effect is to erode the target's boundaries and normalise the conduct. The target may not recognise the pattern until it has escalated significantly. Common in grooming (both child and adult), workplace sexual harassment, and institutional abuse. Restricted to natural person targets." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. False Claims & Fabrication — weaponised falsehoods
+# ────────────────────────────────────────────────────────────────────
+
+rel:FalseClaims a rdfs:Class ;
+    rdfs:label "False Claims & Fabrication" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "Deliberate fabrication or deployment of false claims against the target — distinct from disinformation (which spreads false information broadly): false claims are targeted at a specific person. Includes false allegations to authorities, fabricated evidence, perjury, false reports, and the strategic deployment of true-but-misleading information. False claims may be made to law enforcement, courts, employers, professional bodies, child protection services, immigration authorities, or the public. The target may face severe consequences (arrest, job loss, custody loss, deportation) before the falsity is established. False claims are particularly damaging when they exploit institutional processes — the institution becomes the instrument of harm. Restricted to natural person targets (the accused) but may target legal persons (false claims against organisations)." .
+
+rel:falseAllegation a rel:FalseClaims ;
+    rdfs:label "false-allegation" ;
+    rdfs:comment "Making a false allegation to authorities — false reports of crime, false child abuse reports, false domestic violence reports, false professional misconduct reports. The allegation triggers institutional processes that may cause severe harm to the target (investigation, arrest, suspension, custody removal) before the falsity is established. The false allegation may be combined with competitiveVictimhood (the claimant positions themselves as the victim). Particularly damaging when made to mandatory-reporting institutions (child protection, police) because the institution is required to act. Restricted to natural person targets." .
+
+rel:fabricatedEvidence a rel:FalseClaims ;
+    rdfs:label "fabricated-evidence" ;
+    rdfs:comment "Creating or planting false evidence to support claims against the target — fabricated documents, altered communications, deep-fake recordings or images, planted physical evidence. May be combined with falseAllegation (fabricated evidence supports the false report) or digitalCompromise (planting false digital evidence on the target's devices). The fabrication may be sophisticated enough to pass initial scrutiny. Restricted to natural and legal person targets." .
+
+rel:perjury a rel:FalseClaims ;
+    rdfs:label "perjury-false-sworn-statement" ;
+    rdfs:comment "Making false statements under oath or in sworn documents — false affidavits, false testimony, false statutory declarations. Perjury is a criminal offence in most jurisdictions but may be difficult to prove. The false sworn statement may be used in family court (false allegations of abuse in custody proceedings), civil proceedings (false claims of debt), criminal proceedings (false accusations), or immigration proceedings (false statements about the target). The institutional weight given to sworn statements makes perjury particularly damaging. Restricted to natural person targets." .
+
+rel:falseMedicalClaim a rel:FalseClaims ;
+    rdfs:label "false-medical-psychiatric-claim" ;
+    rdfs:comment "Making false claims about the target's medical or psychiatric condition — falsely claiming the target is mentally ill, dangerous, suicidal, or incapacitated. May be made to medical professionals, mental health services, police (welfare checks), or courts (capacity challenges). Particularly insidious because it exploits the medical system's duty of care — the target may be subjected to involuntary assessment, medication, or hospitalisation based on false claims. Common in custody disputes (pathologising the other parent), elder abuse (claiming incapacity to gain control), and domestic abuse (pathologising the victim to discredit them). Links to rel:gaslightingVariant medical. Restricted to natural person targets." .
+
+rel:misleadingTrueClaims a rel:FalseClaims ;
+    rdfs:label "misleading-true-claims" ;
+    rdfs:comment "Deploying true but misleading information to harm the target — technically true statements that create a false impression. Includes: revealing true but private information out of context, presenting true facts in a misleading sequence, true statements that imply false conclusions, selective disclosure of true facts that obscures exculpatory context. Distinct from fabrication (which is false): misleadingTrueClaims are technically true but weaponised through framing or selectivity. May be harder to challenge because each individual statement is true. Restricted to natural and legal person targets." .
+
+rel:falseCounterClaim a rel:FalseClaims ;
+    rdfs:label "false-counter-claim" ;
+    rdfs:comment "Making a false counter-claim in response to a true claim by the target — the target reports harm, and the aggressor files a counter-claim alleging the target is the perpetrator. A component of DARVO (Deny, Attack, Reverse Victim and Offender). May result in both parties being treated as mutual combatants, neutralising the target's complaint. Common in domestic violence (mutual arrest policies), workplace complaints (both parties disciplined), and institutional complaints. Restricted to natural person targets." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Content Double Bind — weaponising illegality of content
+# ────────────────────────────────────────────────────────────────────
+
+rel:ContentDoubleBind a rdfs:Class ;
+    rdfs:label "Content Double Bind" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "A sophisticated attack vector where the content used to threaten or harm the target is itself illegal to possess or share, creating a double bind for the target: they cannot share the evidence of the threat without committing a crime. Example: a perpetrator threatens a target via a video depicting illegal sexual content (e.g. child exploitation material, non-consensual intimate recording of the target or another person). The target cannot show the video to police because possessing or sharing the video is itself a criminal offence. The perpetrator exploits the legal prohibition on the content to create a shield against prosecution. This method is used by sophisticated bad actors and organised crime because it exploits the gap between the threat (which is harmful) and the evidence of the threat (which is illegal to handle). The ontology models this as a distinct method because it requires specific system responses: the system must provide a way for the target to report the threat without handling the illegal content, and law enforcement must have protocols for receiving reports of threats made through illegal content. Restricted to natural person targets." .
+
+rel:doubleBindType a rdf:Property ;
+    rdfs:label "double-bind type" ;
+    rdfs:domain rel:ContentDoubleBind ;
+    rdfs:range  rel:DoubleBindType .
+
+rel:DoubleBindType a rdfs:Class ;
+    rdfs:label "Double Bind Type" .
+
+rel:dbIllegalSexual a rel:DoubleBindType ; rdfs:label "illegal-sexual-content" ;
+    rdfs:comment "Threat delivered through content that is illegal to possess or share due to sexual content laws — e.g. threat accompanied by child exploitation material, non-consensual intimate image of the target or another person. The target cannot share the evidence without committing an offence. The perpetrator may be a third party to the content (not the person depicted) or may be the person depicted (self-generated content used as a weapon). Particularly used in sexual blackmail and organised crime." .
+rel:dbIllegalRecording a rel:DoubleBindType ; rdfs:label "illegal-recording" ;
+    rdfs:comment "Threat delivered through content that is illegal due to recording laws — e.g. illegally intercepted communications, covert recordings in jurisdictions where covert recording is illegal. The target cannot share the recording to prove the threat without admitting to or facilitating an illegal recording." .
+rel:dbClassifiedContent a rel:DoubleBindType ; rdfs:label "classified-or-restricted-content" ;
+    rdfs:comment "Threat delivered through content that is classified or restricted — e.g. leaked government documents, classified military information. The target cannot share the evidence without handling classified material. Used in state-level adversarial conduct and whistleblowing contexts." .
+rel:dbPrivacyProtected a rel:DoubleBindType ; rdfs:label "privacy-protected-content" ;
+    rdfs:comment "Threat delivered through content that is protected by privacy laws — e.g. medical records of a third party, legally privileged communications. The target cannot share the evidence without breaching privacy or privilege obligations. Links to obligations.n3 confidentiality instruments." .
+rel:dbSelfIncriminating a rel:DoubleBindType ; rdfs:label "self-incriminating-content" ;
+    rdfs:comment "Threat delivered through content that would incriminate the target if shared — e.g. the threat references the target's own illegal conduct, or the content shows the target in a compromising situation. The target cannot share the evidence without exposing themselves to prosecution or social harm. The perpetrator exploits the target's vulnerability to keep them from reporting." .
+
+rel:doubleBindReportingPath a rdf:Property ;
+    rdfs:label "reporting path" ;
+    rdfs:domain rel:ContentDoubleBind ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the target can report the threat without handling the illegal content — e.g. 'report to law enforcement without sharing content, describe threat only', 'report through legal representative who has privilege', 'ZKP validation that threat exists without revealing content'. The system must provide at least one reporting path." .
+
+rel:doubleBindZKPOption a rdf:Property ;
+    rdfs:label "zkp option" ;
+    rdfs:domain rel:ContentDoubleBind ;
+    rdfs:range  obl:ZeroKnowledgeValidation ;
+    rdfs:comment "If a ZKP option exists, the target may be able to validate that a threat was made without revealing the illegal content. Links to obligations.n3 zero-knowledge validation." .
+
+rel:doubleBindMischaracterisation a rdf:Property ;
+    rdfs:label "mischaracterisation risk" ;
+    rdfs:domain rel:ContentDoubleBind ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Risk that the wrongs will be mischaracterised if reported — e.g. the target may be charged with possession of illegal content rather than being treated as a victim of threat. Sophisticated bad actors exploit this: they structure the threat so that the target's report triggers prosecution of the target, not the perpetrator. The system must be aware of this risk and provide protections for reporters." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Social Harm Patterns — context-specific configurations
+# ────────────────────────────────────────────────────────────────────
+
+rel:SocialHarmPattern a rdfs:Class ;
+    rdfs:label "Social Harm Pattern" ;
+    rdfs:comment "A recurring configuration of relational, psychological, and social methods that constitutes a recognisable pattern of harm. Patterns are not new methods — they are combinations of methods that commonly co-occur and have distinct characteristics. Modelling patterns helps identify conduct that may be missed when methods are assessed individually. Each pattern lists the methods typically involved, the context in which it occurs, and the characteristics that distinguish it from other patterns. On gendered patterns: some patterns are culturally associated with particular genders (e.g. coercive control is stereotyped as masculine, relational aggression as feminine) but the ontology does not assign patterns to genders. All patterns may be enacted by actors of any gender against targets of any gender. The gendering of patterns is a cultural phenomenon, not an ontological one." .
+
+rel:patternMethods a rdf:Property ;
+    rdfs:label "pattern methods" ;
+    rdfs:domain rel:SocialHarmPattern ;
+    rdfs:range  adv:ConductMethod ;
+    rdfs:comment "The methods typically involved in this pattern." .
+
+rel:patternContext a rdf:Property ;
+    rdfs:label "pattern context" ;
+    rdfs:domain rel:SocialHarmPattern ;
+    rdfs:range  rel:PatternContext .
+
+rel:PatternContext a rdfs:Class ;
+    rdfs:label "Pattern Context" .
+
+rel:ctxDomestic     a rel:PatternContext ; rdfs:label "domestic" ;
+    rdfs:comment "Domestic / intimate partner context." .
+rel:ctxWorkplace    a rel:PatternContext ; rdfs:label "workplace" ;
+    rdfs:comment "Workplace context — includes bullying, mobbing, harassment." .
+rel:ctxCommunity    a rel:PatternContext ; rdfs:label "community" ;
+    rdfs:comment "Community context — includes religious communities, neighbourhood groups, online communities." .
+rel:ctxInstitutional a rel:PatternContext ; rdfs:label "institutional" ;
+    rdfs:comment "Institutional context — includes schools, hospitals, government, military." .
+rel:ctxOnline       a rel:PatternContext ; rdfs:label "online" ;
+    rdfs:comment "Online / digital context — includes social media, forums, gaming." .
+rel:ctxFamily       a rel:PatternContext ; rdfs:label "family" ;
+    rdfs:comment "Family context — includes parent-child, sibling, extended family." .
+rel:ctxPostSeparation a rel:PatternContext ; rdfs:label "post-separation" ;
+    rdfs:comment "Post-separation context — conduct after relationship ends. May persist for years." .
+
+rel:coerciveControlPattern a rel:SocialHarmPattern ;
+    rdfs:label "coercive-control-pattern" ;
+    rel:patternMethods rel:gaslighting, rel:socialIsolation, rel:emotionalBlackmail, rel:financialControl, rel:monitoringStalking, rel:trapping, rel:sexualCoercion ;
+    rel:patternContext rel:ctxDomestic, rel:ctxFamily, rel:ctxInstitutional ;
+    rdfs:comment "The overarching pattern of coercive control — cumulative domination through multiple methods. Criminalised as a distinct offence in several jurisdictions. The pattern is not any single act but the combination and duration. See §7." .
+
+rel:postSeparationAbuse a rel:SocialHarmPattern ;
+    rdfs:label "post-separation-abuse" ;
+    rel:patternMethods rel:smearCampaign, rel:flyingMonkey, rel:falseAllegation, rel:financialControl, rel:monitoringStalking, rel:triangulation ;
+    rel:patternContext rel:ctxPostSeparation, rel:ctxFamily, rel:ctxCommunity ;
+    rdfs:comment "Continued abuse after a relationship ends — the aggressor shifts from direct control to indirect methods: smear campaigns to destroy reputation, flying monkeys to harass, false allegations to institutions (child protection, police, family court), financial control through legal processes, stalking through technology, triangulation through children. Post-separation abuse may persist for years and may escalate at key points (court dates, new relationships, custody exchanges). Particularly dangerous because the target may be told they are 'free' now that the relationship has ended, while the abuse continues in new forms." .
+
+rel:workplaceMobbing a rel:SocialHarmPattern ;
+    rdfs:label "workplace-mobbing" ;
+    rel:patternMethods rel:socialExclusion, rel:gossipRumour, rel:relationalSabotage, rel:smearCampaign, rel:falseAllegation, rel:silentTreatment ;
+    rel:patternContext rel:ctxWorkplace, rel:ctxInstitutional ;
+    rdfs:comment "Collective harassment of a target by a group in the workplace — distinct from individual bullying: mobbing involves multiple perpetrators and may be orchestrated by a leader. The target is gradually isolated, discredited, and driven out. Methods include exclusion from meetings and communications, rumour spreading, sabotage of work, false performance complaints, and coordinated social ostracism. The institution may enable the mobbing through inaction or by treating the target's complaints as a 'personality conflict.' May target any worker but particularly targets whistleblowers, newcomers, and those who differ from the group norm." .
+
+rel:institutionalAbuse a rel:SocialHarmPattern ;
+    rdfs:label "institutional-abuse-pattern" ;
+    rel:patternMethods rel:gaslighting, rel:infantilisation, rel:falseMedicalClaim, rel:sexualExploitationDependency, rel:trapping ;
+    rel:patternContext rel:ctxInstitutional ;
+    rdfs:comment "Abuse enabled or perpetrated by an institutional setting — the institution's structure, power dynamics, and processes are used as instruments of harm. Includes: aged care facilities (infantilisation, financial control, chemical restraint), psychiatric settings (involuntary treatment, pathologising complaints, denial of autonomy), immigration detention (exploitation of dependency, indefinite holding), religious institutions (spiritual manipulation, exploitation of trust, cover-up of abuse), and prisons. The institution may gaslight the target by denying that harm occurred or by framing complaints as symptoms. Institutional abuse is particularly damaging because the target cannot leave and the institution controls the evidence." .
+
+rel:onlineHarassmentCampaign a rel:SocialHarmPattern ;
+    rdfs:label "online-harassment-campaign" ;
+    rel:patternMethods rel:smearCampaign, rel:defamation, rel:monitoringStalking, rel:sexualContentWeaponisation, rel:falseAllegation, rel:socialExclusion ;
+    rel:patternContext rel:ctxOnline ;
+    rdfs:comment "Coordinated online harassment of a target — may involve doxxing (publishing private information), mass reporting (coordinated false reports to platforms), deep-fake sexual content, sustained social media attacks, and monitoring of online activity. May be orchestrated by a single actor using multiple accounts or by a coordinated group. The target's online presence — which may be essential for work, social connection, or public participation — is weaponised against them. Particularly targets women, public figures, activists, and marginalised groups. May transition to offline stalking and harassment." .
+
+rel:familySystemAbuse a rel:SocialHarmPattern ;
+    rdfs:label "family-system-abuse" ;
+    rel:patternMethods rel:triangulation, rel:gaslighting, rel:flyingMonkey, rel:emotionalBlackmail, rel:competitiveVictimhood, rel:infantilisation ;
+    rel:patternContext rel:ctxFamily, rel:ctxDomestic ;
+    rdfs:comment "Abuse within family systems that exploits family roles, obligations, and dynamics — a parent triangulating children into marital conflict, a sibling recruiting other family members against the target, a parent using emotionalBlackmail through the obligation norms of family, an adult child infantilising an elderly parent to gain control. Family system abuse is particularly difficult to escape because the family is supposed to be a source of support. The target may be told 'but they're your family' as a reason to tolerate abuse. Flying monkeys are often family members recruited to pressure the target to comply with family norms." .
+
+rel:communityOstracism a rel:SocialHarmPattern ;
+    rdfs:label "community-ostracism" ;
+    rel:patternMethods rel:socialExclusion, rel:gossipRumour, rel:smearCampaign, rel:flyingMonkey, rel:relationalSabotage ;
+    rel:patternContext rel:ctxCommunity, rel:ctxInstitutional ;
+    rdfs:comment "Systematic exclusion of the target from a community — the target is gradually or suddenly excluded from community participation, social life, and support. May occur in religious communities (shunning, excommunication), cultural communities (social death), professional communities (blacklisting), or online communities (banning, blocklisting). The community may justify the ostracism by citing the target's alleged misconduct — which may be fabricated or exaggerated. Community ostracism is particularly damaging in tight-knit communities where social participation is essential for economic survival, housing, and identity. The target may have no recourse within the community and may need to leave entirely." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Cumulative Pattern — coercive control as overarching
+# ────────────────────────────────────────────────────────────────────
+
+rel:coerciveControl a rdfs:Class ;
+    rdfs:label "Coercive Control" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "A pattern of behaviour that establishes domination over the target through cumulative acts of multiple methods — gaslighting, social isolation, trapping, emotional manipulation, financial control, sexual coercion, monitoring, and other methods. Coercive control is not a single incident but a campaign — the individual acts may seem minor in isolation but constitute severe harm in aggregate. Criminalised as a distinct offence in several jurisdictions (UK, Ireland, parts of Australia, parts of the US). Coercive control is the overarching method that encompasses many of the other methods listed in this ontology — it is the pattern, not the individual act. Common in intimate partner abuse but also occurs in institutional settings (coercive control of employees, community members, or dependents), family systems, and cult dynamics. The target may not recognise they are under coercive control — the methods are designed to be invisible in isolation and to undermine the target's capacity to recognise the pattern. Restricted to natural person targets." .
+
+rel:ccMethods a rdf:Property ;
+    rdfs:label "methods used" ;
+    rdfs:domain rel:coerciveControl ;
+    rdfs:range  adv:ConductMethod ;
+    rdfs:comment "The specific methods employed within this coercive control campaign. A campaign typically involves 3 or more methods." .
+
+rel:ccDuration a rdf:Property ;
+    rdfs:label "duration" ;
+    rdfs:domain rel:coerciveControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of the campaign — 'months', 'years', 'decades'. Coercive control is by definition sustained over time." .
+
+rel:ccEscalation a rdf:Property ;
+    rdfs:label "escalation pattern" ;
+    rdfs:domain rel:coerciveControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the campaign has escalated over time — methods added, intensity increased, frequency increased. Escalation may be gradual (boiling frog) or triggered by events (target attempting to leave, target gaining independence)." .
+
+rel:ccPhase a rdf:Property ;
+    rdfs:label "phase" ;
+    rdfs:domain rel:coerciveControl ;
+    rdfs:range  rel:CoerciveControlPhase .
+
+rel:CoerciveControlPhase a rdfs:Class ;
+    rdfs:label "Coercive Control Phase" .
+
+rel:ccGrooming     a rel:CoerciveControlPhase ; rdfs:label "grooming" ;
+    rdfs:comment "Grooming phase — love bombing, trust building, establishing dependency. The target does not recognise the conduct as adversarial. The aggressor is establishing the foundations for future control." .
+rel:ccConsolidation a rel:CoerciveControlPhase ; rdfs:label "consolidation" ;
+    rdfs:comment "Consolidation phase — control is established and maintained. Methods shift from grooming to maintenance: gaslighting, isolation, financial control, monitoring. The target is increasingly dependent and constrained." .
+rel:ccCrisis       a rel:CoerciveControlPhase ; rdfs:label "crisis" ;
+    rdfs:comment "Crisis phase — the target attempts resistance, escape, or disclosure. The aggressor escalates in response — increased violence, intensified smear campaigns, false allegations, stalking. The most dangerous phase — risk of serious harm or death is highest when the target attempts to leave." .
+rel:ccPostSeparation a rel:CoerciveControlPhase ; rdfs:label "post-separation" ;
+    rdfs:comment "Post-separation phase — the relationship has ended but the control continues through indirect methods: smear campaigns, flying monkeys, false allegations, financial control through legal processes, stalking, triangulation through children. May persist for years." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Additional methods — carried over from adversarial-conduct.n3
+# ────────────────────────────────────────────────────────────────────
+
+rel:socialIsolation a rel:RelationalAggression ;
+    rdfs:label "social-isolation" ;
+    rdfs:comment "Systematic destruction of the target's social support network — alienating friends, family, colleagues, and community members from the target through lies, manipulation, manufactured conflicts, or exploitation of existing tensions. Distinct from adv:isolationMethod (which cuts off access): socialIsolation destroys the relationships themselves so the target has no one to turn to. Often combined with gaslighting — the isolated target has no external validation to counter the gaslighter's reality. Common in domestic abuse (coercive control), cult recruitment, workplace mobbing, and political persecution. The target may not recognise the isolation as deliberate — it may be attributed to 'people not liking me' rather than 'someone is turning people against me'. Restricted to natural person targets." .
+
+rel:defamation a rel:RelationalAggression ;
+    rdfs:label "defamation" ;
+    rdfs:comment "Deliberate destruction of the target's reputation through false or misleading statements — distinct from adv:mediaManipulation (which is the channel) and adv:disinformation (which is the content): defamation is the targeted application of false statements to a specific person's reputation. Includes slander (spoken), libel (written), and digital defamation (social media posts, reviews, campaigns). May be combined with socialIsolation — defaming the target to their own support network accelerates isolation. The target's reputation is a dignity aspect (see obl:dignityReputation). May target natural or legal persons." .
+
+rel:trapping a rel:PsychologicalManipulation ;
+    rdfs:label "trapping" ;
+    rdfs:comment "Creating situations from which the target cannot escape without harm — physical trapping (locking in, blocking exit), financial trapping (debt manipulation creating dependency), legal trapping (strategic litigation making defence impossible), social trapping (reputation destruction making leaving costly), or relational trapping (creating dependency so the target cannot leave the relationship). Trapping is often cumulative — each trap reinforces the others. The target may enter the situation voluntarily and only discover the trap when they attempt to leave. Common in domestic abuse, employment (debt bondage, visa dependency), and cult membership. Distinct from coercion: trapping creates the conditions that make coercion unnecessary — the target 'chooses' to comply because the alternatives are worse. Restricted to natural person targets." .
+
+rel:emotionalManipulation a rel:PsychologicalManipulation ;
+    rdfs:label "emotional-manipulation" ;
+    rdfs:comment "Exploitation of the target's emotional capacities — guilt, empathy, love, fear, obligation — to control behaviour. Includes: inducing guilt to compel compliance, exploiting empathy to extract concessions, weaponising love to prevent departure, manufacturing crises to create dependency, alternating affection and withdrawal to create trauma bonding. Distinct from adv:intimidation (which uses fear of external harm): emotional manipulation exploits the target's own emotional responses as the mechanism of control. Often combined with gaslighting and socialIsolation. The target may not recognise the manipulation — they may attribute their compliance to love, loyalty, or obligation. Restricted to natural person targets." .
+
+rel:financialControl a rel:PsychologicalManipulation ;
+    rdfs:label "financial-control" ;
+    rdfs:comment "Controlling the target's financial autonomy to create dependency — distinct from adv:financialPressure (which uses financial leverage to compel specific actions): financialControl is the systematic removal of the target's ability to make independent financial decisions. Includes: controlling bank accounts, preventing employment, creating debt dependency, withholding money for necessities, forcing financial decisions under duress. Common in domestic abuse (economic coercion), employment (debt bondage), and human trafficking. The target cannot leave the relationship because they have no financial resources. Often combined with trapping and coercive control. Restricted to natural person targets." .
+
+rel:smearCampaign a rel:RelationalAggression ;
+    rdfs:label "smear-campaign" ;
+    rdfs:comment "Coordinated, sustained defamation of the target across multiple channels and social networks — distinct from defamation (which may be a single statement): a smear campaign is a campaign with multiple actors, multiple channels, and sustained duration. Includes: planting false narratives with mutual contacts, coordinated social media attacks, fabricated evidence of misconduct, exploitation of existing grievances to recruit allies against the target. Often used by perpetrators of domestic abuse to pre-emptively discredit the victim (DARVO: Deny, Attack, Reverse Victim and Offender). Common in workplace mobbing, political campaigns, and post-separation abuse. May target natural or legal persons." .
+
+rel:monitoringStalking a rel:PsychologicalManipulation ;
+    rdfs:label "monitoring-stalking" ;
+    rdfs:comment "Surveillance and tracking of the target's movements, communications, and activities — physical stalking, digital surveillance, monitoring through shared devices, tracking apps, and social media surveillance. Distinct from adv:digitalCompromise (which targets systems): monitoring/stalking targets the person. The aim is to know the target's location, contacts, and activities at all times — this enables other methods (isolation, gaslighting, coercive control) by providing information about the target's support network and movements. Criminalised as stalking in most jurisdictions. Restricted to natural person targets." .
+
+rel:loveBombing a rel:PsychologicalManipulation ;
+    rdfs:label "love-bombing" ;
+    rdfs:comment "Overwhelming the target with affection, attention, and commitment early in a relationship to create rapid emotional dependency — then withdrawing the affection to control behaviour. The target becomes addicted to the early affection and complies with demands to regain it. Love bombing is not simple flattery — it is intense, rapid, and creates a sense of destiny or specialness ('soulmate', 'twin flame', 'meant to be'). Common in cult recruitment, romantic relationships, and some sales and recruitment contexts. Love bombing is a precursor to other methods — the dependency it creates enables gaslighting, emotional manipulation, and coercive control. The target may not recognise the love bombing as manipulation — they may experience it as the best relationship they've ever had. The withdrawal phase is particularly damaging — the target may comply with escalating demands to regain the initial affection. Love bombing may also be used to re-establish control after a crisis (see rel:ccGrooming and rel:narcissisticAbuse). Restricted to natural person targets." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (adversarial-relational.n3) links to:
+#
+# adversarial-conduct.n3:
+#   - All methods here are subClassOf adv:ConductMethod
+#   - Methods may be used with any adv:ConductStrategy
+#   - Methods may target any adv:ConductTarget (natural persons)
+#   - Patterns may be used in adv:ConductPattern (coordinated campaigns)
+#   - The main ontology references this file for relational methods
+#
+# epistemics.n3:
+#   - Gaslighting directly affects epistemic status (subjective →
+#     uncertain → dependent)
+#   - False claims affect reality classification (fiction presented
+#     as non-fiction with intent to harm)
+#   - Medical gaslighting affects the target's epistemic confidence
+#     about their own body
+#
+# obligations.n3:
+#   - Coercive circumstances (obl:CoerciveCircumstance) may involve
+#     relational coercion (obl:coerRelational)
+#   - Content double binds link to confidentiality instruments and
+#     ZKP validation options
+#   - Human dignity aspects are targeted by many of these methods
+#     (reputation, bodily integrity, autonomy, vulnerability)
+#   - Disclosure exceptions may apply — e.g. imminent harm
+#     exception for targets of coercive control
+#
+# duty-of-care.n3:
+#   - Institutional abuse occurs within duty-of-care relationships
+#   - Coercive control may occur within family duty-of-care
+#   - Duty holders may be perpetrators (abuse of duty)
+#
+# personhood.n3:
+#   - These methods target personhood (social relations, reputation,
+#     legal status) and selfhood (perception, emotional state,
+#     autonomy)
+#   - Social relations (person:SocialRelation) are the vehicle and
+#     target of relational aggression
+#
+# values.n3:
+#   - Values agreements may be weaponised (friendshipWeaponisation
+#     exploits trust norms)
+#   - Values gaps may reveal perpetrators (projected values of
+#     'caring partner' vs enumerated values of coercive control)
+#
+# faith-systems.n3:
+#   - Religious communities may be sites of community ostracism
+#   - Spiritual manipulation may be a component of institutional
+#     abuse in religious settings
+#   - Faith community leaders may weaponise faith authority
+#
+# provenance.n3:
+#   - All conduct records have provenance
+#   - False claims and fabricated evidence require provenance
+#     tracking to establish the falsity
+#   - Content double binds require provenance for reporting
+#     without content handling
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Proxy Perpetration — acting on behalf of another
+# ────────────────────────────────────────────────────────────────────
+
+rel:ProxyPerpetration a rdfs:Class ;
+    rdfs:label "Proxy Perpetration" ;
+    rdfs:comment "A configuration in which the direct actor is not the primary instigator — the actor conducts adversarial conduct on behalf of, under instruction from, or as an instrument of another party. Proxy perpetration is critical to model because it obscures the true source of harm. The direct actor may be a willing participant, a coerced participant, or an unwitting participant (e.g. recruited as a 'concerned friend' without knowing the full context). Proxy perpetration is gender-neutral — any person may act as proxy for any other person, regardless of gender. Common configurations: a woman acting on behalf of a male partner (e.g. delivering threats he cannot deliver due to restraining order), a man acting on behalf of a female partner (e.g. intimidating her rival), a family member acting on behalf of another family member, a colleague acting on behalf of a supervisor, a community member acting on behalf of a leader. Proxy perpetration may also be layered — A instructs B who recruits C, making the chain difficult to trace. Restricted to natural persons as both proxy and instigator." .
+
+rel:proxyActor a rdf:Property ;
+    rdfs:label "proxy actor" ;
+    rdfs:domain rel:ProxyPerpetration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The person who directly conducts the adversarial conduct — the instrument of harm." .
+
+rel:proxyInstigator a rdf:Property ;
+    rdfs:label "instigator" ;
+    rdfs:domain rel:ProxyPerpetration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The person who directed, instructed, or commissioned the proxy actor — the primary source of harm. May be unknown or suspected." .
+
+rel:proxyAwareness a rdf:Property ;
+    rdfs:label "proxy awareness" ;
+    rdfs:domain rel:ProxyPerpetration ;
+    rdfs:range  rel:ProxyAwareness .
+
+rel:ProxyAwareness a rdfs:Class ;
+    rdfs:label "Proxy Awareness" .
+
+rel:paWilling    a rel:ProxyAwareness ; rdfs:label "willing" ;
+    rdfs:comment "The proxy actor knows they are conducting adversarial conduct and chooses to participate." .
+rel:paCoerced   a rel:ProxyAwareness ; rdfs:label "coerced" ;
+    rdfs:comment "The proxy actor is themselves under coercion or duress — they conduct the conduct because they are threatened. 'Coerced' is a mind-dependent term applicable to natural persons only." .
+rel:paUnwitting a rel:ProxyAwareness ; rdfs:label "unwitting" ;
+    rdfs:comment "The proxy actor does not know they are being used as an instrument — they may be told a one-sided story and believe they are helping. Common in flying monkey recruitment." .
+rel:paPartiallyAware a rel:ProxyAwareness ; rdfs:label "partially-aware" ;
+    rdfs:comment "The proxy actor suspects something is wrong but does not fully understand their role — they may rationalise their participation." .
+
+rel:proxyChain a rdf:Property ;
+    rdfs:label "proxy chain" ;
+    rdfs:domain rel:ProxyPerpetration ;
+    rdfs:range  rel:ProxyPerpetration ;
+    rdfs:comment "Links to another ProxyPerpetration if the chain is layered — A instructs B who recruits C. Each link in the chain is a separate ProxyPerpetration instance." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Profession-Correlated Access — tools, authority, opportunity
+# ────────────────────────────────────────────────────────────────────
+
+rel:ProfessionCorrelatedAccess a rdfs:Class ;
+    rdfs:label "Profession-Correlated Access" ;
+    rdfs:comment "A pattern of access to particular adversarial methods that correlates with a profession or social role — not because of the character of people in that profession, but because of the tools, authority, trust, and access that the profession provides. The correlation is one of access and opportunity, not of character or gender. Any person in any profession may commit any adversarial conduct; the profession simply shapes which methods are most accessible and most easily disguised. This class is modelled to ensure that ontological analysis considers profession-specific attack vectors that may be invisible in generic security models." .
+
+rel:professionRole a rdf:Property ;
+    rdfs:label "profession or role" ;
+    rdfs:domain rel:ProfessionCorrelatedAccess ;
+    rdfs:range  rel:ProfessionRole .
+
+rel:ProfessionRole a rdfs:Class ;
+    rdfs:label "Profession or Role" .
+
+rel:roleTrades a rel:ProfessionRole ; rdfs:label "trades-and-physical-labour" ;
+    rdfs:comment "Trades and physical labour — greater access to physical methods and physical environments where physical harm can be disguised as accident. Includes construction, mining, agriculture, manufacturing." .
+
+rel:roleMedical a rel:ProfessionRole ; rdfs:label "medical-and-health-professional" ;
+    rdfs:comment "Medical and health professionals — greater access to complex negligence, false documentation, medication manipulation, pathologising of targets, and exploitation of the trust and dependency inherent in the care relationship. Includes doctors, nurses, psychiatrists, psychologists, pharmacists, aged care workers." .
+
+rel:roleLegal a rel:ProfessionRole ; rdfs:label "legal-professional" ;
+    rdfs:comment "Legal professionals — greater access to legal abuse (SLAPPs, vexatious litigation), perjury, false affidavits, and weaponisation of legal process. Includes lawyers, paralegals, judges, court officers." .
+
+rel:rolePolitical a rel:ProfessionRole ; rdfs:label "political-and-public-figure" ;
+    rdfs:comment "Political and public figures — greater access to character attacks, smear campaigns, media manipulation, and institutional gaslighting. Includes politicians, lobbyists, political staff, public commentators." .
+
+rel:roleFinancial a rel:ProfessionRole ; rdfs:label "financial-professional" ;
+    rdfs:comment "Financial professionals — greater access to financial control, asset hiding, debt manipulation, and economic coercion. Includes accountants, financial advisors, bank officers, auditors." .
+
+rel:roleReligious a rel:ProfessionRole ; rdfs:label "religious-and-community-leader" ;
+    rdfs:comment "Religious and community leaders — greater access to spiritual manipulation, community ostracism, exploitation of trust, and weaponisation of faith authority. Includes clergy, elders, community organisers, cult leaders." .
+
+rel:roleEducator a rel:ProfessionRole ; rdfs:label "educator-and-childcare" ;
+    rdfs:comment "Educators and child-care professionals — greater access to grooming, infantilisation, boundary testing, and exploitation of the dependency and trust inherent in the care relationship. Includes teachers, coaches, child-care workers, youth workers." .
+
+rel:roleTechnology a rel:ProfessionRole ; rdfs:label "technology-professional" ;
+    rdfs:comment "Technology professionals — greater access to digital surveillance, monitoring, deep-fake creation, and weaponisation of software agents. Includes software engineers, IT administrators, data analysts, security professionals." .
+
+rel:roleLawEnforcement a rel:ProfessionRole ; rdfs:label "law-enforcement-and-security" ;
+    rdfs:comment "Law enforcement and security — greater access to intimidation, false arrest, evidence planting, and exploitation of institutional authority. Includes police, security guards, military, intelligence officers." .
+
+rel:roleSocialWork a rel:ProfessionRole ; rdfs:label "social-work-and-community-services" ;
+    rdfs:comment "Social work and community services — greater access to false reports to child protection, pathologising of targets, exploitation of institutional authority over families, and weaponisation of mandatory reporting. Includes social workers, child protection officers, community service workers." .
+
+rel:roleHR a rel:ProfessionRole ; rdfs:label "human-resources-and-management" ;
+    rdfs:comment "Human resources and management — greater access to workplace mobbing, constructed performance issues, retaliation disguised as process, and exploitation of institutional authority. Includes HR managers, supervisors, executives." .
+
+rel:roleCare a rel:ProfessionRole ; rdfs:label "carer-and-dependent-relationship" ;
+    rdfs:comment "Carers and those in dependent-relationship roles — greater access to infantilisation, financial control, medication manipulation, and exploitation of the dependency inherent in the care relationship. Includes aged care workers, disability support workers, family carers, guardians." .
+
+rel:professionMethods a rdf:Property ;
+    rdfs:label "accessible methods" ;
+    rdfs:domain rel:ProfessionCorrelatedAccess ;
+    rdfs:range  adv:ConductMethod ;
+    rdfs:comment "The methods most accessible to this profession — not exclusive, but most likely given the tools, authority, and access of the role." .
+
+rel:professionDisguise a rdf:Property ;
+    rdfs:label "common disguise" ;
+    rdfs:domain rel:ProfessionCorrelatedAccess ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the conduct is typically disguised within this profession — e.g. medical harm disguised as treatment, legal abuse disguised as process, workplace mobbing disguised as performance management." .
+
+# ────────────────────────────────────────────────────────────────────
+# 12. Core Principle — the test for adversarial conduct
+# ────────────────────────────────────────────────────────────────────
+
+rel:CorePrinciple a rdfs:Class ;
+    rdfs:label "Core Principle — Test for Adversarial Conduct" ;
+    rdfs:comment "The foundational test for whether conduct should be considered adversarial. The test is not limited to legally recognised offences, culturally recognised violence, or conduct that fits expected perpetrator-target patterns. The test is: If the conduct is not friendly — if it is not substantive of supports to act in good faith — if the potential intent and purpose is to cause another injury, whether physical, psychological, relational, social, sexual, financial, reputational, or institutional — then it should be considered adversarial conduct. This test applies regardless of: the gender of the actor, the gender of the target, the relationship between actor and target, the profession or social role of the actor, whether the actor is acting alone or as proxy, whether the conduct is visible or invisible, whether the conduct is a single incident or a cumulative pattern, whether the conduct is culturally normalised, and whether the conduct is legally recognised. The purpose of this principle is to ensure that the ontology does not replicate the blind spots of existing legal and security frameworks — blind spots that have historically failed to recognise harm perpetrated by women, harm between women, harm against men, harm that is culturally normalised, and harm that operates through relational and psychological channels." .
+
+rel:principleTest a rdf:Property ;
+    rdfs:label "principle test" ;
+    rdfs:domain rel:CorePrinciple ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The three-part test: (1) Is the conduct friendly? (2) Is it substantive of supports to act in good faith? (3) Is the potential intent and purpose to cause injury? If (1) is no, or (2) is no, or (3) is yes, the conduct should be considered." .
+
+rel:principleHarmTypes a rdf:Property ;
+    rdfs:label "harm types considered" ;
+    rdfs:domain rel:CorePrinciple ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The types of injury considered: physical, psychological, relational, social, sexual, financial, reputational, institutional, epistemic, autonomy." .
+
+rel:principleRegardlessOf a rdf:Property ;
+    rdfs:label "regardless of" ;
+    rdfs:domain rel:CorePrinciple ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Factors that do not affect whether conduct is considered adversarial: gender of actor, gender of target, relationship, profession, sole/proxy/group, visible/invisible, single/cumulative, culturally normalised, legally recognised." .
+
+# ────────────────────────────────────────────────────────────────────
+# 13. Accountability Evasion & Discrimination Weaponisation
+# ────────────────────────────────────────────────────────────────────
+
+rel:AccountabilityEvasion a rdfs:Class ;
+    rdfs:label "Accountability Evasion" ;
+    rdfs:subClassOf adv:ConductMethod ;
+    rdfs:comment "Tactics used to evade accountability for adversarial conduct by manipulating social perception, exploiting discriminatory biases, or weaponising the target's social position. These tactics are particularly insidious because they operate after the harm has been done — the perpetrator has already caused injury, and the evasion tactic compounds the harm by preventing recognition, validation, or justice. Accountability evasion is often the second wave of harm: the initial conduct causes injury, and the evasion ensures the injury is not addressed. Restricted to natural person targets." .
+
+rel:feignedIncompetence a rel:AccountabilityEvasion ;
+    rdfs:label "feigned-incompetence" ;
+    rdfs:comment "Deliberately presenting oneself as insufficiently intelligent, knowledgeable, or competent to have caused the harm intentionally — 'oh, we're just not intelligent enough to understand.' The tactic serves multiple purposes: (1) it denies intent, making the conduct appear accidental or negligent rather than adversarial; (2) it positions the target as unreasonable for expecting better; (3) it engenders social victimisation against the target — observers may perceive the target as bullying, arrogant, or demanding too much from someone 'less capable'; (4) it exploits social biases that associate intelligence with certain groups, so the target (if from a group stereotyped as more intelligent or articulate) is further marginalised for 'punching down.' Feigned incompetence is distinct from genuine incompetence — the perpetrator is capable of the conduct (which may be sophisticated) but presents as incapable when accountability is sought. Common in workplace settings, institutional responses to complaints, and organised crime contexts where perpetrators exploit the gap between their conduct and their presented persona. Restricted to natural person targets." .
+
+rel:discriminationWeaponisation a rel:AccountabilityEvasion ;
+    rdfs:label "discrimination-weaponisation" ;
+    rdfs:comment "Manipulating existing social biases and discriminatory behaviours to execute harm or evade accountability — the perpetrator does not need to hold the discriminatory belief themselves; they exploit the fact that institutions, communities, and observers hold biases that can be activated against the target. Examples: (1) a perpetrator exploits the bias that women are 'too emotional' or 'hysterical' — by provoking a response and then pointing to the response as evidence of instability; (2) a perpetrator exploits racial bias by framing a target of colour as 'aggressive' for conduct that would be accepted from a white person; (3) a perpetrator exploits the bias that people with mental illness are unreliable — by suggesting the target is mentally ill, making their reports of harm less credible; (4) a perpetrator exploits class bias by framing a working-class target as 'rough' or 'troublemaking.' Discrimination weaponisation is particularly effective because the perpetrator does not need to be discriminatory themselves — they simply activate existing discrimination in the social environment. This makes it especially useful for organised crime, which can exploit social biases without being directly associated with them. Restricted to natural person targets." .
+
+rel:marginalisedGroupWeaponisation a rel:AccountabilityEvasion ;
+    rdfs:label "marginalised-group-weaponisation" ;
+    rdfs:comment "Using a person as an instrument of harm by exploiting contextual factors that make them effective in that specific situation — the factors that make someone an effective instrument are not reducible to a single variable such as gender. The effectiveness of the instrument depends on the intersection of: the topic or domain of the harm, the context and setting, the relationships between actor, target, and instrument, the resources or lack thereof, the social biases that apply in that specific context, the institutional blind spots, the vulnerability of the instrument, and the power asymmetries between instigator and instrument. Gender bias is one factor among many — it may be operative in some contexts and not others, and it may interact with other factors (wealth, race, class, psychiatric vulnerability, professional position, family networks, substance dependency) in ways that are specific to the situation. The ontology does not reduce this complexity to 'women are less likely to be suspected' — that framing is itself a simplification that obscures the contextual dynamics. Instead, the ontology models the factors as a multidimensional space (see rel:InstrumentalisationFactor) in which the effectiveness of any person as an instrument is evaluated contextually. Two bias mechanisms may be exploited where gender is a factor: (A) Disbelief bias — targets who report harm from a member of a group stereotyped as non-threatening are less likely to be believed. (B) Protective bias — social norms that shield the group member from investigation or consequence. Protective bias may be the more powerful mechanism: a person may engage in acts that would result in immediate criminal investigation if executed by someone outside the protected category, but because of the protective bias, the conduct is not investigated. The social bias that 'protects' is weaponised — it does not protect the instrument; it protects the instigator who hides behind them. The instrument is not served by this protection — they are placed in legal and physical danger while the instigator remains insulated. The target faces a double bind: if they report, the protective bias may prevent action; if they walk away, they lose evidence and the ability to correct the problem; if they stay, they remain exposed to ongoing harm. Neither reporting nor silence leads to justice. Intergenerational impact: the implications extend to children, particularly in single-parent situations where the instrument is also the primary carer. Children may normalise the conduct, learn adversarial methods, internalise the bias, become future instruments, or become future targets. The ontological visibility of these behaviours is essential for child protection, family court, and therapeutic contexts. Detailed scenario patterns are modelled in adversarial-relational-scenarios.n3. Restricted to natural persons." .
+
+rel:protectiveBiasType a rdf:Property ;
+    rdfs:label "protective bias type" ;
+    rdfs:domain rel:marginalisedGroupWeaponisation ;
+    rdfs:range  rel:ProtectiveBiasType ;
+    rdfs:comment "The specific social bias exploited to shield the proxy actor from accountability." .
+
+rel:ProtectiveBiasType a rdfs:Class ;
+    rdfs:label "Protective Bias Type" .
+
+rel:pbChivalric a rel:ProtectiveBiasType ; rdfs:label "chivalric-protective-bias" ;
+    rdfs:comment "Social norm that women should be protected from consequence — 'protect the woman', reluctance to arrest or prosecute women, institutional reluctance to investigate female-perpetrated harm. The bias is weaponised: it does not protect women, it protects the instigator who hides behind the woman." .
+
+rel:pbDisbelief a rel:ProtectiveBiasType ; rdfs:label "disbelief-bias" ;
+    rdfs:comment "Social norm that members of certain groups do not commit certain harms — 'women don't do that', 'mothers don't harm children', 'nurses don't abuse patients'. The bias prevents the target's report from being taken seriously." .
+
+rel:pbInstitutional a rel:ProtectiveBiasType ; rdfs:label "institutional-protective-bias" ;
+    rdfs:comment "Institutional policies or cultures that shield certain groups from investigation — e.g. police reluctance to arrest women in domestic violence calls (defaulting to the man as perpetrator), child protection systems that default to maternal custody, professional bodies that protect their own members." .
+
+rel:pbCultural a rel:ProtectiveBiasType ; rdfs:label "cultural-protective-bias" ;
+    rdfs:comment "Cultural norms that prevent accountability for certain groups — e.g. cultural norms against challenging elders, religious leaders, or community figures. The cultural protection is exploited by instigators who hide behind the protected status." .
+
+rel:victimDoubleBind a rdf:Property ;
+    rdfs:label "victim double bind" ;
+    rdfs:domain rel:marginalisedGroupWeaponisation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The double bind created for the target: if they report, the protective bias prevents action; if they walk away, they lose evidence and the ability to correct the problem; if they stay, they remain exposed to ongoing harm. Neither reporting nor silence leads to justice." .
+
+rel:intergenerationalImpact a rdf:Property ;
+    rdfs:label "intergenerational impact" ;
+    rdfs:domain rel:marginalisedGroupWeaponisation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The impact on children exposed to or taught these behaviours — particularly in single-parent situations where the proxy actor is the primary carer. Children may normalise the conduct, learn adversarial methods, internalise the bias, become future instruments, or become future targets. Essential for child protection assessments, family court proceedings, and therapeutic interventions." .
+
+rel:instrumentalisationFactor a rdf:Property ;
+    rdfs:label "instrumentalisation factor" ;
+    rdfs:domain rel:marginalisedGroupWeaponisation ;
+    rdfs:range  rel:InstrumentalisationFactor ;
+    rdfs:comment "A contextual factor that makes a person effective as an instrument of harm in a specific situation. Multiple factors may apply simultaneously and interact. See adversarial-relational-scenarios.n3 for detailed scenario patterns." .
+
+rel:InstrumentalisationFactor a rdfs:Class ;
+    rdfs:label "Instrumentalisation Factor" ;
+    rdfs:comment "A contextual factor that makes a person effective as an instrument of harm in a specific situation. The effectiveness of any person as an instrument is not reducible to a single variable — it depends on the intersection of multiple factors that are specific to the situation. Factors may include: social bias (gender, race, class, age, disability), wealth and resource asymmetry, family or network position, professional authority, psychiatric vulnerability, substance dependency, sexual leverage, institutional blind spots, legal status, immigration status, and others. Each factor is evaluated in context — the same factor may be operative in one situation and not another. Detailed scenario patterns showing how factors intersect are modelled in adversarial-relational-scenarios.n3." .
+
+rel:provocationResponseInversion a rel:AccountabilityEvasion ;
+    rdfs:label "provocation-response-inversion" ;
+    rdfs:comment "Deliberately provoking a target into a visible response, then presenting the response as the problem while concealing the provocation — the perpetrator causes harm through methods that are invisible or deniable (gaslighting, social isolation, emotional manipulation), waits for the target to respond (anger, distress, confrontation), then points to the response as evidence that the target is unstable, aggressive, or the actual perpetrator. The provocation is designed to produce a response that can be characterised as the harm, while the actual harm (the provocation) remains invisible. This is a component of DARVO (Deny, Attack, Reverse Victim and Offender) and is particularly effective when combined with discriminationWeaponisation — if the target is from a group stereotyped as 'emotional,' 'aggressive,' or 'unstable,' the inverted response is more readily accepted as the problem. Common in domestic abuse (provoking then calling police on the victim), workplace settings (provoking then reporting the target's 'behaviour'), and institutional contexts (provoking a whistleblower then citing their 'conduct' as grounds for dismissal). Restricted to natural person targets." .
+
+rel:ontologicalInvisibility a rel:AccountabilityEvasion ;
+    rdfs:label "ontological-invisibility" ;
+    rdfs:comment "Conduct that is harmful but cannot be identified, reported, or addressed because it has not been ontologically defined — the harm exists but the category for recognising it does not. This is the meta-tactic: the absence of ontological definition is itself an attack vector. If a person is engaging in anti-social behaviours that cause harm or exploit others, and those behaviours are not ontologically defined, then: (1) the target cannot name what is happening to them; (2) institutions cannot recognise the conduct; (3) the perpetrator cannot be held accountable; (4) associated mental illness or other problems in the perpetrator or target cannot be identified or addressed; (5) the conduct is culturally normalised because there is no framework to challenge it. The creation of this ontology is itself a response to ontological invisibility — by defining relational, psychological, and social methods of harm, we make them visible and addressable. Ontological invisibility is exploited by sophisticated perpetrators who choose methods that have not been defined in legal, institutional, or social frameworks. The tactic is particularly effective when combined with feignedIncompetence ('how could I have known that was harmful?') and discriminationWeaponisation ('no one would believe this is harmful'). Restricted to natural person targets." .

@@ -1,0 +1,592 @@
+# Document Ontology — Document Types, Templates, Context Markup, Publishing, Datasources
+# Authoring form (N3) — compiled to document.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix doc:        <https://qualiadb.org/schema/ui/document#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Document Type — what kind of document is this?
+# ────────────────────────────────────────────────────────────────────
+
+doc:DocumentType a rdfs:Class ;
+    rdfs:label "Document Type" ;
+    rdfs:comment "A classification of document that determines structure, required datasource bindings, validation rules, and available templates. Document types are extensible — new types can be defined without changing the ontology." .
+
+doc:GeneralDocument a doc:DocumentType ;
+    rdfs:label "General Document" ;
+    rdfs:comment "A general-purpose document with no mandatory datasource bindings. Free-form authoring." .
+
+doc:ResearchDocument a doc:DocumentType ;
+    rdfs:label "Research Document" ;
+    rdfs:comment "A research document that relies heavily on an array of datasources where content is checked against sources. Requires cited sources for claimed facts. May embed graphs, maps, clinical data." .
+
+doc:NewsArticle a doc:DocumentType ;
+    rdfs:label "News Article" ;
+    rdfs:comment "A news article defined to rely upon public stats or other external information. Requires datasource links for statistical claims. Temporal status is critical — stats may change over time." .
+
+doc:LegalDocument a doc:DocumentType ;
+    rdfs:label "Legal Document" ;
+    rdfs:comment "A legal document that reviews a private body of knowledge (case information) and is considered in relation to specific legislation and case documentation in a particular jurisdiction. Requires jurisdiction scope and legislation references." .
+
+doc:AcademicPaper a doc:DocumentType ;
+    rdfs:label "Academic Paper" ;
+    rdfs:comment "An academic paper with formal citation requirements, peer-review workflow, and structured sections (abstract, introduction, methods, results, discussion, references)." .
+
+doc:Report a doc:DocumentType ;
+    rdfs:label "Report" ;
+    rdfs:comment "A structured report (business, government, technical) with sections, executive summary, and optional appendices. May bind to organisational datasources." .
+
+doc:Letter a doc:DocumentType ;
+    rdfs:label "Letter" ;
+    rdfs:comment "Correspondence — formal letter, memo, or communication. May require sender/recipient identity and agency claims." .
+
+doc:Form a doc:DocumentType ;
+    rdfs:label "Form" ;
+    rdfs:comment "An interactive form with input fields, validation rules, and submission workflow. See §8 Forms." .
+
+# — Document type properties —
+
+doc:requiresDatasource a rdf:Property ;
+    rdfs:label "requires datasource" ;
+    rdfs:domain doc:DocumentType ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A datasource type that this document type requires (e.g. 'legislation', 'case-law', 'public-stats', 'clinical-ontology')." .
+
+doc:requiresJurisdiction a rdf:Property ;
+    rdfs:label "requires jurisdiction" ;
+    rdfs:domain doc:DocumentType ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this document type requires a jurisdiction scope (e.g. legal documents)." .
+
+doc:requiresCitations a rdf:Property ;
+    rdfs:label "requires citations" ;
+    rdfs:domain doc:DocumentType ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether claimed facts must have source citations (research, academic, legal)." .
+
+doc:allowsTemporalStatus a rdf:Property ;
+    rdfs:label "allows temporal status" ;
+    rdfs:domain doc:DocumentType ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this document type supports temporal status tracking (created-at vs present-status). News articles and research documents typically do." .
+
+# — Set requirements for known types —
+
+doc:ResearchDocument doc:requiresDatasource "research-corpus", "gazetteer", "ontology" ;
+    doc:requiresCitations true ;
+    doc:allowsTemporalStatus true .
+
+doc:NewsArticle doc:requiresDatasource "public-stats", "news-wire" ;
+    doc:requiresCitations true ;
+    doc:allowsTemporalStatus true .
+
+doc:LegalDocument doc:requiresDatasource "legislation", "case-law" ;
+    doc:requiresJurisdiction true ;
+    doc:requiresCitations true ;
+    doc:allowsTemporalStatus true .
+
+doc:AcademicPaper doc:requiresDatasource "academic-corpus" ;
+    doc:requiresCitations true ;
+    doc:allowsTemporalStatus false .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Template — supplied and custom
+# ────────────────────────────────────────────────────────────────────
+
+doc:Template a rdfs:Class ;
+    rdfs:label "Template" ;
+    rdfs:comment "A reusable document template that defines structure, styling, datasource bindings, and validation rules. Templates can be supplied (system-provided) or custom (user-created). A template is itself a WorkArtifact — it can be versioned, provenanced, and shared." .
+
+doc:templateFor a rdf:Property ;
+    rdfs:label "template for" ;
+    rdfs:domain doc:Template ;
+    rdfs:range  doc:DocumentType ;
+    rdfs:comment "The document type this template is designed for." .
+
+doc:templateOrigin a rdf:Property ;
+    rdfs:label "template origin" ;
+    rdfs:domain doc:Template ;
+    rdfs:range  doc:TemplateOrigin .
+
+doc:TemplateOrigin a rdfs:Class ;
+    rdfs:label "Template Origin" .
+
+doc:supplied a doc:TemplateOrigin ; rdfs:label "supplied" ;
+    rdfs:comment "System-provided template, shipped with the toolbox." .
+doc:custom a doc:TemplateOrigin ; rdfs:label "custom" ;
+    rdfs:comment "User-created template, stored in the user's workspace." .
+doc:community a doc:TemplateOrigin ; rdfs:label "community" ;
+    rdfs:comment "Community-shared template, installed from a template registry." .
+
+doc:hasSection a rdf:Property ;
+    rdfs:label "has section" ;
+    rdfs:domain doc:Template ;
+    rdfs:range  doc:TemplateSection ;
+    rdfs:comment "A structural section defined by the template." .
+
+doc:TemplateSection a rdfs:Class ;
+    rdfs:label "Template Section" ;
+    rdfs:comment "A structural section in a template (e.g. 'Abstract', 'Introduction', 'Methods', 'References'). Sections may be required or optional." .
+
+doc:sectionTitle a rdf:Property ;
+    rdfs:label "section title" ;
+    rdfs:domain doc:TemplateSection ;
+    rdfs:range  xsd:string .
+
+doc:sectionRequired a rdf:Property ;
+    rdfs:label "section required" ;
+    rdfs:domain doc:TemplateSection ;
+    rdfs:range  xsd:boolean .
+
+doc:sectionOrder a rdf:Property ;
+    rdfs:label "section order" ;
+    rdfs:domain doc:TemplateSection ;
+    rdfs:range  xsd:integer .
+
+doc:sectionDatasource a rdf:Property ;
+    rdfs:label "section datasource" ;
+    rdfs:domain doc:TemplateSection ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A datasource type that this section binds to (e.g. a 'References' section binds to 'academic-corpus')." .
+
+doc:hasStyle a rdf:Property ;
+    rdfs:label "has style" ;
+    rdfs:domain doc:Template ;
+    rdfs:range  doc:StyleDefinition ;
+    rdfs:comment "Style definitions (fonts, spacing, colours, heading styles) included in the template." .
+
+doc:StyleDefinition a rdfs:Class ;
+    rdfs:label "Style Definition" ;
+    rdfs:comment "A named style (paragraph, heading, citation, footnote, etc.) with formatting properties." .
+
+doc:styleName a rdf:Property ;
+    rdfs:label "style name" ;
+    rdfs:domain doc:StyleDefinition ;
+    rdfs:range  xsd:string .
+
+doc:hasDatasourceBinding a rdf:Property ;
+    rdfs:label "has datasource binding" ;
+    rdfs:domain doc:Template ;
+    rdfs:range  doc:DatasourceBinding ;
+    rdfs:comment "A datasource interface that the template connects to (ontology, public stats, case law, etc.)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Datasource Binding — connecting documents to data services
+# ────────────────────────────────────────────────────────────────────
+
+doc:DatasourceBinding a rdfs:Class ;
+    rdfs:label "Datasource Binding" ;
+    rdfs:comment "A connection between a document (or template) and an external data service. The binding specifies the datasource type, access method, refresh policy, and how content in the document links to data from the source." .
+
+doc:bindingType a rdf:Property ;
+    rdfs:label "binding type" ;
+    rdfs:domain doc:DatasourceBinding ;
+    rdfs:range  doc:DatasourceType ;
+    rdfs:comment "The type of datasource this binding connects to." .
+
+doc:DatasourceType a rdfs:Class ;
+    rdfs:label "Datasource Type" .
+
+doc:ontology        a doc:DatasourceType ; rdfs:label "ontology" ;
+    rdfs:comment "An ontology (SHACL shapes, SKOS vocabularies, domain ontologies) used for validation and term linking." .
+doc:publicStats     a doc:DatasourceType ; rdfs:label "public stats" ;
+    rdfs:comment "Public statistical data (census, economic indicators, health statistics)." .
+doc:legislation     a doc:DatasourceType ; rdfs:label "legislation" ;
+    rdfs:comment "Legislative text and regulatory databases, scoped by jurisdiction." .
+doc:caseLaw         a doc:DatasourceType ; rdfs:label "case law" ;
+    rdfs:comment "Case law and court decisions, scoped by jurisdiction." .
+doc:gazetteer       a doc:DatasourceType ; rdfs:label "gazetteer" ;
+    rdfs:comment "Geographic gazetteer (GeoNames, place ontology) for place-name linking." .
+doc:academic        a doc:DatasourceType ; rdfs:label "academic corpus" ;
+    rdfs:comment "Academic citation databases (Crossref, Semantic Scholar, DOI registry)." .
+doc:newsWire        a doc:DatasourceType ; rdfs:label "news wire" ;
+    rdfs:comment "News wire services and press feeds." .
+doc:clinical        a doc:DatasourceType ; rdfs:label "clinical ontology" ;
+    rdfs:comment "Clinical ontologies (SNOMED CT, ICD, LOINC) and clinical data sources." .
+doc:knowledgeGraph  a doc:DatasourceType ; rdfs:label "knowledge graph" ;
+    rdfs:comment "A linked-data knowledge graph (DBpedia, Wikidata, or a private graph)." .
+doc:privateCorpus   a doc:DatasourceType ; rdfs:label "private corpus" ;
+    rdfs:comment "A private body of knowledge (case files, internal documents, organisational data)." .
+doc:sensorFeed      a doc:DatasourceType ; rdfs:label "sensor feed" ;
+    rdfs:comment "Live sensor data (IoT, environmental, health telemetry)." .
+
+doc:bindingIRI a rdf:Property ;
+    rdfs:label "binding IRI" ;
+    rdfs:domain doc:DatasourceBinding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The IRI or endpoint of the datasource." .
+
+doc:bindingRefresh a rdf:Property ;
+    rdfs:label "binding refresh" ;
+    rdfs:domain doc:DatasourceBinding ;
+    rdfs:range  doc:RefreshPolicy ;
+    rdfs:comment "How often the datasource content is refreshed." .
+
+doc:RefreshPolicy a rdfs:Class ;
+    rdfs:label "Refresh Policy" .
+
+doc:static      a doc:RefreshPolicy ; rdfs:label "static" ;
+    rdfs:comment "Content is fetched once at document creation and does not change." .
+doc:periodic    a doc:RefreshPolicy ; rdfs:label "periodic" ;
+    rdfs:comment "Content is refreshed on a schedule (hourly, daily, weekly)." .
+doc:live        a doc:RefreshPolicy ; rdfs:label "live" ;
+    rdfs:comment "Content is fetched in real-time when the document is viewed." .
+doc:manual      a doc:RefreshPolicy ; rdfs:label "manual" ;
+    rdfs:comment "Content is refreshed only when the user explicitly requests it." .
+
+doc:bindingJurisdiction a rdf:Property ;
+    rdfs:label "binding jurisdiction" ;
+    rdfs:domain doc:DatasourceBinding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Jurisdiction scope for this binding (e.g. 'AU-NSW', 'US-Federal', 'EU'). Required for legislation and case-law bindings." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Context Markup — linking concepts to sources
+# ────────────────────────────────────────────────────────────────────
+
+doc:ContextMarkup a rdfs:Class ;
+    rdfs:label "Context Markup" ;
+    rdfs:comment "Semantic markup within a document that links specific concepts, terms, claimed facts, and statements to their sources. Context markup forms a graph within the document — each markup node is a node in the document's knowledge graph, linked to provenance entries and datasource bindings." .
+
+doc:markupSpan a rdf:Property ;
+    rdfs:label "markup span" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "UTF-8 byte range [start,end] of the marked-up text within the document." .
+
+doc:markupType a rdf:Property ;
+    rdfs:label "markup type" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:MarkupType ;
+    rdfs:comment "What kind of thing is being marked up." .
+
+doc:MarkupType a rdfs:Class ;
+    rdfs:label "Markup Type" .
+
+doc:term          a doc:MarkupType ; rdfs:label "term" ;
+    rdfs:comment "A term or concept, linked to an ontology entry or definition." .
+doc:entity        a doc:MarkupType ; rdfs:label "entity" ;
+    rdfs:comment "A named entity (person, organisation, place), linked to a knowledge graph node." .
+doc:claimedFact   a doc:MarkupType ; rdfs:label "claimed fact" ;
+    rdfs:comment "A factual claim, linked to one or more sources that support or refute it." .
+doc:statement     a doc:MarkupType ; rdfs:label "statement" ;
+    rdfs:comment "A declarative statement, linked to its provenance and assertion context." .
+doc:statistic     a doc:MarkupType ; rdfs:label "statistic" ;
+    rdfs:comment "A statistical figure, linked to a datasource with temporal status." .
+doc:citation      a doc:MarkupType ; rdfs:label "citation" ;
+    rdfs:comment "A citation reference, linked to an academic or legal source." .
+doc:definition    a doc:MarkupType ; rdfs:label "definition" ;
+    rdfs:comment "A term definition, linked to an ontology or glossary." .
+doc:quote         a doc:MarkupType ; rdfs:label "quote" ;
+    rdfs:comment "A direct quotation, linked to the source utterance." .
+
+doc:linksTo a rdf:Property ;
+    rdfs:label "links to" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source this markup links to (ontology term, knowledge graph node, datasource entry, etc.)." .
+
+doc:linksToBinding a rdf:Property ;
+    rdfs:label "links to binding" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:DatasourceBinding ;
+    rdfs:comment "The datasource binding that provides the linked content." .
+
+doc:hasProvenance a rdf:Property ;
+    rdfs:label "has provenance" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  prov:ProvenanceEntry ;
+    rdfs:comment "The provenance entry for this markup — who added it, when, and with what confidence." .
+
+doc:hasAgencyClaim a rdf:Property ;
+    rdfs:label "has agency claim" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  agency:Claim ;
+    rdfs:comment "The agency claim evaluated when this markup was added (was the contributor authorised?)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Context Graph — the document's knowledge graph
+# ────────────────────────────────────────────────────────────────────
+
+doc:ContextGraph a rdfs:Class ;
+    rdfs:label "Context Graph" ;
+    rdfs:comment "The knowledge graph formed by all context markup within a document. Each markup node is a node in this graph, with edges to sources, provenance entries, and other markup nodes (e.g. a claimed fact may reference multiple terms and entities). The graph may be appended to by audiences (3rd parties, contributors) and may be updated over time." .
+
+doc:hasContextGraph a rdf:Property ;
+    rdfs:label "has context graph" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  doc:ContextGraph ;
+    rdfs:comment "The context graph attached to this document artifact." .
+
+doc:hasMarkupNode a rdf:Property ;
+    rdfs:label "has markup node" ;
+    rdfs:domain doc:ContextGraph ;
+    rdfs:range  doc:ContextMarkup ;
+    rdfs:comment "A context markup node in this graph." .
+
+doc:markupEdge a rdf:Property ;
+    rdfs:label "markup edge" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:ContextMarkup ;
+    rdfs:comment "A semantic relationship between two markup nodes (e.g. a claimed fact references a term, a statistic supports a statement)." .
+
+doc:edgeRelation a rdf:Property ;
+    rdfs:label "edge relation" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The predicate of the edge between markup nodes (e.g. 'supports', 'refutes', 'references', 'defines', 'measures')." .
+
+doc:appendedBy a rdf:Property ;
+    rdfs:label "appended by" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  agency:Actor ;
+    rdfs:comment "The actor who appended this markup node to the context graph. May be the original author, a 3rd-party audience, a contributor, or a software agent." .
+
+doc:appendScope a rdf:Property ;
+    rdfs:label "append scope" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:AppendScope ;
+    rdfs:comment "Who can see this appended markup — original author only, all contributors, or public." .
+
+doc:AppendScope a rdfs:Class ;
+    rdfs:label "Append Scope" .
+
+doc:authorOnly    a doc:AppendScope ; rdfs:label "author only" .
+doc:contributors  a doc:AppendScope ; rdfs:label "contributors" .
+doc:audience      a doc:AppendScope ; rdfs:label "audience" .
+doc:public        a doc:AppendScope ; rdfs:label "public" .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Temporal Status — created-at vs present-status
+# ────────────────────────────────────────────────────────────────────
+
+doc:TemporalStatus a rdfs:Class ;
+    rdfs:label "Temporal Status" ;
+    rdfs:comment "Tracks the status of datasource-linked content at two points in time: when the document was created (frozen snapshot) and the present status (live refresh). This allows a reader to see both what the author saw when writing and what the current state is." .
+
+doc:createdAtStatus a rdf:Property ;
+    rdfs:label "created-at status" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:StatusSnapshot ;
+    rdfs:comment "The status of the linked datasource content at the time the document was created." .
+
+doc:presentStatus a rdf:Property ;
+    rdfs:label "present status" ;
+    rdfs:domain doc:ContextMarkup ;
+    rdfs:range  doc:StatusSnapshot ;
+    rdfs:comment "The current status of the linked datasource content (may differ from created-at if the datasource has been updated)." .
+
+doc:StatusSnapshot a rdfs:Class ;
+    rdfs:label "Status Snapshot" ;
+    rdfs:comment "A snapshot of datasource content at a point in time. Contains the value, timestamp, source hash, and a summary of what changed (if comparing to a previous snapshot)." .
+
+doc:snapshotValue a rdf:Property ;
+    rdfs:label "snapshot value" ;
+    rdfs:domain doc:StatusSnapshot ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The value of the datasource content at this snapshot (e.g. 'unemployment rate: 4.2%')." .
+
+doc:snapshotTimestamp a rdf:Property ;
+    rdfs:label "snapshot timestamp" ;
+    rdfs:domain doc:StatusSnapshot ;
+    rdfs:range  xsd:dateTime .
+
+doc:snapshotHash a rdf:Property ;
+    rdfs:label "snapshot hash" ;
+    rdfs:domain doc:StatusSnapshot ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Content hash of the datasource content at this snapshot." .
+
+doc:statusDelta a rdf:Property ;
+    rdfs:label "status delta" ;
+    rdfs:domain doc:StatusSnapshot ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable summary of what changed between the created-at and present snapshots (e.g. 'rate increased from 4.2% to 4.5%')." .
+
+doc:statusChanged a rdf:Property ;
+    rdfs:label "status changed" ;
+    rdfs:domain doc:StatusSnapshot ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the present status differs from the created-at status." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Publishing — flatten manifold to derivative formats
+# ────────────────────────────────────────────────────────────────────
+
+doc:PublishTarget a rdfs:Class ;
+    rdfs:label "Publish Target" ;
+    rdfs:comment "A target format for publishing a document manifold as a flat derivative. Each target has specific rendering rules, capability requirements, and may include or exclude certain hypermedia assets." .
+
+doc:Print a doc:PublishTarget ;
+    rdfs:label "Print" ;
+    rdfs:comment "Print-ready output (PDF, PostScript). Static — no interactive elements. May include pagination, headers/footers, print-specific styling." .
+
+doc:Webpage a doc:PublishTarget ;
+    rdfs:label "Webpage" ;
+    rdfs:comment "HTML/web output. Interactive — may include embedded media, live datasource links, context markup tooltips. Published as HCF or static HTML." .
+
+doc:Ebook a doc:PublishTarget ;
+    rdfs:label "Ebook" ;
+    rdfs:comment "E-book format (EPUB, PDF). Semi-static — may include embedded media but no live datasource links. Reflowable layout." .
+
+doc:HCFBundle a doc:PublishTarget ;
+    rdfs:label "HCF Bundle" ;
+    rdfs:comment "Hypermedia Content Format bundle — the native format. Fully interactive, includes all hypermedia assets, live datasource links, context graph, and provenance. This is the canonical publishing format." .
+
+doc:Markdown a doc:PublishTarget ;
+    rdfs:label "Markdown" ;
+    rdfs:comment "Plain markdown output. No interactive elements, no embedded media (links only). Useful for code environments and plain-text workflows." .
+
+doc:Plain a doc:PublishTarget ;
+    rdfs:label "Plain Text" ;
+    rdfs:comment "Plain text output. No formatting, no media, no links. Accessibility fallback." .
+
+# — Publish target properties —
+
+doc:includesMedia a rdf:Property ;
+    rdfs:label "includes media" ;
+    rdfs:domain doc:PublishTarget ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this publish target can include embedded hypermedia assets." .
+
+doc:includesLiveLinks a rdf:Property ;
+    rdfs:label "includes live links" ;
+    rdfs:domain doc:PublishTarget ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this publish target supports live datasource links (temporal status updates)." .
+
+doc:includesContextGraph a rdf:Property ;
+    rdfs:label "includes context graph" ;
+    rdfs:domain doc:PublishTarget ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this publish target includes the document's context graph (markup, provenance, agency claims)." .
+
+doc:includesInteractive a rdf:Property ;
+    rdfs:label "includes interactive" ;
+    rdfs:domain doc:PublishTarget ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this publish target supports interactive elements (forms, live queries, collapsible sections)." .
+
+# — Set publish target capabilities —
+
+doc:Print       doc:includesMedia true ; doc:includesLiveLinks false ; doc:includesContextGraph false ; doc:includesInteractive false .
+doc:Webpage     doc:includesMedia true ; doc:includesLiveLinks true ;  doc:includesContextGraph true ;  doc:includesInteractive true .
+doc:Ebook       doc:includesMedia true ; doc:includesLiveLinks false ; doc:includesContextGraph false ; doc:includesInteractive false .
+doc:HCFBundle   doc:includesMedia true ; doc:includesLiveLinks true ;  doc:includesContextGraph true ;  doc:includesInteractive true .
+doc:Markdown    doc:includesMedia false ; doc:includesLiveLinks false ; doc:includesContextGraph false ; doc:includesInteractive false .
+doc:Plain       doc:includesMedia false ; doc:includesLiveLinks false ; doc:includesContextGraph false ; doc:includesInteractive false .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Forms — interactive document elements
+# ────────────────────────────────────────────────────────────────────
+
+doc:Form a rdfs:Class ;
+    rdfs:label "Form" ;
+    rdfs:comment "An interactive form within a document. Forms contain input fields, validation rules, and a submission workflow. A form is a document type (doc:Form) but may also be embedded within other document types." .
+
+doc:hasField a rdf:Property ;
+    rdfs:label "has field" ;
+    rdfs:domain doc:Form ;
+    rdfs:range  doc:FormField ;
+    rdfs:comment "An input field in the form." .
+
+doc:FormField a rdfs:Class ;
+    rdfs:label "Form Field" ;
+    rdfs:comment "A single input field in a form. Fields have a type, label, validation rules, and may bind to a datasource or ontology." .
+
+doc:fieldType a rdf:Property ;
+    rdfs:label "field type" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  doc:FieldType .
+
+doc:FieldType a rdfs:Class ;
+    rdfs:label "Field Type" .
+
+doc:textInput     a doc:FieldType ; rdfs:label "text input" .
+doc:textArea      a doc:FieldType ; rdfs:label "text area" .
+doc:numberInput   a doc:FieldType ; rdfs:label "number input" .
+doc:dateInput     a doc:FieldType ; rdfs:label "date input" .
+doc:selectOne     a doc:FieldType ; rdfs:label "select one" .
+doc:selectMany    a doc:FieldType ; rdfs:label "select many" .
+doc:checkbox      a doc:FieldType ; rdfs:label "checkbox" .
+doc:radioGroup    a doc:FieldType ; rdfs:label "radio group" .
+doc:fileUpload    a doc:FieldType ; rdfs:label "file upload" .
+doc:signature     a doc:FieldType ; rdfs:label "signature" .
+doc:entitySelect  a doc:FieldType ; rdfs:label "entity select" ;
+    rdfs:comment "Selects an entity from a knowledge graph or ontology (autocomplete from datasource)." .
+doc:iriInput      a doc:FieldType ; rdfs:label "IRI input" ;
+    rdfs:comment "Input that must be a valid IRI, optionally validated against a known datasource." .
+
+doc:fieldLabel a rdf:Property ;
+    rdfs:label "field label" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  xsd:string .
+
+doc:fieldRequired a rdf:Property ;
+    rdfs:label "field required" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  xsd:boolean .
+
+doc:fieldValidation a rdf:Property ;
+    rdfs:label "field validation" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Validation rule (SHACL shape, regex, range, or custom expression)." .
+
+doc:fieldDatasource a rdf:Property ;
+    rdfs:label "field datasource" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  doc:DatasourceBinding ;
+    rdfs:comment "Datasource binding for this field (e.g. an entity-select field binds to a knowledge graph)." .
+
+doc:fieldOntology a rdf:Property ;
+    rdfs:label "field ontology" ;
+    rdfs:domain doc:FormField ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Ontology IRI that constrains valid values for this field." .
+
+doc:formSubmission a rdf:Property ;
+    rdfs:label "form submission" ;
+    rdfs:domain doc:Form ;
+    rdfs:range  doc:SubmissionWorkflow ;
+    rdfs:comment "The workflow for submitting the form." .
+
+doc:SubmissionWorkflow a rdfs:Class ;
+    rdfs:label "Submission Workflow" ;
+    rdfs:comment "Defines what happens when a form is submitted — where the data goes, who receives it, what agency claims are required, and what constituencies must consent." .
+
+doc:submissionTarget a rdf:Property ;
+    rdfs:label "submission target" ;
+    rdfs:domain doc:SubmissionWorkflow ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI or endpoint where the form data is submitted." .
+
+doc:submissionRequiresAgency a rdf:Property ;
+    rdfs:label "submission requires agency" ;
+    rdfs:domain doc:SubmissionWorkflow ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the submitter must have a valid agency claim (e.g. signing on behalf of an organisation)." .
+
+doc:submissionRequiresConsent a rdf:Property ;
+    rdfs:label "submission requires consent" ;
+    rdfs:domain doc:SubmissionWorkflow ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether constituencies must consent before the form data is submitted (e.g. patient consent for clinical forms)." .
+
+doc:submissionFormat a rdf:Property ;
+    rdfs:label "submission format" ;
+    rdfs:domain doc:SubmissionWorkflow ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Format of the submitted data (CBOR-LD, JSON-LD, HCF, etc.)." .

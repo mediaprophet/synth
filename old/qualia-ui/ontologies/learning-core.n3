@@ -1,0 +1,760 @@
+# Learning Core Ontology — Knowledge Domains, Skills, Expertise,
+# Proficiency Assessment, and Recognition of Prior Learning
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Defines vocabulary for modelling knowledge, skills, expertise, and
+# proficiency over time. Supports both intentional learning (structured
+# education, tutorials, courses) and incidental learning (knowledge
+# accumulated as a consequence of interactions, media consumption, and
+# activities). Includes recognition of prior learning (RPL), skill gap
+# analysis, and confidence/assurance levels for assessed competencies.
+#
+# Learning experience, adaptive learning, tutorial environments, and
+# elearning toolbox components are in learning-experience.n3.
+#
+# Imports: personhood.n3, epistemics.n3, agency.n3, provenance.n3,
+#          production-document.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix pd:     <https://qualiadb.org/schema/ui/production-document#> .
+@prefix prov:   <https://qualiadb.org/schema/ui/provenance#> .
+@prefix lrn:    <https://qualiadb.org/schema/ui/learning-core#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Knowledge Domain — subject areas and fields
+# ────────────────────────────────────────────────────────────────────
+
+lrn:KnowledgeDomain a rdfs:Class ;
+    rdfs:label "Knowledge Domain" ;
+    rdfs:comment "A subject area or field of knowledge — e.g. mathematics, software engineering, music theory, constitutional law, organic chemistry. Domains may be nested (sub-domains) and may overlap. A domain defines the scope of what knowledge and skills can be assessed within it. Domains are not agent-specific — they are objective classifications of knowledge areas, though their boundaries may be contested (epistemic modality)." .
+
+lrn:domainName a rdf:Property ;
+    rdfs:label "domain name" ;
+    rdfs:domain lrn:KnowledgeDomain ;
+    rdfs:range  xsd:string .
+
+lrn:domainDescription a rdf:Property ;
+    rdfs:label "domain description" ;
+    rdfs:domain lrn:KnowledgeDomain ;
+    rdfs:range  xsd:string .
+
+lrn:subDomain a rdf:Property ;
+    rdfs:label "sub-domain" ;
+    rdfs:domain lrn:KnowledgeDomain ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "A narrower domain within this domain. e.g. 'calculus' is a sub-domain of 'mathematics'." .
+
+lrn:parentDomain a rdf:Property ;
+    rdfs:label "parent domain" ;
+    rdfs:domain lrn:KnowledgeDomain ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "The broader domain that contains this domain." .
+
+lrn:domainOverlap a rdf:Property ;
+    rdfs:label "domain overlap" ;
+    rdfs:domain lrn:KnowledgeDomain ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "Another domain that overlaps with this one — shared concepts, methods, or applications." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Skill — specific competencies within a domain
+# ────────────────────────────────────────────────────────────────────
+
+lrn:Skill a rdfs:Class ;
+    rdfs:label "Skill" ;
+    rdfs:comment "A specific competency within a knowledge domain — a demonstrable ability to perform a task or apply knowledge. Skills have a type (cognitive, physical, social, technical, creative) and are assessed via skill assessments. Skills may be decomposed into sub-skills and may have prerequisite skills." .
+
+lrn:skillName a rdf:Property ;
+    rdfs:label "skill name" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  xsd:string .
+
+lrn:skillDomain a rdf:Property ;
+    rdfs:label "skill domain" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "The knowledge domain this skill belongs to." .
+
+lrn:skillType a rdf:Property ;
+    rdfs:label "skill type" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  lrn:SkillType .
+
+lrn:SkillType a rdfs:Class ;
+    rdfs:label "Skill Type" .
+
+lrn:cognitiveSkill    a lrn:SkillType ; rdfs:label "cognitive" ;
+    rdfs:comment "Cognitive skill — reasoning, analysis, problem-solving, memory. Applicable to natural agents (humans, animals). For software agents, use 'computational' instead." .
+lrn:physicalSkill     a lrn:SkillType ; rdfs:label "physical" ;
+    rdfs:comment "Physical skill — motor coordination, dexterity, athletic ability. Applicable to natural agents with physical bodies." .
+lrn:socialSkill       a lrn:SkillType ; rdfs:label "social" ;
+    rdfs:comment "Social skill — communication, negotiation, collaboration, leadership. Applicable to natural agents and legal persons (institutional social capacity)." .
+lrn:technicalSkill    a lrn:SkillType ; rdfs:label "technical" ;
+    rdfs:comment "Technical skill — tool use, programming, operating equipment, applying methods. Applicable to natural agents and software agents (computational tasks)." .
+lrn:creativeSkill     a lrn:SkillType ; rdfs:label "creative" ;
+    rdfs:comment "Creative skill — artistic expression, design, composition, improvisation. Applicable to natural agents. Software agent output may mimic creative output but is computational generation, not creative skill." .
+lrn:computationalSkill a lrn:SkillType ; rdfs:label "computational" ;
+    rdfs:comment "Computational skill — data processing, pattern matching, inference, classification. Applicable to software agents. The mechanism is computation, not cognition." .
+lrn:metaSkill         a lrn:SkillType ; rdfs:label "meta" ;
+    rdfs:comment "Meta-skill — learning to learn, self-assessment, study strategies. Applicable to natural agents." .
+
+lrn:subSkill a rdf:Property ;
+    rdfs:label "sub-skill" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "A more specific skill that is part of this skill." .
+
+lrn:prerequisiteSkill a rdf:Property ;
+    rdfs:label "prerequisite skill" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "A skill that must be acquired before this skill can be developed." .
+
+lrn:skillDescription a rdf:Property ;
+    rdfs:label "skill description" ;
+    rdfs:domain lrn:Skill ;
+    rdfs:range  xsd:string .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Proficiency Level — measuring skill and knowledge
+# ────────────────────────────────────────────────────────────────────
+
+lrn:ProficiencyLevel a rdfs:Class ;
+    rdfs:label "Proficiency Level" ;
+    rdfs:comment "A level of proficiency in a skill or knowledge domain. Proficiency is assessed, not self-declared — though self-assessment may be recorded as a separate data point. Proficiency levels may follow established frameworks (Bloom's taxonomy, Dreyfus model, CEFR, AQF) or custom scales." .
+
+lrn:proficiencyScale a rdf:Property ;
+    rdfs:label "proficiency scale" ;
+    rdfs:domain lrn:ProficiencyLevel ;
+    rdfs:range  lrn:ProficiencyScale ;
+    rdfs:comment "The scale or framework used for this proficiency level." .
+
+lrn:ProficiencyScale a rdfs:Class ;
+    rdfs:label "Proficiency Scale" .
+
+lrn:bloomTaxonomy    a lrn:ProficiencyScale ; rdfs:label "bloom-taxonomy" ;
+    rdfs:comment "Bloom's taxonomy — remember, understand, apply, analyse, evaluate, create." .
+lrn:dreyfusModel    a lrn:ProficiencyScale ; rdfs:label "dreyfus-model" ;
+    rdfs:comment "Dreyfus model — novice, advanced beginner, competent, proficient, expert." .
+lrn:cefrScale       a lrn:ProficiencyScale ; rdfs:label "cefr" ;
+    rdfs:comment "Common European Framework of Reference — A1, A2, B1, B2, C1, C2." .
+lrn:aqfScale        a lrn:ProficiencyScale ; rdfs:label "aqf" ;
+    rdfs:comment "Australian Qualifications Framework — levels 1-10." .
+lrn:customScale     a lrn:ProficiencyScale ; rdfs:label "custom" ;
+    rdfs:comment "Custom scale — defined by the learning provider or institution." .
+
+lrn:levelValue a rdf:Property ;
+    rdfs:label "level value" ;
+    rdfs:domain lrn:ProficiencyLevel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific level — e.g. 'B2', 'proficient', 'level-4', 'analyse'." .
+
+lrn:levelScore a rdf:Property ;
+    rdfs:label "level score" ;
+    rdfs:domain lrn:ProficiencyLevel ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Numeric score for this level (0.0 to 1.0 or custom range), enabling comparison across scales." .
+
+lrn:levelDescription a rdf:Property ;
+    rdfs:label "level description" ;
+    rdfs:domain lrn:ProficiencyLevel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What this level means — what the agent can do at this proficiency." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Skill Assessment — evaluating proficiency
+# ────────────────────────────────────────────────────────────────────
+
+lrn:SkillAssessment a rdfs:Class ;
+    rdfs:label "Skill Assessment" ;
+    rdfs:comment "An evaluation of a person's proficiency in a skill or knowledge domain. Assessments may be formal (examination, certification) or informal (observation, self-assessment, peer review). Each assessment has a method, a result, a confidence level, and provenance — who assessed, when, and on what evidence. Assessments are appendable — new assessments do not replace old ones; they add to the history. The most recent assessment may not be the most accurate; confidence levels help weigh competing assessments." .
+
+lrn:assessmentMethod a rdf:Property ;
+    rdfs:label "assessment method" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  lrn:AssessmentMethod .
+
+lrn:AssessmentMethod a rdfs:Class ;
+    rdfs:label "Assessment Method" .
+
+lrn:examination      a lrn:AssessmentMethod ; rdfs:label "examination" ;
+    rdfs:comment "Formal examination — standardised test under controlled conditions." .
+lrn:practicalDemo    a lrn:AssessmentMethod ; rdfs:label "practical-demonstration" ;
+    rdfs:comment "Practical demonstration — performing the skill in a controlled setting." .
+lrn:portfolioReview  a lrn:AssessmentMethod ; rdfs:label "portfolio-review" ;
+    rdfs:comment "Portfolio review — evaluation of collected work samples." .
+lrn:peerReview       a lrn:AssessmentMethod ; rdfs:label "peer-review" ;
+    rdfs:comment "Peer review — assessment by peers in the same domain." .
+lrn:selfAssessment   a lrn:AssessmentMethod ; rdfs:label "self-assessment" ;
+    rdfs:comment "Self-assessment — the person evaluates their own proficiency. Lower confidence than external assessment." .
+lrn:observation      a lrn:AssessmentMethod ; rdfs:label "observation" ;
+    rdfs:comment "Observation — an assessor observes the person performing the skill in a natural setting." .
+lrn:automatedAssessment a lrn:AssessmentMethod ; rdfs:label "automated" ;
+    rdfs:comment "Automated assessment — software agent evaluates proficiency via computational analysis (test scoring, code analysis, pattern matching). The software agent computes a result; it does not understand or judge." .
+lrn:interviewAssessment a lrn:AssessmentMethod ; rdfs:label "interview" ;
+    rdfs:comment "Interview — structured or unstructured interview to assess knowledge and reasoning." .
+lrn:projectAssessment a lrn:AssessmentMethod ; rdfs:label "project" ;
+    rdfs:comment "Project-based assessment — evaluation of a completed project or deliverable." .
+
+lrn:assessedSkill a rdf:Property ;
+    rdfs:label "assessed skill" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "The skill being assessed." .
+
+lrn:assessedDomain a rdf:Property ;
+    rdfs:label "assessed domain" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "The knowledge domain being assessed (if domain-level, not skill-specific)." .
+
+lrn:assessmentResult a rdf:Property ;
+    rdfs:label "assessment result" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  lrn:ProficiencyLevel ;
+    rdfs:comment "The proficiency level determined by this assessment." .
+
+lrn:assessmentConfidence a rdf:Property ;
+    rdfs:label "assessment confidence" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the assessment result (0.0 to 1.0). Formal examinations have higher confidence; self-assessments have lower confidence. Confidence may be reduced by factors like test anxiety, cultural bias in assessment instruments, or limited evidence." .
+
+lrn:assessmentAssessor a rdf:Property ;
+    rdfs:label "assessor" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that performed the assessment — may be a human assessor, an institution, or a software agent (for automated assessments)." .
+
+lrn:assessmentDate a rdf:Property ;
+    rdfs:label "assessment date" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  xsd:dateTime .
+
+lrn:assessmentEvidence a rdf:Property ;
+    rdfs:label "assessment evidence" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of evidence supporting the assessment — test scores, work samples, observation notes, project deliverables." .
+
+lrn:assessmentValidity a rdf:Property ;
+    rdfs:label "assessment validity" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Validity period — how long the assessment is considered current. e.g. '2 years', 'indefinite (skill does not decay)', 'expires 2027-01-01'." .
+
+lrn:assessmentEpistemicMode a rdf:Property ;
+    rdfs:label "assessment epistemic mode" ;
+    rdfs:domain lrn:SkillAssessment ;
+    rdfs:range  epi:EpistemicMode ;
+    rdfs:comment "The epistemic mode of the assessment — objective (standardised test), intersubjective (peer review), subjective (self-assessment). Links to epistemics.n3." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Skill Profile — a person's accumulated skills and knowledge
+# ────────────────────────────────────────────────────────────────────
+
+lrn:SkillProfile a rdfs:Class ;
+    rdfs:label "Skill Profile" ;
+    rdfs:comment "A person's accumulated skills, knowledge, and proficiency levels over time. A skill profile is appendable — new assessments, learning events, and experiences add to it; they do not overwrite history. The profile contains the full history of assessments, enabling trend analysis (improvement, stagnation, decline). A skill profile may be queried for gaps — skills required for a goal that the person does not yet have." .
+
+lrn:profileHolder a rdf:Property ;
+    rdfs:label "profile holder" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person whose skill profile this is." .
+
+lrn:profileAssessment a rdf:Property ;
+    rdfs:label "profile assessment" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  lrn:SkillAssessment ;
+    rdfs:comment "A skill assessment in this profile." .
+
+lrn:profileDomain a rdf:Property ;
+    rdfs:label "profile domain" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "A knowledge domain the person has been assessed in or has learning history in." .
+
+lrn:profileSkill a rdf:Property ;
+    rdfs:label "profile skill" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "A skill the person has been assessed in or has learning history in." .
+
+lrn:profileCurrentLevel a rdf:Property ;
+    rdfs:label "current level" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  lrn:ProficiencyLevel ;
+    rdfs:comment "The current proficiency level — derived from the most recent or highest-confidence assessment. This is a computed view, not a stored fact; the underlying data is the assessment history." .
+
+lrn:profileLastUpdated a rdf:Property ;
+    rdfs:label "last updated" ;
+    rdfs:domain lrn:SkillProfile ;
+    rdfs:range  xsd:dateTime .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Skill Gap — identifying missing competencies
+# ────────────────────────────────────────────────────────────────────
+
+lrn:SkillGap a rdfs:Class ;
+    rdfs:label "Skill Gap" ;
+    rdfs:comment "A gap between a person's current proficiency and a required or desired proficiency in a skill or domain. Skill gaps are computed by comparing a skill profile against a target (job requirements, course prerequisites, personal goals). Gaps have a magnitude (how far the person is from the target), a priority (how important closing the gap is), and may recommend learning actions." .
+
+lrn:gapSkill a rdf:Property ;
+    rdfs:label "gap skill" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "The skill where the gap exists." .
+
+lrn:gapDomain a rdf:Property ;
+    rdfs:label "gap domain" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "The knowledge domain where the gap exists." .
+
+lrn:gapCurrentLevel a rdf:Property ;
+    rdfs:label "gap current level" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  lrn:ProficiencyLevel ;
+    rdfs:comment "The person's current proficiency level." .
+
+lrn:gapTargetLevel a rdf:Property ;
+    rdfs:label "gap target level" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  lrn:ProficiencyLevel ;
+    rdfs:comment "The required or desired proficiency level." .
+
+lrn:gapMagnitude a rdf:Property ;
+    rdfs:label "gap magnitude" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "The size of the gap — difference between current and target level scores (0.0 = no gap, 1.0 = maximum gap)." .
+
+lrn:gapPriority a rdf:Property ;
+    rdfs:label "gap priority" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  lrn:GapPriority .
+
+lrn:GapPriority a rdfs:Class ;
+    rdfs:label "Gap Priority" .
+
+lrn:priorityCritical a lrn:GapPriority ; rdfs:label "critical" ;
+    rdfs:comment "Critical — the gap blocks a required goal. Must be addressed first." .
+lrn:priorityHigh     a lrn:GapPriority ; rdfs:label "high" ;
+    rdfs:comment "High — the gap significantly impacts the goal. Should be addressed soon." .
+lrn:priorityMedium   a lrn:GapPriority ; rdfs:label "medium" ;
+    rdfs:comment "Medium — the gap is relevant but not blocking. Address when possible." .
+lrn:priorityLow      a lrn:GapPriority ; rdfs:label "low" ;
+    rdfs:comment "Low — the gap is minor or optional. Nice to have." .
+
+lrn:gapTargetContext a rdf:Property ;
+    rdfs:label "gap target context" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What the gap is relative to — e.g. 'job: senior developer', 'course: advanced calculus', 'personal-goal: learn piano'." .
+
+lrn:gapRecommendedAction a rdf:Property ;
+    rdfs:label "recommended action" ;
+    rdfs:domain lrn:SkillGap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Recommended learning action to close the gap — e.g. 'take course: linear algebra 101', 'practice: daily coding exercises', 'read: introduction to harmony'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Recognition of Prior Learning (RPL)
+# ────────────────────────────────────────────────────────────────────
+
+lrn:RecognitionOfPriorLearning a rdfs:Class ;
+    rdfs:label "Recognition of Prior Learning" ;
+    rdfs:comment "Formal recognition that a person has acquired skills or knowledge through informal, non-formal, or experiential learning — outside of formal education or certification. RPL is an assessment process: the person's prior experience (work, self-study, community participation, media consumption, project work) is evaluated against defined competency standards. RPL may grant formal qualifications, course credits, or exemptions. RPL assessments follow the same SkillAssessment structure but use portfolio, interview, and observation methods predominantly. The confidence level of RPL assessments may vary — highly documented prior experience yields higher confidence than undocumented claims." .
+
+lrn:rplCandidate a rdf:Property ;
+    rdfs:label "RPL candidate" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person seeking RPL." .
+
+lrn:rplCompetency a rdf:Property ;
+    rdfs:label "RPL competency" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "The skill or competency being assessed for recognition." .
+
+lrn:rplEvidenceSource a rdf:Property ;
+    rdfs:label "RPL evidence source" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  lrn:RPLEvidenceSource ;
+    rdfs:comment "The type of evidence supporting the RPL claim." .
+
+lrn:RPLEvidenceSource a rdfs:Class ;
+    rdfs:label "RPL Evidence Source" .
+
+lrn:workExperience    a lrn:RPLEvidenceSource ; rdfs:label "work-experience" ;
+    rdfs:comment "Work experience — demonstrated through employment records, project portfolios, or employer statements." .
+lrn:selfDirectedStudy a lrn:RPLEvidenceSource ; rdfs:label "self-directed-study" ;
+    rdfs:comment "Self-directed study — books read, online courses completed, projects built. May be harder to verify." .
+lrn:communityParticipation a lrn:RPLEvidenceSource ; rdfs:label "community-participation" ;
+    rdfs:comment "Community participation — volunteer work, open-source contributions, community leadership." .
+lrn:mediaConsumption  a lrn:RPLEvidenceSource ; rdfs:label "media-consumption" ;
+    rdfs:comment "Media consumption — books, documentaries, podcasts, lectures. Lowest confidence as evidence of skill — consumption does not guarantee competency. May support knowledge-domain recognition but not skill proficiency." .
+lrn:projectWork      a lrn:RPLEvidenceSource ; rdfs:label "project-work" ;
+    rdfs:comment "Project work — personal or professional projects demonstrating skill application." .
+lrn:militaryService  a lrn:RPLEvidenceSource ; rdfs:label "military-service" ;
+    rdfs:comment "Military service — training and experience gained in military contexts." .
+lrn:lifeExperience    a lrn:RPLEvidenceSource ; rdfs:label "life-experience" ;
+    rdfs:comment "Life experience — skills gained through personal circumstances (caregiving, travel, recovery, etc.)." .
+
+lrn:rplOutcome a rdf:Property ;
+    rdfs:label "RPL outcome" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  lrn:RPLOutcome .
+
+lrn:RPLOutcome a rdfs:Class ;
+    rdfs:label "RPL Outcome" .
+
+lrn:rplGranted       a lrn:RPLOutcome ; rdfs:label "granted" ;
+    rdfs:comment "RPL granted — competency recognised at the claimed level." .
+lrn:rplPartial       a lrn:RPLOutcome ; rdfs:label "partial" ;
+    rdfs:comment "Partial recognition — some competencies recognised, others require further evidence or assessment." .
+lrn:rplDeferred      a lrn:RPLOutcome ; rdfs:label "deferred" ;
+    rdfs:comment "Deferred — insufficient evidence. More evidence or a formal assessment is required." .
+lrn:rplDeclined      a lrn:RPLOutcome ; rdfs:label "declined" ;
+    rdfs:comment "Declined — evidence does not support the claimed competency." .
+
+lrn:rplAssessor a rdf:Property ;
+    rdfs:label "RPL assessor" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that conducted the RPL assessment — typically a qualified assessor or registered training organisation." .
+
+lrn:rplDate a rdf:Property ;
+    rdfs:label "RPL date" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  xsd:dateTime .
+
+lrn:rplConfidence a rdf:Property ;
+    rdfs:label "RPL confidence" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the RPL outcome (0.0 to 1.0). Higher when evidence is well-documented and verifiable; lower when evidence is self-reported or undocumented." .
+
+lrn:rplQualificationGranted a rdf:Property ;
+    rdfs:label "qualification granted" ;
+    rdfs:domain lrn:RecognitionOfPriorLearning ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If RPL is granted or partial, the qualification, credit, or exemption awarded." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Qualification — formal certification
+# ────────────────────────────────────────────────────────────────────
+
+lrn:Qualification a rdfs:Class ;
+    rdfs:label "Qualification" ;
+    rdfs:comment "A formal certification of knowledge or skill — degree, diploma, certificate, licence, badge, micro-credential. Qualifications are granted by recognised issuing authorities (universities, professional bodies, governments, certification providers). Qualifications may be granted through formal education, RPL, or examination. Qualifications have a scope (what skills/domains they cover), a level (where they sit on a qualifications framework), and a validity period." .
+
+lrn:qualificationName a rdf:Property ;
+    rdfs:label "qualification name" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  xsd:string .
+
+lrn:qualificationType a rdf:Property ;
+    rdfs:label "qualification type" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  lrn:QualificationType .
+
+lrn:QualificationType a rdfs:Class ;
+    rdfs:label "Qualification Type" .
+
+lrn:degree          a lrn:QualificationType ; rdfs:label "degree" .
+lrn:diploma         a lrn:QualificationType ; rdfs:label "diploma" .
+lrn:certificate     a lrn:QualificationType ; rdfs:label "certificate" .
+lrn:licence         a lrn:QualificationType ; rdfs:label "licence" ;
+    rdfs:comment "Licence — legal authorisation to practice (medical, legal, pilot, etc.)." .
+lrn:microCredential a lrn:QualificationType ; rdfs:label "micro-credential" ;
+    rdfs:comment "Micro-credential — a small, focused certification for a specific skill or competency." .
+lrn:digitalBadge    a lrn:QualificationType ; rdfs:label "digital-badge" ;
+    rdfs:comment "Digital badge — a verifiable digital representation of an achievement or skill." .
+lrn:professionalCert a lrn:QualificationType ; rdfs:label "professional-certification" ;
+    rdfs:comment "Professional certification — industry-recognised certification (e.g. AWS, PMP, CFA)." .
+
+lrn:qualificationIssuer a rdf:Property ;
+    rdfs:label "issuer" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the issuing authority — university, professional body, government, certification provider." .
+
+lrn:qualificationHolder a rdf:Property ;
+    rdfs:label "holder" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person who holds this qualification." .
+
+lrn:qualificationDate a rdf:Property ;
+    rdfs:label "qualification date" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Date the qualification was granted." .
+
+lrn:qualificationExpiry a rdf:Property ;
+    rdfs:label "qualification expiry" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Expiry date — if the qualification has a validity period. Some qualifications do not expire." .
+
+lrn:qualificationSkills a rdf:Property ;
+    rdfs:label "qualification skills" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "Skills or competencies covered by this qualification." .
+
+lrn:qualificationDomain a rdf:Property ;
+    rdfs:label "qualification domain" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "Knowledge domain this qualification is in." .
+
+lrn:qualificationLevel a rdf:Property ;
+    rdfs:label "qualification level" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  lrn:ProficiencyLevel ;
+    rdfs:comment "The proficiency level this qualification represents." .
+
+lrn:qualificationRPL a rdf:Property ;
+    rdfs:label "qualification via RPL" ;
+    rdfs:domain lrn:Qualification ;
+    rdfs:range  lrn:RecognitionOfPriorLearning ;
+    rdfs:comment "If this qualification was granted via RPL, the RPL assessment that led to it." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Learning Event — how knowledge and skills are acquired
+# ────────────────────────────────────────────────────────────────────
+
+lrn:LearningEvent a rdfs:Class ;
+    rdfs:label "Learning Event" ;
+    rdfs:comment "An event in which a person acquires or reinforces knowledge or skill. Learning events may be intentional (attending a lecture, completing a tutorial, studying a text) or incidental (gaining knowledge through work, media consumption, social interaction, or gameplay). Learning events are recorded with provenance — what was learned, from what source, when, and with what outcome. Not all learning events produce assessable skill gains; some produce partial knowledge that requires reinforcement." .
+
+lrn:learningEventType a rdf:Property ;
+    rdfs:label "learning event type" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  lrn:LearningEventType .
+
+lrn:LearningEventType a rdfs:Class ;
+    rdfs:label "Learning Event Type" .
+
+lrn:intentionalLearning a lrn:LearningEventType ; rdfs:label "intentional" ;
+    rdfs:comment "Intentional learning — the person deliberately set out to learn. Includes attending courses, reading textbooks, completing tutorials, practising skills, studying media for educational purposes." .
+lrn:incidentalLearning a lrn:LearningEventType ; rdfs:label "incidental" ;
+    rdfs:comment "Incidental learning — the person gained knowledge or skill as a by-product of another activity. Includes learning through work, social interaction, media consumption (not for educational purposes), gameplay, problem-solving, or exploration." .
+lrn:experientialLearning a lrn:LearningEventType ; rdfs:label "experiential" ;
+    rdfs:comment "Experiential learning — learning by doing. The person acquired skill through direct experience — building, creating, performing, failing, iterating." .
+lrn:socialLearning a lrn:LearningEventType ; rdfs:label "social" ;
+    rdfs:comment "Social learning — learning from others through observation, imitation, collaboration, or instruction. Includes mentorship, apprenticeship, peer learning." .
+lrn:reflectiveLearning a lrn:LearningEventType ; rdfs:label "reflective" ;
+    rdfs:comment "Reflective learning — learning through reflection on experience. The person reviews what happened, why, and what they would do differently." .
+
+lrn:learningEventLearner a rdf:Property ;
+    rdfs:label "learner" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person who learned." .
+
+lrn:learningEventSkill a rdf:Property ;
+    rdfs:label "learned skill" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "The skill that was acquired or reinforced." .
+
+lrn:learningEventDomain a rdf:Property ;
+    rdfs:label "learned domain" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "The knowledge domain that was engaged." .
+
+lrn:learningEventSource a rdf:Property ;
+    rdfs:label "learning source" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source — course, book, media asset, person, project, game, work task." .
+
+lrn:learningEventSourceType a rdf:Property ;
+    rdfs:label "source type" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  lrn:LearningSourceType .
+
+lrn:LearningSourceType a rdfs:Class ;
+    rdfs:label "Learning Source Type" .
+
+lrn:sourceCourse      a lrn:LearningSourceType ; rdfs:label "course" .
+lrn:sourceTutorial    a lrn:LearningSourceType ; rdfs:label "tutorial" .
+lrn:sourceBook        a lrn:LearningSourceType ; rdfs:label "book" .
+lrn:sourceLecture     a lrn:LearningSourceType ; rdfs:label "lecture" .
+lrn:sourceMedia       a lrn:LearningSourceType ; rdfs:label "media" ;
+    rdfs:comment "Media — video, audio, podcast, documentary, interactive media." .
+lrn:sourceArticle     a lrn:LearningSourceType ; rdfs:label "article" .
+lrn:sourceWorkTask    a lrn:LearningSourceType ; rdfs:label "work-task" .
+lrn:sourceProject     a lrn:LearningSourceType ; rdfs:label "project" .
+lrn:sourceGame        a lrn:LearningSourceType ; rdfs:label "game" ;
+    rdfs:comment "Game — learning through gameplay (serious games, simulations, educational games)." .
+lrn:sourceSocial      a lrn:LearningSourceType ; rdfs:label "social-interaction" .
+lrn:sourceMentor      a lrn:LearningSourceType ; rdfs:label "mentor" .
+lrn:sourceSelfStudy   a lrn:LearningSourceType ; rdfs:label "self-study" .
+lrn:sourceResearch    a lrn:LearningSourceType ; rdfs:label "research" ;
+    rdfs:comment "Research — learning through conducting research or investigation." .
+
+lrn:learningEventDate a rdf:Property ;
+    rdfs:label "event date" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:dateTime .
+
+lrn:learningEventDuration a rdf:Property ;
+    rdfs:label "duration" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of the learning event — e.g. '45 minutes', '2 hours', 'semester'." .
+
+lrn:learningEventOutcome a rdf:Property ;
+    rdfs:label "outcome" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  lrn:LearningOutcome .
+
+lrn:LearningOutcome a rdfs:Class ;
+    rdfs:label "Learning Outcome" .
+
+lrn:outcomeAcquired  a lrn:LearningOutcome ; rdfs:label "acquired" ;
+    rdfs:comment "Skill or knowledge acquired — the person can now demonstrate the competency." .
+lrn:outcomeReinforced a lrn:LearningOutcome ; rdfs:label "reinforced" ;
+    rdfs:comment "Existing skill or knowledge reinforced — proficiency maintained or slightly improved." .
+lrn:outcomePartial   a lrn:LearningOutcome ; rdfs:label "partial" ;
+    rdfs:comment "Partial acquisition — some understanding gained but full competency not yet achieved. Requires further learning." .
+lrn:outcomeExposure  a lrn:LearningOutcome ; rdfs:label "exposure" ;
+    rdfs:comment "Exposure — the person encountered the concept but did not retain or understand it. No assessable skill gain." .
+lrn:outcomeNoGain    a lrn:LearningOutcome ; rdfs:label "no-gain" ;
+    rdfs:comment "No gain — the learning event did not result in any knowledge or skill acquisition." .
+
+lrn:learningEventConfidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence that the learning event produced the stated outcome (0.0 to 1.0). Higher when the outcome is verified by assessment; lower when it is self-reported." .
+
+lrn:learningEventExperienceMode a rdf:Property ;
+    rdfs:label "experience mode" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The modality through which the experience was acquired — direct, simulated, observational, interpersonal, educational, mediated. See learning-experience-modality.n3 for the full ExperienceMode vocabulary. The mode fundamentally affects the type of knowledge produced and its transferability." .
+
+lrn:learningEventKnowledgeType a rdf:Property ;
+    rdfs:label "knowledge type" ;
+    rdfs:domain lrn:LearningEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The type of knowledge produced — propositional (knowing-that), practical (knowing-how), experiential (knowing-what-it-is-like), interpersonal (knowing-about-others-experiences). See learning-experience-modality.n3 for the full KnowledgeType vocabulary." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Assurance Level — confidence in accumulated knowledge
+# ────────────────────────────────────────────────────────────────────
+
+lrn:AssuranceLevel a rdfs:Class ;
+    rdfs:label "Assurance Level" ;
+    rdfs:comment "An overall level of assurance about a person's knowledge or skill in a domain. Assurance is computed from multiple factors: the number and quality of assessments, the consistency of results, the recency of assessments, the diversity of assessment methods, and whether the assessments were conducted by independent assessors. Assurance is not the same as proficiency — a person may have high proficiency but low assurance (if proficiency is only self-assessed), or low proficiency with high assurance (if a formal examination confirmed it). Assurance levels enable decisions about whether to trust a person's claimed competency for a given purpose." .
+
+lrn:assuranceDomain a rdf:Property ;
+    rdfs:label "assurance domain" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  lrn:KnowledgeDomain .
+
+lrn:assuranceSkill a rdf:Property ;
+    rdfs:label "assurance skill" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  lrn:Skill .
+
+lrn:assuranceScore a rdf:Property ;
+    rdfs:label "assurance score" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Overall assurance score (0.0 to 1.0). Computed from assessment history quality, not from proficiency level." .
+
+lrn:assuranceGrade a rdf:Property ;
+    rdfs:label "assurance grade" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  lrn:AssuranceGrade .
+
+lrn:AssuranceGrade a rdfs:Class ;
+    rdfs:label "Assurance Grade" .
+
+lrn:assuranceVerified   a lrn:AssuranceGrade ; rdfs:label "verified" ;
+    rdfs:comment "Verified — multiple independent assessments confirm the proficiency. High confidence." .
+lrn:assuranceSupported  a lrn:AssuranceGrade ; rdfs:label "supported" ;
+    rdfs:comment "Supported — at least one formal assessment supports the proficiency. Moderate confidence." .
+lrn:assuranceIndicated  a lrn:AssuranceGrade ; rdfs:label "indicated" ;
+    rdfs:comment "Indicated — informal assessments or evidence suggest the proficiency but it is not formally verified. Low confidence." .
+lrn:assuranceClaimed    a lrn:AssuranceGrade ; rdfs:label "claimed" ;
+    rdfs:comment "Claimed — only self-assessment or unverified claims. Very low confidence." .
+lrn:assuranceUnknown    a lrn:AssuranceGrade ; rdfs:label "unknown" ;
+    rdfs:comment "Unknown — no assessment data available for this skill or domain." .
+
+lrn:assuranceFactors a rdf:Property ;
+    rdfs:label "assurance factors" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Factors contributing to the assurance score — assessment count, assessor independence, method diversity, recency, consistency (CBOR-LD encoded)." .
+
+lrn:assuranceLastAssessed a rdf:Property ;
+    rdfs:label "last assessed" ;
+    rdfs:domain lrn:AssuranceLevel ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Date of the most recent assessment contributing to this assurance level." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (learning-core.n3) links to:
+#
+# personhood.n3:
+#   - Skill profiles are held by persons (person:Personhood)
+#   - Qualifications are legal/social recognitions of competency
+#   - RPL may affect legal status (licences, certifications)
+#
+# epistemics.n3:
+#   - Assessments have epistemic mode (objective, intersubjective, subjective)
+#   - Assurance levels are epistemic confidence in competency claims
+#   - Self-assessment is subjective; formal examination is objective
+#   - Peer review is intersubjective
+#
+# agency.n3:
+#   - Assessors are agency:Actor (human, institution, or software agent)
+#   - Automated assessments are performed by software agents
+#   - Software agents compute assessment results; they do not understand
+#     or judge
+#
+# provenance.n3:
+#   - All assessments, learning events, and RPL decisions have provenance
+#   - Assessment evidence links to provenance records
+#
+# production-document.n3:
+#   - Learning materials (courses, tutorials, textbooks) may be
+#     production documents
+#   - Research reports may be learning sources
+#   - Style guides may define assessment criteria
+#
+# learning-experience.n3:
+#   - Learning paths, adaptive learning, tutorial environments, and
+#     elearning toolbox components are in learning-experience.n3
+#   - Shares the lrn: prefix
+#
+# learning-experience-modality.n3:
+#   - Experience modes (direct, simulated, observational, interpersonal,
+#     educational, mediated) — the epistemological difference between
+#     doing, living, learning about, watching, and engaging with others
+#   - Experience records — lived experience distinct from learning events
+#   - Knowledge types (propositional, practical, experiential, interpersonal)
+#   - Skill development trajectories over time
+#   - Experiential transfer — how experience transfers across contexts
+#   - Shares the lrn: prefix

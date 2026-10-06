@@ -1,0 +1,659 @@
+# Values Ontology — Projected Values, Enumerated Values, Values
+# Instruments, Values Agreements, and Values Credentials
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Models values as a multi-layered concept:
+#
+#   1. Projected values — what an entity says its values are (statements,
+#      charters, codes of conduct, mission statements). May or may not
+#      align with demonstrated behaviour.
+#   2. Enumerated values — values derived from observing an entity's
+#      actual behaviour, decisions, and patterns over time. The
+#      reality of what the entity values, as distinct from what it
+#      claims to value.
+#   3. Values instruments — foundational documents and frameworks that
+#      define value systems (human rights instruments, ethical codes,
+#      professional standards, religious moral frameworks, community
+#      charters). These are referenceable authorities.
+#   4. Values agreements — agreements between entities that reference
+#      values instruments as guiding foundations for the relationship
+#      and any content produced within it. May persist beyond the
+#      relationship's conclusion.
+#   5. Values credentials — verifiable claims about an entity's values,
+#      issued by authorities, communities, or through demonstrated
+#      behaviour. May be required for participation in certain
+#      contexts.
+#
+# Key design principle: the gap between projected and enumerated values
+# is itself meaningful data. An entity whose projected and enumerated
+# values align has integrity (in the structural sense). An entity whose
+# projected values diverge from enumerated values has a values gap that
+# may indicate misrepresentation, aspiration, or change in progress.
+#
+# Nomenclature: "values" are held by all agent types but the mechanism
+# differs. Natural agents hold values as personal commitments shaped by
+# experience, upbringing, and reflection. Legal persons hold values as
+# institutional positions (board decisions, policy, culture). Software
+# agents do not hold values — they have operational constraints and
+# configuration parameters that reflect the values of their principals.
+# To claim a software agent "values" something is a category error.
+#
+# Imports: epistemics.n3, agency.n3, personhood.n3, provenance.n3,
+#          faith-systems.n3, care-scope.n3, production-document.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix scope:  <https://qualiadb.org/schema/ui/care-scope#> .
+@prefix faith:  <https://qualiadb.org/schema/ui/faith-systems#> .
+@prefix pd:     <https://qualiadb.org/schema/ui/production-document#> .
+@prefix prov:   <https://qualiadb.org/schema/ui/provenance#> .
+@prefix vals:   <https://qualiadb.org/schema/ui/values#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Value — the atomic concept
+# ────────────────────────────────────────────────────────────────────
+
+vals:Value a rdfs:Class ;
+    rdfs:label "Value" ;
+    rdfs:comment "A principle, ideal, or standard that an entity considers important and that guides or evaluates behaviour, decisions, and relationships. Values are not preferences (I like chocolate) nor opinions (I think X is good policy) — they are deeper commitments that shape patterns of action. Values may be held by natural agents (personal values), legal persons (institutional values, organisational culture), and communities (shared cultural values). Software agents do not hold values — they have operational constraints that reflect the values of their principals. Values may conflict — an entity may hold values that are in tension (freedom vs security, individual vs community). Value conflicts are not defects — they are the normal condition of complex value systems. How an entity navigates conflicts reveals its prioritisation, which is itself value data." .
+
+vals:valueName a rdf:Property ;
+    rdfs:label "value name" ;
+    rdfs:domain vals:Value ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Name of the value — e.g. 'honesty', 'environmental stewardship', 'patient autonomy', 'freedom of expression', 'cultural respect'." .
+
+vals:valueDescription a rdf:Property ;
+    rdfs:label "value description" ;
+    rdfs:domain vals:Value ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What the value means in practice — how it manifests, what it requires, what it prohibits." .
+
+vals:valueCategory a rdf:Property ;
+    rdfs:label "value category" ;
+    rdfs:domain vals:Value ;
+    rdfs:range  vals:ValueCategory .
+
+vals:ValueCategory a rdfs:Class ;
+    rdfs:label "Value Category" .
+
+vals:catMoral        a vals:ValueCategory ; rdfs:label "moral" ;
+    rdfs:comment "Moral value — right vs wrong. e.g. honesty, justice, fairness, compassion. Applicable to natural agents and legal persons (institutional ethics)." .
+vals:catEthical      a vals:ValueCategory ; rdfs:label "ethical" ;
+    rdfs:comment "Ethical value — framework for evaluating conduct. e.g. autonomy, beneficence, non-maleficence, duty. Broader than moral — includes professional and role ethics." .
+vals:catPolitical    a vals:ValueCategory ; rdfs:label "political" ;
+    rdfs:comment "Political value — governance and power. e.g. democracy, freedom, equality, sovereignty, self-determination." .
+vals:catEnvironmental a vals:ValueCategory ; rdfs:label "environmental" ;
+    rdfs:comment "Environmental value — relationship to land, nature, and place. e.g. stewardship, sustainability, biodiversity, custodianship of country." .
+vals:catCultural     a vals:ValueCategory ; rdfs:label "cultural" ;
+    rdfs:comment "Cultural value — preservation and respect for culture, heritage, language, tradition. e.g. cultural continuity, respect for elders, language preservation." .
+vals:catSocial       a vals:ValueCategory ; rdfs:label "social" ;
+    rdfs:comment "Social value — community and relationships. e.g. solidarity, hospitality, reciprocity, community wellbeing." .
+vals:catProfessional a vals:ValueCategory ; rdfs:label "professional" ;
+    rdfs:comment "Professional value — standards of practice. e.g. competence, diligence, client confidentiality, professional independence." .
+vals:catSpiritual    a vals:ValueCategory ; rdfs:label "spiritual" ;
+    rdfs:comment "Spiritual value — relationship to the sacred or transcendent. e.g. reverence, humility, devotion, sacredness of life. Links to faith-systems.n3." .
+vals:catAesthetic    a vals:ValueCategory ; rdfs:label "aesthetic" ;
+    rdfs:comment "Aesthetic value — beauty, form, expression. e.g. artistic integrity, beauty, craftsmanship." .
+vals:catEpistemic    a vals:ValueCategory ; rdfs:label "epistemic" ;
+    rdfs:comment "Epistemic value — truth, knowledge, evidence. e.g. intellectual honesty, rigour, transparency, openness to revision." .
+
+vals:valueConflict a rdf:Property ;
+    rdfs:label "conflicts with" ;
+    rdfs:domain vals:Value ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "A value that may conflict with this one — e.g. 'freedom' conflicts with 'security', 'individual autonomy' conflicts with 'community wellbeing'. Conflicts are not defects — they are the normal condition of complex value systems." .
+
+vals:valuePriority a rdf:Property ;
+    rdfs:label "priority" ;
+    rdfs:domain vals:Value ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Relative priority of this value within a value set — lower number = higher priority. Used when values conflict — the higher-priority value generally prevails. Priority may be context-dependent." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Projected Values — what an entity says it values
+# ────────────────────────────────────────────────────────────────────
+
+vals:ProjectedValues a rdfs:Class ;
+    rdfs:label "Projected Values" ;
+    rdfs:comment "Values that an entity explicitly states, declares, or projects as its values. These are the entity's claimed values — what it says it stands for. Projected values may take many forms: personal statements, organisational mission statements, codes of conduct, ethical charters, political platforms, brand values. Projected values are not necessarily insincere — an entity may genuinely aspire to values it has not yet fully demonstrated. But projected values are also not necessarily accurate — they may be performative, strategic, or aspirational without substance. The relationship between projected values and enumerated values (what behaviour demonstrates) is the key analytical question. An entity with high alignment between projected and enumerated values has values integrity. An entity with low alignment has a values gap. Projected values are always agent-relative — they represent the entity's self-presentation, which may be assessed by others (see epistemics.n3)." .
+
+vals:projectedBy a rdf:Property ;
+    rdfs:label "projected by" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity that projects these values." .
+
+vals:projectedValue a rdf:Property ;
+    rdfs:label "projected value" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "A value included in this projection." .
+
+vals:projectionForm a rdf:Property ;
+    rdfs:label "projection form" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  vals:ProjectionForm .
+
+vals:ProjectionForm a rdfs:Class ;
+    rdfs:label "Projection Form" .
+
+vals:formStatement    a vals:ProjectionForm ; rdfs:label "statement" ;
+    rdfs:comment "Personal or institutional statement — a direct declaration of values." .
+vals:formMission      a vals:ProjectionForm ; rdfs:label "mission-statement" ;
+    rdfs:comment "Mission or vision statement — organisational values embedded in purpose." .
+vals:formCode         a vals:ProjectionForm ; rdfs:label "code-of-conduct" ;
+    rdfs:comment "Code of conduct or ethics — formalised value commitments with expected behaviours." .
+vals:formCharter      a vals:ProjectionForm ; rdfs:label "charter" ;
+    rdfs:comment "Charter — foundational document establishing values and principles for an entity or community." .
+vals:formPlatform     a vals:ProjectionForm ; rdfs:label "platform" ;
+    rdfs:comment "Political or campaign platform — values as part of a political position." .
+vals:formBrand        a vals:ProjectionForm ; rdfs:label "brand-values" ;
+    rdfs:comment "Brand values — values used in marketing and brand identity. May be genuine or performative." .
+vals:formPledge       a vals:ProjectionForm ; rdfs:label "pledge-oath" ;
+    rdfs:comment "Pledge or oath — a formal commitment to values, often sworn. e.g. Hippocratic Oath, oath of office." .
+vals:formPolicy       a vals:ProjectionForm ; rdfs:label "policy" ;
+    rdfs:comment "Policy — institutional values expressed through formal policy documents." .
+
+vals:projectionDate a rdf:Property ;
+    rdfs:label "projection date" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the projection was made or last updated. Projected values may change over time." .
+
+vals:projectionSource a rdf:Property ;
+    rdfs:label "projection source" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the document, statement, or publication that contains this projection. May be a production document." .
+
+vals:projectionEpistemicMode a rdf:Property ;
+    rdfs:label "epistemic mode" ;
+    rdfs:domain vals:ProjectedValues ;
+    rdfs:range  epi:EpistemicMode ;
+    rdfs:comment "The epistemic status of the projection — typically subjective (the entity's own claim) or intersubjective (shared within a community). The projection is a claim, not a verified fact." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Enumerated Values — what behaviour demonstrates
+# ────────────────────────────────────────────────────────────────────
+
+vals:EnumeratedValues a rdfs:Class ;
+    rdfs:label "Enumerated Values" ;
+    rdfs:comment "Values derived from observing an entity's actual behaviour, decisions, and patterns over time — the reality of what the entity values, as distinct from what it claims to value. Enumerated values are inferred from evidence: decisions made, priorities in resource allocation, behaviours under pressure, what is rewarded and punished within the entity, what is tolerated and what is not. Enumerated values are not the entity's self-assessment — they are an external assessment based on observable evidence. An entity may have enumerated values that differ from its projected values. This difference (values gap) is analytically significant: it may indicate misrepresentation (claiming values not held), aspiration (working toward values not yet embodied), change in progress (values shifting), or contextual variation (different values in different contexts). Enumerated values are always provisional — new evidence may revise the assessment. They are appendable — new observations add to the evidence base." .
+
+vals:enumeratedFor a rdf:Property ;
+    rdfs:label "enumerated for" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity whose values are enumerated." .
+
+vals:enumeratedValue a rdf:Property ;
+    rdfs:label "enumerated value" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "A value inferred from the entity's behaviour." .
+
+vals:enumeratedEvidence a rdf:Property ;
+    rdfs:label "evidence" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of evidence supporting the enumeration — decisions, actions, allocations, behaviours, policies implemented, responses to situations." .
+
+vals:enumeratedConfidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the enumeration (0.0 to 1.0). Higher with more evidence, more consistent evidence, and longer observation period. Lower with limited evidence or contradictory behaviour." .
+
+vals:enumeratedAssessor a rdf:Property ;
+    rdfs:label "assessor" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that performed the enumeration — may be a human observer, an institution, or a software agent (computational analysis of behaviour patterns). For software agents: the agent computes patterns from data; it does not understand values." .
+
+vals:enumeratedDate a rdf:Property ;
+    rdfs:label "enumeration date" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the enumeration was performed or last updated." .
+
+vals:enumeratedPeriod a rdf:Property ;
+    rdfs:label "observation period" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The period over which behaviour was observed — e.g. '2020-2025', 'last 12 months', 'since inception'. Longer periods yield more reliable enumerations." .
+
+vals:enumeratedEpistemicMode a rdf:Property ;
+    rdfs:label "epistemic mode" ;
+    rdfs:domain vals:EnumeratedValues ;
+    rdfs:range  epi:EpistemicMode ;
+    rdfs:comment "The epistemic status of the enumeration — typically intersubjective (based on observable evidence, assessable by others) or contested (if different assessors disagree)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Values Gap — the difference between projected and enumerated
+# ────────────────────────────────────────────────────────────────────
+
+vals:ValuesGap a rdfs:Class ;
+    rdfs:label "Values Gap" ;
+    rdfs:comment "The difference between an entity's projected values and its enumerated values. A values gap is not inherently negative — it may indicate aspiration (the entity is working toward values it has not yet fully embodied), change in progress (values are shifting), or contextual variation (different values in different contexts). However, a values gap may also indicate misrepresentation (claiming values not held), hypocrisy (claiming values while acting against them), or strategic projection (values deployed for reputation without commitment). The nature of the gap matters: a small gap with evidence of effort to close it is aspiration; a large gap with no effort is misrepresentation. Values gaps are assessed, not self-reported — the entity may not recognise its own gap. Values gaps are appendable — they may narrow, widen, or shift over time." .
+
+vals:gapEntity a rdf:Property ;
+    rdfs:label "gap entity" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity whose values gap is assessed." .
+
+vals:gapProjected a rdf:Property ;
+    rdfs:label "gap projected" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  vals:ProjectedValues .
+
+vals:gapEnumerated a rdf:Property ;
+    rdfs:label "gap enumerated" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  vals:EnumeratedValues .
+
+vals:gapMagnitude a rdf:Property ;
+    rdfs:label "gap magnitude" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Size of the gap (0.0 = full alignment, 1.0 = complete divergence). Computed by comparing projected and enumerated value sets." .
+
+vals:gapType a rdf:Property ;
+    rdfs:label "gap type" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  vals:GapType .
+
+vals:GapType a rdfs:Class ;
+    rdfs:label "Gap Type" .
+
+vals:gapAspiration     a vals:GapType ; rdfs:label "aspiration" ;
+    rdfs:comment "Aspiration — the entity is working toward values it has not yet fully embodied. Evidence of effort, progress, or commitment. Not negative — growth is a process." .
+vals:gapMisrepresentation a vals:GapType ; rdfs:label "misrepresentation" ;
+    rdfs:comment "Misrepresentation — the entity claims values it does not hold, with no evidence of effort to embody them. For natural agents: may involve self-deception or strategic projection. For legal persons: institutional misrepresentation (policy not practised). Not 'deceptive' for legal persons — use institutional terms." .
+vals:gapTransition     a vals:GapType ; rdfs:label "transition" ;
+    rdfs:comment "Transition — the entity's values are shifting. The projected values reflect the new direction; the enumerated values reflect the old pattern. The gap is temporary if the transition is genuine." .
+vals:gapContextual     a vals:GapType ; rdfs:label "contextual-variation" ;
+    rdfs:comment "Contextual variation — the entity holds different values in different contexts. Not necessarily inconsistent — context-dependent values are normal. e.g. a company may value transparency in public relations but confidentiality in negotiations." .
+vals:gapHypocrisy      a vals:GapType ; rdfs:label "hypocrisy" ;
+    rdfs:comment "Hypocrisy — the entity claims values while knowingly acting against them. Distinct from misrepresentation (which may be unconscious) — hypocrisy involves awareness of the gap. Applicable to natural agents. For legal persons: 'institutional inconsistency' — policy and practice diverge with awareness of the divergence." .
+
+vals:gapAssessedBy a rdf:Property ;
+    rdfs:label "assessed by" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that assessed the gap." .
+
+vals:gapDate a rdf:Property ;
+    rdfs:label "gap date" ;
+    rdfs:domain vals:ValuesGap ;
+    rdfs:range  xsd:dateTime .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Values Instrument — foundational frameworks and documents
+# ────────────────────────────────────────────────────────────────────
+
+vals:ValuesInstrument a rdfs:Class ;
+    rdfs:label "Values Instrument" ;
+    rdfs:comment "A foundational document, framework, or declaration that defines a value system and can be referenced by values agreements. Values instruments are the authoritative sources that agreements cite as guiding foundations. Examples: Universal Declaration of Human Rights, European Convention on Human Rights, UN Declaration on the Rights of Indigenous Peoples, Hippocratic Oath, Geneva Convention, Earth Charter, a professional code of ethics, a religious moral framework (see faith:MoralFramework), a community charter, a corporate code of conduct. Values instruments may be international (UDHR), national (constitution), professional (engineering code of ethics), cultural (Aboriginal customary law), religious (Ten Commandments, Buddhist precepts), or organisational (company values charter). An instrument may be a production document (see pd:BookPublication, pd:FunctionalSpec) or an oral tradition (see faith:OralTradition)." .
+
+vals:instrumentTitle a rdf:Property ;
+    rdfs:label "instrument title" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  xsd:string .
+
+vals:instrumentType a rdf:Property ;
+    rdfs:label "instrument type" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  vals:InstrumentType .
+
+vals:InstrumentType a rdfs:Class ;
+    rdfs:label "Instrument Type" .
+
+vals:instHumanRights     a vals:InstrumentType ; rdfs:label "human-rights" ;
+    rdfs:comment "Human rights instrument — e.g. UDHR, ICCPR, ICESCR, ECHR, UNDRIP." .
+vals:instConstitutional  a vals:InstrumentType ; rdfs:label "constitutional" ;
+    rdfs:comment "Constitutional — national or regional constitutional documents that establish values as law." .
+vals:instProfessional    a vals:InstrumentType ; rdfs:label "professional-code" ;
+    rdfs:comment "Professional code — ethical codes of professional bodies. e.g. AMA Code of Medical Ethics, IEEE Code of Ethics." .
+vals:instReligious       a vals:InstrumentType ; rdfs:label "religious-moral" ;
+    rdfs:comment "Religious or faith-based moral framework — links to faith:MoralFramework. e.g. Ten Commandments, Buddhist precepts, Sharia principles, Catholic social teaching." .
+vals:instCultural        a vals:InstrumentType ; rdfs:label "cultural-customary" ;
+    rdfs:comment "Cultural or customary — indigenous customary law, community traditions, cultural protocols. Links to faith:IndigenousKnowledgeProtocol." .
+vals:instEnvironmental   a vals:InstrumentType ; rdfs:label "environmental" ;
+    rdfs:comment "Environmental — e.g. Earth Charter, Paris Agreement principles, indigenous custodianship principles." .
+vals:instOrganisational  a vals:InstrumentType ; rdfs:label "organisational" ;
+    rdfs:comment "Organisational — a specific organisation's values charter, code of conduct, or ethical framework." .
+vals:instCommunity       a vals:InstrumentType ; rdfs:label "community-charter" ;
+    rdfs:comment "Community charter — a community's agreed values and principles. May be formal or informal." .
+vals:instInternational   a vals:InstrumentType ; rdfs:label "international-law" ;
+    rdfs:comment "International law instrument — treaties, conventions, declarations that establish values-based obligations. e.g. Geneva Conventions, Refugee Convention." .
+vals:instPhilosophical   a vals:InstrumentType ; rdfs:label "philosophical" ;
+    rdfs:comment "Philosophical — a philosophical ethical framework. e.g. Kantian ethics, utilitarianism, virtue ethics, care ethics." .
+
+vals:instrumentAuthority a rdf:Property ;
+    rdfs:label "authority" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The body or tradition that authorises the instrument — e.g. 'UN General Assembly', 'World Medical Association', 'First Nations elders', 'the Buddhist sangha', 'the company board'." .
+
+vals:instrumentValues a rdf:Property ;
+    rdfs:label "instrument values" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "Values defined or upheld by this instrument." .
+
+vals:instrumentIRI a rdf:Property ;
+    rdfs:label "instrument IRI" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI or URL of the instrument's text or reference." .
+
+vals:instrumentJurisdiction a rdf:Property ;
+    rdfs:label "jurisdiction" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Jurisdictional scope — 'universal', 'regional: Europe', 'national: Australia', 'professional: medicine', 'cultural: [people]', 'organisational: [entity]'." .
+
+vals:instrumentTransmissionMode a rdf:Property ;
+    rdfs:label "transmission mode" ;
+    rdfs:domain vals:ValuesInstrument ;
+    rdfs:range  faith:TransmissionMode ;
+    rdfs:comment "How the instrument is transmitted — text (written), oral (spoken), practice (embodied), place (land-based). Links to faith-systems.n3. Many indigenous values instruments are oral or practice-based, not written." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Values Agreement — relationships grounded in values
+# ────────────────────────────────────────────────────────────────────
+
+vals:ValuesAgreement a rdfs:Class ;
+    rdfs:label "Values Agreement" ;
+    rdfs:comment "An agreement between entities that references one or more values instruments as guiding foundations for the relationship and any content produced within it. Values agreements go beyond contractual obligations — they establish the ethical framework within which the relationship operates. Example: Bob and Jane create a connection (personal, professional, or creative) and reference the UDHR, their respective faith traditions, and a community charter as the values foundation for managing their relationship. The agreement governs not only their interactions but also any content produced within the relationship — and may persist beyond the relationship's conclusion. If Bob and Jane later end their relationship, the values agreement may continue to govern how shared content is treated, how they refer to each other, and how disagreements are resolved. Values agreements may reference other agreements (creating an agreement network) and may issue values credentials (verifiable claims about the parties' values commitments)." .
+
+vals:agreementTitle a rdf:Property ;
+    rdfs:label "agreement title" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  xsd:string .
+
+vals:agreementParties a rdf:Property ;
+    rdfs:label "parties" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of the entities that are parties to the agreement. May be two (Bob and Jane) or many (a community)." .
+
+vals:agreementInstruments a rdf:Property ;
+    rdfs:label "referenced instruments" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  vals:ValuesInstrument ;
+    rdfs:comment "Values instruments referenced as guiding foundations. e.g. UDHR, a professional code, a faith moral framework, a community charter." .
+
+vals:agreementValues a rdf:Property ;
+    rdfs:label "agreement values" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "Specific values that the parties commit to within this agreement — may be drawn from the referenced instruments or be unique to this relationship." .
+
+vals:agreementContent a rdf:Property ;
+    rdfs:label "governs content" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of content produced within the relationship that is governed by this agreement. The agreement's values framework applies to this content even after the relationship concludes." .
+
+vals:agreementPersistence a rdf:Property ;
+    rdfs:label "persistence" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  vals:AgreementPersistence .
+
+vals:AgreementPersistence a rdfs:Class ;
+    rdfs:label "Agreement Persistence" .
+
+vals:persistRelationship  a vals:AgreementPersistence ; rdfs:label "while-relationship-active" ;
+    rdfs:comment "The agreement persists only while the relationship is active. Ends when the relationship ends." .
+vals:persistContent       a vals:AgreementPersistence ; rdfs:label "content-persists" ;
+    rdfs:comment "The agreement persists for governed content even after the relationship ends. Content remains under the values framework. This is the default for content-producing relationships." .
+vals:persistIndefinite    a vals:AgreementPersistence ; rdfs:label "indefinite" ;
+    rdfs:comment "The agreement persists indefinitely — the values commitment is not time-bound. e.g. a values pledge between collaborators that outlives the project." .
+vals:persistSuccessor     a vals:AgreementPersistence ; rdfs:label "binding-on-successors" ;
+    rdfs:comment "The agreement binds successors and assigns — the values commitment transfers to heirs, successors, or assigns. e.g. a creator's values commitment that binds their estate." .
+
+vals:agreementRelatedAgreement a rdf:Property ;
+    rdfs:label "related agreement" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  vals:ValuesAgreement ;
+    rdfs:comment "Another values agreement related to this one — may be a predecessor, successor, amendment, or parallel agreement. Agreements may form networks." .
+
+vals:agreementRelatedContract a rdf:Property ;
+    rdfs:label "related contract" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  agency:Contract ;
+    rdfs:comment "A formal contract (agency.n3) related to this values agreement. The values agreement provides the ethical framework; the contract provides the legal framework. They may reference each other." .
+
+vals:agreementRelatedCare a rdf:Property ;
+    rdfs:label "related care agreement" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  scope:Agreement ;
+    rdfs:comment "A care-scope agreement (care-scope.n3) related to this values agreement. Values agreements may underpin duty-of-care relationships." .
+
+vals:agreementStatus a rdf:Property ;
+    rdfs:label "agreement status" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  scope:AgreementStatus ;
+    rdfs:comment "Lifecycle status — reuses scope:AgreementStatus (draft, active, amended, suspended, expired, revoked, superseded, under-review)." .
+
+vals:agreementDate a rdf:Property ;
+    rdfs:label "agreement date" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  xsd:dateTime .
+
+vals:agreementCredentials a rdf:Property ;
+    rdfs:label "issued credentials" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  vals:ValuesCredential ;
+    rdfs:comment "Values credentials issued by or through this agreement." .
+
+vals:agreementDisputeResolution a rdf:Property ;
+    rdfs:label "dispute resolution" ;
+    rdfs:domain vals:ValuesAgreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How values disputes within the agreement are resolved — e.g. 'mediation by community elder', 'arbitration by professional body', 'reference to instrument authority', 'consensus process'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Values Credential — verifiable claims about values
+# ────────────────────────────────────────────────────────────────────
+
+vals:ValuesCredential a rdfs:Class ;
+    rdfs:label "Values Credential" ;
+    rdfs:comment "A verifiable claim about an entity's values — issued by an authority, community, or through a values agreement. Values credentials enable entities to demonstrate their values commitments in a verifiable way, beyond self-declaration. A values credential may be: (a) issued by an authority (a professional body certifies adherence to its code), (b) issued by a community (a faith community affirms a person's standing), (c) issued through a values agreement (parties issue each other credentials confirming their commitments), or (d) issued through demonstrated behaviour (an enumeration of values from observed behaviour, certified by an assessor). Values credentials may be required for participation in certain contexts — e.g. a hospital may require a values credential affirming patient-centred care; a community may require a values credential affirming respect for cultural protocols. Values credentials may be revoked if the holder's behaviour contradicts the credentialled values." .
+
+vals:credentialHolder a rdf:Property ;
+    rdfs:label "holder" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity that holds this credential." .
+
+vals:credentialIssuer a rdf:Property ;
+    rdfs:label "issuer" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity that issued the credential — an authority, community, agreement party, or assessor." .
+
+vals:credentialValues a rdf:Property ;
+    rdfs:label "credential values" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  vals:Value ;
+    rdfs:comment "The values that this credential affirms." .
+
+vals:credentialInstrument a rdf:Property ;
+    rdfs:label "credential instrument" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  vals:ValuesInstrument ;
+    rdfs:comment "The values instrument that the credential references — e.g. a professional code, human rights instrument, or community charter." .
+
+vals:credentialBasis a rdf:Property ;
+    rdfs:label "basis" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  vals:CredentialBasis .
+
+vals:CredentialBasis a rdfs:Class ;
+    rdfs:label "Credential Basis" .
+
+vals:basisAuthority     a vals:CredentialBasis ; rdfs:label "authority-issued" ;
+    rdfs:comment "Authority-issued — a recognised authority (professional body, institution, government) certifies adherence to a values instrument." .
+vals:basisCommunity     a vals:CredentialBasis ; rdfs:label "community-affirmed" ;
+    rdfs:comment "Community-affirmed — a community affirms the holder's values standing within that community. e.g. a faith community affirms a person's adherence to the tradition's values." .
+vals:basisAgreement     a vals:CredentialBasis ; rdfs:label "agreement-issued" ;
+    rdfs:comment "Agreement-issued — issued through a values agreement. Parties issue each other credentials confirming their commitments. e.g. Bob and Jane issue each other values credentials as part of their agreement." .
+vals:basisBehavioural   a vals:CredentialBasis ; rdfs:label "behavioural-enumeration" ;
+    rdfs:comment "Behavioural enumeration — the credential is based on observed behaviour (enumerated values), certified by an assessor. The holder did not request this credential — it was derived from evidence." .
+vals:basisSelfDeclared  a vals:CredentialBasis ; rdfs:label "self-declared" ;
+    rdfs:comment "Self-declared — the holder declares their own values. Lowest assurance — equivalent to projected values. May be a starting point for higher-assurance credentials." .
+
+vals:credentialAssurance a rdf:Property ;
+    rdfs:label "assurance" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  vals:CredentialAssurance .
+
+vals:CredentialAssurance a rdfs:Class ;
+    rdfs:label "Credential Assurance" .
+
+vals:assurVerified    a vals:CredentialAssurance ; rdfs:label "verified" ;
+    rdfs:comment "Verified — the credential is verified by multiple independent sources. Highest assurance." .
+vals:assurSupported   a vals:CredentialAssurance ; rdfs:label "supported" ;
+    rdfs:comment "Supported — the credential is supported by at least one independent source. Moderate assurance." .
+vals:assurSelfOnly    a vals:CredentialAssurance ; rdfs:label "self-only" ;
+    rdfs:comment "Self-only — only the holder's self-declaration. Low assurance." .
+vals:assurContested   a vals:CredentialAssurance ; rdfs:label "contested" ;
+    rdfs:comment "Contested — the credential is disputed by other parties. The values claim is challenged." .
+
+vals:credentialDate a rdf:Property ;
+    rdfs:label "credential date" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:dateTime .
+
+vals:credentialExpiry a rdf:Property ;
+    rdfs:label "expiry" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Expiry date — some credentials require renewal. Others do not expire." .
+
+vals:credentialRevocable a rdf:Property ;
+    rdfs:label "revocable" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the credential can be revoked. Revocation may occur if the holder's behaviour contradicts the credentialled values." .
+
+vals:credentialRevocation a rdf:Property ;
+    rdfs:label "revocation" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If revoked, the revocation record — who revoked, when, on what grounds. Revocation is appendable — the credential history is preserved." .
+
+vals:credentialRequiredFor a rdf:Property ;
+    rdfs:label "required for" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Contexts in which this credential is required for participation — e.g. 'clinical practice', 'community ceremony', 'collaborative project', 'fiduciary role'." .
+
+vals:credentialRelatedAgreement a rdf:Property ;
+    rdfs:label "related agreement" ;
+    rdfs:domain vals:ValuesCredential ;
+    rdfs:range  vals:ValuesAgreement ;
+    rdfs:comment "If issued through a values agreement, the agreement that issued it." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Values Network — interconnected values commitments
+# ────────────────────────────────────────────────────────────────────
+
+vals:ValuesNetwork a rdfs:Class ;
+    rdfs:label "Values Network" ;
+    rdfs:comment "A network of interconnected values agreements, instruments, and credentials among multiple entities. Values networks emerge when entities form multiple values-grounded relationships that reference shared or related instruments. Example: Bob and Jane have a values agreement referencing UDHR. Jane and Ahmed have a values agreement referencing UDHR and a professional code. Ahmed and a community have a values agreement referencing the professional code and a community charter. These agreements form a network — a values commitment by one entity may be relevant to its relationships with others. Values networks enable values-based trust propagation: if Bob trusts Jane's values credential, and Jane trusts Ahmed's, Bob may have indirect values trust in Ahmed. Values networks also enable values conflict detection: if Bob's agreement with Jane references a value that conflicts with Bob's agreement with someone else, the conflict is visible in the network." .
+
+vals:networkEntities a rdf:Property ;
+    rdfs:label "network entities" ;
+    rdfs:domain vals:ValuesNetwork ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of entities in the network." .
+
+vals:networkAgreements a rdf:Property ;
+    rdfs:label "network agreements" ;
+    rdfs:domain vals:ValuesNetwork ;
+    rdfs:range  vals:ValuesAgreement ;
+    rdfs:comment "Values agreements in the network." .
+
+vals:networkInstruments a rdf:Property ;
+    rdfs:label "network instruments" ;
+    rdfs:domain vals:ValuesNetwork ;
+    rdfs:range  vals:ValuesInstrument ;
+    rdfs:comment "Values instruments referenced across the network." .
+
+vals:networkCredentials a rdf:Property ;
+    rdfs:label "network credentials" ;
+    rdfs:domain vals:ValuesNetwork ;
+    rdfs:range  vals:ValuesCredential ;
+    rdfs:comment "Values credentials held by entities in the network." .
+
+vals:networkConflicts a rdf:Property ;
+    rdfs:label "network conflicts" ;
+    rdfs:domain vals:ValuesNetwork ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Values conflicts detected within the network — where an entity's agreements reference conflicting values, or where credentials contradict each other." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (values.n3) links to:
+#
+# epistemics.n3:
+#   - Projected values are subjective claims (the entity's self-presentation)
+#   - Enumerated values are intersubjective (based on observable evidence)
+#   - Values gaps may be contested (different assessors disagree)
+#   - Values credentials have epistemic assurance levels
+#   - Values instruments may have blended reality classification
+#     (religious moral frameworks — see epi:Mythological)
+#
+# agency.n3:
+#   - Values are held by entities (agency:Entity)
+#   - Values agreements may relate to contracts (agency:Contract)
+#   - Values assessors are actors (agency:Actor)
+#   - Software agents do not hold values — they have operational
+#     constraints reflecting their principal's values
+#
+# personhood.n3:
+#   - Personal values are part of personhood
+#   - Values agreements are social relations (person:SocialRelation)
+#   - Values may inform legal rights and obligations
+#   - Values credentials may affect legal standing
+#
+# care-scope.n3:
+#   - Values agreements may underpin duty-of-care relationships
+#   - Agreement status lifecycle reuses scope:AgreementStatus
+#   - Values instruments may define professional duty standards
+#
+# faith-systems.n3:
+#   - Religious moral frameworks are values instruments
+#   - Faith adherence may be a basis for values credentials
+#   - Indigenous knowledge protocols may govern values transmission
+#   - Values instruments may have oral or practice-based transmission
+#
+# production-document.n3:
+#   - Values instruments may be production documents (charters, codes)
+#   - Values agreement content is governed by the agreement
+#   - Projected values sources may be production documents
+#
+# provenance.n3:
+#   - All values assessments, agreements, and credentials have provenance
+#   - Enumerated values evidence links to provenance records
+#   - Credential revocation has provenance
+#
+# learning-core.n3 / learning-experience-modality.n3:
+#   - Values are shaped by upbringing factors (lrn:UpbringingFactor)
+#   - Values may be taught through learning events
+#   - Faith tradition upbringing confers values (faith:MoralFramework)
+#   - Life activities may develop or transform values

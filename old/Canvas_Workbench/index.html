@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HyperCanvas: Multi-Dimensional Mindware Workbench</title>
+  <meta name="author" content="Timothy Charles Holborn">
+  <meta name="copyright" content="Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.">
+
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="./styles/theme.css?v=0.0.32">
+  <link rel="stylesheet" href="./styles/layout.css?v=0.0.32">
+  <link rel="stylesheet" href="./styles/canvas.css?v=0.0.32">
+  <link rel="stylesheet" href="./styles/toolboxes.css?v=0.0.32">
+  <link rel="stylesheet" href="./styles/sanctuary.css?v=0.0.32">
+</head>
+<body>
+  <div id="app-root">
+    <!-- 1. Top Menubar (File, Manifolds, Edit, View, Insert, Strata, Epistemic, Permissions, Help) -->
+    <header class="top-menubar">
+      <div class="menu-items-group">
+        <span class="brand-icon">🌌</span>
+        <button class="menu-btn" data-menu="file">File
+          <div class="dropdown-menu" id="menu-file">
+            <div class="dropdown-item" id="item-new-canvas"><span>New Manifold Workspace</span><span class="shortcut-hint">Ctrl+N</span></div>
+            <div class="dropdown-item"><span>Open Manifold...</span><span class="shortcut-hint">Ctrl+O</span></div>
+            <div class="dropdown-item"><span>Import HCF / HMC Archive</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item"><span>Save to Merkle DAG</span><span class="shortcut-hint">Ctrl+S</span></div>
+            <div class="dropdown-item"><span>Export RDF 1.2 Triples</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="manifolds">Manifolds
+          <div class="dropdown-menu" id="menu-manifolds">
+            <!-- Core Knowledge Family -->
+            <div class="dropdown-item" data-canvas="manifold-research-01"><span>🔬 Research & Epistemology</span><span class="shortcut-hint">Alt+1</span></div>
+            <div class="dropdown-item" data-canvas="manifold-media-01"><span>🎨 Media & Creative 3D</span><span class="shortcut-hint">Alt+2</span></div>
+            <div class="dropdown-item" data-canvas="manifold-social-01"><span>👥 Social & Multi-Agent</span><span class="shortcut-hint">Alt+3</span></div>
+            <div class="dropdown-divider"></div>
+            <!-- Economics & Projects Family -->
+            <div class="dropdown-item" data-canvas="manifold-finance-01"><span>💰 Financial Economics & Ledgers</span><span class="shortcut-hint">Alt+4</span></div>
+            <div class="dropdown-item" data-canvas="manifold-project-nexus-01"><span>🚀 Collaborative Projects Nexus</span><span class="shortcut-hint">Alt+5</span></div>
+            <div class="dropdown-divider"></div>
+            <!-- Sovereign Sanctuary Family -->
+            <div class="dropdown-item" data-canvas="manifold-sanctuary-01"><span>🏛️ Sanctuary (Inforg & Infosphere)</span><span class="shortcut-hint">Alt+6</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="menu-expose-toggle"><span>🗂️ Exposé Overview (All Desktops)</span><span class="shortcut-hint">Alt+O</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="edit">Edit
+          <div class="dropdown-menu" id="menu-edit">
+            <div class="dropdown-item"><span>Undo</span><span class="shortcut-hint">Ctrl+Z</span></div>
+            <div class="dropdown-item"><span>Redo</span><span class="shortcut-hint">Ctrl+Y</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item"><span>Duplicate Selected Node</span></div>
+            <div class="dropdown-item"><span>Select All Containers</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="view">View
+          <div class="dropdown-menu" id="menu-view">
+            <div class="dropdown-item" id="item-view-2d"><span>2D Flat Manifold</span></div>
+            <div class="dropdown-item" id="item-view-3d"><span>3D Perspective Orbit</span></div>
+            <div class="dropdown-item" id="item-view-4d"><span>4D Spatiotemporal Plane</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="item-recenter"><span>Reset Camera (XYZD)</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-theme="default"><span>🌌 Theme: Cyber-Dark (Default Grid & Blue)</span></div>
+            <div class="dropdown-item" data-theme="high-contrast-dark"><span>⚫ Theme: OLED High-Contrast Dark</span></div>
+            <div class="dropdown-item" data-theme="high-contrast-light"><span>☀️ Theme: Clinical Paper Light</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="insert">Insert
+          <div class="dropdown-menu" id="menu-insert">
+            <div class="dropdown-item" id="item-add-subcanvas"><span>🌌 Recursive Sub-Manifold Component</span></div>
+            <div class="dropdown-item" id="item-add-social"><span>👥 Social AI Chat Graph</span></div>
+            <div class="dropdown-item" id="item-add-webrtc"><span>🎥 WebRTC Live Stream</span></div>
+            <div class="dropdown-item" id="item-add-health"><span>🩺 Health & Pathology Node</span></div>
+            <div class="dropdown-item" id="item-add-webview"><span>🌐 Webview Knowledge Frame</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="item-add-doc"><span>📄 Document / Observation Record</span></div>
+            <div class="dropdown-item" id="item-add-image"><span>🎨 Image & Visual Media</span></div>
+            <div class="dropdown-item" id="item-add-map"><span>🗺️ Geospatial & Case Map</span></div>
+            <div class="dropdown-item" id="item-add-ontology"><span>🏷️ Ontology Mapping Node</span></div>
+            <div class="dropdown-item" id="item-add-code"><span>⚡ VibeScript 0.1 Node</span></div>
+            <div class="dropdown-item" id="item-add-sheet"><span>📊 Columnar Tensor Sheet</span></div>
+            <div class="dropdown-item" id="item-add-portal"><span>🌀 Sub-Manifold Wormhole</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="strata">Strata
+          <div class="dropdown-menu" id="menu-strata">
+            <div class="dropdown-item" id="menu-strata-all"><span>Select All Strata Levels</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-filter="environmental"><span>🌿 Environmental / Ecological</span></div>
+            <div class="dropdown-item" data-filter="social"><span>👥 Social / Cultural</span></div>
+            <div class="dropdown-item" data-filter="legal"><span>⚖️ Legal / Fiduciary</span></div>
+            <div class="dropdown-item" data-filter="financial"><span>💰 Financial / Economic</span></div>
+            <div class="dropdown-item" data-filter="technical"><span>⚙️ Technical / Cybernetic</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="epistemic">Epistemic Modality
+          <div class="dropdown-menu" id="menu-epistemic">
+            <div class="dropdown-item" data-mod="all"><span>All Epistemic Modalities</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-mod="objective"><span>🔬 Objective (Empirical Telemetry)</span></div>
+            <div class="dropdown-item" data-mod="subjective"><span>🧠 Subjective (First-Person Qualia)</span></div>
+            <div class="dropdown-item" data-mod="intersubjective"><span>🌊 Intersubjective (Cultural Consensus)</span></div>
+            <div class="dropdown-item" data-mod="normative"><span>⚖️ Normative (Statute & Mandate)</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="permissions">Permissions
+          <div class="dropdown-menu" id="menu-permissions">
+            <div class="dropdown-item"><span>👥 Project Authors Circle (Full Access)</span></div>
+            <div class="dropdown-item"><span>🛡️ Fiduciary Sentinel Gate L3</span></div>
+            <div class="dropdown-item"><span>✍️ Sign with did:qualia:...</span></div>
+            <div class="dropdown-item"><span>🏷️ Manage Permission Tags</span></div>
+          </div>
+        </button>
+        <button class="menu-btn" data-menu="help">Help</button>
+      </div>
+
+      <div class="menu-items-group" style="gap: 10px;">
+        <span class="honesty-indicator" style="font-family: var(--font-mono); font-size: 10px; background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 6px; border-radius: 4px;">mock · 0.0.31-dev</span>
+        <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Poet HyperCanvas · Vibe 0.1</span>
+      </div>
+    </header>
+
+    <!-- 2. Canvas Control & Virtual Desktops Pager Bar -->
+    <div class="canvas-control-bar" id="canvas-control-bar"></div>
+
+    <!-- Dynamic Clipable Contextual Toolchain Deck Receptor (Physical Workshop Socket-Sets & 3D Prism) -->
+    <div id="toolchain-deck"></div>
+
+    <!-- Accessibility & Persona Modalities Modal Drawer -->
+    <div id="a11y-modal" class="ribbon-settings-modal hidden" style="top: 80px; right: 80px; width: 420px; max-height: 80vh; overflow-y: auto;"></div>
+
+    <!-- Semantic Connector Relationship Inspector Panel (Slide-out Lightbox) -->
+    <aside id="wire-inspector-panel" class="wire-inspector-panel hidden"></aside>
+
+    <!-- 3. Main Workspace: Canvas Viewport + Toolboxes + Slide-out Sidebar -->
+    <div class="main-workspace">
+      <!-- Floating Toolbox Shelf (4-Way Dockable) -->
+      <aside class="toolbox-dock dock-left" id="toolbox-dock"></aside>
+
+      <!-- Floating Active Toolbox Palette -->
+      <div class="floating-toolbox-palette dock-left" id="floating-toolbox-palette"></div>
+
+      <!-- Canvas Viewport -->
+      <div class="canvas-viewport-container" id="canvas-viewport">
+        <!-- SVG Grid Background (Cyber-Semantic Blue & Major Crosshairs) -->
+        <svg class="canvas-grid-svg">
+          <defs>
+            <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 210, 255, 0.08)" stroke-width="1"/>
+            </pattern>
+            <pattern id="grid-pattern-major" width="200" height="200" patternUnits="userSpaceOnUse">
+              <rect width="200" height="200" fill="url(#grid-pattern)" />
+              <path d="M 200 0 L 0 0 0 200" fill="none" stroke="rgba(0, 210, 255, 0.18)" stroke-width="1.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-pattern-major)" />
+        </svg>
+
+        <!-- Canvas Stage (Transformed Layer) -->
+        <div class="canvas-stage" id="canvas-stage">
+          <!-- Connection Wires Layer -->
+          <svg class="wires-svg-layer" id="wires-layer"></svg>
+        </div>
+
+        <!-- Canvas HUD (Zoom Controls) -->
+        <div class="canvas-hud">
+          <button class="hud-btn" id="hud-zoom-out" title="Zoom Out">-</button>
+          <span class="zoom-level-text" id="zoom-display">90%</span>
+          <button class="hud-btn" id="hud-zoom-in" title="Zoom In">+</button>
+          <button class="hud-btn" id="hud-recenter" title="Reset View" style="font-size: 11px; margin-left: 4px;">Recenter</button>
+        </div>
+
+        <!-- XYZD 3D CAD Trackball Gizmo (Bottom Right) -->
+        <div class="xyzd-controller-hud" id="xyzd-hud"></div>
+      </div>
+
+      <!-- Slide-out Technical Info & Connection Ontology Sidebar -->
+      <aside class="tech-sidebar" id="tech-sidebar"></aside>
+    </div>
+
+    <!-- 4. Bottom Statusbar -->
+    <footer class="bottom-statusbar">
+      <div class="statusbar-left">
+        <span class="status-indicator live" id="status-presence">● Timothy Charles Holborn (Principal)</span>
+        <span class="status-text" id="status-strata-summary">Strata: <strong id="status-active-strata">All (5 Levels Active)</strong></span>
+        <span class="status-text" id="status-epistemic-summary">Epistemic: <strong id="status-active-epistemic">All Modalities</strong></span>
+        <span class="status-text" id="status-merkle-dag">Merkle-DAG: <code>0x4F8A9C2E</code></span>
+      </div>
+      <div class="statusbar-right">
+        <button class="btn btn-sm" id="btn-toggle-a11y" style="font-size: 11px; padding: 2px 8px;"><span>♿</span> 🔬 SME | a11y</button>
+        <button class="btn btn-sm btn-ghost" id="btn-toggle-tech-sidebar" style="font-size: 11px; padding: 2px 8px;">⚙️ Technical Telemetry</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Application Bootstrap (ES Modules) -->
+  <script type="module">
+    import { canvasState } from './js/state.js';
+    import { WireSystem } from './js/wire-system.js';
+    import { ContainerManager } from './js/container-manager.js';
+    import { CanvasEngine } from './js/canvas-engine.js';
+    import { ToolboxRegistry } from './js/toolbox-registry.js';
+    import { TechSidebar } from './js/tech-sidebar.js';
+    import { CanvasSwitcher } from './js/canvas-switcher.js';
+    import { XYZDGizmo } from './js/xyzd-gizmo.js';
+    import { ToolchainDeckManager } from './js/toolchain-deck.js';
+    import { ControlBarManager } from './js/control-bar-manager.js';
+    import { AccessibilityManager } from './js/a11y-manager.js';
+    import { WireInspector } from './js/wire-inspector.js';
+
+    // DOM Elements
+    const controlBarEl = document.querySelector('#canvas-control-bar');
+    const viewport = document.querySelector('#canvas-viewport');
+    const stage = document.querySelector('#canvas-stage');
+    const wiresLayer = document.querySelector('#wires-layer');
+    const toolboxDock = document.querySelector('#toolbox-dock');
+    const toolboxPalette = document.querySelector('#floating-toolbox-palette');
+    const techSidebarEl = document.querySelector('#tech-sidebar');
+    const toolchainDeckEl = document.querySelector('#toolchain-deck');
+    const a11yModalEl = document.querySelector('#a11y-modal');
+    const wireInspectorEl = document.querySelector('#wire-inspector-panel');
+
+    // 1. Initialize Top Control Bar (Socket-Case Pods)
+    const controlBarManager = new ControlBarManager(controlBarEl);
+
+    // 2. Instantiate Subsystems
+    const desktopContainer = document.querySelector('#virtual-desktop-container');
+    const a11yTriggerBtn = document.querySelector('#btn-toggle-a11y');
+
+    const wireSystem = new WireSystem(wiresLayer);
+    const containerManager = new ContainerManager(stage, wireSystem);
+    const canvasEngine = new CanvasEngine(viewport, stage, containerManager);
+    const toolboxRegistry = new ToolboxRegistry(toolboxDock, toolboxPalette, containerManager);
+    const techSidebar = new TechSidebar(techSidebarEl);
+    const toolchainDeck = new ToolchainDeckManager(toolchainDeckEl);
+    const a11yManager = new AccessibilityManager(a11yTriggerBtn, a11yModalEl);
+    const canvasSwitcher = new CanvasSwitcher(desktopContainer, containerManager, wireSystem, canvasEngine);
+    const xyzdGizmo = new XYZDGizmo(document.querySelector('#xyzd-hud'), canvasEngine);
+    const wireInspector = new WireInspector(wireInspectorEl, wireSystem, containerManager);
+
+    // Make managers globally accessible
+    window.hyperCanvasSwitcher = canvasSwitcher;
+    window.hyperA11yManager = a11yManager;
+    window.hyperWireInspector = wireInspector;
+
+    // Load initial canvas
+    canvasSwitcher.switchCanvas('manifold-research-01');
+    canvasEngine.updateDateTimeUI(canvasState.state.time);
+
+    // Manifolds Dropdown Menu items
+    document.querySelectorAll('#menu-manifolds .dropdown-item[data-canvas]').forEach(item => {
+      item.addEventListener('click', () => {
+        const cId = item.getAttribute('data-canvas');
+        canvasSwitcher.switchCanvas(cId);
+      });
+    });
+    document.querySelector('#menu-expose-toggle')?.addEventListener('click', () => {
+      canvasSwitcher.toggleExposeOverview();
+    });
+
+    // View Dropdown Theme Selectors
+    document.querySelectorAll('#menu-view .dropdown-item[data-theme]').forEach(item => {
+      item.addEventListener('click', () => {
+        const themeKey = item.getAttribute('data-theme');
+        a11yManager.setTheme(themeKey);
+      });
+    });
+
+    // Epistemic Modality Lens Selector
+    const epistemicButtons = document.querySelectorAll('.epistemic-btn');
+    epistemicButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        epistemicButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mod = btn.getAttribute('data-epistemic');
+        canvasState.setEpistemicModality(mod);
+      });
+    });
+
+    canvasState.subscribe('epistemicModalityChanged', (mod) => {
+      containerManager.renderAll();
+      const statusEpistemic = document.querySelector('#status-active-epistemic');
+      if (statusEpistemic) statusEpistemic.innerText = mod.charAt(0).toUpperCase() + mod.slice(1);
+    });
+
+    // Multi-Selectable Strata Deck Buttons
+    const strataButtons = document.querySelectorAll('.strata-deck-btn');
+    strataButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const strata = btn.getAttribute('data-strata');
+        if (strata === 'all') {
+          canvasState.selectAllStrata();
+        } else {
+          canvasState.toggleStrata(strata);
+        }
+      });
+    });
+
+    function syncStrataButtons(activeList) {
+      strataButtons.forEach(btn => {
+        const key = btn.getAttribute('data-strata');
+        if (key === 'all') {
+          btn.classList.toggle('active', activeList.includes('all') || activeList.length >= 5);
+        } else {
+          btn.classList.toggle('active', activeList.includes('all') || activeList.includes(key));
+        }
+      });
+
+      const statusStrata = document.querySelector('#status-active-strata');
+      if (statusStrata) {
+        if (activeList.includes('all') || activeList.length >= 5) {
+          statusStrata.innerText = 'All (5 Levels Active)';
+        } else {
+          statusStrata.innerText = activeList.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ') || 'None';
+        }
+      }
+    }
+
+    canvasState.subscribe('strataChanged', (activeList) => {
+      syncStrataButtons(activeList);
+      containerManager.renderAll();
+    });
+
+    // Menu Bar Dropdown Controllers
+    const menuButtons = document.querySelectorAll('.menu-btn');
+    menuButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const menuId = `menu-${btn.getAttribute('data-menu')}`;
+        const menu = document.getElementById(menuId);
+        const isOpen = menu?.classList.contains('show');
+
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        menuButtons.forEach(b => b.classList.remove('active'));
+
+        if (!isOpen && menu) {
+          menu.classList.add('show');
+          btn.classList.add('active');
+        }
+      });
+    });
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+      menuButtons.forEach(b => b.classList.remove('active'));
+    });
+
+    // Dimension Switcher (2D / 3D / 4D)
+    const dimButtons = document.querySelectorAll('.dim-btn');
+    dimButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        dimButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const dim = btn.getAttribute('data-dim');
+        canvasState.setDimensionMode(dim);
+      });
+    });
+
+    // 4D DateTime Span Slider & Controls
+    const timeSpanSlider = document.querySelector('#time-span-slider');
+    const btnPlayTime = document.querySelector('#btn-play-time');
+
+    if (timeSpanSlider) {
+      timeSpanSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value) / 100;
+        canvasState.setTimeProgress(val);
+      });
+    }
+
+    if (btnPlayTime) {
+      btnPlayTime.addEventListener('click', () => {
+        canvasState.togglePlayTime();
+        btnPlayTime.innerText = canvasState.state.time.isPlaying ? '⏸' : '▶';
+      });
+    }
+
+    // Span Preset Buttons
+    document.querySelectorAll('.span-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.span-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const spanKey = btn.getAttribute('data-span');
+        canvasState.setTimeSpanPreset(spanKey);
+      });
+    });
+
+    // HUD Zoom Buttons
+    document.querySelector('#hud-zoom-in')?.addEventListener('click', () => {
+      canvasState.setState({ zoom: Math.min(canvasState.state.zoom * 1.2, 3.0) });
+      canvasEngine.updateTransform();
+    });
+    document.querySelector('#hud-zoom-out')?.addEventListener('click', () => {
+      canvasState.setState({ zoom: Math.max(canvasState.state.zoom * 0.8, 0.3) });
+      canvasEngine.updateTransform();
+    });
+    document.querySelector('#hud-recenter')?.addEventListener('click', () => {
+      canvasEngine.resetView();
+    });
+
+    // Toggle Technical Sidebar
+    document.querySelector('#btn-toggle-tech-sidebar')?.addEventListener('click', () => {
+      canvasState.toggleTechSidebar('telemetry');
+    });
+
+    // Insert Menu Shortcuts
+    document.querySelector('#item-add-subcanvas')?.addEventListener('click', () => {
+      canvasState.addContainer({
+        id: `container-subcanvas-${Date.now()}`,
+        type: 'subcanvas',
+        strata: 'technical',
+        epistemic: 'objective',
+        title: 'Embedded Sub-Canvas Component',
+        x: 400,
+        y: 200,
+        width: 440,
+        height: 300,
+        z: 100,
+        validFrom: '2026-08-15T00:00:00',
+        validTo: '2026-08-16T00:00:00',
+        targetCanvasId: 'manifold-media-01',
+        graphTriples: []
+      });
+      containerManager.renderAll();
+    });
+
+    document.querySelector('#item-add-social')?.addEventListener('click', () => toolboxRegistry.addSocialContainer());
+    document.querySelector('#item-add-webrtc')?.addEventListener('click', () => toolboxRegistry.addWebRtcContainer());
+    document.querySelector('#item-add-health')?.addEventListener('click', () => toolboxRegistry.addHealthContainer());
+    document.querySelector('#item-add-webview')?.addEventListener('click', () => toolboxRegistry.addWebviewContainer());
+    document.querySelector('#item-add-doc')?.addEventListener('click', () => toolboxRegistry.addDocContainer());
+    document.querySelector('#item-add-image')?.addEventListener('click', () => toolboxRegistry.addImageContainer());
+    document.querySelector('#item-add-map')?.addEventListener('click', () => toolboxRegistry.addMapContainer());
+    document.querySelector('#item-add-ontology')?.addEventListener('click', () => toolboxRegistry.addOntologyContainer());
+    document.querySelector('#item-add-code')?.addEventListener('click', () => toolboxRegistry.addCodeContainer());
+    document.querySelector('#item-add-sheet')?.addEventListener('click', () => toolboxRegistry.addSheetContainer());
+    document.querySelector('#item-add-portal')?.addEventListener('click', () => toolboxRegistry.addPortalContainer());
+
+    // Sync selected node in status bar
+    canvasState.subscribe('containerSelected', (id) => {
+      const statusNode = document.querySelector('#status-active-node');
+      if (statusNode) statusNode.innerText = id || 'none';
+    });
+  </script>
+</body>
+</html>

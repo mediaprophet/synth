@@ -1,0 +1,338 @@
+# Agency Ontology — Entities, Actors, Agency, Contracts, Claims, Delegation
+# Authoring form (N3) — compiled to agency.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Entity — the thing that exists
+# ────────────────────────────────────────────────────────────────────
+
+agency:Entity a rdfs:Class ;
+    rdfs:label "Entity" ;
+    rdfs:comment "A legal or conceptual thing that exists. An entity IS; an actor ACTS. The same entity can be multiple actors across different circumstances. Entities have identity (DID, registration, IRI) independent of any action they perform." .
+
+agency:NaturalPerson a rdfs:Class ;
+    rdfs:subClassOf agency:Entity ;
+    rdfs:label "Natural Person" ;
+    rdfs:comment "A human being. Identified by DID (e.g. did:qualia:timothy_charles_holborn)." .
+
+agency:LegalPerson a rdfs:Class ;
+    rdfs:subClassOf agency:Entity ;
+    rdfs:label "Legal Person" ;
+    rdfs:comment "A company, organisation, institution, or other entity with legal personality. Identified by registration IRI or DID." .
+
+agency:SoftwareEntity a rdfs:Class ;
+    rdfs:subClassOf agency:Entity ;
+    rdfs:label "Software Entity" ;
+    rdfs:comment "A software agent, service, or system identified as an entity in its own right (e.g. an NLP pipeline, an LLM, a symbolic extractor). Identified by type + version + instance IRI." .
+
+agency:CollectiveEntity a rdfs:Class ;
+    rdfs:subClassOf agency:Entity ;
+    rdfs:label "Collective Entity" ;
+    rdfs:comment "A group, community, or unincorporated association that acts as a unit but is not a legal person. Identified by IRI." .
+
+# — Entity identity properties —
+
+agency:did a rdf:Property ;
+    rdfs:label "DID" ;
+    rdfs:domain agency:Entity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Decentralized identifier." .
+
+agency:registeredName a rdf:Property ;
+    rdfs:label "registered name" ;
+    rdfs:domain agency:Entity ;
+    rdfs:range  xsd:string .
+
+agency:registrationIRI a rdf:Property ;
+    rdfs:label "registration IRI" ;
+    rdfs:domain agency:Entity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "External registration identifier (e.g. ABN, ACN, ORCID, ROR)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Actor — an entity performing actions in a context
+# ────────────────────────────────────────────────────────────────────
+
+agency:Actor a rdfs:Class ;
+    rdfs:label "Actor" ;
+    rdfs:comment "An entity performing an action in a specific circumstance. The same entity can be multiple actors — a person can be an employee of one company and a contractor for another, each with different scope. An actor is the intersection of an entity and a circumstance." .
+
+agency:isEntity a rdf:Property ;
+    rdfs:label "is entity" ;
+    rdfs:domain agency:Actor ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The underlying entity that this actor is. One entity, many actors." .
+
+agency:inCircumstance a rdf:Property ;
+    rdfs:label "in circumstance" ;
+    rdfs:domain agency:Actor ;
+    rdfs:range  agency:Circumstance ;
+    rdfs:comment "The circumstance that bounds this actor's scope of action." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Circumstance — the bounding context
+# ────────────────────────────────────────────────────────────────────
+
+agency:Circumstance a rdfs:Class ;
+    rdfs:label "Circumstance" ;
+    rdfs:comment "The context that bounds when an actor's agency is valid. Includes temporal scope, topical scope, subject scope, and relational scope. An agency claim is only valid within its circumstance." .
+
+agency:validFrom a rdf:Property ;
+    rdfs:label "valid from" ;
+    rdfs:domain agency:Circumstance ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the circumstance begins." .
+
+agency:validUntil a rdf:Property ;
+    rdfs:label "valid until" ;
+    rdfs:domain agency:Circumstance ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the circumstance ends. Empty means open-ended." .
+
+agency:topicScope a rdf:Property ;
+    rdfs:label "topic scope" ;
+    rdfs:domain agency:Circumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The topic or domain the circumstance covers (e.g. 'clinical-research', 'financial-audit', 'content-authoring')." .
+
+agency:subjectScope a rdf:Property ;
+    rdfs:label "subject scope" ;
+    rdfs:domain agency:Circumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific subject or matter the circumstance covers (e.g. a patient ID, a project ID, a document IRI)." .
+
+agency:relationScope a rdf:Property ;
+    rdfs:label "relation scope" ;
+    rdfs:domain agency:Circumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The relational context (e.g. 'employee-of', 'contractor-for', 'delegate-of')." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Agency — acting on behalf of a principal
+# ────────────────────────────────────────────────────────────────────
+
+agency:Agency a rdfs:Class ;
+    rdfs:label "Agency" ;
+    rdfs:comment "A relationship where an actor (the agent) acts on behalf of a principal entity. The agency is bounded by a contract that defines permitted purposes and scope. An agency relationship is not unconditional — it is scoped by circumstance and governed by contract." .
+
+agency:agent a rdf:Property ;
+    rdfs:label "agent" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Actor ;
+    rdfs:comment "The actor who acts on behalf of the principal." .
+
+agency:principal a rdf:Property ;
+    rdfs:label "principal" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity on whose behalf the agent acts." .
+
+agency:underContract a rdf:Property ;
+    rdfs:label "under contract" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Contract ;
+    rdfs:comment "The contract that governs this agency relationship." .
+
+agency:withinCircumstance a rdf:Property ;
+    rdfs:label "within circumstance" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Circumstance ;
+    rdfs:comment "The circumstance that bounds this agency." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Contract — the governing agreement
+# ────────────────────────────────────────────────────────────────────
+
+agency:Contract a rdfs:Class ;
+    rdfs:label "Contract" ;
+    rdfs:comment "An agreement that defines the scope of an agency relationship. A contract specifies permitted purposes, prohibited purposes, temporal validity, and the rules the agent must follow. Contracts can be explicit (signed, written) or implicit (employment, terms of service, fiduciary duty)." .
+
+agency:contractIRI a rdf:Property ;
+    rdfs:label "contract IRI" ;
+    rdfs:domain agency:Contract ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI identifying the contract (e.g. a DID document, a signed document hash, a terms-of-service URL)." .
+
+agency:permittedPurpose a rdf:Property ;
+    rdfs:label "permitted purpose" ;
+    rdfs:domain agency:Contract ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A purpose for which the agent is authorised to act on behalf of the principal. Multiple permitted purposes may be listed." .
+
+agency:prohibitedPurpose a rdf:Property ;
+    rdfs:label "prohibited purpose" ;
+    rdfs:domain agency:Contract ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A purpose for which the agent is explicitly NOT authorised, even if it might otherwise seem within scope." .
+
+agency:contractRules a rdf:Property ;
+    rdfs:label "contract rules" ;
+    rdfs:domain agency:Contract ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Rules or constraints the agent must follow (e.g. 'must not share data with third parties', 'must use best efforts', 'fiduciary duty of care')." .
+
+agency:contractType a rdf:Property ;
+    rdfs:label "contract type" ;
+    rdfs:domain agency:Contract ;
+    rdfs:range  agency:ContractType ;
+    rdfs:comment "The nature of the contract." .
+
+agency:ContractType a rdfs:Class ;
+    rdfs:label "Contract Type" .
+
+agency:explicit      a agency:ContractType ; rdfs:label "explicit" ;
+    rdfs:comment "A signed or written agreement (employment contract, service agreement, NDA)." .
+agency:implicit      a agency:ContractType ; rdfs:label "implicit" ;
+    rdfs:comment "An implied relationship (employment law, fiduciary duty, terms of use)." .
+agency:statutory     a agency:ContractType ; rdfs:label "statutory" ;
+    rdfs:comment "A legal or regulatory requirement (privacy law, professional licensing, mandatory reporting)." .
+agency:delegation    a agency:ContractType ; rdfs:label "delegation" ;
+    rdfs:comment "A sub-delegation from an existing agency (the principal's agent delegates to another agent)." .
+agency:machinePolicy a agency:ContractType ; rdfs:label "machine policy" ;
+    rdfs:comment "A machine-readable policy (capability scope, access control, Sentinel rules)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Claim — an assertion of agency (may be valid or invalid)
+# ────────────────────────────────────────────────────────────────────
+
+agency:Claim a rdfs:Class ;
+    rdfs:label "Claim" ;
+    rdfs:comment "An assertion that an actor acts on behalf of a principal under a contract. A claim may be valid (consistent with the contract and circumstance) or invalid (the actor is doing something not permitted by the principal or contract). Claims are evaluated, not assumed." .
+
+agency:claimedBy a rdf:Property ;
+    rdfs:label "claimed by" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  agency:Actor ;
+    rdfs:comment "The actor making the claim of agency." .
+
+agency:claimedOnBehalfOf a rdf:Property ;
+    rdfs:label "claimed on behalf of" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The principal entity the actor claims to represent." .
+
+agency:claimedUnderContract a rdf:Property ;
+    rdfs:label "claimed under contract" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  agency:Contract ;
+    rdfs:comment "The contract the actor claims authorises their action." .
+
+agency:claimedPurpose a rdf:Property ;
+    rdfs:label "claimed purpose" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The purpose for which the actor claims to act." .
+
+agency:claimValidity a rdf:Property ;
+    rdfs:label "claim validity" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  agency:ClaimValidity ;
+    rdfs:comment "The evaluated validity of the claim." .
+
+agency:ClaimValidity a rdfs:Class ;
+    rdfs:label "Claim Validity" .
+
+agency:valid       a agency:ClaimValidity ; rdfs:label "valid" ;
+    rdfs:comment "The claim is consistent with the contract, circumstance, and principal's rules. The actor is authorised." .
+agency:invalid     a agency:ClaimValidity ; rdfs:label "invalid" ;
+    rdfs:comment "The claim is not consistent with the contract or principal's rules. The actor is not authorised for this purpose." .
+agency:unverified  a agency:ClaimValidity ; rdfs:label "unverified" ;
+    rdfs:comment "The claim has not yet been evaluated. The actor's authority is uncertain." .
+agency:contested   a agency:ClaimValidity ; rdfs:label "contested" ;
+    rdfs:comment "The claim has been challenged. The actor's authority is disputed." .
+agency:expired     a agency:ClaimValidity ; rdfs:label "expired" ;
+    rdfs:comment "The claim was once valid but the circumstance has ended (temporal expiry)." .
+agency:ultraVires  a agency:ClaimValidity ; rdfs:label "ultra vires" ;
+    rdfs:comment "The actor is acting beyond the scope of their authority — the action is not permitted by the contract or principal, even if the agency relationship itself is valid." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Delegation chain — recursive agency
+# ────────────────────────────────────────────────────────────────────
+
+agency:delegatedBy a rdf:Property ;
+    rdfs:label "delegated by" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Agency ;
+    rdfs:comment "This agency was delegated by another agency. Forms a chain: software agent ← contracted by ← company ← used by ← human agent of company. Each link is its own agency with its own contract and circumstance." .
+
+agency:delegationDepth a rdf:Property ;
+    rdfs:label "delegation depth" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "How many levels deep this agency is in the delegation chain. 0 = direct agency (actor acts directly for principal). 1 = one level of delegation. etc." .
+
+agency:originalPrincipal a rdf:Property ;
+    rdfs:label "original principal" ;
+    rdfs:domain agency:Agency ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The root principal at the top of the delegation chain. Even if an agent is 3 levels deep, the original principal is the entity that ultimately authorised the chain." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Evaluation — checking claim validity
+# ────────────────────────────────────────────────────────────────────
+
+agency:evaluatedAt a rdf:Property ;
+    rdfs:label "evaluated at" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the claim's validity was evaluated." .
+
+agency:evaluatedBy a rdf:Property ;
+    rdfs:label "evaluated by" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  agency:Actor ;
+    rdfs:comment "Who or what evaluated the claim (a Sentinel agent, a fiduciary, a human reviewer)." .
+
+agency:evaluationReason a rdf:Property ;
+    rdfs:label "evaluation reason" ;
+    rdfs:domain agency:Claim ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable explanation of why the claim was evaluated as valid or invalid." .
+
+# The evaluation logic (in Rust, not N3 inference):
+# 1. Check that the claimed contract exists and is active (validFrom ≤ now ≤ validUntil).
+# 2. Check that the claimed purpose is in the contract's permittedPurpose list.
+# 3. Check that the claimed purpose is not in the contract's prohibitedPurpose list.
+# 4. Check that the actor's circumstance matches (topic, subject, relation scope).
+# 5. Check the delegation chain — each link must be valid for the chain to be valid.
+# 6. If all checks pass: valid. If purpose is outside scope: ultraVires.
+#    If contract is expired: expired. If contract doesn't exist: invalid.
+#    If cannot verify: unverified.
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Linking to provenance
+# ────────────────────────────────────────────────────────────────────
+
+# The provenance ontology (prov:) records WHO contributed and WHAT role they played.
+# The agency ontology (agency:) records WHETHER they were authorised to do so.
+#
+# A provenance Contribution entry references an agency:Actor.
+# That actor has an agency:Agency relationship to a principal entity.
+# The agency has a contract with permitted purposes.
+# When a contribution is made, a Claim is evaluated:
+#   - Is the actor's role within the contract's permitted purposes?
+#   - Is the circumstance still valid?
+#   - Is the delegation chain intact?
+#
+# If the claim is invalid or ultraVires, the contribution is still recorded
+# (provenance is honest — it records what happened, not what should have happened),
+# but the Sentinel may flag it, gate it, or require remediation.
+
+agency:hasAgencyClaim a rdf:Property ;
+    rdfs:label "has agency claim" ;
+    rdfs:domain prov:Contribution ;
+    rdfs:range  agency:Claim ;
+    rdfs:comment "The agency claim evaluated when this contribution was made. Links provenance (what happened) to agency (whether it was authorised)." .

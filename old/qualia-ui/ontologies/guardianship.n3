@@ -1,0 +1,560 @@
+# Guardianship Ontology — Formal Legal Guardianship, Family Roles,
+# and Intervention/Challenge/Replacement Relations
+#
+# Authoring form (N3) — compiled to guardianship.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Guardianship is a formal sub-type of Duty of Care (see duty-of-care.n3)
+# where a guardian holds court-appointed or statutory protective authority
+# over a ward. The ward is a person who requires formal protection due to
+# vulnerability (minority, incapacity, absence, etc.).
+#
+# This ontology also defines:
+#   - Family roles and relationships that give rise to duties of care
+#   - Intervention, challenge, and replacement — entities that seek to
+#     replace, interfere with, or significantly impact an existing
+#     guardianship or duty-of-care relation
+#   - Ward vulnerability, guardianship structure, authority, and review
+#
+# Imports: agency.n3, personhood.n3, selfhood.n3, duty-of-care.n3,
+#          agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+@prefix care:       <https://qualiadb.org/schema/ui/duty-of-care#> .
+@prefix guard:      <https://qualiadb.org/schema/ui/guardianship#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Guardianship Relation — formal legal guardianship
+# ────────────────────────────────────────────────────────────────────
+
+guard:GuardianshipRelation a rdfs:Class ;
+    rdfs:subClassOf care:DutyOfCareRelation ;
+    rdfs:label "Guardianship Relation" ;
+    rdfs:comment "A formal legal guardianship — a court-appointed or statutory protective relationship where a guardian holds authority over a ward. The ward is a person who requires formal protection due to vulnerability (minority, incapacity, absence, etc.). Guardianship is the most restrictive form of duty of care. The duty-type property (inherited from DutyOfCareRelation) should be set to care:guardianship. The care-subject property should be set to the ward; the duty-holder property should be set to the guardian." .
+
+guard:guardian a rdf:Property ;
+    rdfs:label "guardian" ;
+    rdfs:domain guard:GuardianshipRelation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity acting as guardian. Sub-property of care:dutyHolder." ;
+    rdfs:subPropertyOf care:dutyHolder .
+
+guard:ward a rdf:Property ;
+    rdfs:label "ward" ;
+    rdfs:domain guard:GuardianshipRelation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person under formal legal guardianship. Sub-property of care:careSubject. Reserved for formal guardianship — other duty-of-care relations use care:careSubject." ;
+    rdfs:subPropertyOf care:careSubject .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Guarded Subject — what the guardianship covers
+# ────────────────────────────────────────────────────────────────────
+
+guard:GuardedSubject a rdfs:Class ;
+    rdfs:label "Guarded Subject" ;
+    rdfs:comment "The subject matter of a guardianship scope. A guardianship may cover specific traits, purposes, assets, topics, or things. Multiple guarded subjects may be attached to a single guardianship scope, each with its own constraints." .
+
+guard:subjectType a rdf:Property ;
+    rdfs:label "subject type" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  guard:SubjectType ;
+    rdfs:comment "The type of thing being guarded." .
+
+guard:SubjectType a rdfs:Class ;
+    rdfs:label "Subject Type" .
+
+guard:traitGuardianship a guard:SubjectType ; rdfs:label "trait-guardianship" ;
+    rdfs:comment "Guards a specific trait or capacity of the ward — e.g. medical decision-making, financial management, educational choices. The guardian has authority only over the specified trait." .
+guard:purposeGuardianship a guard:SubjectType ; rdfs:label "purpose-guardianship" ;
+    rdfs:comment "Guards for a specific purpose — e.g. a single transaction, a legal proceeding, a property sale. Expires when the purpose is fulfilled." .
+guard:assetGuardianship a guard:SubjectType ; rdfs:label "asset-guardianship" ;
+    rdfs:comment "Guards a specific asset or set of assets — e.g. a trust, an inheritance, a bank account, real property. The guardian manages the asset but does not have general authority over the ward." .
+guard:topicGuardianship a guard:SubjectType ; rdfs:label "topic-guardianship" ;
+    rdfs:comment "Guards decisions within a specific topic domain — e.g. healthcare, education, housing, legal representation. Broader than a single trait but narrower than plenary." .
+guard:entityGuardianship a guard:SubjectType ; rdfs:label "entity-guardianship" ;
+    rdfs:comment "Guards an entity in its entirety — the ward's full personhood. This is plenary guardianship; the guardian has comprehensive authority." .
+guard:thingGuardianship a guard:SubjectType ; rdfs:label "thing-guardianship" ;
+    rdfs:comment "Guards a specific thing — e.g. a physical object, a digital asset, an animal, a collection. The guardian protects and manages the thing but does not have authority over the ward's personhood generally." .
+guard:projectGuardianship a guard:SubjectType ; rdfs:label "project-guardianship" ;
+    rdfs:comment "Guards a project — the guardian oversees project execution, milestones, budget, and deliverables. The project itself is the ward; the guardian ensures the project's interests are protected even when participants change. Distinct from asset-guardianship (which guards specific assets) — project-guardianship guards the ongoing process and its outcomes." .
+guard:groupGuardianship a guard:SubjectType ; rdfs:label "group-guardianship" ;
+    rdfs:comment "Guards a group or collective entity — the guardian ensures the group's welfare, governance, and collective interests. The group is the ward; individual members retain their own personhood and selfhood. The guardian's authority extends to collective decisions, not individual member autonomy." .
+guard:softwareAgentGuardianship a guard:SubjectType ; rdfs:label "software-agent-guardianship" ;
+    rdfs:comment "Guards a software agent — the guardian (principal agent) oversees the software agent's operation, capability scope, and output governance. The software agent is the ward; the guardian ensures the agent operates within its authorised scope and may override or terminate it. This is a principal-agent relationship where the software agent has no personhood or selfhood — the guardianship covers the agent's operational scope and the principal's duty to oversee it. Uses computational terms (override, terminate, scope-limit) not mind-dependent terms." .
+guard:incorporatedEntityGuardianship a guard:SubjectType ; rdfs:label "incorporated-entity-guardianship" ;
+    rdfs:comment "Guards an incorporated entity (legal person) — the guardian (receiver, administrator, statutory manager) oversees the entity's operations, compliance, and asset management. The incorporated entity is the ward; the guardian's authority is defined by corporate law, statute, or court order. The entity's decision-makers may be displaced or supervised depending on the scope." .
+
+guard:subjectReference a rdf:Property ;
+    rdfs:label "subject reference" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI or identifier of the specific thing being guarded (e.g. an asset IRI, a topic IRI, a property IRI)." .
+
+guard:subjectDescription a rdf:Property ;
+    rdfs:label "subject description" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable description of what is being guarded." .
+
+guard:permittedActions a rdf:Property ;
+    rdfs:label "permitted actions" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions the guardian is permitted to take regarding this subject (e.g. 'sell', 'manage', 'consent-to-treatment')." .
+
+guard:prohibitedActions a rdf:Property ;
+    rdfs:label "prohibited actions" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions the guardian is explicitly NOT permitted to take regarding this subject." .
+
+guard:requiresCourtOrder a rdf:Property ;
+    rdfs:label "requires court order" ;
+    rdfs:domain guard:GuardedSubject ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether certain actions within this subject require a court order before the guardian may act. True for significant decisions like selling property, consenting to major medical procedures." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Ward Vulnerability — why guardianship is needed
+# ────────────────────────────────────────────────────────────────────
+
+guard:WardVulnerability a rdfs:Class ;
+    rdfs:label "Ward Vulnerability" ;
+    rdfs:comment "The reason a ward requires formal guardianship. Vulnerability is a personhood concept — describes the ward's legal or social situation, not their inner experience." .
+
+guard:vulnerabilityType a rdf:Property ;
+    rdfs:label "vulnerability type" ;
+    rdfs:domain guard:WardVulnerability ;
+    rdfs:range  guard:VulnerabilityType .
+
+guard:VulnerabilityType a rdfs:Class ;
+    rdfs:label "Vulnerability Type" .
+
+guard:minority        a guard:VulnerabilityType ; rdfs:label "minority" ;
+    rdfs:comment "The ward is a minor — below the age of legal capacity." .
+guard:incapacity      a guard:VulnerabilityType ; rdfs:label "incapacity" ;
+    rdfs:comment "The ward lacks capacity to make decisions in one or more domains." .
+guard:absence         a guard:VulnerabilityType ; rdfs:label "absence" ;
+    rdfs:comment "The ward is absent — unavailable to make decisions." .
+guard:deceased        a guard:VulnerabilityType ; rdfs:label "deceased" ;
+    rdfs:comment "The ward is deceased. Guardianship applies to the estate." .
+guard:animal          a guard:VulnerabilityType ; rdfs:label "animal" ;
+    rdfs:comment "The ward is a non-human animal. Covers care, welfare, veterinary decisions." .
+guard:corporateInsolvency a guard:VulnerabilityType ; rdfs:label "corporate-insolvency" ;
+    rdfs:comment "The ward is an incorporated entity unable to meet obligations. Receivership, administration." .
+guard:statutoryOversight a guard:VulnerabilityType ; rdfs:label "statutory-oversight" ;
+    rdfs:comment "The ward is subject to statutory oversight — regulated entity, public body." .
+guard:operationalDependency a guard:VulnerabilityType ; rdfs:label "operational-dependency" ;
+    rdfs:comment "The ward is a software agent requiring principal-agent oversight. Structural, not incapacity." .
+guard:collectiveNeed a guard:VulnerabilityType ; rdfs:label "collective-need" ;
+    rdfs:comment "The ward is a group requiring guardianship for collective welfare. Individuals retain autonomy." .
+
+guard:capacityDomain a rdf:Property ;
+    rdfs:label "capacity domain" ;
+    rdfs:domain guard:WardVulnerability ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For partial incapacity, the specific domain affected." .
+
+guard:vulnerabilityAssessedBy a rdf:Property ;
+    rdfs:label "assessed by" ;
+    rdfs:domain guard:WardVulnerability ;
+    rdfs:range  agency:Entity .
+
+guard:assessedAt a rdf:Property ;
+    rdfs:label "assessed at" ;
+    rdfs:domain guard:WardVulnerability ;
+    rdfs:range  xsd:dateTime .
+
+guard:reassessmentRequired a rdf:Property ;
+    rdfs:label "reassessment required" ;
+    rdfs:domain guard:WardVulnerability ;
+    rdfs:range  xsd:string .
+
+# Note: Voluntary vs involuntary guardianship is NOT a vulnerability type.
+# A minor's vulnerability is 'minority'; whether the guardianship is
+# voluntary (parents consent) or court-ordered (despite objection) is a
+# separate dimension. This is modelled via care:ConsentBasis in
+# duty-of-care.n3 — use care:hasConsentBasis to specify whether the
+# guardianship is voluntary, involuntary, deemed, court-ordered, or
+# proxy-consented. Similarly, the legal basis (agreement, statute, court
+# order, custom) is modelled via care:LegalBasis, and the governing
+# jurisdiction via care:Jurisdiction.
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Guardianship Structure — how authority is organised
+# ────────────────────────────────────────────────────────────────────
+
+guard:GuardianshipStructure a rdfs:Class ;
+    rdfs:label "Guardianship Structure" ;
+    rdfs:comment "How guardian authority is organised, distributed, and constrained." .
+
+guard:structureType a rdf:Property ;
+    rdfs:label "structure type" ;
+    rdfs:domain guard:GuardianshipStructure ;
+    rdfs:range  guard:StructureType .
+
+guard:StructureType a rdfs:Class ;
+    rdfs:label "Structure Type" .
+
+guard:sole       a guard:StructureType ; rdfs:label "sole" .
+guard:joint      a guard:StructureType ; rdfs:label "joint" ;
+    rdfs:comment "Multiple guardians share authority." .
+guard:delegated  a guard:StructureType ; rdfs:label "delegated" ;
+    rdfs:comment "Primary guardian delegates specific subjects to secondary guardians." .
+guard:successive a guard:StructureType ; rdfs:label "successive" ;
+    rdfs:comment "Guardians succeed each other." .
+guard:corporate  a guard:StructureType ; rdfs:label "corporate" ;
+    rdfs:comment "A legal person acts as guardian." .
+
+guard:decisionRule a rdf:Property ;
+    rdfs:label "decision rule" ;
+    rdfs:domain guard:GuardianshipStructure ;
+    rdfs:range  guard:DecisionRule .
+
+guard:DecisionRule a rdfs:Class ;
+    rdfs:label "Decision Rule" .
+
+guard:unanimous  a guard:DecisionRule ; rdfs:label "unanimous" .
+guard:majority   a guard:DecisionRule ; rdfs:label "majority" .
+guard:any        a guard:DecisionRule ; rdfs:label "any" .
+guard:primary    a guard:DecisionRule ; rdfs:label "primary" .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Guardianship Authority — what the guardian can do
+# ────────────────────────────────────────────────────────────────────
+
+guard:GuardianshipAuthority a rdfs:Class ;
+    rdfs:label "Guardianship Authority" ;
+    rdfs:comment "Specific powers granted to a guardian. Always bounded by scope." .
+
+guard:authorityLevel a rdf:Property ;
+    rdfs:label "authority level" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  guard:AuthorityLevel .
+
+guard:AuthorityLevel a rdfs:Class ;
+    rdfs:label "Authority Level" .
+
+guard:consent   a guard:AuthorityLevel ; rdfs:label "consent" .
+guard:manage    a guard:AuthorityLevel ; rdfs:label "manage" .
+guard:represent a guard:AuthorityLevel ; rdfs:label "represent" .
+guard:advise    a guard:AuthorityLevel ; rdfs:label "advise" .
+guard:oversee   a guard:AuthorityLevel ; rdfs:label "oversee" .
+
+guard:advanceDirective a rdf:Property ;
+    rdfs:label "advance directive" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "An advance directive from the ward that constrains the guardian's authority." .
+
+guard:courtOrder a rdf:Property ;
+    rdfs:label "court order" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  xsd:string .
+
+guard:reportingRequirement a rdf:Property ;
+    rdfs:label "reporting requirement" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  xsd:string .
+
+guard:selfhoodAccessPermitted a rdf:Property ;
+    rdfs:label "selfhood access permitted" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the guardian has access to the ward's selfhood. Default false." .
+
+guard:selfhoodAccessScope a rdf:Property ;
+    rdfs:label "selfhood access scope" ;
+    rdfs:domain guard:GuardianshipAuthority ;
+    rdfs:range  xsd:string .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Guardianship Review and Revocation
+# ────────────────────────────────────────────────────────────────────
+
+guard:GuardianshipReview a rdfs:Class ;
+    rdfs:label "Guardianship Review" ;
+    rdfs:comment "A periodic or triggered review of a guardianship relation." .
+
+guard:reviewType a rdf:Property ;
+    rdfs:label "review type" ;
+    rdfs:domain guard:GuardianshipReview ;
+    rdfs:range  guard:ReviewType .
+
+guard:ReviewType a rdfs:Class ;
+    rdfs:label "Review Type" .
+
+guard:periodic  a guard:ReviewType ; rdfs:label "periodic" .
+guard:triggered a guard:ReviewType ; rdfs:label "triggered" .
+guard:requested a guard:ReviewType ; rdfs:label "requested" .
+
+guard:reviewDate a rdf:Property ;
+    rdfs:label "review date" ;
+    rdfs:domain guard:GuardianshipReview ;
+    rdfs:range  xsd:dateTime .
+
+guard:reviewOutcome a rdf:Property ;
+    rdfs:label "review outcome" ;
+    rdfs:domain guard:GuardianshipReview ;
+    rdfs:range  guard:ReviewOutcome .
+
+guard:ReviewOutcome a rdfs:Class ;
+    rdfs:label "Review Outcome" .
+
+guard:continued        a guard:ReviewOutcome ; rdfs:label "continued" .
+guard:modified         a guard:ReviewOutcome ; rdfs:label "modified" .
+guard:revoked          a guard:ReviewOutcome ; rdfs:label "revoked" .
+guard:guardianReplaced a guard:ReviewOutcome ; rdfs:label "guardian-replaced" .
+
+guard:reviewedBy a rdf:Property ;
+    rdfs:label "reviewed by" ;
+    rdfs:domain guard:GuardianshipReview ;
+    rdfs:range  agency:Entity .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Family Roles — roles arising from family relationships
+# ────────────────────────────────────────────────────────────────────
+
+guard:FamilyRole a rdfs:Class ;
+    rdfs:label "Family Role" ;
+    rdfs:comment "A role that arises from a family relationship and may give rise to duties of care, guardianship, or custodial responsibility. Family roles are distinct from formal guardianship — a parent has family duty toward their child by virtue of the family relationship, not by court appointment. However, family roles may be formalised (e.g. a court may appoint a parent as legal guardian) or displaced (e.g. child protection may remove a child from a parent). Family roles are personhood — socially situated and legally governed. Selfhood is not affected by family role assignment." .
+
+guard:familyRoleType a rdf:Property ;
+    rdfs:label "family role type" ;
+    rdfs:domain guard:FamilyRole ;
+    rdfs:range  guard:FamilyRoleType .
+
+guard:FamilyRoleType a rdfs:Class ;
+    rdfs:label "Family Role Type" .
+
+guard:naturalParent     a guard:FamilyRoleType ; rdfs:label "natural-parent" ;
+    rdfs:comment "A natural (biological) parent. Holds family duty toward their child by default. May be formalised as guardian or displaced by court order." .
+guard:adoptiveParent    a guard:FamilyRoleType ; rdfs:label "adoptive-parent" ;
+    rdfs:comment "An adoptive parent. Holds the same family duty as a natural parent following legal adoption." .
+guard:stepParent        a guard:FamilyRoleType ; rdfs:label "step-parent" ;
+    rdfs:comment "A step-parent. May hold family duty depending on the relationship and legal framework. Does not automatically hold legal guardianship unless formally appointed." .
+guard:fosterParent      a guard:FamilyRoleType ; rdfs:label "foster-parent" ;
+    rdfs:comment "A foster parent. Holds custodial duty under a statutory or agency arrangement. Not a legal guardian unless separately appointed." .
+guard:kinshipCarer      a guard:FamilyRoleType ; rdfs:label "kinship-carer" ;
+    rdfs:comment "A family member (grandparent, aunt, uncle, sibling) who assumes care of a child when parents cannot. May be formal or informal." .
+guard:child             a guard:FamilyRoleType ; rdfs:label "child" ;
+    rdfs:comment "A child of a parent. The care-subject of the parent's family duty until reaching majority or emancipation." .
+guard:sibling           a guard:FamilyRoleType ; rdfs:label "sibling" ;
+    rdfs:comment "A sibling. May hold family duty in specific circumstances (e.g. adult sibling caring for a disabled sibling)." .
+guard:spouse            a guard:FamilyRoleType ; rdfs:label "spouse" ;
+    rdfs:comment "A spouse. Holds family duty toward their spouse and may hold medical proxy or power-of-attorney by default in some jurisdictions." .
+guard:extendedFamily    a guard:FamilyRoleType ; rdfs:label "extended-family" ;
+    rdfs:comment "Extended family member (grandparent, aunt, uncle, cousin). May hold consultation or information rights in guardianship proceedings." .
+guard:familyCarer       a guard:FamilyRoleType ; rdfs:label "family-carer" ;
+    rdfs:comment "A family member who provides ongoing care for another family member (e.g. adult child caring for elderly parent)." .
+guard:deFactoCarer      a guard:FamilyRoleType ; rdfs:label "de-facto-carer" ;
+    rdfs:comment "A person who assumes a caring role without formal appointment — a neighbour, family friend, or community member who provides ongoing care." .
+
+guard:familyRelationTo a rdf:Property ;
+    rdfs:label "family relation to" ;
+    rdfs:domain guard:FamilyRole ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity to whom the family role relates (e.g. the child, the elderly parent)." .
+
+guard:familyRoleFormalised a rdf:Property ;
+    rdfs:label "family role formalised" ;
+    rdfs:domain guard:FamilyRole ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the family role has been formalised through legal process." .
+
+guard:familyRoleDisplaced a rdf:Property ;
+    rdfs:label "family role displaced" ;
+    rdfs:domain guard:FamilyRole ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the family role has been displaced by court order, statutory intervention, or child protection proceedings." .
+
+guard:displacementReason a rdf:Property ;
+    rdfs:label "displacement reason" ;
+    rdfs:domain guard:FamilyRole ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If displaced, the reason — e.g. 'child-protection-order', 'capacity-assessment', 'court-finding-of-neglect', 'voluntary-surrender'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Intervention — entities seeking to replace, interfere, or impact
+# ────────────────────────────────────────────────────────────────────
+
+guard:Intervention a rdfs:Class ;
+    rdfs:label "Intervention" ;
+    rdfs:comment "An action by an entity seeking to replace, interfere with, or significantly impact an existing duty-of-care or guardianship relation. Interventions may be lawful (court proceedings, statutory oversight, child protection) or unlawful (abduction, unauthorised access). Interventions are personhood — they operate in the social and legal domain. An intervention that seeks to compel a natural agent's selfhood is prohibited regardless of the intervener's authority." .
+
+guard:interventionType a rdf:Property ;
+    rdfs:label "intervention type" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  guard:InterventionType .
+
+guard:InterventionType a rdfs:Class ;
+    rdfs:label "Intervention Type" .
+
+guard:replacement       a guard:InterventionType ; rdfs:label "replacement" ;
+    rdfs:comment "The intervener seeks to replace the current duty-holder or guardian." .
+guard:interference      a guard:InterventionType ; rdfs:label "interference" ;
+    rdfs:comment "The intervener seeks to interfere with the duty-holder's decisions or authority — influence or obstruct, not replace." .
+guard:impact            a guard:InterventionType ; rdfs:label "impact" ;
+    rdfs:comment "The intervener's actions significantly impact the relation without directly targeting it." .
+guard:childProtection   a guard:InterventionType ; rdfs:label "child-protection" ;
+    rdfs:comment "A statutory child protection intervention — a state agency removes or displaces a child from a family duty-of-care relation." .
+guard:capacityChallenge a guard:InterventionType ; rdfs:label "capacity-challenge" ;
+    rdfs:comment "An entity challenges the care-subject's capacity — seeking to establish or remove guardianship." .
+guard:emergencyIntervention a guard:InterventionType ; rdfs:label "emergency-intervention" ;
+    rdfs:comment "An emergency intervention — an authority acts immediately to protect the care-subject without prior court authorisation." .
+guard:unlawfulInterference a guard:InterventionType ; rdfs:label "unlawful-interference" ;
+    rdfs:comment "Unlawful interference — abduction, unauthorised access, or any action that violates the duty-of-care relation without legal authority." .
+
+guard:intervener a rdf:Property ;
+    rdfs:label "intervener" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  agency:Entity .
+
+guard:interventionTarget a rdf:Property ;
+    rdfs:label "intervention target" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  care:DutyOfCareRelation ;
+    rdfs:comment "The duty-of-care or guardianship relation that is the target." .
+
+guard:interventionAuthority a rdf:Property ;
+    rdfs:label "intervention authority" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  guard:InterventionAuthority .
+
+guard:InterventionAuthority a rdfs:Class ;
+    rdfs:label "Intervention Authority" .
+
+guard:courtAuthorised   a guard:InterventionAuthority ; rdfs:label "court-authorised" .
+guard:statutoryAuthorised a guard:InterventionAuthority ; rdfs:label "statutory-authorised" .
+guard:consentAuthorised a guard:InterventionAuthority ; rdfs:label "consent-authorised" .
+guard:noAuthority       a guard:InterventionAuthority ; rdfs:label "no-authority" .
+
+guard:interventionStatus a rdf:Property ;
+    rdfs:label "intervention status" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  guard:InterventionStatus .
+
+guard:InterventionStatus a rdfs:Class ;
+    rdfs:label "Intervention Status" .
+
+guard:proposed    a guard:InterventionStatus ; rdfs:label "proposed" .
+guard:pending     a guard:InterventionStatus ; rdfs:label "pending" .
+guard:active      a guard:InterventionStatus ; rdfs:label "active" .
+guard:dismissed   a guard:InterventionStatus ; rdfs:label "dismissed" .
+guard:completed   a guard:InterventionStatus ; rdfs:label "completed" .
+guard:appealed    a guard:InterventionStatus ; rdfs:label "appealed" .
+
+guard:interventionOutcome a rdf:Property ;
+    rdfs:label "intervention outcome" ;
+    rdfs:domain guard:Intervention ;
+    rdfs:range  xsd:string .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Family Intervention — family-specific intervention with standing
+# ────────────────────────────────────────────────────────────────────
+
+# Family members are the most common interveners in guardianship and
+# duty-of-care relations. A family member may:
+#   - Petition to become guardian (replacement)
+#   - Challenge a guardian's decisions (interference)
+#   - Request review of a care arrangement (capacity challenge)
+#   - Report concerns to statutory bodies (child protection, elder abuse)
+#   - Seek to remove a child from a care arrangement (custody dispute)
+#   - Contest a will or estate administration (replacement)
+#
+# Family interventions require careful balancing:
+#   - The family member's standing (relationship to the care-subject)
+#   - The care-subject's wishes (if they have capacity to express them)
+#   - The current duty-holder's performance
+#   - The care-subject's best interests
+#   - The care-subject's selfhood (which must not be compelled)
+#
+# A family member's intervention does not automatically grant them
+# access to the care-subject's selfhood. Even a natural parent whose
+# child is under their family duty does not have automatic access to
+# the child's selfhood vault — the child's private reflections, dream
+# records, and qualia memories remain protected. Access requires
+# either the child's consent (if they have capacity) or a court order.
+
+guard:FamilyIntervention a rdfs:Class ;
+    rdfs:subClassOf guard:Intervention ;
+    rdfs:label "Family Intervention" ;
+    rdfs:comment "An intervention by a family member in an existing duty-of-care or guardianship relation. The family member's standing (family role type and relationship) is a factor. Selfhood is never subject to family intervention." .
+
+guard:familyIntervenerRole a rdf:Property ;
+    rdfs:label "family intervener role" ;
+    rdfs:domain guard:FamilyIntervention ;
+    rdfs:range  guard:FamilyRoleType ;
+    rdfs:comment "The family role of the intervener — determines standing." .
+
+guard:standingAssessed a rdf:Property ;
+    rdfs:label "standing assessed" ;
+    rdfs:domain guard:FamilyIntervention ;
+    rdfs:range  xsd:boolean .
+
+guard:standingOutcome a rdf:Property ;
+    rdfs:label "standing outcome" ;
+    rdfs:domain guard:FamilyIntervention ;
+    rdfs:range  guard:StandingOutcome .
+
+guard:StandingOutcome a rdfs:Class ;
+    rdfs:label "Standing Outcome" .
+
+guard:standingGranted  a guard:StandingOutcome ; rdfs:label "standing-granted" .
+guard:standingDenied   a guard:StandingOutcome ; rdfs:label "standing-denied" .
+guard:standingLimited  a guard:StandingOutcome ; rdfs:label "standing-limited" .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Linking to duty-of-care.n3 and personhood.n3
+# ────────────────────────────────────────────────────────────────────
+
+# GuardianshipRelation is a subClassOf DutyOfCareRelation in
+# duty-of-care.n3, which is itself a subClassOf FiduciaryRelationship
+# in personhood.n3.
+#
+# Inherited from duty-of-care.n3:
+#   - care:dutyHolder / care:careSubject
+#   - care:dutyType (set to care:guardianship)
+#   - care:CareScope (scope breadth, duration, permitted/prohibited actions)
+#   - care:InvolvedParty (all party roles, rights, responsibilities)
+#   - care:PartyRight (informational, procedural, substantive, protective,
+#     operational)
+#   - care:PartyResponsibility (fiduciary, professional, civic, contractual,
+#     procedural, operational, protective, compliance)
+#   - care:LegalBasis (agreement, statute, court order, custom, consent,
+#     emergency, fiduciary) — why the relation exists
+#   - care:ConsentBasis (voluntary, involuntary, deemed, court-ordered,
+#     proxy) — whether the ward consented
+#   - care:Jurisdiction (governing law, court, statutes, cross-border,
+#     conflict of laws) — which legal system governs
+#   - care:selfhoodAccessPermitted / care:selfhoodAccessScope
+#
+# Defined in guardianship.n3:
+#   - guard:GuardianshipRelation (formal legal guardianship)
+#   - guard:GuardedSubject (trait, purpose, asset, topic, entity, thing,
+#     project, group, software agent, incorporated entity)
+#   - guard:WardVulnerability (minority, incapacity, absence, deceased,
+#     animal, corporate insolvency, statutory oversight, operational
+#     dependency, collective need)
+#     Note: voluntary/involuntary is NOT a vulnerability type — it is
+#     modelled via care:ConsentBasis in duty-of-care.n3
+#   - guard:GuardianshipStructure (sole, joint, delegated, successive, corporate)
+#   - guard:GuardianshipAuthority (consent, manage, represent, advise, oversee)
+#   - guard:GuardianshipReview (periodic, triggered, requested)
+#   - guard:FamilyRole (natural parent, adoptive parent, step-parent,
+#     foster parent, kinship carer, child, sibling, spouse, extended family,
+#     family carer, de facto carer)
+#   - guard:Intervention (replacement, interference, impact, child protection,
+#     capacity challenge, emergency intervention, unlawful interference)
+#   - guard:FamilyIntervention (family-specific intervention with standing)

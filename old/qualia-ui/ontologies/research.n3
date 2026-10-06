@@ -1,0 +1,886 @@
+# Research Ontology — Enquiry Scope, Dynamics, Dark Links, Inference, Provenance
+# Authoring form (N3) — compiled to research.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix pres:       <https://qualiadb.org/schema/ui/presentation#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix code:       <https://qualiadb.org/schema/ui/code#> .
+@prefix inv:        <https://qualiadb.org/schema/ui/investigation#> .
+@prefix res:        <https://qualiadb.org/schema/ui/research#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Research Project — the top-level enquiry
+# ────────────────────────────────────────────────────────────────────
+
+res:ResearchProject a rdfs:Class ;
+    rdfs:label "Research Project" ;
+    rdfs:comment "A structured enquiry into a domain, phenomenon, or question. Research is broader than investigation — it is exploratory and generative, not just reconstructive or predictive. A research project defines its own scope, constraints, and purpose, and may relate to zero or more investigations." .
+
+res:hasPurpose a rdf:Property ;
+    rdfs:label "has purpose" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Purpose ;
+    rdfs:comment "The purpose statement — why the research is being conducted. Purposes may be multi-valued (a project may have several purposes)." .
+
+res:hasScope a rdf:Property ;
+    rdfs:label "has scope" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Scope ;
+    rdfs:comment "The scope definition — what is in and out of bounds for this research." .
+
+res:hasConstraint a rdf:Property ;
+    rdfs:label "has constraint" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Constraint ;
+    rdfs:comment "A constraint on the research — methodological, ethical, temporal, spatial, legal, or resource-based." .
+
+res:hasResearchQuestion a rdf:Property ;
+    rdfs:label "has research question" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:ResearchQuestion .
+
+res:hasCorpus a rdf:Property ;
+    rdfs:label "has corpus" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Corpus .
+
+res:hasDynamics a rdf:Property ;
+    rdfs:label "has dynamics" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Dynamics ;
+    rdfs:comment "The dynamic systems under study — social, socio-economic, spatio-temporal, or combinations." .
+
+res:hasInference a rdf:Property ;
+    rdfs:label "has inference" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Inference .
+
+res:hasSynthesis a rdf:Property ;
+    rdfs:label "has synthesis" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:Synthesis .
+
+res:relatedInvestigation a rdf:Property ;
+    rdfs:label "related investigation" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  inv:Investigation ;
+    rdfs:comment "A related investigation. Research may inform or be informed by investigations. The relationship is loose — research may exist without any investigation." .
+
+res:hasOutput a rdf:Property ;
+    rdfs:label "has output" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:ResearchOutput .
+
+res:researchStatus a rdf:Property ;
+    rdfs:label "research status" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:ResearchStatus .
+
+res:ResearchStatus a rdfs:Class ; rdfs:label "Research Status" .
+
+res:StatusProposing  a res:ResearchStatus ; rdfs:label "proposing" .
+res:StatusActive     a res:ResearchStatus ; rdfs:label "active" .
+res:StatusPaused     a res:ResearchStatus ; rdfs:label "paused" .
+res:StatusConcluded  a res:ResearchStatus ; rdfs:label "concluded" .
+res:StatusOngoing    a res:ResearchStatus ; rdfs:label "ongoing" ;
+    rdfs:comment "Continuous research — e.g. a living systematic review." .
+res:StatusSuperseded a res:ResearchStatus ; rdfs:label "superseded" .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Purpose — why the research exists
+# ────────────────────────────────────────────────────────────────────
+
+res:Purpose a rdfs:Class ;
+    rdfs:label "Purpose" ;
+    rdfs:comment "The purpose of a research project. Purposes are not just topics — they encode intent. 'Understand the causes of X' is different from 'evaluate the effectiveness of Y' or 'discover new patterns in Z'." .
+
+res:PurposeType a rdfs:Class ; rdfs:label "Purpose Type" .
+
+res:Exploratory    a res:PurposeType ; rdfs:label "exploratory" ;
+    rdfs:comment "Explore an under-studied area. Generate hypotheses, identify patterns, map the territory." .
+res:Explanatory    a res:PurposeType ; rdfs:label "explanatory" ;
+    rdfs:comment "Explain a phenomenon — identify causes, mechanisms, or reasons." .
+res:Evaluative     a res:PurposeType ; rdfs:label "evaluative" ;
+    rdfs:comment "Evaluate a policy, intervention, or system — assess effectiveness, efficiency, equity." .
+res:Generative     a res:PurposeType ; rdfs:label "generative" ;
+    rdfs:comment "Generate new knowledge, artefacts, or models. Create ontologies, frameworks, or theories." .
+res:Confirmatory   a res:PurposeType ; rdfs:label "confirmatory" ;
+    rdfs:comment "Confirm or refute existing findings. Replication, verification, stress-testing." .
+res:Integrative    a res:PurposeType ; rdfs:label "integrative" ;
+    rdfs:comment "Integrate findings across domains, disciplines, or datasets. Systematic review, meta-analysis." .
+res:Critical       a res:PurposeType ; rdfs:label "critical" ;
+    rdfs:comment "Critically examine assumptions, frameworks, or power structures. Critical theory, deconstruction." .
+res:Applied        a res:PurposeType ; rdfs:label "applied" ;
+    rdfs:comment "Apply research to a practical problem. Action research, design science, translational research." .
+
+res:purposeType a rdf:Property ;
+    rdfs:label "purpose type" ;
+    rdfs:domain res:Purpose ;
+    rdfs:range  res:PurposeType .
+
+res:purposeStatement a rdf:Property ;
+    rdfs:label "purpose statement" ;
+    rdfs:domain res:Purpose ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The purpose in natural language or formal logic." .
+
+res:purposeOntology a rdf:Property ;
+    rdfs:label "purpose ontology" ;
+    rdfs:domain res:Purpose ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of an ontology that constrains the purpose's vocabulary and valid claims." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Scope & Constraints — what is in/out of bounds
+# ────────────────────────────────────────────────────────────────────
+
+res:Scope a rdfs:Class ;
+    rdfs:label "Scope" ;
+    rdfs:comment "The scope of a research project. Defines what is in and out of bounds — temporally, spatially, socially, topically, and methodologically." .
+
+res:scopeTemporal a rdf:Property ;
+    rdfs:label "temporal scope" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Time period covered (e.g. '2000-2025', 'pre-colonial', 'last 30 days')." .
+
+res:scopeSpatial a rdf:Property ;
+    rdfs:label "spatial scope" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Geographic scope (e.g. 'global', 'AU-NSW', 'urban centres >100k', 'watershed X')." .
+
+res:scopeSocial a rdf:Property ;
+    rdfs:label "social scope" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Population or social group scope (e.g. 'adults 18-65', 'healthcare workers', 'nation-state governments')." .
+
+res:scopeTopical a rdf:Property ;
+    rdfs:label "topical scope" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Topic boundaries — what concepts, domains, or phenomena are in scope." .
+
+res:scopeMethodological a rdf:Property ;
+    rdfs:label "methodological scope" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Accepted methodologies (e.g. 'qualitative only', 'mixed methods', 'computational', 'ethnographic')." .
+
+res:scopeOntology a rdf:Property ;
+    rdfs:label "scope ontology" ;
+    rdfs:domain res:Scope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of an ontology that defines the scope's vocabulary. The scope ontology acts as a constraint — only terms within this ontology (or its imports) are valid in the research project's claims." .
+
+res:Constraint a rdfs:Class ;
+    rdfs:label "Constraint" ;
+    rdfs:comment "A constraint on the research. Constraints limit what can be done, how, or when — they are not scope (what is studied) but boundaries on the research process itself." .
+
+res:ConstraintType a rdfs:Class ; rdfs:label "Constraint Type" .
+
+res:EthicalConstraint    a res:ConstraintType ; rdfs:label "ethical" ;
+    rdfs:comment "Ethical constraints — IRB approval, informed consent, vulnerable populations, data sensitivity." .
+res:LegalConstraint      a res:ConstraintType ; rdfs:label "legal" ;
+    rdfs:comment "Legal constraints — GDPR, HIPAA, copyright, data sovereignty, jurisdictional restrictions." .
+res:ResourceConstraint   a res:ConstraintType ; rdfs:label "resource" ;
+    rdfs:comment "Resource constraints — time, funding, compute, data access, personnel." .
+res:MethodologicalConstraint a res:ConstraintType ; rdfs:label "methodological" ;
+    rdfs:comment "Methodological constraints — required rigour, reproducibility standards, sample size minimums." .
+res:AccessConstraint     a res:ConstraintType ; rdfs:label "access" ;
+    rdfs:comment "Access constraints — restricted datasets, paywalled literature, classified information, consent-gated data." .
+res:TemporalConstraint   a res:ConstraintType ; rdfs:label "temporal" ;
+    rdfs:comment "Temporal constraints — deadline, data recency requirements, longitudinal commitment." .
+
+res:constraintType a rdf:Property ;
+    rdfs:label "constraint type" ;
+    rdfs:domain res:Constraint ;
+    rdfs:range  res:ConstraintType .
+
+res:constraintDescription a rdf:Property ;
+    rdfs:label "constraint description" ;
+    rdfs:domain res:Constraint ;
+    rdfs:range  xsd:string .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Research Question — the enquiry structure
+# ────────────────────────────────────────────────────────────────────
+
+res:ResearchQuestion a rdfs:Class ;
+    rdfs:label "Research Question" ;
+    rdfs:comment "A question that the research project seeks to answer. Research questions may be hierarchical (a question may have sub-questions) and may be linked (answering one may depend on or inform another)." .
+
+res:questionText a rdf:Property ;
+    rdfs:label "question text" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  xsd:string .
+
+res:questionParent a rdf:Property ;
+    rdfs:label "parent question" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  res:ResearchQuestion .
+
+res:questionDependsOn a rdf:Property ;
+    rdfs:label "depends on" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  res:ResearchQuestion ;
+    rdfs:comment "This question cannot be answered until the referenced question is answered." .
+
+res:questionInforms a rdf:Property ;
+    rdfs:label "informs" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  res:ResearchQuestion ;
+    rdfs:comment "Answering this question provides input to the referenced question." .
+
+res:questionStatus a rdf:Property ;
+    rdfs:label "question status" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  res:QuestionStatus .
+
+res:QuestionStatus a rdfs:Class ; rdfs:label "Question Status" .
+
+res:QStatusOpen       a res:QuestionStatus ; rdfs:label "open" .
+res:QStatusInProgress a res:QuestionStatus ; rdfs:label "in progress" .
+res:QStatusAnswered   a res:QuestionStatus ; rdfs:label "answered" .
+res:QStatusReframed   a res:QuestionStatus ; rdfs:label "reframed" ;
+    rdfs:comment "The question was reframed — the original question was replaced by a better one." .
+res:QStatusDeferred   a res:QuestionStatus ; rdfs:label "deferred" .
+res:QStatusDropped    a res:QuestionStatus ; rdfs:label "dropped" .
+
+res:questionAnswer a rdf:Property ;
+    rdfs:label "question answer" ;
+    rdfs:domain res:ResearchQuestion ;
+    rdfs:range  res:Finding ;
+    rdfs:comment "The finding that answers this question (when status is answered)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Corpus — the knowledge base under study
+# ────────────────────────────────────────────────────────────────────
+
+res:Corpus a rdfs:Class ;
+    rdfs:label "Corpus" ;
+    rdfs:comment "The collection of sources, data, and literature that the research project draws upon. A corpus may include documents, datasets, sensor feeds, testimony, web content, and other artefacts. Each item in the corpus has provenance." .
+
+res:CorpusItem a rdfs:Class ;
+    rdfs:label "Corpus Item" ;
+    rdfs:comment "A single item in a research corpus. Has a source IRI, a type, and provenance metadata." .
+
+res:CorpusType a rdfs:Class ; rdfs:label "Corpus Type" .
+
+res:CorpusLiterature   a res:CorpusType ; rdfs:label "literature" ;
+    rdfs:comment "Published literature — papers, books, reports, preprints." .
+res:CorpusDataset      a res:CorpusType ; rdfs:label "dataset" ;
+    rdfs:comment "Structured datasets — statistical, survey, sensor, administrative." .
+res:CorpusDocument     a res:CorpusType ; rdfs:label "document" ;
+    rdfs:comment "Unstructured documents — reports, transcripts, legal texts, news." .
+res:CorpusMedia        a res:CorpusType ; rdfs:label "media" ;
+    rdfs:comment "Media — images, video, audio, satellite imagery." .
+res:CorpusWeb          a res:CorpusType ; rdfs:label "web" ;
+    rdfs:comment "Web content — pages, social media, APIs, linked data." .
+res:CorpusSensor       a res:CorpusType ; rdfs:label "sensor" ;
+    rdfs:comment "Sensor data — environmental, biometric, telemetry, IoT." .
+res:CorpusOral         a res:CorpusType ; rdfs:label "oral" ;
+    rdfs:comment "Oral history, interviews, testimony, ethnographic field notes." .
+res:CorpusArchival     a res:CorpusType ; rdfs:label "archival" ;
+    rdfs:comment "Archival records — historical, governmental, institutional." .
+res:CorpusDerived      a res:CorpusType ; rdfs:label "derived" ;
+    rdfs:comment "Derived data — generated by analysis, extraction, or transformation of other corpus items." .
+
+res:corpusItemType a rdf:Property ;
+    rdfs:label "corpus item type" ;
+    rdfs:domain res:CorpusItem ;
+    rdfs:range  res:CorpusType .
+
+res:corpusItemSource a rdf:Property ;
+    rdfs:label "corpus item source" ;
+    rdfs:domain res:CorpusItem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source artefact." .
+
+res:corpusItemProvenance a rdf:Property ;
+    rdfs:label "corpus item provenance" ;
+    rdfs:domain res:CorpusItem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the provenance record (prov:Provenance entry)." .
+
+res:corpusItemConfidence a rdf:Property ;
+    rdfs:label "corpus item confidence" ;
+    rdfs:domain res:CorpusItem ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the item's reliability (0.0 to 1.0). Based on source credibility, verification status, and corroboration." .
+
+res:hasCorpusItem a rdf:Property ;
+    rdfs:label "has corpus item" ;
+    rdfs:domain res:Corpus ;
+    rdfs:range  res:CorpusItem .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Dynamics — social, socio-economic, spatio-temporal
+# ────────────────────────────────────────────────────────────────────
+
+res:Dynamics a rdfs:Class ;
+    rdfs:label "Dynamics" ;
+    rdfs:comment "The dynamic systems under study in a research project. Dynamics may be social, socio-economic, spatio-temporal, or combinations. Different dynamics may have different ontological structures — a social network is not a market is not a climate system. Links between dynamics may or may not exist, and where they exist, they may have different structures." .
+
+# — Social dynamics —
+res:SocialDynamics a rdfs:Class ;
+    rdfs:subClassOf res:Dynamics ;
+    rdfs:label "Social Dynamics" ;
+    rdfs:comment "Social structures, networks, influence, power, identity, culture, norms, institutions. Social dynamics are about how people and groups relate to each other." .
+
+res:SocialNetwork a rdfs:Class ;
+    rdfs:label "Social Network" ;
+    rdfs:comment "A network of actors and their relationships. Actors may be individuals, groups, or institutions. Relationships may be typed (kinship, friendship, authority, collaboration, conflict)." .
+
+res:SocialStructure a rdfs:Class ;
+    rdfs:label "Social Structure" ;
+    rdfs:comment "Persistent patterns of social arrangement — classes, hierarchies, institutions, roles, norms." .
+
+res:PowerRelation a rdfs:Class ;
+    rdfs:label "Power Relation" ;
+    rdfs:comment "A relationship where one actor has power over another. May be formal (legal authority) or informal (social influence, economic leverage)." .
+
+res:CulturalNorm a rdfs:Class ;
+    rdfs:label "Cultural Norm" ;
+    rdfs:comment "A shared expectation about behaviour within a group. Norms may be explicit (laws, rules) or implicit (customs, conventions)." .
+
+# — Socio-economic dynamics —
+res:SocioEconomicDynamics a rdfs:Class ;
+    rdfs:subClassOf res:Dynamics ;
+    rdfs:label "Socio-Economic Dynamics" ;
+    rdfs:comment "Economic structures and their social embedding — markets, inequality, access, capital flows, labour, consumption, production, distribution." .
+
+res:MarketStructure a rdfs:Class ;
+    rdfs:label "Market Structure" ;
+    rdfs:comment "The structure of a market — participants, competition, pricing, supply/demand dynamics, barriers to entry." .
+
+res:InequalityPattern a rdfs:Class ;
+    rdfs:label "Inequality Pattern" ;
+    rdfs:comment "Patterns of inequality — wealth, income, health, education, access. May be measured along multiple axes (class, race, gender, geography)." .
+
+res:CapitalFlow a rdfs:Class ;
+    rdfs:label "Capital Flow" ;
+    rdfs:comment "Flows of capital — financial, human, social, cultural. May be tracked across space and time." .
+
+res:AccessPattern a rdfs:Class ;
+    rdfs:label "Access Pattern" ;
+    rdfs:comment "Patterns of access to resources, services, or opportunities — healthcare, education, justice, digital, financial." .
+
+# — Spatio-temporal dynamics —
+res:SpatioTemporalDynamics a rdfs:Class ;
+    rdfs:subClassOf res:Dynamics ;
+    rdfs:comment "Patterns and processes that unfold across space and time — migration, diffusion, contagion, urbanisation, environmental change, conflict spread." .
+
+res:MigrationPattern a rdfs:Class ;
+    rdfs:label "Migration Pattern" ;
+    rdfs:comment "Patterns of movement — human migration, species migration, idea diffusion, technology adoption." .
+
+res:DiffusionProcess a rdfs:Class ;
+    rdfs:label "Diffusion Process" ;
+    rdfs:comment "How something spreads — disease, information, innovation, norms, conflict. May follow different models (S-curve, exponential, network-mediated)." .
+
+res:EnvironmentalChange a rdfs:Class ;
+    rdfs:label "Environmental Change" ;
+    rdfs:comment "Environmental dynamics — climate, land use, biodiversity, pollution, resource depletion." .
+
+res:UrbanDynamics a rdfs:Class ;
+    rdfs:label "Urban Dynamics" ;
+    rdfs:comment "Urban processes — growth, decline, gentrification, segregation, infrastructure development." .
+
+# — Cross-dynamic links —
+res:DynamicLink a rdfs:Class ;
+    rdfs:label "Dynamic Link" ;
+    rdfs:comment "A link between different dynamics — e.g. a link between social networks and economic markets, or between environmental change and migration. Cross-dynamic links may have different ontological structures than within-dynamic links." .
+
+res:linkDynamics a rdf:Property ;
+    rdfs:label "link dynamics" ;
+    rdfs:domain res:DynamicLink ;
+    rdfs:range  res:Dynamics ;
+    rdfs:comment "The dynamics being linked (exactly 2)." .
+
+res:linkStructure a rdf:Property ;
+    rdfs:label "link structure" ;
+    rdfs:domain res:DynamicLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of an ontology that defines the structure of this link. Cross-dynamic links may use a different ontology than either of the dynamics they connect." .
+
+res:linkStrength a rdf:Property ;
+    rdfs:label "link strength" ;
+    rdfs:domain res:DynamicLink ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Strength of the cross-dynamic link (0.0 to 1.0)." .
+
+res:linkEvidence a rdf:Property ;
+    rdfs:label "link evidence" ;
+    rdfs:domain res:DynamicLink ;
+    rdfs:range  res:CorpusItem ;
+    rdfs:comment "Corpus items that provide evidence for this cross-dynamic link." .
+
+res:hasDynamicLink a rdf:Property ;
+    rdfs:label "has dynamic link" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:DynamicLink .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Dark Links — hidden, inferred, or suppressed connections
+# ────────────────────────────────────────────────────────────────────
+
+res:DarkLink a rdfs:Class ;
+    rdfs:label "Dark Link" ;
+    rdfs:comment "A connection that is not directly observable but is inferred from indirect evidence. Dark links may be: (a) hidden — the connection exists but is deliberately concealed; (b) latent — the connection exists but has not yet been made explicit; (c) suppressed — the connection was once visible but has been removed or obscured; (d) inferred — the connection is hypothesised based on patterns but not yet confirmed. Dark links are essential for research because many real-world connections are not directly visible — they require inference from available evidence." .
+
+res:DarkLinkType a rdfs:Class ; rdfs:label "Dark Link Type" .
+
+res:DarkHidden     a res:DarkLinkType ; rdfs:label "hidden" ;
+    rdfs:comment "The connection exists but is deliberately concealed. Evidence of concealment is itself evidence of the link." .
+res:DarkLatent     a res:DarkLinkType ; rdfs:label "latent" ;
+    rdfs:comment "The connection exists but has not yet been made explicit. It is discoverable through analysis." .
+res:DarkSuppressed a res:DarkLinkType ; rdfs:label "suppressed" ;
+    rdfs:comment "The connection was once visible but has been removed, obscured, or denied. Provenance gaps may indicate suppression." .
+res:DarkInferred   a res:DarkLinkType ; rdfs:label "inferred" ;
+    rdfs:comment "The connection is hypothesised based on patterns but not confirmed. Requires further evidence to confirm or refute." .
+
+res:darkLinkType a rdf:Property ;
+    rdfs:label "dark link type" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  res:DarkLinkType .
+
+res:darkLinkFrom a rdf:Property ;
+    rdfs:label "dark link from" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source entity, event, or concept." .
+
+res:darkLinkTo a rdf:Property ;
+    rdfs:label "dark link to" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the target entity, event, or concept." .
+
+res:darkLinkInferenceMethod a rdf:Property ;
+    rdfs:label "inference method" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The method used to infer the dark link (e.g. 'network analysis', 'provenance gap detection', 'pattern matching', 'counterfactual reasoning', 'NLP extraction')." .
+
+res:darkLinkEvidence a rdf:Property ;
+    rdfs:label "dark link evidence" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  res:CorpusItem ;
+    rdfs:comment "Corpus items that provide indirect evidence for the dark link." .
+
+res:darkLinkConfidence a rdf:Property ;
+    rdfs:label "dark link confidence" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the inferred link (0.0 to 1.0). Based on evidence quality, inference method reliability, and corroboration." .
+
+res:darkLinkProvenanceGap a rdf:Property ;
+    rdfs:label "provenance gap" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of a provenance gap that suggests the dark link — missing records, deleted references, unexplained temporal gaps, or broken derivative chains." .
+
+res:darkLinkOntology a rdf:Property ;
+    rdfs:label "dark link ontology" ;
+    rdfs:domain res:DarkLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of an ontology that defines the structure of this dark link. Dark links may use a different ontology than visible links because the connection type may not be representable in the source dynamics' ontologies." .
+
+res:hasDarkLink a rdf:Property ;
+    rdfs:label "has dark link" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:DarkLink .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Inference — drawing conclusions from evidence
+# ────────────────────────────────────────────────────────────────────
+
+res:Inference a rdfs:Class ;
+    rdfs:label "Inference" ;
+    rdfs:comment "A conclusion drawn from evidence and reasoning. Inferences may be deductive (necessarily true if premises are true), inductive (probably true based on pattern), abductive (best explanation for observations), or analogical (true by analogy to a known case)." .
+
+res:InferenceType a rdfs:Class ; rdfs:label "Inference Type" .
+
+res:DeductiveInference  a res:InferenceType ; rdfs:label "deductive" ;
+    rdfs:comment "Necessarily true if premises are true. Formal logic, mathematical proof." .
+res:InductiveInference  a res:InferenceType ; rdfs:label "inductive" ;
+    rdfs:comment "Probably true based on observed patterns. Statistical inference, generalisation." .
+res:AbductiveInference  a res:InferenceType ; rdfs:label "abductive" ;
+    rdfs:comment "Best available explanation for observations. Diagnosis, hypothesis formation." .
+res:AnalogicalInference a res:InferenceType ; rdfs:label "analogical" ;
+    rdfs:comment "Inference by analogy to a known case. Case-based reasoning, metaphor." .
+res:CausalInference     a res:InferenceType ; rdfs:label "causal" ;
+    rdfs:comment "Inference about cause and effect. Requires causal model or experimental evidence." .
+res:CounterfactualInference a res:InferenceType ; rdfs:label "counterfactual" ;
+    rdfs:comment "Inference about what would have happened under different conditions. What-if reasoning." .
+
+res:inferenceType a rdf:Property ;
+    rdfs:label "inference type" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  res:InferenceType .
+
+res:inferencePremise a rdf:Property ;
+    rdfs:label "inference premise" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of a corpus item, finding, or prior inference that serves as a premise." .
+
+res:inferenceConclusion a rdf:Property ;
+    rdfs:label "inference conclusion" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  res:Finding ;
+    rdfs:comment "The finding that is the conclusion of the inference." .
+
+res:inferenceReasoning a rdf:Property ;
+    rdfs:label "inference reasoning" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The reasoning chain — how the premises lead to the conclusion." .
+
+res:inferenceConfidence a rdf:Property ;
+    rdfs:label "inference confidence" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the inference (0.0 to 1.0). Based on premise reliability, inference method, and corroboration." .
+
+res:inferenceProvenance a rdf:Property ;
+    rdfs:label "inference provenance" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the provenance record for this inference. Inferences are themselves knowledge artefacts with provenance — who made the inference, when, using what method and evidence." .
+
+res:inferenceDependsOn a rdf:Property ;
+    rdfs:label "inference depends on" ;
+    rdfs:domain res:Inference ;
+    rdfs:range  res:Inference ;
+    rdfs:comment "This inference depends on a prior inference (inference chains)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Finding & Synthesis — research outputs
+# ────────────────────────────────────────────────────────────────────
+
+res:Finding a rdfs:Class ;
+    rdfs:label "Finding" ;
+    rdfs:comment "A research finding — a claim or conclusion supported by evidence and reasoning. Findings are the atomic units of research output. A finding may answer a research question, support or contradict a hypothesis, or identify a pattern." .
+
+res:findingStatement a rdf:Property ;
+    rdfs:label "finding statement" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  xsd:string .
+
+res:findingConfidence a rdf:Property ;
+    rdfs:label "finding confidence" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Overall confidence in the finding (0.0 to 1.0). Based on evidence quality, inference reliability, and corroboration." .
+
+res:findingSupports a rdf:Property ;
+    rdfs:label "finding supports" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  res:ResearchQuestion ;
+    rdfs:comment "The research question this finding answers or contributes to." .
+
+res:findingEvidence a rdf:Property ;
+    rdfs:label "finding evidence" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  res:CorpusItem .
+
+res:findingInference a rdf:Property ;
+    rdfs:label "finding inference" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  res:Inference .
+
+res:findingProvenance a rdf:Property ;
+    rdfs:label "finding provenance" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the provenance record for this finding." .
+
+res:findingContested a rdf:Property ;
+    rdfs:label "finding contested" ;
+    rdfs:domain res:Finding ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "If true, the finding is contested — there is evidence or argument against it. Contested findings require adjudication." .
+
+res:Synthesis a rdfs:Class ;
+    rdfs:label "Synthesis" ;
+    rdfs:comment "A synthesis of multiple findings into a higher-order understanding. Synthesis may be a literature review, a theory, a framework, a model, or a narrative. Synthesis is where individual findings are integrated into a coherent whole." .
+
+res:SynthesisType a rdfs:Class ; rdfs:label "Synthesis Type" .
+
+res:NarrativeSynthesis    a res:SynthesisType ; rdfs:label "narrative" ;
+    rdfs:comment "Narrative integration — a written account that weaves findings together." .
+res:SystematicReview      a res:SynthesisType ; rdfs:label "systematic review" ;
+    rdfs:comment "Systematic review — structured synthesis following a protocol (PRISMA, Cochrane)." .
+res:MetaAnalysis          a res:SynthesisType ; rdfs:label "meta-analysis" ;
+    rdfs:comment "Statistical meta-analysis — quantitative synthesis of effect sizes." .
+res:TheoryConstruction    a res:SynthesisType ; rdfs:label "theory construction" ;
+    rdfs:comment "Theory construction — building a new theoretical framework from findings." .
+res:ModelConstruction     a res:SynthesisType ; rdfs:label "model construction" ;
+    rdfs:comment "Model construction — building a computational or formal model from findings." .
+res:OntologyConstruction  a res:SynthesisType ; rdfs:label "ontology construction" ;
+    rdfs:comment "Ontology construction — building a new ontology from findings." .
+res:FrameworkConstruction a res:SynthesisType ; rdfs:label "framework construction" ;
+    rdfs:comment "Framework construction — building a conceptual or analytical framework." .
+
+res:synthesisType a rdf:Property ;
+    rdfs:label "synthesis type" ;
+    rdfs:domain res:Synthesis ;
+    rdfs:range  res:SynthesisType .
+
+res:synthesisFinding a rdf:Property ;
+    rdfs:label "synthesis finding" ;
+    rdfs:domain res:Synthesis ;
+    rdfs:range  res:Finding ;
+    rdfs:comment "A finding included in the synthesis." .
+
+res:synthesisOutput a rdf:Property ;
+    rdfs:label "synthesis output" ;
+    rdfs:domain res:Synthesis ;
+    rdfs:range  res:ResearchOutput .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Research Output — artefacts produced by research
+# ────────────────────────────────────────────────────────────────────
+
+res:ResearchOutput a rdfs:Class ;
+    rdfs:label "Research Output" ;
+    rdfs:comment "An artefact produced by a research project. Outputs may be papers, datasets, models, ontologies, frameworks, policy briefs, or other deliverables." .
+
+res:OutputType a rdfs:Class ; rdfs:label "Output Type" .
+
+res:OutputPaper       a res:OutputType ; rdfs:label "paper" .
+res:OutputDataset     a res:OutputType ; rdfs:label "dataset" .
+res:OutputModel       a res:OutputType ; rdfs:label "model" .
+res:OutputOntology    a res:OutputType ; rdfs:label "ontology" .
+res:OutputFramework   a res:OutputType ; rdfs:label "framework" .
+res:OutputPolicy      a res:OutputType ; rdfs:label "policy brief" .
+res:OutputReport      a res:OutputType ; rdfs:label "report" .
+res:OutputVisualisation a res:OutputType ; rdfs:label "visualisation" .
+res:OutputCode        a res:OutputType ; rdfs:label "code" .
+res:OutputPresentation a res:OutputType ; rdfs:label "presentation" .
+
+res:outputType a rdf:Property ;
+    rdfs:label "output type" ;
+    rdfs:domain res:ResearchOutput ;
+    rdfs:range  res:OutputType .
+
+res:outputArtefact a rdf:Property ;
+    rdfs:label "output artefact" ;
+    rdfs:domain res:ResearchOutput ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the artefact (document, dataset, model file, ontology file, etc.)." .
+
+res:outputProvenance a rdf:Property ;
+    rdfs:label "output provenance" ;
+    rdfs:domain res:ResearchOutput ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the provenance record for this output." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Zero-Shot Deficit — what can't be done yet
+# ────────────────────────────────────────────────────────────────────
+
+res:ZeroShotDeficit a rdfs:Class ;
+    rdfs:label "Zero-Shot Deficit" ;
+    rdfs:comment "Explicit modelling of what cannot be done at project start. When a research project, investigation, or work activity begins, there is minimal context — no corpus, no hypotheses, no evidence, no dynamics mapped. The zero-shot deficit is the gap between what is needed and what is available. It is not a failure state but a starting state that progressively closes as agents contribute information, build corpora, form hypotheses, and map dynamics. Modelling the deficit explicitly allows the system to prioritise enrichment, track progress, and avoid premature conclusions." .
+
+res:deficitScore a rdf:Property ;
+    rdfs:label "deficit score" ;
+    rdfs:domain res:ZeroShotDeficit ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Overall deficit score (0.0 = no deficit, fully enriched; 1.0 = total deficit, zero-shot). Computed from corpus coverage, hypothesis coverage, dynamics coverage, and evidence coverage." .
+
+res:deficitAssessedAt a rdf:Property ;
+    rdfs:label "assessed at" ;
+    rdfs:domain res:ZeroShotDeficit ;
+    rdfs:range  xsd:dateTime .
+
+res:hasDeficit a rdf:Property ;
+    rdfs:label "has deficit" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:ZeroShotDeficit .
+
+# — Knowledge frontier —
+
+res:KnowledgeFrontier a rdfs:Class ;
+    rdfs:label "Knowledge Frontier" ;
+    rdfs:comment "The edge of what is currently known in a research project. The frontier has three zones: (1) known — well-supported findings with high confidence; (2) unknown — identified questions with no answers yet; (3) unknown-unknown — areas where we don't even know what questions to ask. The frontier shifts as agents contribute — unknowns become known, unknown-unknowns become unknowns." .
+
+res:frontierKnown a rdf:Property ;
+    rdfs:label "frontier known" ;
+    rdfs:domain res:KnowledgeFrontier ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of findings, facts, or well-supported claims that are within the known zone." .
+
+res:frontierUnknown a rdf:Property ;
+    rdfs:label "frontier unknown" ;
+    rdfs:domain res:KnowledgeFrontier ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of research questions or gaps that are identified but unanswered." .
+
+res:frontierUnknownUnknown a rdf:Property ;
+    rdfs:label "frontier unknown-unknown" ;
+    rdfs:domain res:KnowledgeFrontier ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Areas where we don't yet know what questions to ask. May be identified by gap analysis, cross-domain analogy, or agent suggestion." .
+
+res:hasKnowledgeFrontier a rdf:Property ;
+    rdfs:label "has knowledge frontier" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:KnowledgeFrontier .
+
+# — Context accumulation —
+
+res:ContextAccumulation a rdfs:Class ;
+    rdfs:label "Context Accumulation" ;
+    rdfs:comment "Tracks how context builds over time from the zero-shot starting point. Each enrichment event (new corpus item, new finding, new inference, new dark link) adds to the accumulated context. The accumulation is not just a count — it tracks what capabilities are now unlocked. For example, adding a dataset may unlock trend analysis; adding a social network may unlock link analysis; adding a dark link may unlock a new hypothesis." .
+
+res:accumulatedItems a rdf:Property ;
+    rdfs:label "accumulated items" ;
+    rdfs:domain res:ContextAccumulation ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Total number of corpus items, findings, inferences, and dark links accumulated." .
+
+res:accumulatedCapabilities a rdf:Property ;
+    rdfs:label "accumulated capabilities" ;
+    rdfs:domain res:ContextAccumulation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "List of analysis capabilities now available (e.g. 'trend-analysis', 'social-network', 'causal-model', 'dark-link-inference'). Capabilities unlock as prerequisites are met." .
+
+res:accumulatedAt a rdf:Property ;
+    rdfs:label "accumulated at" ;
+    rdfs:domain res:ContextAccumulation ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Timestamp of the last accumulation update." .
+
+res:hasContextAccumulation a rdf:Property ;
+    rdfs:label "has context accumulation" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:ContextAccumulation .
+
+# — Enrichment events —
+
+res:EnrichmentEvent a rdfs:Class ;
+    rdfs:label "Enrichment Event" ;
+    rdfs:comment "An event where new information expands what can be done. Each enrichment event records what was added, what capabilities it unlocked, and which agent contributed it. Enrichment events are the mechanism by which the zero-shot deficit closes over time." .
+
+res:enrichmentType a rdf:Property ;
+    rdfs:label "enrichment type" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  res:EnrichmentType .
+
+res:EnrichmentType a rdfs:Class ; rdfs:label "Enrichment Type" .
+
+res:EnrichCorpusItem     a res:EnrichmentType ; rdfs:label "corpus-item" ;
+    rdfs:comment "A new corpus item was added (literature, dataset, document, etc.)." .
+res:EnrichFinding        a res:EnrichmentType ; rdfs:label "finding" ;
+    rdfs:comment "A new finding was created from evidence and inference." .
+res:EnrichInference      a res:EnrichmentType ; rdfs:label "inference" ;
+    rdfs:comment "A new inference was made from existing findings or corpus items." .
+res:EnrichDarkLink       a res:EnrichmentType ; rdfs:label "dark-link" ;
+    rdfs:comment "A new dark link was inferred." .
+res:EnrichDynamics       a res:EnrichmentType ; rdfs:label "dynamics" ;
+    rdfs:comment "A new dynamic system was defined (social, economic, spatio-temporal)." .
+res:EnrichCrossDynamic   a res:EnrichmentType ; rdfs:label "cross-dynamic-link" ;
+    rdfs:comment "A new cross-dynamic link was established." .
+res:EnrichHypothesis     a res:EnrichmentType ; rdfs:label "hypothesis" ;
+    rdfs:comment "A new hypothesis was proposed (in a linked investigation)." .
+res:EnrichEvidence       a res:EnrichmentType ; rdfs:label "evidence" ;
+    rdfs:comment "New evidence was collected (in a linked investigation)." .
+
+res:enrichmentAgent a rdf:Property ;
+    rdfs:label "enrichment agent" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that contributed this enrichment." .
+
+res:enrichmentTimestamp a rdf:Property ;
+    rdfs:label "enrichment timestamp" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  xsd:dateTime .
+
+res:enrichmentUnlockedCapability a rdf:Property ;
+    rdfs:label "unlocked capability" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Analysis capability unlocked by this enrichment (e.g. 'trend-analysis', 'social-network', 'causal-model')." .
+
+res:enrichmentClosedGap a rdf:Property ;
+    rdfs:label "closed gap" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of a knowledge frontier gap or hypothesis gap that this enrichment helped close." .
+
+res:enrichmentProvenance a rdf:Property ;
+    rdfs:label "enrichment provenance" ;
+    rdfs:domain res:EnrichmentEvent ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the provenance record for this enrichment." .
+
+res:hasEnrichmentEvent a rdf:Property ;
+    rdfs:label "has enrichment event" ;
+    rdfs:domain res:ContextAccumulation ;
+    rdfs:range  res:EnrichmentEvent .
+
+# — Bootstrap hypotheses —
+
+res:BootstrapHypothesis a rdfs:Class ;
+    rdfs:label "Bootstrap Hypothesis" ;
+    rdfs:comment "An initial hypothesis formed from minimal information at project start. Bootstrap hypotheses are explicitly tentative — they have low confidence and are expected to be refined, reframed, or replaced as context accumulates. They are not failures of zero-shot reasoning but starting points for progressive enrichment. Bootstrap hypotheses may be generated by agents from scope and purpose alone, before any corpus is built." .
+
+res:bootstrapConfidence a rdf:Property ;
+    rdfs:label "bootstrap confidence" ;
+    rdfs:domain res:BootstrapHypothesis ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Initial confidence (typically 0.1-0.3). Low by design — to be revised as evidence accumulates." .
+
+res:bootstrapBasis a rdf:Property ;
+    rdfs:label "bootstrap basis" ;
+    rdfs:domain res:BootstrapHypothesis ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What the hypothesis was bootstrapped from (scope, purpose, prior knowledge, analogy, agent intuition)." .
+
+res:bootstrapStatus a rdf:Property ;
+    rdfs:label "bootstrap status" ;
+    rdfs:domain res:BootstrapHypothesis ;
+    rdfs:range  res:BootstrapStatus .
+
+res:BootstrapStatus a rdfs:Class ; rdfs:label "Bootstrap Status" .
+
+res:BootProposed    a res:BootstrapStatus ; rdfs:label "proposed" ;
+    rdfs:comment "Initial state — hypothesis proposed from minimal information." .
+res:BootRefined     a res:BootstrapStatus ; rdfs:label "refined" ;
+    rdfs:comment "Hypothesis has been refined with new evidence. No longer a pure bootstrap." .
+res:BootConfirmed   a res:BootstrapStatus ; rdfs:label "confirmed" ;
+    rdfs:comment "Hypothesis has been confirmed by accumulated evidence." .
+res:BootReframed    a res:BootstrapStatus ; rdfs:label "reframed" ;
+    rdfs:comment "Hypothesis was reframed into a better formulation." .
+res:BootDisproven   a res:BootstrapStatus ; rdfs:label "disproven" ;
+    rdfs:comment "Hypothesis was disproven by accumulated evidence." .
+res:BootSuperseded  a res:BootstrapStatus ; rdfs:label "superseded" ;
+    rdfs:comment "Hypothesis was superseded by a better hypothesis." .
+
+res:bootstrapPromotedTo a rdf:Property ;
+    rdfs:label "promoted to" ;
+    rdfs:domain res:BootstrapHypothesis ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the inv:Hypothesis this bootstrap was promoted to (once sufficient evidence accumulates)." .
+
+res:hasBootstrapHypothesis a rdf:Property ;
+    rdfs:label "has bootstrap hypothesis" ;
+    rdfs:domain res:ResearchProject ;
+    rdfs:range  res:BootstrapHypothesis .

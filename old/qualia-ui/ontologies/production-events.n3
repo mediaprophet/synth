@@ -1,0 +1,251 @@
+# Production Events Ontology — DMX, projection mapping, cue stacks, show control
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: pe: (production events domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix pe:     <https://purl.org/qualia/ontology/production-events#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Production
+# ────────────────────────────────────────────────────────────────────
+
+pe:Production a rdfs:Class ;
+    rdfs:label "Production" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A live production — event, show, installation, or broadcast." .
+
+pe:ProductionType a rdfs:Class ;
+    rdfs:label "Production Type" .
+
+pe:EventProduction a pe:ProductionType ; rdfs:label "event" .
+pe:ShowProduction a pe:ProductionType ; rdfs:label "show" .
+pe:InstallationProduction a pe:ProductionType ; rdfs:label "installation" .
+pe:BroadcastProduction a pe:ProductionType ; rdfs:label "broadcast" .
+
+pe:productionType a rdf:Property ;
+    rdfs:domain pe:Production ;
+    rdfs:range  pe:ProductionType .
+
+pe:fixtureCount a rdf:Property ;
+    rdfs:domain pe:Production ;
+    rdfs:range  xsd:integer .
+
+pe:dmxUniverses a rdf:Property ;
+    rdfs:domain pe:Production ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of DMX universes." .
+
+pe:projectionResolution a rdf:Property ;
+    rdfs:domain pe:Production ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Projection resolution per projector." .
+
+pe:surfaceCount a rdf:Property ;
+    rdfs:domain pe:Production ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of projection surfaces." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. DMX Universe
+# ────────────────────────────────────────────────────────────────────
+
+pe:DMXUniverse a rdfs:Class ;
+    rdfs:label "DMX Universe" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A DMX universe — 512 channels. Contains patched fixtures." .
+
+pe:universeID a rdf:Property ;
+    rdfs:domain pe:DMXUniverse ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Universe number (0–63999 for Art-Net)." .
+
+pe:artNetIP a rdf:Property ;
+    rdfs:domain pe:DMXUniverse ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Art-Net IP address for network output." .
+
+pe:dmxChannelValue a rdf:Property ;
+    rdfs:domain pe:DMXUniverse ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Channel values array (512 bytes, CBOR-LD encoded)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Fixture
+# ────────────────────────────────────────────────────────────────────
+
+pe:Fixture a rdfs:Class ;
+    rdfs:label "Fixture" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A lighting fixture — moving head, LED par, laser, strobe, or haze machine." .
+
+pe:FixtureType a rdfs:Class ;
+    rdfs:label "Fixture Type" .
+
+pe:MovingHead a pe:FixtureType ; rdfs:label "moving-head" .
+pe:LEDPar a pe:FixtureType ; rdfs:label "led-par" .
+pe:LaserFixture a pe:FixtureType ; rdfs:label "laser" .
+pe:StrobeFixture a pe:FixtureType ; rdfs:label "strobe" .
+pe:HazeMachine a pe:FixtureType ; rdfs:label "hazer" .
+
+pe:fixtureType a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  pe:FixtureType .
+
+pe:fixtureProfile a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of fixture profile (channel map definition)." .
+
+pe:fixtureAddress a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "DMX start address (1–512)." .
+
+pe:fixtureUniverse a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "DMX universe number." .
+
+pe:fixturePosition a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "3D position [x, y, z]." .
+
+pe:fixtureRotation a rdf:Property ;
+    rdfs:domain pe:Fixture ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "3D rotation [x, y, z]." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Projection Surface
+# ────────────────────────────────────────────────────────────────────
+
+pe:ProjectionSurface a rdfs:Class ;
+    rdfs:label "Projection Surface" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A projection surface — flat, curved, architectural, or volumetric." .
+
+pe:SurfaceType a rdfs:Class ;
+    rdfs:label "Surface Type" .
+
+pe:FlatSurface a pe:SurfaceType ; rdfs:label "flat" .
+pe:CurvedSurface a pe:SurfaceType ; rdfs:label "curved" .
+pe:ArchitecturalSurface a pe:SurfaceType ; rdfs:label "architectural" .
+pe:VolumetricSurface a pe:SurfaceType ; rdfs:label "volumetric" .
+
+pe:surfaceType a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  pe:SurfaceType .
+
+pe:surfaceGeometry a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Surface geometry mesh IRI or parametric definition." .
+
+pe:edgeBlendParams a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Edge blend parameters for multi-projector setups (CBOR-LD encoded)." .
+
+pe:geometryCorrection a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Geometry correction — keystone, warp, mapping (CBOR-LD encoded)." .
+
+pe:calibrationPoints a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Calibration point pairs [screen_point, projector_point] (CBOR-LD encoded)." .
+
+pe:projectionContent a rdf:Property ;
+    rdfs:domain pe:ProjectionSurface ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of content asset assigned to this surface." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Cue Stack
+# ────────────────────────────────────────────────────────────────────
+
+pe:CueStack a rdfs:Class ;
+    rdfs:label "Cue Stack" ;
+    rdfs:subClassOf hm:Timeline ;
+    rdfs:comment "A cue stack — ordered list of cues with fades and triggers." .
+
+pe:Cue a rdfs:Class ;
+    rdfs:label "Cue" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A single cue in a cue stack — contains DMX scene, projection state, and timing." .
+
+pe:cueData a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Cue data — DMX scene, projection content, audio trigger (CBOR-LD encoded)." .
+
+pe:cueFadeIn a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Fade-in time in seconds." .
+
+pe:cueFadeOut a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Fade-out time in seconds." .
+
+pe:cueFadeCurve a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Fade curve — linear, ease-in, ease-out, ease-in-out, exponential." .
+
+pe:cueTriggerType a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Trigger type — manual, time, event, SMPTE, MIDI, OSC." .
+
+pe:cueTriggerData a rdf:Property ;
+    rdfs:domain pe:Cue ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Trigger data (CBOR-LD encoded) — time value, event name, SMPTE code." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Show Control
+# ────────────────────────────────────────────────────────────────────
+
+pe:ShowControl a rdfs:Class ;
+    rdfs:label "Show Control" ;
+    rdfs:comment "Show control configuration — SMPTE, MIDI timecode, Art-Net, OSC." .
+
+pe:smpteSource a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "SMPTE timecode source — LTC, VITC, MIDI." .
+
+pe:smpteFrameRate a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "SMPTE frame rate — 24, 25, 29.97, 30." .
+
+pe:mtcSource a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "MIDI timecode source device." .
+
+pe:artNetConfig a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Art-Net network configuration (CBOR-LD encoded)." .
+
+pe:oscConfig a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "OSC configuration — IP, port, message map (CBOR-LD encoded)." .
+
+pe:timelineTriggerMap a rdf:Property ;
+    rdfs:domain pe:ShowControl ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Map of timeline positions to trigger actions (CBOR-LD encoded)." .

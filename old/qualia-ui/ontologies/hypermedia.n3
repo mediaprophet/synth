@@ -1,0 +1,350 @@
+# Hypermedia Ontology — core asset types, provenance, and cross-domain references
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: hm: (hypermedia core)
+# Imports: container.n3, provenance.n3, agency.n3
+#
+# Defines the base vocabulary for all hypermedia asset toolboxes:
+# image, audio, video, 3D, interactive hypermedia, portals, productions.
+# Each domain has its own split module with domain-specific classes.
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Hypermedia Asset (base class)
+# ────────────────────────────────────────────────────────────────────
+
+hm:HypermediaAsset a rdfs:Class ;
+    rdfs:label "Hypermedia Asset" ;
+    rdfs:comment "Base class for all hypermedia assets — images, audio, video, 3D models, interactive packages, portal worlds, and production rigs. Every asset has provenance, a format, and may be a derivative of another asset." .
+
+hm:assetFormat a rdf:Property ;
+    rdfs:label "asset format" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  hm:AssetFormat ;
+    rdfs:comment "The format/encoding of the asset — raster, vector, wave, MIDI, video-stream, mesh, interactive-package, etc." .
+
+hm:AssetFormat a rdfs:Class ;
+    rdfs:label "Asset Format" ;
+    rdfs:comment "Enumerated format type for a hypermedia asset." .
+
+hm:RasterFormat a hm:AssetFormat ; rdfs:label "raster" .
+hm:VectorFormat a hm:AssetFormat ; rdfs:label "vector" .
+hm:HybridImageFormat a hm:AssetFormat ; rdfs:label "hybrid-image" .
+hm:WaveFormat a hm:AssetFormat ; rdfs:label "wave" .
+hm:MIDIFormat a hm:AssetFormat ; rdfs:label "midi" .
+hm:VideoFormat a hm:AssetFormat ; rdfs:label "video" .
+hm:MeshFormat a hm:AssetFormat ; rdfs:label "mesh" .
+hm:SceneFormat a hm:AssetFormat ; rdfs:label "scene" .
+hm:InteractiveFormat a hm:AssetFormat ; rdfs:label "interactive" .
+hm:PortalFormat a hm:AssetFormat ; rdfs:label "portal" .
+hm:ProductionFormat a hm:AssetFormat ; rdfs:label "production" .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Asset provenance and rights
+# ────────────────────────────────────────────────────────────────────
+
+hm:sourceAsset a rdf:Property ;
+    rdfs:label "source asset" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  hm:HypermediaAsset ;
+    rdfs:comment "If this asset is a derivative, links to the source asset it was derived from." .
+
+hm:derivativeType a rdf:Property ;
+    rdfs:label "derivative type" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How this derivative was produced — crop, resize, transcode, remix, edit, composite, render, export." .
+
+hm:licence a rdf:Property ;
+    rdfs:label "licence" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Licence terms — CC-BY, CC-BY-NC, proprietary, public-domain, etc." .
+
+hm:rightsHolder a rdf:Property ;
+    rdfs:label "rights holder" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor who holds rights to this asset." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Composition elements (shared across domains)
+# ────────────────────────────────────────────────────────────────────
+
+hm:CompositionElement a rdfs:Class ;
+    rdfs:label "Composition Element" ;
+    rdfs:comment "Base class for composable elements within an asset — layers (image), tracks (audio/video), objects (3D), triggers (interactive), fixtures (production). Each domain subclasses this." .
+
+hm:elementOrder a rdf:Property ;
+    rdfs:label "element order" ;
+    rdfs:domain hm:CompositionElement ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Z-order or sequence position of this element within its parent composition." .
+
+hm:elementVisible a rdf:Property ;
+    rdfs:label "element visible" ;
+    rdfs:domain hm:CompositionElement ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the element is currently visible/active in the composition." .
+
+hm:elementLabel a rdf:Property ;
+    rdfs:label "element label" ;
+    rdfs:domain hm:CompositionElement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable label for the composition element." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Timeline (shared by audio, video, productions)
+# ────────────────────────────────────────────────────────────────────
+
+hm:Timeline a rdfs:Class ;
+    rdfs:label "Timeline" ;
+    rdfs:comment "A temporal sequence of elements — used by audio, video, and production domains. Contains ordered clips, cues, or events positioned in time." .
+
+hm:timelineDuration a rdf:Property ;
+    rdfs:domain hm:Timeline ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Total duration in seconds." .
+
+hm:timelineFPS a rdf:Property ;
+    rdfs:domain hm:Timeline ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Frame rate in frames-per-second (video, production)." .
+
+hm:timelineSampleRate a rdf:Property ;
+    rdfs:domain hm:Timeline ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Sample rate in Hz (audio)." .
+
+hm:timelineBPM a rdf:Property ;
+    rdfs:domain hm:Timeline ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Tempo in beats-per-minute (audio)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Cross-domain references
+# ────────────────────────────────────────────────────────────────────
+#
+# Assets in one domain may reference assets in another:
+#   - Video references audio tracks (sync)
+#   - 3D references image textures (material)
+#   - Hypermedia references video/audio streams (interactive overlay)
+#   - Productions reference DMX + projection + audio (show control)
+#   - Portals reference 3D scenes + audio (immersive)
+
+hm:referencesAsset a rdf:Property ;
+    rdfs:label "references asset" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  hm:HypermediaAsset ;
+    rdfs:comment "Links an asset to another asset it references — e.g. a 3D material references an image texture, a video references an audio track, a hypermedia package references a video stream." .
+
+hm:referenceType a rdf:Property ;
+    rdfs:label "reference type" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the referenced asset is used — texture, audio-sync, stream-overlay, show-control, scene-embed." .
+
+hm:syncOffset a rdf:Property ;
+    rdfs:label "sync offset" ;
+    rdfs:domain hm:HypermediaAsset ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Temporal offset in seconds for synchronising referenced assets (e.g. audio synced to video)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Inspection and metadata
+# ────────────────────────────────────────────────────────────────────
+
+hm:AssetMetadata a rdfs:Class ;
+    rdfs:label "Asset Metadata" ;
+    rdfs:comment "Technical metadata for an asset — codec, resolution, duration, sample rate, bit depth, colour space, etc. Domain-specific subclasses add domain fields." .
+
+hm:metadataFor a rdf:Property ;
+    rdfs:label "metadata for" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  hm:HypermediaAsset .
+
+hm:codec a rdf:Property ;
+    rdfs:label "codec" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Encoding codec — H.264, H.265, ProRes, AAC, FLAC, PNG, WebP, glTF, etc." .
+
+hm:resolution a rdf:Property ;
+    rdfs:label "resolution" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Pixel dimensions — 1920x1080, 3840x2160, etc." .
+
+hm:bitDepth a rdf:Property ;
+    rdfs:label "bit depth" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Bit depth — 8, 10, 12, 16, 24, 32." .
+
+hm:colourSpace a rdf:Property ;
+    rdfs:label "colour space" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Colour space — sRGB, AdobeRGB, ProPhoto, DCI-P3, Rec.2020, Rec.709." .
+
+hm:fileSize a rdf:Property ;
+    rdfs:label "file size" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "File size in bytes." .
+
+hm:checksum a rdf:Property ;
+    rdfs:label "checksum" ;
+    rdfs:domain hm:AssetMetadata ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Content hash for integrity verification." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Domain split modules
+# ────────────────────────────────────────────────────────────────────
+#
+# Domain-specific ontologies are in separate files:
+#
+#   image-editing.n3       — Image domain (layers, filters, brushes, masks)
+#   audio-production.n3    — Audio domain (tracks, synthesis, MIDI, effects)
+#   video-production.n3    — Video domain (timeline, clips, colour, transitions)
+#   spatial-3d.n3          — 3D domain (meshes, rigs, animation, narratives)
+#   interactive-hypermedia.n3 — Interactive domain (HbbTV, 2nd screen, social)
+#   portal-worlds.n3       — Portal domain (worlds, immersive environments)
+#   production-events.n3   — Production domain (DMX, projection, events)
+#   production-document.n3 — Production documents (scripts, specs, style
+#                            guides, books, research reports, briefs)
+#   game-design.n3        — Game mechanics, characters, dialogue, quests,
+#                           inventory, progression, game states
+#   game-world.n3         — Game worlds, regions, real-world grounding,
+#                           game design documents (GDDs)
+#   learning-core.n3      — Knowledge domains, skills, proficiency,
+#                           skill assessment, RPL, qualifications,
+#                           learning events, assurance levels
+#   learning-experience.n3 — Learning paths, adaptive learning, tutorial
+#                           environments, incidental learning tracking,
+#                           elearning toolbox components, learning manifolds
+#   learning-experience-modality.n3 — Experience modes (direct, lived,
+#                           simulated, observational, interpersonal,
+#                           educational, mediated), knowledge types
+#                           (propositional, practical, experiential,
+#                           interpersonal), experience records, skill
+#                           development trajectories, experiential transfer
+#   faith-systems.n3      — Systems of faith, belief, practice, sacred
+#                           communities, oral traditions, indigenous
+#                           knowledge systems, moral frameworks, cosmology,
+#                           sacred places, faith adherence, indigenous
+#                           knowledge protocols
+#   values.n3             — Projected values, enumerated values, values
+#                           gaps, values instruments (human rights,
+#                           professional codes, religious frameworks),
+#                           values agreements (relationship-grounded,
+#                           content-persistent), values credentials
+#                           (verifiable claims), values networks
+#   obligations.n3        — Obligations & responsibilities, confidentiality
+#                           instruments, human dignity protections,
+#                           zero-knowledge validation, coercive
+#                           circumstances, disclosure exceptions &
+#                           exclusions, obligation conflict resolution
+#   adversarial-relational.n3 — Relational aggression, psychological
+#                           manipulation, sexual manipulation, false
+#                           claims & fabrication, content double binds
+#                           (illegal content as threat vector),
+#                           social harm patterns (coercive control,
+#                           post-separation abuse, workplace mobbing,
+#                           institutional abuse, online harassment,
+#                           family system abuse, community ostracism)
+#   adversarial-relational-scenarios.n3 — Contextual scenario patterns
+#                           showing how methods and factors intersect
+#                           in practice: wealth-family abuse, substance-
+#                           driven exploitation, sexual network leverage,
+#                           adolescent relational aggression, corporate
+#                           shield weaponisation, adolescent online
+#                           commodification, proxy harassment via
+#                           protective bias, single-parent
+#                           intergenerational transmission
+#   settings.n3 — Settings system: preferences (natural persons:
+#                 accessibility, sensory pacing, aesthetic, workflow,
+#                 language, privacy, communication), configuration
+#                 (legal persons: policy, compliance, security,
+#                 operational, integration), parameters (software
+#                 agents: threshold, mode, allocation, timeout),
+#                 capability management (grant, revoke, suspend,
+#                 scope, constraints, budget), access control
+#                 (capability-based, selfhood protection), ontology
+#                 loading (modules, prefixes, load order, status),
+#                 runtime parameters (profiles: sovereign/WASM/edge,
+#                 memory, cache, processing mode), fiduciary VM
+#                 (sandbox strictness, budget enforcement, event
+#                 bridge, legacy JS), profile management (personal,
+#                 work, shared, institutional, agent, guest)
+#   communications.n3 — Communications manifold: pulse events
+#                       (source, channel, payload, priority,
+#                       provenance), channels (direct, topic,
+#                       request-response, stream, group, federation;
+#                       transports: WebRTC, WebSocket, MQTT, HTTP,
+#                       SSE, internal, DAG sync), interaction
+#                       patterns (conversation, request-response,
+#                       broadcast, collaboration, negotiation,
+#                       delegation, notification, presence), protocol
+#                       handlers (state, retry, encryption), routing
+#                       rules (match, action, priority), agent
+#                       communication (person/institutional/dispatch)
+#   social.n3 — Social manifold: social graph (edges, strength,
+#               context, provenance), edge types (friendship, family,
+#               professional, community, acquaintance, adversarial,
+#               membership, partnership, sponsorship, connection,
+#               federation), communities (formal, informal,
+#               place-based, interest-based, event-based, online,
+#               faith), reputation (trustworthiness, competence,
+#               reliability, integrity, conduct; levels; evidence),
+#               social context (relationships, communities, norms,
+#               obligations), social protocols (initiation,
+#               confidentiality, conflict resolution)
+#   social-connections.n3 — Social connections companion: connection
+#                           requests (ZKP-verified workflow, status:
+#                           pending/verifying/guardian-review/accepted/
+#                           declined/blocked/expired/withdrawn), ZKP
+#                           claims (age proof, identity uniqueness,
+#                           credential, community membership, conduct
+#                           clear), risk assessment (levels: none/low/
+#                           moderate/high/critical; indicators: new
+#                           account, no shared contacts, no community
+#                           overlap, unverified identity, duplicate
+#                           account, conduct history, trolling pattern,
+#                           grooming pattern, identity mismatch, social
+#                           engineering, phishing vector, network
+#                           weaponisation, coercive control entry),
+#                           settings recommendations (disclosure,
+#                           monitoring, guardian notification, initial
+#                           period, capability scope), social-vector
+#                           attack types (fake account, trolling,
+#                           grooming, phishing, social engineering,
+#                           coercive control entry, network
+#                           weaponisation, reputation manipulation,
+#                           isolation tactics, radicalisation),
+#                           vulnerable person categories (minor, under-
+#                           guardianship, recently-separated, DV
+#                           survivor, whistleblower, public figure,
+#                           housing-insecure, cognitive-impairment, new-
+#                           immigrant, substance-recovery, elderly),
+#                           vulnerable person protection (mandatory for
+#                           structural, opt-in for situational;
+#                           approval modes: always/age-based/risk-based/
+#                           community-based/network-based/none; max
+#                           disclosure; monitoring: passive/active/off;
+#                           alert triggers: grooming/bullying/adult-
+#                           contact-minor/risky-connection/location-
+#                           sharing/isolation/identity-mismatch/coercive-
+#                           control/network-weaponisation/retaliation/
+#                           financial-exploitation)
+#
+# All domain modules import this core ontology and use the `hm:` prefix
+# for shared classes (HypermediaAsset, CompositionElement, Timeline,
+# AssetMetadata) while adding domain-specific classes with their own
+# prefixes (img:, aud:, vid:, sp3:, ihm:, pw:, pe:).

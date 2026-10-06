@@ -1,0 +1,209 @@
+# Portal Worlds Ontology — worlds, portals, avatars, physics, environments
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: pw: (portal worlds domain)
+# Imports: hypermedia.n3, spatial-3d.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix sp3:    <https://purl.org/qualia/ontology/spatial-3d#> .
+@prefix pw:     <https://purl.org/qualia/ontology/portal-worlds#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Portal
+# ────────────────────────────────────────────────────────────────────
+
+pw:Portal a rdfs:Class ;
+    rdfs:label "Portal" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A portal — web portal, virtual world, immersive environment, or social space." .
+
+pw:PortalType a rdfs:Class ;
+    rdfs:label "Portal Type" .
+
+pw:WebPortal a pw:PortalType ; rdfs:label "web-portal" .
+pw:VirtualWorld a pw:PortalType ; rdfs:label "world" .
+pw:ImmersiveEnv a pw:PortalType ; rdfs:label "immersive-env" .
+pw:SocialSpace a pw:PortalType ; rdfs:label "social-space" .
+
+pw:portalType a rdf:Property ;
+    rdfs:domain pw:Portal ;
+    rdfs:range  pw:PortalType .
+
+pw:worldIRI a rdf:Property ;
+    rdfs:domain pw:Portal ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the world resource." .
+
+pw:maxPlayers a rdf:Property ;
+    rdfs:domain pw:Portal ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Maximum concurrent players." .
+
+pw:physicsEngine a rdf:Property ;
+    rdfs:domain pw:Portal ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Physics engine — rapier, physx, bullet, custom." .
+
+pw:renderPipeline a rdf:Property ;
+    rdfs:domain pw:Portal ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Render pipeline — forward, deferred, hybrid." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. World
+# ────────────────────────────────────────────────────────────────────
+
+pw:World a rdfs:Class ;
+    rdfs:label "World" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A virtual world — terrain, skybox, environment, physics, spawn points." .
+
+pw:terrainData a rdf:Property ;
+    rdfs:domain pw:World ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Terrain heightmap data IRI." .
+
+pw:skybox a rdf:Property ;
+    rdfs:domain pw:World ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Skybox IRI (HDRI or cube map)." .
+
+pw:environmentLight a rdf:Property ;
+    rdfs:domain pw:World ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Environment lighting configuration (CBOR-LD encoded)." .
+
+pw:spawnPoint a rdf:Property ;
+    rdfs:domain pw:World ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Spawn point [x, y, z, rotX, rotY, rotZ]." .
+
+pw:worldBoundary a rdf:Property ;
+    rdfs:domain pw:World ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "World boundary geometry (CBOR-LD encoded)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Portal Link
+# ────────────────────────────────────────────────────────────────────
+
+pw:PortalLink a rdfs:Class ;
+    rdfs:label "Portal Link" ;
+    rdfs:comment "A link between portals — warp, teleport, scene-load, or IRI link." .
+
+pw:LinkType a rdfs:Class ;
+    rdfs:label "Link Type" .
+
+pw:WarpLink a pw:LinkType ; rdfs:label "warp" .
+pw:TeleportLink a pw:LinkType ; rdfs:label "teleport" .
+pw:SceneLoadLink a pw:LinkType ; rdfs:label "scene-load" .
+pw:IRILink a pw:LinkType ; rdfs:label "iri-link" .
+
+pw:linkType a rdf:Property ;
+    rdfs:domain pw:PortalLink ;
+    rdfs:range  pw:LinkType .
+
+pw:linkDestination a rdf:Property ;
+    rdfs:domain pw:PortalLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of destination world or portal." .
+
+pw:linkPosition a rdf:Property ;
+    rdfs:domain pw:PortalLink ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Position of the portal anchor in the world [x, y, z]." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Avatar
+# ────────────────────────────────────────────────────────────────────
+
+pw:Avatar a rdfs:Class ;
+    rdfs:label "Avatar" ;
+    rdfs:comment "An avatar configuration — mesh, animation, customisation, controller mapping." .
+
+pw:avatarMesh a rdf:Property ;
+    rdfs:domain pw:Avatar ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of avatar mesh asset." .
+
+pw:avatarCustomisation a rdf:Property ;
+    rdfs:domain pw:Avatar ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Customisation parameters (CBOR-LD encoded)." .
+
+pw:controllerMap a rdf:Property ;
+    rdfs:domain pw:Avatar ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Input controller mapping (CBOR-LD encoded)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Environment Object
+# ────────────────────────────────────────────────────────────────────
+
+pw:EnvironmentObject a rdfs:Class ;
+    rdfs:label "Environment Object" ;
+    rdfs:subClassOf sp3:SceneObject ;
+    rdfs:comment "An object placed in a world — prop, furniture, interactive object, or portal anchor." .
+
+pw:EnvObjectType a rdfs:Class ;
+    rdfs:label "Environment Object Type" .
+
+pw:PropObject a pw:EnvObjectType ; rdfs:label "prop" .
+pw:FurnitureObject a pw:EnvObjectType ; rdfs:label "furniture" .
+pw:InteractiveObject a pw:EnvObjectType ; rdfs:label "interactive-object" .
+pw:PortalAnchor a pw:EnvObjectType ; rdfs:label "portal-anchor" .
+
+pw:envObjectType a rdf:Property ;
+    rdfs:domain pw:EnvironmentObject ;
+    rdfs:range  pw:EnvObjectType .
+
+pw:interactionConfig a rdf:Property ;
+    rdfs:domain pw:EnvironmentObject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Interaction configuration for interactive objects (CBOR-LD encoded)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Physics Body
+# ────────────────────────────────────────────────────────────────────
+
+pw:PhysicsBody a rdfs:Class ;
+    rdfs:label "Physics Body" ;
+    rdfs:comment "A physics body — static, dynamic, trigger, or character controller." .
+
+pw:PhysicsType a rdfs:Class ;
+    rdfs:label "Physics Type" .
+
+pw:StaticBody a pw:PhysicsType ; rdfs:label "static" .
+pw:DynamicBody a pw:PhysicsType ; rdfs:label "dynamic" .
+pw:TriggerBody a pw:PhysicsType ; rdfs:label "trigger" .
+pw:CharacterController a pw:PhysicsType ; rdfs:label "character-controller" .
+
+pw:physicsType a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  pw:PhysicsType .
+
+pw:colliderType a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Collider type — box, sphere, capsule, mesh, convex-hull." .
+
+pw:mass a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  xsd:float .
+
+pw:friction a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  xsd:float .
+
+pw:restitution a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  xsd:float .
+
+pw:triggerEvent a rdf:Property ;
+    rdfs:domain pw:PhysicsBody ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Event type for trigger bodies — enter, exit, stay." .

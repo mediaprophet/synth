@@ -1,0 +1,346 @@
+# Provenance Ontology — Contributors, Sources, Constituencies, Derivative Chains
+# Authoring form (N3) — compiled to provenance.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix pres:       <https://qualiadb.org/schema/ui/presentation#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Provenance Graph — every artifact carries its own
+# ────────────────────────────────────────────────────────────────────
+
+prov:ProvenanceGraph a rdfs:Class ;
+    rdfs:label "Provenance Graph" ;
+    rdfs:comment "A graph attached to a WorkArtifact that records all contributors, data sources, transformations, and derivative relationships over time. Like film credits or a software dependency tree, but per-artifact and machine-readable." .
+
+prov:forArtifact a rdf:Property ;
+    rdfs:label "for artifact" ;
+    rdfs:domain prov:ProvenanceGraph ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "The artifact this provenance graph describes." .
+
+prov:hasEntry a rdf:Property ;
+    rdfs:label "has entry" ;
+    rdfs:domain prov:ProvenanceGraph ;
+    rdfs:range  prov:ProvenanceEntry ;
+    rdfs:comment "A single provenance entry in the graph — a contribution, a source, or a transformation." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Provenance Entry (base class)
+# ────────────────────────────────────────────────────────────────────
+
+prov:ProvenanceEntry a rdfs:Class ;
+    rdfs:label "Provenance Entry" ;
+    rdfs:comment "A single record in a provenance graph. Every entry has a timestamp, an actor, and a role." .
+
+prov:timestamp a rdf:Property ;
+    rdfs:label "timestamp" ;
+    rdfs:domain prov:ProvenanceEntry ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the entry was recorded. ISO 8601 / RFC 3339." .
+
+prov:actor a rdf:Property ;
+    rdfs:label "actor" ;
+    rdfs:domain prov:ProvenanceEntry ;
+    rdfs:range  agency:Actor ;
+    rdfs:comment "Who or what performed the action. References an actor from the agency ontology, which links the actor to an underlying entity and circumstance." .
+
+prov:role a rdf:Property ;
+    rdfs:label "role" ;
+    rdfs:domain prov:ProvenanceEntry ;
+    rdfs:range  prov:ContributionRole ;
+    rdfs:comment "The role the actor played in this entry." .
+
+prov:entryHash a rdf:Property ;
+    rdfs:label "entry hash" ;
+    rdfs:domain prov:ProvenanceEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Content hash of the entry for integrity verification (Bao/Q42)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Actor — defined in the agency ontology
+# ────────────────────────────────────────────────────────────────────
+#
+# Actors are defined in the agency ontology (agency.n3), not here.
+# An agency:Actor is an agency:Entity performing actions in a specific
+# agency:Circumstance. The same entity can be multiple actors.
+#
+# Entity types (agency.n3):
+#   - NaturalPerson   (human, identified by DID)
+#   - LegalPerson     (company, organisation, identified by registration)
+#   - SoftwareEntity  (agent, pipeline, LLM, identified by type + version + IRI)
+#   - CollectiveEntity (community, group, identified by IRI)
+#
+# Each provenance entry's prov:actor references an agency:Actor.
+# The agency ontology tracks whether that actor was authorised to act
+# (via agency:Agency, agency:Contract, agency:Claim).
+#
+# Provenance records WHAT happened. Agency records WHETHER it was authorised.
+# Both are needed — provenance is honest (records everything),
+# agency is normative (evaluates validity).
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Contribution Roles — what the actor did
+# ────────────────────────────────────────────────────────────────────
+
+prov:ContributionRole a rdfs:Class ;
+    rdfs:label "Contribution Role" ;
+    rdfs:comment "The role an actor played in a provenance entry. Modelled on film credits, software contribution, and academic attribution." .
+
+# — Authoring roles —
+prov:author        a prov:ContributionRole ; rdfs:label "author" ;
+    rdfs:comment "Created original content." .
+prov:coAuthor      a prov:ContributionRole ; rdfs:label "co-author" ;
+    rdfs:comment "Collaborated on content creation." .
+prov:editor        a prov:ContributionRole ; rdfs:label "editor" ;
+    rdfs:comment "Revised, corrected, or restructured content." .
+prov:contributor   a prov:ContributionRole ; rdfs:label "contributor" ;
+    rdfs:comment "Added a piece or section to the work." .
+
+# — Extraction / processing roles (agents) —
+prov:extractor     a prov:ContributionRole ; rdfs:label "extractor" ;
+    rdfs:comment "An agent that extracted structured data from unstructured content (e.g. NLP pipeline)." .
+prov:annotator     a prov:ContributionRole ; rdfs:label "annotator" ;
+    rdfs:comment "An agent or human that added semantic annotations (entities, relations, frames)." .
+prov:normalizer    a prov:ContributionRole ; rdfs:label "normalizer" ;
+    rdfs:comment "An agent that normalised data (e.g. unit conversion, ontology mapping)." .
+prov:validator     a prov:ContributionRole ; rdfs:label "validator" ;
+    rdfs:comment "An agent or human that validated content against shapes or constraints." .
+
+# — Production roles —
+prov:director      a prov:ContributionRole ; rdfs:label "director" ;
+    rdfs:comment "Directed the overall composition of the work." .
+prov:producer      a prov:ContributionRole ; rdfs:label "producer" ;
+    rdfs:comment "Managed the production process." .
+prov:composer      a prov:ContributionRole ; rdfs:label "composer" ;
+    rdfs:comment "Composed multiple parts into a unified work." .
+
+# — Source / supply roles —
+prov:dataSource    a prov:ContributionRole ; rdfs:label "data source" ;
+    rdfs:comment "Provided data that was incorporated into the work." .
+prov:libraryProvider a prov:ContributionRole ; rdfs:label "library provider" ;
+    rdfs:comment "Provided a library, module, or component used in the work." .
+prov:infrastructureProvider a prov:ContributionRole ; rdfs:label "infrastructure provider" ;
+    rdfs:comment "Provided infrastructure (compute, storage, network) used to produce the work." .
+
+# — Rights / review roles —
+prov:reviewer      a prov:ContributionRole ; rdfs:label "reviewer" ;
+    rdfs:comment "Reviewed the work for quality, accuracy, or rights compliance." .
+prov:rightsHolder  a prov:ContributionRole ; rdfs:label "rights holder" ;
+    rdfs:comment "Holds rights over the work or a component of it." .
+prov:fiduciary     a prov:ContributionRole ; rdfs:label "fiduciary" ;
+    rdfs:comment "Acted in a fiduciary capacity (consent, sensitivity gating, duty of care)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Contribution Entry — someone contributed content
+# ────────────────────────────────────────────────────────────────────
+
+prov:Contribution a rdfs:Class ;
+    rdfs:subClassOf prov:ProvenanceEntry ;
+    rdfs:label "Contribution" ;
+    rdfs:comment "An entry recording that an actor contributed content to the artifact." .
+
+prov:contributedTo a rdf:Property ;
+    rdfs:label "contributed to" ;
+    rdfs:domain prov:Contribution ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "The specific artifact or sub-artifact that received the contribution." .
+
+prov:byteSpan a rdf:Property ;
+    rdfs:label "byte span" ;
+    rdfs:domain prov:Contribution ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "UTF-8 byte range [start,end] of the contributed content within the source text. Empty for whole-artifact contributions." .
+
+prov:confidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:domain prov:Contribution ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence score (0.0–1.0) for agent-extracted contributions. 1.0 for human-authored." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Source Entry — content came from somewhere
+# ────────────────────────────────────────────────────────────────────
+
+prov:SourceEntry a rdfs:Class ;
+    rdfs:subClassOf prov:ProvenanceEntry ;
+    rdfs:label "Source Entry" ;
+    rdfs:comment "An entry recording that content was sourced from an external data source, corpus, or library." .
+
+prov:sourceArtifact a rdf:Property ;
+    rdfs:label "source artifact" ;
+    rdfs:domain prov:SourceEntry ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "The artifact that the content was sourced from (if it is itself a WorkArtifact in the system)." .
+
+prov:sourceIRI a rdf:Property ;
+    rdfs:label "source IRI" ;
+    rdfs:domain prov:SourceEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "External IRI identifying the source (e.g. a SNOMED CT concept, a GeoNames feature, a DOI)." .
+
+prov:sourceLicense a rdf:Property ;
+    rdfs:label "source license" ;
+    rdfs:domain prov:SourceEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "License under which the sourced content is used." .
+
+prov:sourceHash a rdf:Property ;
+    rdfs:label "source hash" ;
+    rdfs:domain prov:SourceEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Content hash of the source at the time of ingestion (for change detection)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Transformation Entry — the artifact was transformed
+# ────────────────────────────────────────────────────────────────────
+
+prov:Transformation a rdfs:Class ;
+    rdfs:subClassOf prov:ProvenanceEntry ;
+    rdfs:label "Transformation" ;
+    rdfs:comment "An entry recording that the artifact was transformed (e.g. flattened, expanded, translated, normalised, rendered)." .
+
+prov:transformType a rdf:Property ;
+    rdfs:label "transform type" ;
+    rdfs:domain prov:Transformation ;
+    rdfs:range  prov:TransformType ;
+    rdfs:comment "The type of transformation applied." .
+
+prov:TransformType a rdfs:Class ;
+    rdfs:label "Transform Type" .
+
+prov:flatten       a prov:TransformType ; rdfs:label "flatten" ;
+    rdfs:comment "Manifold → container (publishing a derivative)." .
+prov:expand        a prov:TransformType ; rdfs:label "expand" ;
+    rdfs:comment "Container → manifold (opening for editing)." .
+prov:translate     a prov:TransformType ; rdfs:label "translate" ;
+    rdfs:comment "Locale translation (i18n)." .
+prov:normalise     a prov:TransformType ; rdfs:label "normalise" ;
+    rdfs:comment "Data normalisation (units, ontology mapping, format conversion)." .
+prov:render        a prov:TransformType ; rdfs:label "render" ;
+    rdfs:comment "Rendering to a presentation modality (2D, 3D, audio, etc.)." .
+prov:extract       a prov:TransformType ; rdfs:label "extract" ;
+    rdfs:comment "NLP extraction (entities, relations, annotations)." .
+prov:compose       a prov:TransformType ; rdfs:label "compose" ;
+    rdfs:comment "Composing multiple artifacts into one." .
+prov:annotate      a prov:TransformType ; rdfs:label "annotate" ;
+    rdfs:comment "Adding semantic annotations to existing content." .
+
+prov:inputArtifact a rdf:Property ;
+    rdfs:label "input artifact" ;
+    rdfs:domain prov:Transformation ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "The artifact before transformation." .
+
+prov:outputArtifact a rdf:Property ;
+    rdfs:label "output artifact" ;
+    rdfs:domain prov:Transformation ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "The artifact after transformation." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Constituency — who has a stake in this artifact
+# ────────────────────────────────────────────────────────────────────
+
+prov:Constituency a rdfs:Class ;
+    rdfs:label "Constituency" ;
+    rdfs:comment "A group of actors who have a stake in an artifact — not necessarily contributors, but affected parties. E.g. patients whose data appears in a clinical document, communities represented in a research artifact, rights holders for embedded content." .
+
+prov:hasConstituency a rdf:Property ;
+    rdfs:label "has constituency" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  prov:Constituency ;
+    rdfs:comment "An artifact may have multiple constituencies." .
+
+prov:constituencyType a rdf:Property ;
+    rdfs:label "constituency type" ;
+    rdfs:domain prov:Constituency ;
+    rdfs:range  prov:ConstituencyType .
+
+prov:ConstituencyType a rdfs:Class ;
+    rdfs:label "Constituency Type" .
+
+prov:dataSubject    a prov:ConstituencyType ; rdfs:label "data subject" ;
+    rdfs:comment "People whose personal data appears in the artifact (patients, users, research subjects)." .
+prov:rightsHolder   a prov:ConstituencyType ; rdfs:label "rights holder" ;
+    rdfs:comment "Parties who hold rights over content in the artifact." .
+prov:stakeholder    a prov:ConstituencyType ; rdfs:label "stakeholder" ;
+    rdfs:comment "Parties affected by the artifact's content or use." .
+prov:audience       a prov:ConstituencyType ; rdfs:label "audience" ;
+    rdfs:comment "Intended audience for the artifact." .
+prov:community      a prov:ConstituencyType ; rdfs:label "community" ;
+    rdfs:comment "A community represented or referenced in the artifact." .
+
+prov:constituencyMember a rdf:Property ;
+    rdfs:label "constituency member" ;
+    rdfs:domain prov:Constituency ;
+    rdfs:range  prov:Actor ;
+    rdfs:comment "An actor who is a member of this constituency." .
+
+prov:consentRequired a rdf:Property ;
+    rdfs:label "consent required" ;
+    rdfs:domain prov:Constituency ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether consent from this constituency is required before the artifact can be published or shared." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Derivative Chain — the ancestry of a published work
+# ────────────────────────────────────────────────────────────────────
+
+prov:DerivativeChain a rdfs:Class ;
+    rdfs:label "Derivative Chain" ;
+    rdfs:comment "The chain of derivations from an original source artifact to the current artifact. Each link is a transformation. Like a git log or a film production history." .
+
+prov:derivedFrom a rdf:Property ;
+    rdfs:label "derived from" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "This artifact was derived from the referenced artifact. Forms a chain (DAG) of derivations." .
+
+prov:derivationStep a rdf:Property ;
+    rdfs:label "derivation step" ;
+    rdfs:domain prov:DerivativeChain ;
+    rdfs:range  prov:Transformation ;
+    rdfs:comment "A single step in the derivative chain — a transformation that produced one artifact from another." .
+
+prov:chainOrder a rdf:Property ;
+    rdfs:label "chain order" ;
+    rdfs:domain prov:DerivativeChain ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Position of this step in the chain (0 = original source)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Credits — the human-readable summary
+# ────────────────────────────────────────────────────────────────────
+
+prov:Credits a rdfs:Class ;
+    rdfs:label "Credits" ;
+    rdfs:comment "A human-readable summary of the provenance graph, like film credits or a colophon. Generated from the provenance graph, not authored independently." .
+
+prov:hasCredits a rdf:Property ;
+    rdfs:label "has credits" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  prov:Credits .
+
+prov:creditLine a rdf:Property ;
+    rdfs:label "credit line" ;
+    rdfs:domain prov:Credits ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A single credit line (e.g. 'NLP extraction by qualia-nlp v0.3', 'Directed by Timothy Charles Holborn')." .
+
+prov:creditOrder a rdf:Property ;
+    rdfs:label "credit order" ;
+    rdfs:domain prov:Credits ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Display order for this credit line." .

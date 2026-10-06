@@ -1,0 +1,215 @@
+# Agent Nomenclature Ontology — agent-type classification and term scoping
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: epi: (same prefix as epistemics.n3 — this is a split module)
+# Imports: epistemics.n3
+#
+# Terms that describe the qualities, capacities, or experiences of one
+# agent type must not be applied to another agent type where the
+# underlying STEM mechanism is fundamentally different. This module
+# defines the agent-type classification, nomenclature mapping, and
+# applicableAgentType scoping for terms in epistemics.n3.
+#
+# See: qualia-db-standards/agent-nomenclature-rules.md for the full
+# human-readable rules and nomenclature isolation table.
+
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Agent Type Classification
+# ────────────────────────────────────────────────────────────────────
+
+epi:AgentType a rdfs:Class ;
+    rdfs:label "Agent Type" ;
+    rdfs:comment "Classification of an epistemic agent into natural, legal, or software. Determines which nomenclature is applicable. See agent-nomenclature-rules.md." .
+
+epi:NaturalAgent a epi:AgentType ; rdfs:label "natural-agent" ;
+    rdfs:comment "A living creature with a mind — capable of consciousness, perception, subjective experience (qualia), emotion, belief, intent, and deliberate action. Only agent type to which mind-dependent terms apply." .
+
+epi:LegalPerson a epi:AgentType ; rdfs:label "legal-person" ;
+    rdfs:comment "An entity with legal personhood but no mind — acts through natural agents or software agents. Has corporate intent (through decision-makers), institutional position, routine, policy. Intent-dependent terms apply (through agents); mind-dependent terms do not." .
+
+epi:SoftwareAgent a epi:AgentType ; rdfs:label "software-agent" ;
+    rdfs:comment "A computational system that processes inputs and produces outputs through algorithms. No mind, no consciousness, no intent. Uses computation, signal acquisition, model assertion, default behaviour, context allocation, enumeration failure, ungrounded generation. Mind-dependent and intent-dependent terms do not apply." .
+
+epi:applicableAgentType a rdf:Property ;
+    rdfs:label "applicable agent type" ;
+    rdfs:comment "Scopes a class, property, or individual to the agent type(s) whose STEM mechanism it accurately describes. Terms without this property are universal (apply to all agent types). See agent-nomenclature-rules.md." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Nomenclature Mapping — natural → legal → software equivalents
+# ────────────────────────────────────────────────────────────────────
+
+epi:NomenclatureMapping a rdfs:Class ;
+    rdfs:label "Nomenclature Mapping" ;
+    rdfs:comment "Maps a concept across agent types to the correct term for each. Ensures semantic precision — the same underlying concept has different STEM mechanisms in different agent types, requiring different terms. See agent-nomenclature-rules.md for the full table." .
+
+epi:nmConcept a rdf:Property ;
+    rdfs:label "concept" ;
+    rdfs:domain epi:NomenclatureMapping ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The concept being mapped (e.g. 'mental processing', 'sensory input', 'false output')." .
+
+epi:nmNaturalTerm a rdf:Property ;
+    rdfs:label "natural agent term" ;
+    rdfs:domain epi:NomenclatureMapping ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The correct term for natural agents (e.g. 'cognition', 'perception', 'mistake')." .
+
+epi:nmLegalTerm a rdf:Property ;
+    rdfs:label "legal person term" ;
+    rdfs:domain epi:NomenclatureMapping ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The correct term for legal persons (e.g. 'decision-making process', 'observation', 'procedural error'). May be 'not-applicable' if the concept has no legal-person equivalent." .
+
+epi:nmSoftwareTerm a rdf:Property ;
+    rdfs:label "software agent term" ;
+    rdfs:domain epi:NomenclatureMapping ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The correct term for software agents (e.g. 'computation', 'signal acquisition', 'enumeration failure'). May be 'not-applicable' if the concept has no software-agent equivalent." .
+
+epi:nmViolationNote a rdf:Property ;
+    rdfs:label "violation note" ;
+    rdfs:domain epi:NomenclatureMapping ;
+    rdfs:range xsd:string ;
+    rdfs:comment "What goes wrong when the term is misapplied across agent types." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Agent-Type Scoping for Bias Classes
+# ────────────────────────────────────────────────────────────────────
+
+epi:CognitiveBias rdfs:comment "Cognitive biases — systematic tendencies in human cognition. Mind-dependent: applies ONLY to epi:NaturalAgent. For software agents use epi:AlgorithmicBias; for legal persons use epi:InstitutionalBias." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+epi:AlgorithmicBias rdfs:comment "Biases in software agents and AI models — training data bias, model architecture bias, optimisation target bias, ungrounded generation bias. Applies ONLY to epi:SoftwareAgent." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+
+epi:InstitutionalBias rdfs:comment "Biases embedded in organisational procedures, legal frameworks, or social structures. Applies ONLY to epi:LegalPerson." ;
+    epi:applicableAgentType epi:LegalPerson .
+
+epi:SensorBias rdfs:comment "Biases in sensor measurements — calibration drift, environmental interference, resolution limits. Applies ONLY to epi:SoftwareAgent (sensors are software agents in this taxonomy)." ;
+    epi:applicableAgentType epi:SoftwareAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Agent-Type Scoping for Intentionality Types
+# ────────────────────────────────────────────────────────────────────
+
+epi:Deliberate epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "The agent intended the action and its outcome. Full awareness and purpose. Requires will — applies to natural agents and legal persons (through decision-makers). Does NOT apply to software agents (no will)." .
+
+epi:Intentional epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "The agent intended the action but may not have intended all consequences. Applies to natural agents and legal persons. Does NOT apply to software agents." .
+
+epi:Negligent epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "The agent did not intend the outcome but failed to take reasonable precautions. Requires foresight capacity — applies to natural agents and legal persons. Does NOT apply to software agents." .
+
+epi:Reckless epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "The agent disregarded a known risk. Requires risk awareness — applies to natural agents and legal persons. Does NOT apply to software agents." .
+
+epi:Accidental epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "The agent did not intend the action or outcome. No foresight, no negligence. Applies to natural agents and legal persons. For software agents use epi:Systematic or emergent." .
+
+epi:Mistaken epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "The agent intended the action but based on a false belief or incorrect information. Requires holding a belief — applies ONLY to natural agents. For software agents use 'misinformed' (bad input) or 'enumeration failure'." .
+
+epi:Systematic epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "The outcome results from a systematic bias or structural issue, not from any single agent's intention. Applies primarily to software agents. For legal persons use epi:InstitutionalBias." .
+
+epi:Emergent epi:applicableAgentType epi:NaturalAgent, epi:SoftwareAgent ;
+    rdfs:comment "The outcome was not intended by any agent but emerged from the interaction of multiple agents or systems. Applies to natural and software agents." .
+
+epi:Coerced epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "The agent was forced or pressured into the action. Requires free will to constrain — applies ONLY to natural agents. For legal persons use 'directed'; for software agents use 'overridden'." .
+
+epi:Habitual epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "The action was performed out of habit or routine, without conscious deliberation. Habit is an automatic behaviour of a mind — applies ONLY to natural agents. For legal persons use 'routine'; for software agents use 'default-behaviour'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Agent-Type Scoping for Mistake Types
+# ────────────────────────────────────────────────────────────────────
+
+epi:MistakeAttentionFailure epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Agent failed to attend to relevant information. Attention is a cognitive function — applies ONLY to natural agents. For legal persons use 'oversight-failure'; for software agents use 'context-loss'." .
+
+epi:MistakePerceptionError epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Agent misperceived the situation. Perception is a conscious act — applies ONLY to natural agents. For legal persons use 'observational-error'; for software agents use 'signal-error'." .
+
+epi:MistakeJudgementError epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "Agent perceived correctly but judged wrongly. Requires reasoning capacity — applies to natural agents and legal persons (through decision-makers). For software agents, this maps to model-architecture limitations." .
+
+epi:MistakeDeliberateDeviation epi:applicableAgentType epi:NaturalAgent, epi:LegalPerson ;
+    rdfs:comment "Agent knowingly deviated from the standard. Requires awareness of the standard and wilful deviation — applies to natural agents and legal persons. Does NOT apply to software agents (no awareness, no will)." .
+
+epi:MistakeUngroundedGeneration epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "AI model generated fabricated content with no grounding in input or training data. A statistical artefact of probabilistic token prediction. Applies ONLY to software agents. See ungrounded-generation.n3 for full cause/consequence decomposition." .
+
+epi:MistakeSimulation epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "The 'mistake' is an artefact of a simulation or model. Applies ONLY to software agents." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Agent-Type Scoping for Grounding Types
+# ────────────────────────────────────────────────────────────────────
+
+epi:GroundEmotion epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Behaviour grounded in emotional response. Emotion is a qualia — applies ONLY to natural agents. Not applicable to legal persons or software agents." .
+
+epi:GroundInstinct epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Behaviour grounded in instinct — hardwired biological response. Applies ONLY to natural agents. Not applicable to legal persons or software agents." .
+
+epi:GroundHabit epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Behaviour grounded in habit — routine, automatic behaviour of a mind. Applies ONLY to natural agents. For legal persons use 'routine'; for software agents use 'default-behaviour'." .
+
+epi:GroundBelief epi:applicableAgentType epi:NaturalAgent ;
+    rdfs:comment "Behaviour grounded in belief — the agent holds a proposition to be true. Belief is a mental state — applies ONLY to natural agents. For legal persons use 'institutional-position'; for software agents use 'model-assertion'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Appendable Record Support
+# ────────────────────────────────────────────────────────────────────
+#
+# When the nature of an axiom or output is unclear at the time of
+# recording, the record should be appendable — any agent (same or
+# different, natural or software) may clarify the nature of the axiom
+# at a future datetime. The original record is not overwritten; a
+# clarifying annotation is appended with provenance.
+
+epi:RecordAppendable a rdf:Property ;
+    rdfs:label "record appendable" ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Whether the record can be appended to by other agents at a future datetime to clarify the nature of the axiom. When the agent type or causal mechanism is unclear at recording time, the record should be marked appendable and the epistemic mode set to ambiguous. Any agent (same or different, natural or software) may append a clarifying annotation with provenance." .
+
+epi:RecordClarification a rdfs:Class ;
+    rdfs:label "Record Clarification" ;
+    rdfs:comment "A clarifying annotation appended to a record by an agent at a future datetime. Does not overwrite the original record — adds context, corrects agent-type attribution, or clarifies causal mechanism. Includes the clarifying agent's IRI, timestamp, and reasoning." .
+
+epi:clarifiesRecord a rdf:Property ;
+    rdfs:label "clarifies record" ;
+    rdfs:domain epi:RecordClarification ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the record being clarified." .
+
+epi:clarifyingAgent a rdf:Property ;
+    rdfs:label "clarifying agent" ;
+    rdfs:domain epi:RecordClarification ;
+    rdfs:range xsd:string ;
+    rdfs:comment "IRI of the agency:Actor providing the clarification." .
+
+epi:clarifyingAgentType a rdf:Property ;
+    rdfs:label "clarifying agent type" ;
+    rdfs:domain epi:RecordClarification ;
+    rdfs:range epi:AgentType ;
+    rdfs:comment "Agent type of the clarifying agent — natural, legal, or software." .
+
+epi:clarificationTimestamp a rdf:Property ;
+    rdfs:label "clarification timestamp" ;
+    rdfs:domain epi:RecordClarification ;
+    rdfs:range xsd:dateTime .
+
+epi:clarificationReasoning a rdf:Property ;
+    rdfs:label "clarification reasoning" ;
+    rdfs:domain epi:RecordClarification ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Reasoning behind the clarification — why the original record was ambiguous and how this clarification resolves it." .

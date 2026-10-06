@@ -1,0 +1,785 @@
+# Container Ontology — Manifolds, Containers, Panels, Widgets
+# Authoring form (N3) — compiled to container.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix manifold:   <https://qualiadb.org/schema/ui/manifold#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Manifold
+# ────────────────────────────────────────────────────────────────────
+
+manifold:Manifold a rdfs:Class ;
+    rdfs:label "Manifold" ;
+    rdfs:comment "A workspace surface — like a desktop or canvas — where containers and sub-manifolds are placed." .
+
+manifold:contains a rdf:Property ;
+    rdfs:label "contains" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  container:Container ;
+    rdfs:comment "A manifold contains zero or more containers." .
+
+manifold:subManifoldOf a rdf:Property ;
+    rdfs:label "sub-manifold of" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  manifold:Manifold ;
+    rdfs:comment "A manifold may be nested inside another manifold (sub-manifold)." .
+
+manifold:activeContainer a rdf:Property ;
+    rdfs:label "active container" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  container:Container ;
+    rdfs:comment "The container currently holding focus on this manifold." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Container (base class)
+# ────────────────────────────────────────────────────────────────────
+
+container:Container a rdfs:Class ;
+    rdfs:label "Container" ;
+    rdfs:comment "A typed occupant placed on a manifold. Every container has exactly one ContainerKind." .
+
+container:kind a rdf:Property ;
+    rdfs:label "kind" ;
+    rdfs:domain container:Container ;
+    rdfs:range  container:ContainerKind ;
+    rdfs:comment "Discriminates content containers from panel and widget containers." .
+
+container:ContainerKind a rdfs:Class ;
+    rdfs:label "Container Kind" ;
+    rdfs:comment "Enumerated discriminator: content, panel, or widget." .
+
+container:content a container:ContainerKind ;
+    rdfs:label "content" ;
+    rdfs:comment "Content containers hold media (documents, sheets, maps, code, 3D, audio...)." .
+
+container:panel a container:ContainerKind ;
+    rdfs:label "panel" ;
+    rdfs:comment "Panel containers hold UI chrome (inspectors, property sheets, outlines, tool palettes)." .
+
+container:widget a container:ContainerKind ;
+    rdfs:label "widget" ;
+    rdfs:comment "Widget containers are small UI elements (mini-map, status bar, breadcrumb, progress indicator)." .
+
+container:title a rdf:Property ;
+    rdfs:label "title" ;
+    rdfs:domain container:Container ;
+    rdfs:range  xsd:string .
+
+container:honesty a rdf:Property ;
+    rdfs:label "honesty" ;
+    rdfs:domain container:Container ;
+    rdfs:range  container:HonestyLabel ;
+    rdfs:comment "Implementation status: live, partial, present, or missing." .
+
+container:HonestyLabel a rdfs:Class ;
+    rdfs:label "Honesty Label" .
+
+container:live     a container:HonestyLabel ; rdfs:label "live" .
+container:partial  a container:HonestyLabel ; rdfs:label "partial" .
+container:present  a container:HonestyLabel ; rdfs:label "present" .
+container:missing  a container:HonestyLabel ; rdfs:label "missing" .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Content containers (hold media)
+# ────────────────────────────────────────────────────────────────────
+
+container:ContentContainer a rdfs:Class ;
+    rdfs:label "Content Container" ;
+    rdfs:subClassOf container:Container ;
+    rdfs:comment "Containers that hold media content. Media = collective of medium." .
+
+# — Document authoring —
+container:Document a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Document" ;
+    rdfs:comment "Rich text, context markup, annotations. Reaches nlp.analyze, gazetteer, Document.ingest." .
+
+container:Sheet a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Sheet" ;
+    rdfs:comment "Reactive cells, formulas, data tables. Reaches Sheet.sum_range, Sheet.stats, P64 latents." .
+
+container:Code a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Code" ;
+    rdfs:comment "VibeScript editing, eval, diagnose. Reaches poet_eval, capability.invoke." .
+
+# — Code & AI containers —
+container:Project a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Project" ;
+    rdfs:comment "QApp project tree — modules, ontologies, assets, tests. Code toolbox." .
+
+container:Terminal a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Terminal" ;
+    rdfs:comment "VibeScript REPL / command output. Code toolbox." .
+
+container:AgentConsole a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Agent Console" ;
+    rdfs:comment "Agent runtime console — task planning, execution, verification. AI toolbox." .
+
+container:NlpPipeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "NLP Pipeline" ;
+    rdfs:comment "NLP extraction pipeline view — text in, structured substrate out. AI toolbox." .
+
+container:GraphRAG a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "GraphRAG" ;
+    rdfs:comment "GraphRAG query and retrieval view. AI toolbox." .
+
+# — Spatial containers —
+container:Scene a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "10D Scene" ;
+    rdfs:comment "10D scene graph view — the primary spatial workspace. Spatial toolbox. Nodes carry semantic links, not just geometry." .
+
+container:Viewport a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Viewport" ;
+    rdfs:comment "Render viewport — camera output, swapchain. Spatial toolbox." .
+
+container:SceneTree a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Scene Tree" ;
+    rdfs:comment "Scene node hierarchy (tree view). Spatial toolbox." .
+
+container:Latex a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "LaTeX" ;
+    rdfs:comment "Mathematical typesetting, CAS. Reaches SymbolicAlgebra." .
+
+container:Slide a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Slide" ;
+    rdfs:comment "Presentation slides. Office toolbox." .
+
+# — Document publishing (derivatives of document manifolds) —
+container:Ebook a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Ebook" ;
+    rdfs:comment "Published e-book (EPUB, PDF). Semi-static, reflowable. Flattened from a document manifold via doc:Ebook publish target." .
+
+container:Webpage a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Webpage" ;
+    rdfs:comment "Published webpage. Interactive, may include live datasource links and context graph. Flattened from a document manifold via doc:Webpage publish target." .
+
+container:PrintDocument a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Print Document" ;
+    rdfs:comment "Print-ready document (PDF, PostScript). Static, paginated. Flattened from a document manifold via doc:Print publish target." .
+
+container:Form a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Form" ;
+    rdfs:comment "Interactive form with input fields, validation, and submission workflow. See document ontology §8. May be embedded in other documents or standalone." .
+
+# — Investigation containers —
+container:CaseBoard a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Case Board" ;
+    rdfs:comment "The primary workspace for an investigation. Displays evidence, hypotheses, links, and timelines in a spatial canvas. Investigate toolbox." .
+
+container:EvidenceBoard a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Evidence Board" ;
+    rdfs:comment "Evidence collection and verification view. Lists evidence items with reliability ratings, chain of custody status, and source provenance. Investigate toolbox." .
+
+container:Timeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Timeline" ;
+    rdfs:comment "Multi-track temporal sequence of events and evidence. Supports exact, approximate, and estimated times. Investigate toolbox." .
+
+container:HypothesisTree a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Hypothesis Tree" ;
+    rdfs:comment "Hierarchical hypothesis view with evidence evaluations (supports/contradicts/neutral). Shows hypothesis status and confidence. Investigate toolbox." .
+
+container:HypothesisGraph a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Hypothesis Graph" ;
+    rdfs:comment "Living, versioned, multi-agent hypothesis graph. Displays hypotheses, their relationships, evidence evaluations, dark link bridges, and gaps. Dynamically updates as agents contribute. Shows confidence scores, support scores, contributor counts, and gap priorities. Investigate toolbox." .
+
+container:Dossier a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Dossier" ;
+    rdfs:comment "Subject profile — biographical, organisational, or systemic background. Links to agency:Entity. Investigate toolbox." .
+
+container:LinkGraph a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Link Graph" ;
+    rdfs:comment "Network graph of links between subjects, events, and evidence. Typed links (financial, communication, social, spatial, temporal, causal). Investigate toolbox." .
+
+container:ScenarioBoard a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Scenario Board" ;
+    rdfs:comment "Forecast scenario workspace. Displays scenarios with probabilities, driving factors, and projected outcomes. Supports branching scenarios. Forecast toolbox." .
+
+container:ForecastChart a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Forecast Chart" ;
+    rdfs:comment "Quantitative forecast visualisation — time-series projections, confidence intervals, scenario comparisons. Forecast toolbox." .
+
+# — Investigation panel containers —
+container:ConstituencyPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Constituency Panel" ;
+    rdfs:comment "Shows investigation constituencies — roles, access levels, contributions. Investigate/Forecast toolbox." .
+
+container:CustodyLog a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Custody Log" ;
+    rdfs:comment "Chain of custody log for selected evidence. Shows transfer history with timestamps, actors, and transformations. Investigate toolbox." .
+
+# — Research containers —
+container:ResearchBoard a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Research Board" ;
+    rdfs:comment "The primary workspace for a research project. Displays research questions, findings, corpus items, dynamics, and inferences on a spatial canvas. Research toolbox." .
+
+container:CorpusBrowser a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Corpus Browser" ;
+    rdfs:comment "Browse and manage the research corpus — literature, datasets, documents, media, web content, sensor data, oral history, archival records. Shows provenance and confidence per item. Research toolbox." .
+
+container:LiteratureReview a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Literature Review" ;
+    rdfs:comment "Structured literature review view — papers, citations, themes, gaps. Supports systematic review protocols. Research toolbox." .
+
+container:DataCanvas a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Data Canvas" ;
+    rdfs:comment "Multi-dataset exploration view — join, filter, visualise, and correlate datasets. Supports socio-economic, sensor, and administrative data. Research toolbox." .
+
+container:DynamicMap a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Dynamic Map" ;
+    rdfs:comment "Spatio-temporal dynamics visualisation — migration, diffusion, environmental change, urban dynamics over time. May overlay social and economic data. Research toolbox." .
+
+container:InferenceGraph a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Inference Graph" ;
+    rdfs:comment "Visualises inference chains — premises, conclusions, confidence. Shows how findings are derived from corpus items through inference. Research toolbox." .
+
+container:DarkLinkExplorer a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Dark Link Explorer" ;
+    rdfs:comment "Explores inferred, hidden, latent, and suppressed connections. Shows dark link types, inference methods, provenance gaps, and confidence. Research toolbox." .
+
+container:SynthesisView a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Synthesis View" ;
+    rdfs:comment "Synthesises findings into higher-order understanding — narrative, systematic review, meta-analysis, theory, model, ontology, or framework. Research toolbox." .
+
+# — Research panel containers —
+container:QuestionTree a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Question Tree" ;
+    rdfs:comment "Hierarchical research question view with dependencies, status, and linked findings. Research toolbox." .
+
+container:ProvenanceTrace a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Provenance Trace" ;
+    rdfs:comment "Traces provenance chains for selected finding, inference, or corpus item. Shows sources, transformations, and derivative chains. Research toolbox." .
+
+container:ConstraintPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Constraint Panel" ;
+    rdfs:comment "Shows research constraints — ethical, legal, resource, methodological, access, temporal. Research toolbox." .
+
+# — Epistemics containers —
+container:RealityBoard a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Reality Board" ;
+    rdfs:comment "Primary workspace for epistemic assessment. Displays claims, behaviours, and expressions with their epistemic status (objective, subjective, intersubjective, contested, fictional), reality classification (fiction/non-fiction/blended), and confidence. Shows agent perspectives, spatio-temporal context, and social relation context. Epistemics toolbox." .
+
+container:SentimentMap a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Sentiment Map" ;
+    rdfs:comment "Visualises sentiment across agents, targets, and time. Shows sentiment type, intensity, authenticity (genuine, performed, manipulated, simulated), and multi-dimensional scores (valence, arousal, dominance, certainty, moral, aesthetic, irony, sarcasm). May overlay social relations to show how sentiment flows through networks. Epistemics toolbox." .
+
+container:PerspectiveView a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Perspective View" ;
+    rdfs:comment "Compares multiple agent perspectives on the same claim, event, or behaviour. Shows perspective types (human, software-agent, sensor, organisation, AI-model, collective), access levels, biases, and how each perspective shapes the epistemic assessment. Epistemics toolbox." .
+
+# — Epistemics panel containers —
+container:IntentionalityPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Intentionality Panel" ;
+    rdfs:comment "Shows intentionality assessment for a selected action or outcome — deliberate, intentional, negligent, reckless, accidental, mistaken, systematic, emergent, coerced, habitual. Includes mistake classification (false-belief, skill-deficit, attention-failure, perception-error, judgement-error, system-design, deliberate-deviation, ungrounded-generation, simulation-artefact). Epistemics toolbox." .
+
+container:GroundingPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Grounding Panel" ;
+    rdfs:comment "Shows behaviour grounding for a selected action — observation, hypothesis, interpretation, belief, assumption, inference, instruction, emotion, instinct, habit, simulation, fiction, norm, values. Shows whether the grounding is verifiable. Epistemics toolbox." .
+
+container:FictionClassifier a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Fiction Classifier" ;
+    rdfs:comment "Classifies a selected document, claim, or expression as fiction, non-fiction, or blended. Shows sub-category (empirical, testimonial, speculative, allegorical, deceptive, mythological, etc.), confidence, and whether the classification is disputed. Epistemics toolbox." .
+
+container:SocialContextPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Social Context Panel" ;
+    rdfs:comment "Shows social relation context for a selected assessment — relation type (hierarchical, peer, adversarial, community), power asymmetry, trust level, community consensus, incentive to misrepresent, social pressure. Epistemics toolbox." .
+
+# — Knowledge graphs —
+container:Graph a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Graph" ;
+    rdfs:comment "SPARQL, quin.statement, RDF 1.2 editing." .
+
+container:Ontology a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Ontology" ;
+    rdfs:comment "SHACL inspector, shape catalog, Turtle/N3 browsing. Reaches SHACL.validate." .
+
+# — Spatial & 3D —
+container:Map a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Map" ;
+    rdfs:comment "GeoSPARQL, cartographic layers. Reaches Render.scene, Manifold.project." .
+
+container:Mesh3D a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "3D Mesh" ;
+    rdfs:comment ".10d meshes, skeletal rigs, blend spaces. Reaches webizen-render." .
+
+container:Portal a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Portal" ;
+    rdfs:comment "Wormhole IRI to another manifold or remote surface." .
+
+# — Media —
+container:Media a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Media" ;
+    rdfs:comment "Image, video, timeline editing. Reaches vision ahash, grapheme." .
+
+container:Audio a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Audio" ;
+    rdfs:comment "Audio playback, EnCodec. Reaches qualia-audio." .
+
+container:Triad a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Triad" ;
+    rdfs:comment "q42-p64-d10 cross-modal container. Audio + tensor + mesh." .
+
+# — Social & communication —
+container:Social a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Social" ;
+    rdfs:comment "Chat graphs, live peers, field notes. Reaches Social.lww." .
+
+container:WebRTC a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "WebRTC" ;
+    rdfs:comment "Real-time communication. No fake streams." .
+
+container:WebView a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Web View" ;
+    rdfs:comment "Sandboxed legacy web content. Capability-gated fetch." .
+
+# — Health & finance —
+container:Health a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Health" ;
+    rdfs:comment "Clinical telemetry, SNOMED annotations. Consent-gated." .
+
+container:Anatomy a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Anatomy" ;
+    rdfs:comment "3D anatomy renderer. Wellfair consent required." .
+
+container:Finance a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Finance" ;
+    rdfs:comment "Portfolio, Black-Scholes, ledger entries." .
+
+# — Pulse —
+container:Pulse a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Pulse" ;
+    rdfs:comment "Event stream monitor. Reaches pulse.publish allowlist." .
+
+# — Hypermedia: image editing —
+container:ImageCanvas a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Image Canvas" ;
+    rdfs:comment "Raster/vector image editing surface — layers, brushes, filters, masks." .
+
+# — Hypermedia: audio production —
+container:AudioTimeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Audio Timeline" ;
+    rdfs:comment "Multi-track audio timeline — clips, MIDI, automation." .
+
+container:Mixer a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Mixer" ;
+    rdfs:comment "Audio channel strips — volume, pan, sends, EQ, dynamics." .
+
+container:SynthRack a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Synth Rack" ;
+    rdfs:comment "Synthesiser rack — oscillators, filters, envelopes, LFOs." .
+
+container:MIDIEditor a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "MIDI Editor" ;
+    rdfs:comment "Piano-roll / MIDI event editor." .
+
+# — Hypermedia: video production —
+container:VideoTimeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Video Timeline" ;
+    rdfs:comment "Multi-track video timeline — clips, transitions, overlays." .
+
+container:PreviewMonitor a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Preview Monitor" ;
+    rdfs:comment "Video preview — full-screen or overlay." .
+
+container:ColourScope a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Colour Scope" ;
+    rdfs:comment "Waveform monitor, vectorscope, histogram for video colour grading." .
+
+# — Hypermedia: 3D editing —
+container:Viewport3D a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "3D Viewport" ;
+    rdfs:comment "3D editing viewport — perspective, orthographic, wireframe, solid, rendered." .
+
+container:MaterialEditor a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Material Editor" ;
+    rdfs:comment "Material node editor — PBR, custom shader, texture sets." .
+
+# — Hypermedia: interactive —
+container:InteractiveTimeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Interactive Timeline" ;
+    rdfs:comment "Timeline of triggers, overlays, and sync events for interactive hypermedia." .
+
+container:TriggerPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Trigger Panel" ;
+    rdfs:comment "Trigger configuration — conditions, actions for interactive content." .
+
+container:SocialPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Social Panel" ;
+    rdfs:comment "Social layer configuration — chat, poll, reaction, share, co-view." .
+
+container:DeviceEmulator a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Device Emulator" ;
+    rdfs:comment "Target device emulator for HbbTV / interactive testing." .
+
+# — Hypermedia: portals —
+container:PortalViewport a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Portal Viewport" ;
+    rdfs:comment "3D viewport for world editing — terrain, objects, portals." .
+
+container:WorldOutliner a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "World Outliner" ;
+    rdfs:comment "World hierarchy — objects, portals, spawn points." .
+
+container:PhysicsInspector a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Physics Inspector" ;
+    rdfs:comment "Physics body inspector — colliders, rigidbodies, triggers." .
+
+# — Hypermedia: productions —
+container:ProductionTimeline a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Production Timeline" ;
+    rdfs:comment "Show control timeline — cues, triggers, SMPTE." .
+
+container:DMXController a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "DMX Controller" ;
+    rdfs:comment "DMX universe controller — channels, fixtures, scenes." .
+
+container:ProjectionCanvas a rdfs:Class ;
+    rdfs:subClassOf container:ContentContainer ;
+    rdfs:label "Projection Canvas" ;
+    rdfs:comment "Projection mapping canvas — surfaces, content, calibration." .
+
+container:FixturePatch a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Fixture Patch" ;
+    rdfs:comment "Fixture patch panel — universe, channel, address." .
+
+container:CueStack a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Cue Stack" ;
+    rdfs:comment "Cue stack — cue list, sequence, fades." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Panel containers (hold UI chrome)
+# ────────────────────────────────────────────────────────────────────
+
+container:PanelContainer a rdfs:Class ;
+    rdfs:label "Panel Container" ;
+    rdfs:subClassOf container:Container ;
+    rdfs:comment "Containers that hold UI chrome — inspectors, property sheets, outlines, tool palettes. Panels observe and act on content containers." .
+
+container:Inspector a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Inspector" ;
+    rdfs:comment "Inspects the active content container's semantic structure (e.g. entity list, graph shapes, aura constraints)." .
+
+container:PropertySheet a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Property Sheet" ;
+    rdfs:comment "Edits properties of the selected element within a content container." .
+
+container:Outline a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Outline" ;
+    rdfs:comment "Structural overview of a content container (document outline, sheet tree, scene graph)." .
+
+container:ToolPalette a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Tool Palette" ;
+    rdfs:comment "A floating or docked palette of quick-access tools. Distinct from the tool-chest (which holds toolboxes); a tool palette is a panel that surfaces frequently used tools from the active toolbox." .
+
+container:AuraTray a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Aura Tray" ;
+    rdfs:comment "Ontological shape and schema inspector. Shows SHACL shapes, validation results, and ontology context for the active container." .
+
+container:PulsePanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Pulse Panel" ;
+    rdfs:comment "Collaborative stream and telemetry monitor. Shows live Pulse events." .
+
+container:GraphPanel a rdfs:Class ;
+    rdfs:subClassOf container:PanelContainer ;
+    rdfs:label "Graph Panel" ;
+    rdfs:comment "Interactive RDF / knowledge graph preview. Read-only visualisation of the active graph." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Widget containers (small UI elements)
+# ────────────────────────────────────────────────────────────────────
+
+container:WidgetContainer a rdfs:Class ;
+    rdfs:label "Widget Container" ;
+    rdfs:subClassOf container:Container ;
+    rdfs:comment "Small UI elements that live on a manifold alongside content and panel containers. Lightweight, usually read-only or single-action." .
+
+container:MiniMap a rdfs:Class ;
+    rdfs:subClassOf container:WidgetContainer ;
+    rdfs:label "Mini-Map" ;
+    rdfs:comment "A zoomed-out overview of the current manifold's layout. Click to navigate." .
+
+container:StatusBar a rdfs:Class ;
+    rdfs:subClassOf container:WidgetContainer ;
+    rdfs:label "Status Bar" ;
+    rdfs:comment "Shows budget, gas, Sentinel state, connection status. Read-only telemetry." .
+
+container:Breadcrumb a rdfs:Class ;
+    rdfs:subClassOf container:WidgetContainer ;
+    rdfs:label "Breadcrumb" ;
+    rdfs:comment "Navigation path showing manifold hierarchy. Click to switch manifold." .
+
+container:ProgressIndicator a rdfs:Class ;
+    rdfs:subClassOf container:WidgetContainer ;
+    rdfs:label "Progress Indicator" ;
+    rdfs:comment "Shows long-running operation progress (NLP ingestion, graph query, render)." .
+
+container:CapabilityBadge a rdfs:Class ;
+    rdfs:subClassOf container:WidgetContainer ;
+    rdfs:label "Capability Badge" ;
+    rdfs:comment "Shows the capability scope of the active container or tool. Visual Sentinel indicator." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Relationships between containers
+# ────────────────────────────────────────────────────────────────────
+
+container:observes a rdf:Property ;
+    rdfs:label "observes" ;
+    rdfs:domain container:PanelContainer ;
+    rdfs:range  container:ContentContainer ;
+    rdfs:comment "A panel container observes a content container (e.g. an inspector observes the active document)." .
+
+container:attachedTo a rdf:Property ;
+    rdfs:label "attached to" ;
+    rdfs:domain container:WidgetContainer ;
+    rdfs:range  container:Container ;
+    rdfs:comment "A widget is attached to another container (e.g. a mini-map is attached to a map container)." .
+
+container:dockPosition a rdf:Property ;
+    rdfs:label "dock position" ;
+    rdfs:domain container:PanelContainer ;
+    rdfs:range  container:DockPosition ;
+    rdfs:comment "Where a panel is docked on the manifold." .
+
+container:DockPosition a rdfs:Class ;
+    rdfs:label "Dock Position" .
+
+container:left    a container:DockPosition ; rdfs:label "left" .
+container:right   a container:DockPosition ; rdfs:label "right" .
+container:top     a container:DockPosition ; rdfs:label "top" .
+container:bottom  a container:DockPosition ; rdfs:label "bottom" .
+container:floating a container:DockPosition ; rdfs:label "floating" .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Manifold seeds (initial layouts)
+# ────────────────────────────────────────────────────────────────────
+
+manifold:seed a rdf:Property ;
+    rdfs:label "seed" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  manifold:ManifoldSeed ;
+    rdfs:comment "The initial container layout for a manifold when first opened." .
+
+manifold:ManifoldSeed a rdfs:Class ;
+    rdfs:label "Manifold Seed" ;
+    rdfs:comment "A declarative initial layout: which containers to place, their positions, and which panels to dock." .
+
+manifold:research a manifold:Manifold ;
+    rdfs:label "Research" ;
+    rdfs:comment "GIS, clinical, rights alignment. Default: map container + graph panel + aura tray docked right." .
+
+manifold:media a manifold:Manifold ;
+    rdfs:label "Media" ;
+    rdfs:comment ".10d kinematics, grapheme, acoustic. Default: 3D mesh + media + inspector docked right." .
+
+manifold:social a manifold:Manifold ;
+    rdfs:label "Social" ;
+    rdfs:comment "Chat graphs, live peers, field notes. Default: social container + pulse panel docked bottom." .
+
+manifold:settings a manifold:Manifold ;
+    rdfs:label "Settings" ;
+    rdfs:comment "Capabilities, fiduciary VM, sub-manifolds. Default: property sheet + capability badge." .
+
+manifold:vibe a manifold:Manifold ;
+    rdfs:label "Vibe" ;
+    rdfs:comment "VibeScript console + diagnose. Default: code container + inspector docked right + status bar bottom." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Work Artifact — the shared identity behind manifolds and containers
+# ────────────────────────────────────────────────────────────────────
+
+container:WorkArtifact a rdfs:Class ;
+    rdfs:label "Work Artifact" ;
+    rdfs:comment "The underlying identity that exists in two states: open (manifold) or flat (container). A document is a WorkArtifact — when you open it for editing it becomes a manifold; when you publish it as a PDF it becomes a container. The artifact identity persists across state transitions." .
+
+container:hasState a rdf:Property ;
+    rdfs:label "has state" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  container:ArtifactState ;
+    rdfs:comment "Whether the artifact is currently open (manifold) or flat (container)." .
+
+container:ArtifactState a rdfs:Class ;
+    rdfs:label "Artifact State" .
+
+container:open a container:ArtifactState ;
+    rdfs:label "open" ;
+    rdfs:comment "The artifact is a manifold — editable, composed of sub-parts (containers and sub-manifolds)." .
+
+container:flat a container:ArtifactState ;
+    rdfs:label "flat" ;
+    rdfs:comment "The artifact is a container — published derivative, self-contained. May carry a link back to the source manifold." .
+
+container:manifestsAs a rdf:Property ;
+    rdfs:label "manifests as" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:comment "The concrete manifold or container that this artifact currently appears as. When open, manifestsAs a manifold. When flat, manifestsAs a container." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. State transitions (manifold ↔ container)
+# ────────────────────────────────────────────────────────────────────
+
+container:expandedFrom a rdf:Property ;
+    rdfs:label "expanded from" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  container:Container ;
+    rdfs:comment "A manifold that was expanded from a flat container for editing. The container's content is decomposed into the manifold's sub-parts." .
+
+container:flattenedTo a rdf:Property ;
+    rdfs:label "flattened to" ;
+    rdfs:domain manifold:Manifold ;
+    rdfs:range  container:Container ;
+    rdfs:comment "A manifold that was flattened into a container (a derivative). The manifold's sub-parts are composed into a single self-contained artifact." .
+
+container:sourceManifold a rdf:Property ;
+    rdfs:label "source manifold" ;
+    rdfs:domain container:Container ;
+    rdfs:range  manifold:Manifold ;
+    rdfs:comment "A flat container that carries a link back to the manifold it was derived from. This allows re-expansion for editing." .
+
+container:derivativeFormat a rdf:Property ;
+    rdfs:label "derivative format" ;
+    rdfs:domain container:Container ;
+    rdfs:range  container:DerivativeFormat ;
+    rdfs:comment "The format of a flattened derivative (PDF, MP4, XLS, DOC, website, CBOR-LD, etc.)." .
+
+container:DerivativeFormat a rdfs:Class ;
+    rdfs:label "Derivative Format" .
+
+container:pdf       a container:DerivativeFormat ; rdfs:label "PDF" .
+container:mp4      a container:DerivativeFormat ; rdfs:label "MP4" .
+container:xls      a container:DerivativeFormat ; rdfs:label "XLS" .
+container:doc      a container:DerivativeFormat ; rdfs:label "DOC" .
+container:website  a container:DerivativeFormat ; rdfs:label "Website" .
+container:hcf      a container:DerivativeFormat ; rdfs:label "HCF (Hypermedia Content Format)" .
+container:cborld   a container:DerivativeFormat ; rdfs:label "CBOR-LD" .
+container:q42      a container:DerivativeFormat ; rdfs:label "Q42 DAG" .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Composition graph (recursive containment)
+# ────────────────────────────────────────────────────────────────────
+
+container:composedOf a rdf:Property ;
+    rdfs:label "composed of" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "A work artifact is composed of other work artifacts. This forms a DAG — an artifact may be part of multiple parents (e.g. a shared graph used in two documents)." .
+
+container:references a rdf:Property ;
+    rdfs:label "references" ;
+    rdfs:domain container:Container ;
+    rdfs:range  manifold:Manifold ;
+    rdfs:comment "A flat container may reference a manifold it is not derived from but links to (e.g. a container that embeds a live manifold as a sub-view)." .
+
+container:embeds a rdf:Property ;
+    rdfs:label "embeds" ;
+    rdfs:domain container:Container ;
+    rdfs:range  container:Container ;
+    rdfs:comment "A container may embed another container (e.g. a document embedding a sheet, a media container embedding a graph panel)." .
+
+container:partOf a rdf:Property ;
+    rdfs:label "part of" ;
+    rdfs:domain container:WorkArtifact ;
+    rdfs:range  container:WorkArtifact ;
+    rdfs:comment "Inverse of composedOf. Indicates this artifact is a component of a larger work." .
+
+# The composition graph is a DAG, not a tree:
+# - A manifold may contain sub-manifolds (recursive).
+# - A container may reference a manifold (live link, not a copy).
+# - A container may embed other containers (composition within a flat artifact).
+# - An artifact may be part of multiple parents (shared components).
+# - Cycles are forbidden — the graph is acyclic.

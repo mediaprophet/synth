@@ -1,0 +1,197 @@
+# Interactive Hypermedia Ontology — HbbTV, 2nd screen, social, sync
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: ihm: (interactive hypermedia domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix ihm:    <https://purl.org/qualia/ontology/interactive-hypermedia#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Interactive Asset
+# ────────────────────────────────────────────────────────────────────
+
+ihm:InteractiveAsset a rdfs:Class ;
+    rdfs:label "Interactive Asset" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "An interactive hypermedia asset — app, overlay, trigger, or stream package." .
+
+ihm:InteractiveType a rdfs:Class ;
+    rdfs:label "Interactive Type" .
+
+ihm:InteractiveApp a ihm:InteractiveType ; rdfs:label "app" .
+ihm:InteractiveOverlay a ihm:InteractiveType ; rdfs:label "overlay" .
+ihm:InteractiveTrigger a ihm:InteractiveType ; rdfs:label "trigger" .
+ihm:InteractiveStream a ihm:InteractiveType ; rdfs:label "stream" .
+
+ihm:interactiveType a rdf:Property ;
+    rdfs:domain ihm:InteractiveAsset ;
+    rdfs:range  ihm:InteractiveType .
+
+ihm:targetPlatform a rdf:Property ;
+    rdfs:domain ihm:InteractiveAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Target platform — HbbTV-2, HbbTV-1, web, mobile, tablet." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Second Screen
+# ────────────────────────────────────────────────────────────────────
+
+ihm:SecondScreen a rdfs:Class ;
+    rdfs:label "Second Screen" ;
+    rdfs:comment "A second-screen companion app configuration." .
+
+ihm:companionAppConfig a rdf:Property ;
+    rdfs:domain ihm:SecondScreen ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Companion app configuration (CBOR-LD encoded)." .
+
+ihm:syncStream a rdf:Property ;
+    rdfs:domain ihm:SecondScreen ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Sync stream IRI." .
+
+ihm:syncMethod a rdf:Property ;
+    rdfs:domain ihm:SecondScreen ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Sync method — timeline, event, wall-clock, SCTE-35." .
+
+ihm:remoteControlMap a rdf:Property ;
+    rdfs:domain ihm:SecondScreen ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Remote control key mapping (CBOR-LD encoded)." .
+
+ihm:pairingMethod a rdf:Property ;
+    rdfs:domain ihm:SecondScreen ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Screen pairing method — QR-code, PIN, audio-watermark, manual." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. HbbTV Package
+# ────────────────────────────────────────────────────────────────────
+
+ihm:HbbTVPackage a rdfs:Class ;
+    rdfs:label "HbbTV Package" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "An HbbTV 2.x packaged application — DVB stream, AIT, app data, DRM." .
+
+ihm:aitConfig a rdf:Property ;
+    rdfs:domain ihm:HbbTVPackage ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Application Information Table configuration (CBOR-LD encoded)." .
+
+ihm:dvbStream a rdf:Property ;
+    rdfs:domain ihm:HbbTVPackage ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of bound DVB stream." .
+
+ihm:drmScheme a rdf:Property ;
+    rdfs:domain ihm:HbbTVPackage ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "DRM scheme — PlayReady, Widevine, FairPlay, Marlin." .
+
+ihm:appData a rdf:Property ;
+    rdfs:domain ihm:HbbTVPackage ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Bundled application data (CBOR-LD encoded)." .
+
+ihm:bandwidthTier a rdf:Property ;
+    rdfs:domain ihm:HbbTVPackage ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Bandwidth tier — low (2Mbps), medium (5Mbps), high (10Mbps+)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Trigger
+# ────────────────────────────────────────────────────────────────────
+
+ihm:Trigger a rdfs:Class ;
+    rdfs:label "Trigger" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A trigger in an interactive timeline — time-based, event-based, user-input, or sensor." .
+
+ihm:TriggerType a rdfs:Class ;
+    rdfs:label "Trigger Type" .
+
+ihm:TimeTrigger a ihm:TriggerType ; rdfs:label "time-based" .
+ihm:EventTrigger a ihm:TriggerType ; rdfs:label "event-based" .
+ihm:UserInputTrigger a ihm:TriggerType ; rdfs:label "user-input" .
+ihm:SensorTrigger a ihm:TriggerType ; rdfs:label "sensor" .
+
+ihm:triggerType a rdf:Property ;
+    rdfs:domain ihm:Trigger ;
+    rdfs:range  ihm:TriggerType .
+
+ihm:triggerCondition a rdf:Property ;
+    rdfs:domain ihm:Trigger ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Trigger condition (CBOR-LD encoded)." .
+
+ihm:triggerAction a rdf:Property ;
+    rdfs:domain ihm:Trigger ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Trigger action — show-overlay, navigate, call-API, start-poll (CBOR-LD encoded)." .
+
+ihm:triggerPosition a rdf:Property ;
+    rdfs:domain ihm:Trigger ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Position on timeline in seconds (for time-based triggers)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Social Layer
+# ────────────────────────────────────────────────────────────────────
+
+ihm:SocialLayer a rdfs:Class ;
+    rdfs:label "Social Layer" ;
+    rdfs:comment "A social interaction layer — chat, poll, reaction, share, co-view." .
+
+ihm:SocialType a rdfs:Class ;
+    rdfs:label "Social Type" .
+
+ihm:ChatSocial a ihm:SocialType ; rdfs:label "chat" .
+ihm:PollSocial a ihm:SocialType ; rdfs:label "poll" .
+ihm:ReactionSocial a ihm:SocialType ; rdfs:label "reaction" .
+ihm:ShareSocial a ihm:SocialType ; rdfs:label "share" .
+ihm:CoViewSocial a ihm:SocialType ; rdfs:label "co-view" .
+
+ihm:socialType a rdf:Property ;
+    rdfs:domain ihm:SocialLayer ;
+    rdfs:range  ihm:SocialType .
+
+ihm:moderationRules a rdf:Property ;
+    rdfs:domain ihm:SocialLayer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Moderation rules (CBOR-LD encoded)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Sync Model
+# ────────────────────────────────────────────────────────────────────
+
+ihm:SyncModel a rdfs:Class ;
+    rdfs:label "Sync Model" ;
+    rdfs:comment "A synchronisation model for interactive content — timeline, event, wall-clock, SCTE-35." .
+
+ihm:SyncType a rdfs:Class ;
+    rdfs:label "Sync Type" .
+
+ihm:TimelineSync a ihm:SyncType ; rdfs:label "timeline-sync" .
+ihm:EventSync a ihm:SyncType ; rdfs:label "event-sync" .
+ihm:WallClockSync a ihm:SyncType ; rdfs:label "wall-clock-sync" .
+ihm:SCTE35Sync a ihm:SyncType ; rdfs:label "scte-35" .
+
+ihm:syncType a rdf:Property ;
+    rdfs:domain ihm:SyncModel ;
+    rdfs:range  ihm:SyncType .
+
+ihm:syncSource a rdf:Property ;
+    rdfs:domain ihm:SyncModel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Sync source — NTP server, SCTE-35 stream, timeline IRI." .
+
+ihm:scte35CueType a rdf:Property ;
+    rdfs:domain ihm:SyncModel ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "SCTE-35 cue type — splice-insert, time-signal, break-start, break-end." .

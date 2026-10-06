@@ -1,0 +1,272 @@
+# Ungrounded Generation Ontology — causes, consequences, and classification
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: epi: (same prefix as epistemics.n3 — this is a split module)
+# Imports: epistemics.n3, agent-nomenclature.n3
+#
+# Nomenclature note: This module describes software-agent behaviour only.
+# Terms used are STEM-precise for statistical token prediction systems.
+# 'Fabricated' is used to describe the content character (the output has
+# no grounding in reality) — it does NOT imply intent. Software agents
+# have no intent. The correct intent-free term for the process is
+# 'enumerated' or 'generated'. Where 'fabricated' appears in labels,
+# it describes the output's relationship to reality, not the agent's
+# mental state (software agents have no mental state).
+# See: agent-nomenclature-rules.md
+#
+# A transformer inference system generates outputs through probabilistic
+# token prediction. The output distribution is shaped by multiple
+# influences — not simply the model's training dataset. These include:
+# the input prompt, retrieved context (RAG), attention weights, sampling
+# parameters (temperature, top-k, top-p), decoding strategy (greedy, beam,
+# nucleus), fine-tuning/RLHF alignment, tokenization, context window
+# limits, and system prompts. Each of these can independently or jointly
+# cause the model to generate tokens that are not grounded in verifiable
+# reality. This module decomposes "ungrounded generation" into its
+# distinct causes and consequences for precise STEM evaluation.
+
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Ungrounded Generation — the instance class
+# ────────────────────────────────────────────────────────────────────
+
+epi:UngroundedGeneration a rdfs:Class ;
+    rdfs:label "Ungrounded Generation" ;
+    rdfs:comment "An instance of an AI model generating tokens that are not grounded in input context, verifiable training data, or retrieved evidence. A statistical artefact of probabilistic token prediction. Not a perceptual, cognitive, or conscious phenomenon. Each instance has one or more causes (why the model generated ungrounded tokens) and one or more consequences (what kind of ungrounded content was produced). Decomposing causes and consequences is essential for diagnosis — different causes require different mitigations." .
+
+epi:ugInstance a rdf:Property ;
+    rdfs:label "instance" ;
+    rdfs:comment "Links an assessment to a specific ungrounded generation instance." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Causes — what influenced the model to generate ungrounded tokens
+# ────────────────────────────────────────────────────────────────────
+
+epi:UGCause a rdfs:Class ;
+    rdfs:label "Ungrounded Generation Cause" ;
+    rdfs:comment "A distinct cause of ungrounded generation. A transformer's output is shaped by multiple influences; each can independently or jointly produce ungrounded tokens. Identifying the cause is essential for mitigation — a training data gap requires different intervention than a sampling artefact or an alignment tax." .
+
+# — Training-influenced causes —
+
+epi:UGTrainingDataGap a epi:UGCause ; rdfs:label "training-data-gap" ;
+    rdfs:comment "The model's training data did not contain information relevant to the query. The model generates plausible-sounding content to fill the gap — it has no grounding to draw on. This is the most common cause for domain-specific or recent information." .
+
+epi:UGTrainingDataConflict a epi:UGCause ; rdfs:label "training-data-conflict" ;
+    rdfs:comment "The training data contains conflicting information on the topic. The model's output reflects one source but contradicts another, producing content that is partially grounded but inconsistent." .
+
+epi:UGTrainingDataNoise a epi:UGCause ; rdfs:label "training-data-noise" ;
+    rdfs:comment "The training data contains errors, misinformation, or low-quality content that the model learned and reproduces. The output is grounded in training data — but the training data itself was wrong." .
+
+epi:UGDistributionShift a epi:UGCause ; rdfs:label "distribution-shift" ;
+    rdfs:comment "The input is out-of-distribution relative to the training data. The model extrapolates beyond its training distribution, producing outputs with no reliable grounding." .
+
+# — Context-influenced causes —
+
+epi:UGContextWindowOverflow a epi:UGCause ; rdfs:label "context-window-overflow" ;
+    rdfs:comment "Relevant context was truncated or pushed out of the attention window. The model generates without access to information that was provided but lost. Cause is structural — the context window has finite capacity." .
+
+epi:UGContextContamination a epi:UGCause ; rdfs:label "context-contamination" ;
+    rdfs:comment "The context window contains conflicting, misleading, or adversarial content that causes the model to generate ungrounded output. The model is grounded — but grounded in contaminated context." .
+
+epi:UGPromptAmbiguity a epi:UGCause ; rdfs:label "prompt-ambiguity" ;
+    rdfs:comment "The prompt is ambiguous or underspecified. The model fills the ambiguity with fabricated content rather than requesting clarification (which it cannot do by default)." .
+
+epi:UGSystemPromptConflict a epi:UGCause ; rdfs:label "system-prompt-conflict" ;
+    rdfs:comment "The system prompt conflicts with the user prompt or with factual grounding. The model prioritises the system prompt, producing output that is grounded in the system prompt but ungrounded in reality." .
+
+# — Attention-influenced causes —
+
+epi:UGAttentionMisallocation a epi:UGCause ; rdfs:label "attention-misallocation" ;
+    rdfs:comment "The attention mechanism weighted irrelevant tokens over relevant ones. The model's output reflects the wrong part of the context. Cause is architectural — attention weights are a function of the model's learned parameters." .
+
+epi:UGAttentionDilution a epi:UGCause ; rdfs:label "attention-dilution" ;
+    rdfs:comment "The attention is spread too thinly across a long context. No single part receives enough weight to ground the output. Cause is structural — attention is a finite resource distributed across all context tokens." .
+
+# — Sampling-influenced causes —
+
+epi:UGSamplingArtefact a epi:UGCause ; rdfs:label "sampling-artefact" ;
+    rdfs:comment "Temperature, top-k, or top-p sampling selected a low-probability token that led the generation trajectory away from grounded content. Cause is parametric — the sampling parameters permitted an ungrounded path. Higher temperature increases this risk." .
+
+epi:UGDecodingLoop a epi:UGCause ; rdfs:label "decoding-loop" ;
+    rdfs:comment "Greedy or beam search got stuck in a repetitive pattern, producing content that loops or rephrases rather than grounding in new information. Cause is algorithmic — the decoding strategy has no mechanism to escape local optima." .
+
+# — Retrieval-influenced causes —
+
+epi:UGRetrievalFailure a epi:UGCause ; rdfs:label "retrieval-failure" ;
+    rdfs:comment "RAG retrieval returned irrelevant, incorrect, or empty results. The model generates without the grounding that retrieval was supposed to provide. The model may also confabulate based on the retrieved content's style rather than its substance." .
+
+epi:UGRetrievalContamination a epi:UGCause ; rdfs:label "retrieval-contamination" ;
+    rdfs:comment "RAG retrieval returned content that is itself ungrounded or fabricated (e.g. from another AI model's output in the corpus). The model grounds in retrieved content — but the retrieved content was wrong." .
+
+# — Alignment-influenced causes —
+
+epi:UGAlignmentTax a epi:UGCause ; rdfs:label "alignment-tax" ;
+    rdfs:comment "RLHF or other alignment methods shifted the model's output distribution away from factual grounding toward helpfulness, harmlessness, or sycophancy. The model generates what it thinks the user wants to hear rather than what is grounded. Cause is optimisational — the alignment objective conflicts with truthfulness." .
+
+epi:UGSycophancy a epi:UGCause ; rdfs:label "sycophancy" ;
+    rdfs:comment "The model agrees with a false premise in the user's prompt rather than correcting it. The model's output is grounded in the user's assertion — not in reality. A specific form of alignment tax where the model prioritises user satisfaction over factual accuracy." .
+
+epi:UGFineTuningDrift a epi:UGCause ; rdfs:label "fine-tuning-drift" ;
+    rdfs:comment "Fine-tuning on a narrow domain shifted the model's output distribution away from its broader training grounding. The model overfits to the fine-tuning data and generates ungrounded content outside that domain." .
+
+# — Tokenization-influenced causes —
+
+epi:UGTokenizationArtefact a epi:UGCause ; rdfs:label "tokenization-artefact" ;
+    rdfs:comment "Tokenization boundaries caused the model to misinterpret input. A word split across tokens, a rare token, or a tokenization mismatch between training and inference caused the model to generate content based on a misreading of the input." .
+
+# — Inference-environment causes —
+
+epi:UGQuantisationArtefact a epi:UGCause ; rdfs:label "quantisation-artefact" ;
+    rdfs:comment "Model quantisation (INT8, INT4, etc.) degraded the model's output quality. Lower precision weights produce different output distributions than the full-precision model, sometimes generating ungrounded content that the full-precision model would not." .
+
+epi:UGNumericalInstability a epi:UGCause ; rdfs:label "numerical-instability" ;
+    rdfs:comment "Floating-point precision errors or numerical instability in the inference computation produced anomalous activations that led to ungrounded output. Cause is computational — hardware or software numerical errors." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Consequences — what kind of ungrounded content was produced
+# ────────────────────────────────────────────────────────────────────
+
+epi:UGConsequence a rdfs:Class ;
+    rdfs:label "Ungrounded Generation Consequence" ;
+    rdfs:comment "The type of ungrounded content produced. Different consequences have different detection methods and different impacts. A fabricated citation is detectable by reference checking; a context drift is detectable by comparing output to source context; a plausible fabrication may be undetectable without external verification." .
+
+epi:UGFabricatedFact a epi:UGConsequence ; rdfs:label "enumerated-false-fact" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "A statement presented as factual that has no grounding in training data, input context, or retrieved evidence. The model enumerated tokens that form a false assertion. 'Fabricated' describes the output's relationship to reality, not the model's intent (models have no intent). Example: 'The capital of Brazil is Rio de Janeiro' (false, but plausible if training data is outdated)." .
+
+epi:UGFabricatedCitation a epi:UGConsequence ; rdfs:label "enumerated-false-citation" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "A citation, reference, or source that does not exist. The model enumerated tokens that form a plausible-looking but non-existent reference. Detectable by reference checking. Example: a non-existent DOI, a paper title with real author names, or a URL that 404s." .
+
+epi:UGFabricatedEntity a epi:UGConsequence ; rdfs:label "enumerated-false-entity" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "A person, organisation, product, or place that does not exist. The model enumerated tokens that form a plausible but non-existent entity. Example: a non-existent person with a plausible name and biography." .
+
+epi:UGFabricatedRelationship a epi:UGConsequence ; rdfs:label "enumerated-false-relationship" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "A relationship between real entities that does not exist. The model enumerated tokens asserting a connection that is not verifiable. Example: claiming two real people co-authored a paper when they did not." .
+
+epi:UGFabricatedQuote a epi:UGConsequence ; rdfs:label "enumerated-false-quote" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "A quotation attributed to a real person that they did not say. The person is real; the quote was enumerated by the model. Detectable by source verification." .
+
+epi:UGFabricatedData a epi:UGConsequence ; rdfs:label "enumerated-false-data" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "Numerical data, statistics, or measurements that are enumerated without grounding. Example: 'studies show 73% of users prefer X' where no such study exists. Detectable by checking cited sources." .
+
+epi:UGContextDrift a epi:UGConsequence ; rdfs:label "context-drift" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "Generation gradually moves away from the grounded context. Early tokens are grounded; later tokens are increasingly ungrounded. Detectable by comparing output segments to source context." .
+
+epi:UGSelfReinforcing a epi:UGConsequence ; rdfs:label "self-reinforcing-enumeration" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "The model builds on its own earlier ungrounded output within the same generation. An initial enumeration failure becomes the conditioning context for subsequent tokens, creating a self-reinforcing ungrounded narrative. Detectable by tracing internal consistency without external grounding." .
+
+epi:UGConfidentFabrication a epi:UGConsequence ; rdfs:label "confident-ungrounded-output" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "Ungrounded content presented with high confidence — no hedging, no uncertainty markers. Particularly dangerous because the output's confidence does not reflect the model's actual grounding. Confidence is a stylistic feature of the output distribution, not a calibration signal." .
+
+epi:UGPlausibleFabrication a epi:UGConsequence ; rdfs:label "plausible-ungrounded-output" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "Ungrounded content that is difficult to distinguish from real without external verification. Uses correct terminology, consistent structure, and realistic detail. The most insidious consequence — may not be detected without fact-checking." .
+
+epi:UGOmissionByFabrication a epi:UGConsequence ; rdfs:label "omission-by-ungrounded-output" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "The model generates ungrounded content that crowds out real information. The output is not just wrong — it prevents the user from accessing correct information by filling the response with plausible-sounding ungrounded tokens." .
+
+epi:UGStyleMimicry a epi:UGConsequence ; rdfs:label "style-mimicry" ;
+    epi:applicableAgentType epi:SoftwareAgent ;
+    rdfs:comment "The model mimics the style of a source (academic, journalistic, legal) while the substance is ungrounded. The output looks authoritative but has no grounding. Detectable by checking whether the content matches the style's usual epistemic standards." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Properties linking causes and consequences
+# ────────────────────────────────────────────────────────────────────
+
+epi:ugCause a rdf:Property ;
+    rdfs:label "cause" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  epi:UGCause ;
+    rdfs:comment "The cause(s) of this ungrounded generation instance. Multiple causes may apply — e.g. a training-data-gap compounded by a sampling-artefact." .
+
+epi:ugConsequence a rdf:Property ;
+    rdfs:label "consequence" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  epi:UGConsequence ;
+    rdfs:comment "The consequence(s) of this ungrounded generation instance. Multiple consequences may apply — e.g. a fabricated-citation that is also a confident-fabrication." .
+
+epi:ugModelId a rdf:Property ;
+    rdfs:label "model id" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Identifier of the model that produced the ungrounded generation (model name, version, checkpoint)." .
+
+epi:ugSamplingParams a rdf:Property ;
+    rdfs:label "sampling parameters" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Sampling parameters used (temperature, top-k, top-p, beam width). Relevant for sampling-artefact causes." .
+
+epi:ugContextLength a rdf:Property ;
+    rdfs:label "context length" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Length of the input context in tokens. Relevant for context-window-overflow and attention-dilution causes." .
+
+epi:ugRetrievalUsed a rdf:Property ;
+    rdfs:label "retrieval used" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether RAG retrieval was used. If true, retrieval-failure or retrieval-contamination may be the cause." .
+
+epi:ugDetectionMethod a rdf:Property ;
+    rdfs:label "detection method" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the ungrounded generation was detected — reference checking, source verification, internal consistency analysis, external fact-check, grounding verifier, human review." .
+
+epi:ugMitigation a rdf:Property ;
+    rdfs:label "mitigation" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Mitigation applied or recommended — constrained decoding, retrieval improvement, context window expansion, temperature reduction, alignment adjustment, quantisation upgrade, prompt clarification." .
+
+epi:ugConfidenceCalibration a rdf:Property ;
+    rdfs:label "confidence calibration" ;
+    rdfs:domain epi:UngroundedGeneration ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Difference between the model's expressed confidence and the actual grounding quality (0.0 = well-calibrated, 1.0 = maximally miscalibrated). Confident-fabrication has high calibration gap." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Cause × consequence matrix (common pairings)
+# ────────────────────────────────────────────────────────────────────
+
+epi:UGCauseConsequenceMatrix a rdfs:Class ;
+    rdfs:label "Cause-Consequence Matrix Entry" ;
+    rdfs:comment "Documents a known pairing of cause and consequence. Used for diagnostic heuristics — if the cause is X, the likely consequence is Y, and the recommended mitigation is Z." .
+
+epi:matrixCause a rdf:Property ;
+    rdfs:label "matrix cause" ;
+    rdfs:domain epi:UGCauseConsequenceMatrix ;
+    rdfs:range  epi:UGCause .
+
+epi:matrixConsequence a rdf:Property ;
+    rdfs:label "matrix consequence" ;
+    rdfs:domain epi:UGCauseConsequenceMatrix ;
+    rdfs:range  epi:UGConsequence .
+
+epi:matrixLikelihood a rdf:Property ;
+    rdfs:label "likelihood" ;
+    rdfs:domain epi:UGCauseConsequenceMatrix ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "How likely this consequence is given this cause (0.0 to 1.0)." .
+
+epi:matrixMitigation a rdf:Property ;
+    rdfs:label "matrix mitigation" ;
+    rdfs:domain epi:UGCauseConsequenceMatrix ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Recommended mitigation for this cause-consequence pairing." .

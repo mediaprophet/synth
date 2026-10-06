@@ -1,0 +1,531 @@
+# Social Connections Ontology — Connection Requests, ZKP Verification,
+# Risk Assessment, Settings Recommendations, Social-Vector Attack
+# Defence, Vulnerable Person Protection
+#
+# Authoring form (N3) — compiled to social-connections.cbor (CBOR-LD)
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Companion file to social.n3 — covers the connection request
+# workflow, ZKP verification, risk assessment, settings
+# recommendations, social-vector attack defence, and vulnerable
+# person protection (including but not limited to child protection).
+#
+# Social-vector attacks are adversarial approaches that exploit
+# the social graph — fake accounts, trolling, grooming, phishing,
+# social engineering, reputation manipulation, isolation tactics,
+# coercive control entry points, and network weaponisation. These
+# attacks affect all users, not just children. However, certain
+# categories of person are at elevated risk and require additional
+# protections: minors, domestic violence survivors, whistleblowers,
+# public figures, persons under guardianship, persons experiencing
+# homelessness or housing insecurity, persons with cognitive
+# impairments, recently separated partners, new immigrants, and
+# others whose social circumstances create vulnerability.
+#
+# Split from social.n3 to respect the 800-line file limit.
+#
+# Imports: social.n3, agency.n3, obligations.n3, guardianship.n3,
+#          settings.n3, provenance.n3, adversarial-relational.n3,
+#          agent-nomenclature.n3, epistemics.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix obl:        <https://qualiadb.org/schema/ui/obligations#> .
+@prefix guard:      <https://qualiadb.org/schema/ui/guardianship#> .
+@prefix set:        <https://qualiadb.org/schema/ui/settings#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix soc:        <https://qualiadb.org/schema/ui/social#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Connection Request — ZKP-verified connection workflow
+# ────────────────────────────────────────────────────────────────────
+# Connection requests are the gateway to new social edges. Rather
+# than a simple "accept/decline", the system supports a ZKP-verified
+# workflow that: (1) validates the requester's identity and
+# credentials without revealing unnecessary data, (2) assesses risk
+# (fake account indicators, trolling patterns, adversarial conduct
+# history, social-vector attack patterns), (3) recommends settings
+# based on the verification results, and (4) for vulnerable persons
+# (including minors), requires guardian or protector approval.
+#
+# This is important for all users — social-vector attacks exploit
+# the ease of creating connections in traditional social platforms.
+# Fake accounts, trolling, grooming, phishing, social engineering,
+# coercive control entry, and network weaponisation affect adults
+# and children alike. Certain categories of person are at elevated
+# risk and require additional protections (see §5 Vulnerable Person
+# Protection).
+
+soc:ConnectionRequest a rdfs:Class ;
+    rdfs:label "Connection Request" ;
+    rdfs:comment "A request to establish a social edge between two entities. Connection requests are not simple accept/decline — they are a ZKP-verified workflow that validates the requester's identity, assesses risk, recommends settings, and (for vulnerable persons, including minors) requires guardian or protector approval. The workflow is designed to make fake accounts harder, detect social-vector attack patterns (trolling, grooming, phishing, social engineering, coercive control entry, network weaponisation), and protect all users — with additional protections for those at elevated risk. Every connection request has provenance and is appendable." .
+
+soc:crRequester a rdf:Property ;
+    rdfs:label "requester" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity requesting the connection." .
+
+soc:crTarget a rdf:Property ;
+    rdfs:label "target" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity receiving the connection request." .
+
+soc:crRequestedEdgeType a rdf:Property ;
+    rdfs:label "requested edge type" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  soc:EdgeType ;
+    rdfs:comment "The type of relationship being requested — e.g. friendship, professional, community-member." .
+
+soc:crStatus a rdf:Property ;
+    rdfs:label "status" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  soc:CRStatus .
+
+soc:CRStatus a rdfs:Class ; rdfs:label "Connection Request Status" .
+soc:crsPending      a soc:CRStatus ; rdfs:label "pending" ;
+    rdfs:comment "Request submitted, awaiting ZKP verification and target decision." .
+soc:crsVerifying    a soc:CRStatus ; rdfs:label "verifying" ;
+    rdfs:comment "ZKP verification in progress — checking identity proofs, credentials, risk indicators." .
+soc:crsGuardianReview a soc:CRStatus ; rdfs:label "guardian-review" ;
+    rdfs:comment "Request requires guardian approval — the target is a minor or vulnerable person under guardianship (see guardianship.n3)." .
+soc:crsAccepted     a soc:CRStatus ; rdfs:label "accepted" ;
+    rdfs:comment "Request accepted — a social edge has been created." .
+soc:crsDeclined     a soc:CRStatus ; rdfs:label "declined" ;
+    rdfs:comment "Request declined by the target or guardian." .
+soc:crsBlocked     a soc:CRStatus ; rdfs:label "blocked" ;
+    rdfs:comment "Request blocked by the system — risk assessment identified adversarial conduct, fake account indicators, or policy violation." .
+soc:crsExpired     a soc:CRStatus ; rdfs:label "expired" ;
+    rdfs:comment "Request expired — not acted upon within the validity period." .
+soc:crsWithdrawn   a soc:CRStatus ; rdfs:label "withdrawn" ;
+    rdfs:comment "Request withdrawn by the requester." .
+
+soc:crProvenance a rdf:Property ;
+    rdfs:label "provenance" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Provenance for this connection request — when submitted, by whom, and all status changes." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. ZKP Verification — proving claims without revealing data
+# ────────────────────────────────────────────────────────────────────
+
+soc:crZKPVerification a rdf:Property ;
+    rdfs:label "zkp verification" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  obl:ZeroKnowledgeValidation ;
+    rdfs:comment "ZKP verification steps performed for this connection request. Multiple ZKPs may be applied — e.g. age proof, identity uniqueness proof, credential proof, community membership proof. Links to obligations.n3 ZeroKnowledgeValidation." .
+
+soc:crZKPClaim a rdf:Property ;
+    rdfs:label "zkp claim" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific ZKP claims requested for this connection — e.g. 'age > 18', 'identity uniqueness (not a duplicate account)', 'holds credential:working-with-children-check', 'not on adversarial conduct registry', 'is member of community:X'. The claims requested depend on the target's settings, the requested edge type, and the target's vulnerability status." .
+
+# Standard ZKP claim types for connection requests
+soc:zcpAgeProof a rdfs:Class ;
+    rdfs:label "Age Proof ZKP Claim" ;
+    rdfs:comment "ZKP claim that proves the requester's age category without revealing date of birth. Critical for child protection — the system can verify whether the requester is an adult, peer, or minor without storing or revealing exact age." .
+
+soc:zcpAgeRange a rdf:Property ;
+    rdfs:label "age range" ;
+    rdfs:domain soc:zcpAgeProof ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The age range proven — e.g. 'under-13', '13-15', '16-17', '18-25', '25+', '65+'. The ranges are coarse to protect privacy while enabling protection decisions." .
+
+soc:zcpIdentityUniqueness a rdfs:Class ;
+    rdfs:label "Identity Uniqueness ZKP Claim" ;
+    rdfs:comment "ZKP claim that proves the requester's identity is unique — not a duplicate or fake account. This is harder to forge in the QualiaDB ecosystem because DIDs are cryptographically bound to keys and biometric baselines (where available). The proof verifies that the requester's DID has not been linked to another active account." .
+
+soc:zcpCredential a rdfs:Class ;
+    rdfs:label "Credential ZKP Claim" ;
+    rdfs:comment "ZKP claim that proves the requester holds a specific credential without revealing its details — e.g. 'holds working-with-children-check', 'holds medical licence', 'holds security clearance'. Links to learning-core.n3 qualifications." .
+
+soc:zcpCommunityMembership a rdfs:Class ;
+    rdfs:label "Community Membership ZKP Claim" ;
+    rdfs:comment "ZKP claim that proves the requester is a member of a specific community — e.g. 'is member of school:X', 'is member of faith-community:Y'. Provides social validation without revealing the requester's full community membership list." .
+
+soc:zcpConductClear a rdfs:Class ;
+    rdfs:label "Conduct Clear ZKP Claim" ;
+    rdfs:comment "ZKP claim that proves the requester is not on an adversarial conduct registry — i.e. has no documented adversarial conduct record that would pose a risk. The proof does not reveal whether the requester has ever been investigated — only whether they are currently on a conduct registry that would block the connection. This protects due process while enabling protection." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Risk Assessment — computational pattern evaluation
+# ────────────────────────────────────────────────────────────────────
+
+soc:RiskAssessment a rdfs:Class ;
+    rdfs:label "Risk Assessment" ;
+    rdfs:comment "A structured assessment of the risk posed by a connection request. Risk assessment is computational — the system evaluates indicators, not intent. The assessment does not determine whether the requester is 'bad' — it identifies whether the request matches patterns associated with adversarial conduct, fake accounts, or trolling. The assessment is evidence-based and appendable." .
+
+soc:raRiskLevel a rdf:Property ;
+    rdfs:label "risk level" ;
+    rdfs:domain soc:RiskAssessment ;
+    rdfs:range  soc:RiskLevel .
+
+soc:RiskLevel a rdfs:Class ; rdfs:label "Risk Level" .
+soc:rlNone     a soc:RiskLevel ; rdfs:label "none" ;
+    rdfs:comment "No risk indicators detected." .
+soc:rlLow      a soc:RiskLevel ; rdfs:label "low" ;
+    rdfs:comment "Minor indicators — new account, limited history. Not blocking but warrants caution." .
+soc:rlModerate a soc:RiskLevel ; rdfs:label "moderate" ;
+    rdfs:comment "Multiple indicators — new account with no shared contacts, no community overlap, no verified credentials. Recommend restricted initial settings." .
+soc:rlHigh     a soc:RiskLevel ; rdfs:label "high" ;
+    rdfs:comment "Strong indicators — pattern matching known adversarial conduct, trolling, or fake account behaviour. Recommend blocking or requiring additional verification." .
+soc:rlCritical a soc:RiskLevel ; rdfs:label "critical" ;
+    rdfs:comment "Critical indicators — requester is on an adversarial conduct registry, has documented harm history, or matches trafficking/grooming patterns. Block automatically and notify guardian if target is a minor." .
+
+soc:raIndicator a rdf:Property ;
+    rdfs:label "indicator" ;
+    rdfs:domain soc:RiskAssessment ;
+    rdfs:range  soc:RiskIndicator ;
+    rdfs:comment "A specific risk indicator detected during assessment. Multiple indicators may be present." .
+
+soc:RiskIndicator a rdfs:Class ; rdfs:label "Risk Indicator" .
+soc:riNewAccount      a soc:RiskIndicator ; rdfs:label "new-account" ;
+    rdfs:comment "Account was recently created — insufficient history to assess." .
+soc:riNoSharedContacts a soc:RiskIndicator ; rdfs:label "no-shared-contacts" ;
+    rdfs:comment "Requester has no mutual contacts with the target — no social validation." .
+soc:riNoCommunityOverlap a soc:RiskIndicator ; rdfs:label "no-community-overlap" ;
+    rdfs:comment "Requester shares no communities with the target." .
+soc:riUnverifiedIdentity a soc:RiskIndicator ; rdfs:label "unverified-identity" ;
+    rdfs:comment "Requester has not completed identity verification ZKPs." .
+soc:riDuplicateAccount a soc:RiskIndicator ; rdfs:label "duplicate-account" ;
+    rdfs:comment "Requester's identity proof indicates a possible duplicate — same biometric or device as an existing account." .
+soc:riConductHistory a soc:RiskIndicator ; rdfs:label "conduct-history" ;
+    rdfs:comment "Requester has documented adversarial conduct — links to adversarial-relational.n3 records." .
+soc:riTrollingPattern a soc:RiskIndicator ; rdfs:label "trolling-pattern" ;
+    rdfs:comment "Requester's interaction history matches trolling patterns — provocation, escalation, target cycling. Computational assessment, not intent attribution." .
+soc:riGroomingPattern a soc:RiskIndicator ; rdfs:label "grooming-pattern" ;
+    rdfs:comment "Requester's interaction history matches grooming patterns — love bombing, isolation, escalating contact, targeting vulnerability. Computational assessment. Critical when target is a minor or other vulnerable person." .
+soc:riIdentityMismatch a soc:RiskIndicator ; rdfs:label "identity-mismatch" ;
+    rdfs:comment "Requester's presented identity does not match ZKP-verified claims — e.g. claims to be a peer but age proof shows adult, claims to be unaffiliated but community membership proof shows institutional tie. Critical when target is vulnerable." .
+soc:riSocialEngineering a soc:RiskIndicator ; rdfs:label "social-engineering" ;
+    rdfs:comment "Requester's approach matches social engineering patterns — urgency, authority claim, reciprocity manipulation, scarcity pressure, impersonation of trusted contact. Computational assessment of interaction patterns, not intent attribution." .
+soc:riPhishingVector a soc:RiskIndicator ; rdfs:label "phishing-vector" ;
+    rdfs:comment "Requester's interaction history matches phishing vectors — credential requests, link injection, impersonation of institution, fake support contact. Computational assessment." .
+soc:riNetworkWeaponisation a soc:RiskIndicator ; rdfs:label "network-weaponisation" ;
+    rdfs:comment "Requester appears to be a proxy node in a coordinated social-vector campaign — multiple connection attempts to the target's network, flying monkey recruitment pattern (see adversarial-relational.n3). Computational assessment." .
+soc:riCoerciveControlEntry a soc:RiskIndicator ; rdfs:label "coercive-control-entry" ;
+    rdfs:comment "Requester's approach matches coercive control entry patterns — charm offensive, rapid intimacy escalation, isolation from existing contacts, dependency creation. Links to adversarial-relational.n3 coercive control phases (grooming → consolidation). Critical for recently separated partners and domestic violence survivors." .
+
+soc:raEvidence a rdf:Property ;
+    rdfs:label "evidence" ;
+    rdfs:domain soc:RiskAssessment ;
+    rdfs:range  prov:Provenance ;
+    rdfs:comment "Evidence supporting the risk assessment — interaction history, conduct records, ZKP verification results. Risk assessments must be evidence-based." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Settings Recommendation — system-suggested connection settings
+# ────────────────────────────────────────────────────────────────────
+
+soc:SettingsRecommendation a rdfs:Class ;
+    rdfs:label "Settings Recommendation" ;
+    rdfs:comment "System-generated settings recommendations for a new connection. These are recommendations, not impositions — the user (or guardian, for minors) may accept, modify, or reject them. Recommendations are based on ZKP verification results, risk assessment, and the target's existing settings and preferences." .
+
+soc:crSettingsRecommendation a rdf:Property ;
+    rdfs:label "settings recommendation" ;
+    rdfs:domain soc:ConnectionRequest ;
+    rdfs:range  soc:SettingsRecommendation .
+
+soc:srDisclosureLevel a rdf:Property ;
+    rdfs:label "recommended disclosure level" ;
+    rdfs:domain soc:SettingsRecommendation ;
+    rdfs:range  soc:DisclosureLevel .
+
+soc:srMonitoring a rdf:Property ;
+    rdfs:label "monitoring" ;
+    rdfs:domain soc:SettingsRecommendation ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether interaction monitoring is recommended — the system watches for adversarial conduct patterns." .
+
+soc:srGuardianNotification a rdf:Property ;
+    rdfs:label "guardian notification" ;
+    rdfs:domain soc:SettingsRecommendation ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the guardian should be notified of the connection — required for minors." .
+
+soc:srInitialPeriod a rdf:Property ;
+    rdfs:label "initial period" ;
+    rdfs:domain soc:SettingsRecommendation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A recommended time-limited initial period during which the connection has restricted settings — e.g. '30-days-restricted'. After the period, the connection may be upgraded if no risk indicators emerged." .
+
+soc:srCapabilityScope a rdf:Property ;
+    rdfs:label "capability scope" ;
+    rdfs:domain soc:SettingsRecommendation ;
+    rdfs:range  set:CapabilityScope ;
+    rdfs:comment "Recommended capability scope for the connection — what the connection may access. Links to settings.n3." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Social-Vector Attack Defence & Vulnerable Person Protection
+# ────────────────────────────────────────────────────────────────────
+# Social-vector attacks exploit the social graph to cause harm.
+# They include: fake accounts, trolling, grooming, phishing, social
+# engineering, coercive control entry, network weaponisation,
+# reputation manipulation, isolation tactics, and radicalisation.
+# These attacks affect all users. However, certain categories of
+# person are at elevated risk due to their social circumstances:
+#
+#   - Minors — grooming, bullying, sexual exploitation, radicalisation
+#   - Recently separated partners — coercive control re-entry,
+#     stalking, proxy harassment
+#   - Domestic violence survivors — re-contact by abuser, location
+#     discovery, proxy networks
+#   - Whistleblowers — retaliation networks, professional sabotage,
+#     isolation
+#   - Public figures — coordinated harassment, reputation attacks,
+#     stalking
+#   - Persons under guardianship — exploitation, undue influence
+#   - Persons experiencing homelessness or housing insecurity —
+#     dependency exploitation, resource leverage
+#   - Persons with cognitive impairments — manipulation, financial
+#     exploitation, undue influence
+#   - New immigrants / refugees — isolation exploitation, cultural
+#     vulnerability, language barrier exploitation
+#   - Persons in substance recovery — dependency exploitation,
+#     relapse targeting
+#   - Elderly persons — financial exploitation, isolation,
+#     impersonation scams
+#
+# Vulnerable person protection policies are mandatory for
+# categories where the vulnerability is structural (minors,
+# persons under guardianship). For situational vulnerabilities
+# (recently separated, DV survivor, whistleblower), the policy is
+# opt-in but strongly recommended. In all cases, the protected
+# person may not consent to removal of their own protections where
+# the vulnerability is structural — this is a design principle,
+# not a configurable option.
+
+soc:SocialVectorAttack a rdfs:Class ;
+    rdfs:label "Social-Vector Attack" ;
+    rdfs:comment "An adversarial approach that exploits the social graph to cause harm. Social-vector attacks use the connection fabric of the system — friend requests, community membership, shared contacts, reputation — as vectors for adversarial conduct. Unlike direct attacks (threats, violence), social-vector attacks are indirect — they manipulate the social environment around the target. Links to adversarial-relational.n3 and adversarial-relational-scenarios.n3. Social-vector attacks are computational patterns — the system detects them by pattern matching, not by attributing intent." .
+
+soc:svaType a rdf:Property ;
+    rdfs:label "type" ;
+    rdfs:domain soc:SocialVectorAttack ;
+    rdfs:range  soc:SVAType .
+
+soc:SVAType a rdfs:Class ; rdfs:label "Social-Vector Attack Type" .
+soc:svatFakeAccount      a soc:SVAType ; rdfs:label "fake-account" ;
+    rdfs:comment "Fake or duplicate account used to bypass blocks, impersonate, or gain trust under false pretences." .
+soc:svatTrolling         a soc:SVAType ; rdfs:label "trolling" ;
+    rdfs:comment "Provocation, escalation, and target cycling through the social graph. Links to adversarial-relational.n3 relational aggression." .
+soc:svatGrooming         a soc:SVAType ; rdfs:label "grooming" ;
+    rdfs:comment "Love bombing, isolation, escalating contact, dependency creation. Targets vulnerability. Links to adversarial-relational.n3 coercive control phases." .
+soc:svatPhishing         a soc:SVAType ; rdfs:label "phishing" ;
+    rdfs:comment "Credential theft, link injection, impersonation of institution or trusted contact." .
+soc:svatSocialEngineering a soc:SVAType ; rdfs:label "social-engineering" ;
+    rdfs:comment "Urgency, authority claim, reciprocity manipulation, scarcity pressure, impersonation." .
+soc:svatCoerciveControlEntry a soc:SVAType ; rdfs:label "coercive-control-entry" ;
+    rdfs:comment "Charm offensive, rapid intimacy escalation, isolation from existing contacts, dependency creation. Entry point for coercive control cycle." .
+soc:svatNetworkWeaponisation a soc:SVAType ; rdfs:label "network-weaponisation" ;
+    rdfs:comment "Coordinated campaign using multiple accounts or proxy agents (flying monkeys) to harass, isolate, or manipulate the target's social environment." .
+soc:svatReputationManipulation a soc:SVAType ; rdfs:label "reputation-manipulation" ;
+    rdfs:comment "Coordinated false reputation assessments, smear campaigns, or reputation inflation. Links to adversarial-relational.n3 gossip/rumour spreading." .
+soc:svatIsolationTactics a soc:SVAType ; rdfs:label "isolation-tactics" ;
+    rdfs:comment "Systematic severing of the target's social edges, community exclusion, creating dependency on the attacker. Links to adversarial-relational.n3 social isolation." .
+soc:svatRadicalisation   a soc:SVAType ; rdfs:label "radicalisation" ;
+    rdfs:comment "Gradual ideological manipulation through targeted content and social reinforcement. May target minors or isolated persons." .
+
+soc:VulnerablePersonCategory a rdfs:Class ;
+    rdfs:label "Vulnerable Person Category" ;
+    rdfs:comment "A category of person at elevated risk from social-vector attacks. Vulnerability may be structural (age, legal status, cognitive capacity) or situational (recent separation, DV survival, whistleblower status). The category determines which protections are mandatory vs recommended." .
+
+soc:vpcMinor a soc:VulnerablePersonCategory ; rdfs:label "minor" ;
+    rdfs:comment "Person under the age of majority. Structural vulnerability — protections are mandatory and non-overridable." .
+soc:vpcUnderGuardianship a soc:VulnerablePersonCategory ; rdfs:label "under-guardianship" ;
+    rdfs:comment "Person under formal legal guardianship. Structural vulnerability — protections are mandatory, set by guardian." .
+soc:vpcRecentlySeparated a soc:VulnerablePersonCategory ; rdfs:label "recently-separated" ;
+    rdfs:comment "Recently separated from a partner. Situational vulnerability — protections are opt-in but strongly recommended. Elevated risk of coercive control re-entry, stalking, proxy harassment." .
+soc:vpcDVSurvivor a soc:VulnerablePersonCategory ; rdfs:label "domestic-violence-survivor" ;
+    rdfs:comment "Survivor of domestic violence. Situational vulnerability — protections are opt-in but strongly recommended. Elevated risk of re-contact, location discovery, proxy networks." .
+soc:vpcWhistleblower a soc:VulnerablePersonCategory ; rdfs:label "whistleblower" ;
+    rdfs:comment "Person who has reported misconduct. Situational vulnerability — protections are opt-in. Elevated risk of retaliation networks, professional sabotage, isolation." .
+soc:vpcPublicFigure a soc:VulnerablePersonCategory ; rdfs:label "public-figure" ;
+    rdfs:comment "Person with public visibility. Situational vulnerability — protections are opt-in. Elevated risk of coordinated harassment, reputation attacks, stalking." .
+soc:vpcHousingInsecure a soc:VulnerablePersonCategory ; rdfs:label "housing-insecure" ;
+    rdfs:comment "Person experiencing homelessness or housing insecurity. Situational vulnerability — protections are opt-in. Elevated risk of dependency exploitation, resource leverage." .
+soc:vpcCognitiveImpairment a soc:VulnerablePersonCategory ; rdfs:label "cognitive-impairment" ;
+    rdfs:comment "Person with cognitive impairment affecting decision-making. Structural vulnerability — protections may be mandatory, set by guardian or advocate." .
+soc:vpcNewImmigrant a soc:VulnerablePersonCategory ; rdfs:label "new-immigrant" ;
+    rdfs:comment "Recent immigrant or refugee with limited local social network. Situational vulnerability — protections are opt-in. Elevated risk of isolation exploitation, cultural vulnerability, language barrier exploitation." .
+soc:vpcSubstanceRecovery a soc:VulnerablePersonCategory ; rdfs:label "substance-recovery" ;
+    rdfs:comment "Person in recovery from substance dependency. Situational vulnerability — protections are opt-in. Elevated risk of dependency exploitation, relapse targeting." .
+soc:vpcElderly a soc:VulnerablePersonCategory ; rdfs:label "elderly" ;
+    rdfs:comment "Elderly person. Structural/situational vulnerability — protections may be mandatory or opt-in depending on capacity assessment. Elevated risk of financial exploitation, isolation, impersonation scams." .
+
+soc:VulnerablePersonProtection a rdfs:Class ;
+    rdfs:label "Vulnerable Person Protection" ;
+    rdfs:comment "A protection policy for a person at elevated risk from social-vector attacks. Generalises child protection to all vulnerable person categories. For structural vulnerabilities (minors, under guardianship, cognitive impairment), the policy is mandatory and non-overridable by the protected person. For situational vulnerabilities (recently separated, DV survivor, whistleblower), the policy is opt-in but strongly recommended. The policy specifies: who may connect, what disclosure is permitted, whether approval is required, what monitoring is active, and what conduct patterns trigger alerts." .
+
+soc:vppProtectedPerson a rdf:Property ;
+    rdfs:label "protected person" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  agency:NaturalPerson ;
+    rdfs:comment "The person protected by this policy." .
+
+soc:vppCategory a rdf:Property ;
+    rdfs:label "category" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  soc:VulnerablePersonCategory ;
+    rdfs:comment "The vulnerability category that triggers this protection. A person may have multiple categories — e.g. a minor who is also a DV survivor." .
+
+soc:vppProtector a rdf:Property ;
+    rdfs:label "protector" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  agency:NaturalPerson ;
+    rdfs:comment "The person who set this protection — for minors and persons under guardianship, this is the guardian (links to guardianship.n3). For situational vulnerabilities, this may be the protected person themselves, an advocate, or a trusted contact." .
+
+soc:vppGuardianshipRelation a rdf:Property ;
+    rdfs:label "guardianship relation" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  guard:GuardianshipRelation ;
+    rdfs:comment "The formal guardianship relation that authorises this protection — links to guardianship.n3. Only set for structural vulnerabilities." .
+
+soc:vppMandatory a rdf:Property ;
+    rdfs:label "mandatory" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this protection is mandatory (non-overridable by the protected person) or opt-in. Mandatory for structural vulnerabilities; opt-in for situational vulnerabilities." .
+
+soc:vppConnectionApproval a rdf:Property ;
+    rdfs:label "connection approval" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  soc:ApprovalMode .
+
+soc:ApprovalMode a rdfs:Class ; rdfs:label "Approval Mode" .
+soc:amAlways      a soc:ApprovalMode ; rdfs:label "always-required" ;
+    rdfs:comment "Protector must approve every connection request." .
+soc:amAgeBased    a soc:ApprovalMode ; rdfs:label "age-based" ;
+    rdfs:comment "Protector approval required for connections from persons outside a verified age range — e.g. no connections from adults to minors without protector approval." .
+soc:amRiskBased   a soc:ApprovalMode ; rdfs:label "risk-based" ;
+    rdfs:comment "Protector approval required only when risk assessment indicates moderate or higher risk." .
+soc:amCommunityBased a soc:ApprovalMode ; rdfs:label "community-based" ;
+    rdfs:comment "Protector approval required for connections from persons outside the protected person's known communities." .
+soc:amNetworkBased a soc:ApprovalMode ; rdfs:label "network-based" ;
+    rdfs:comment "Protector approval required for connections from persons with no shared contacts in the protected person's network. Prevents social-vector attacks from outside the trusted network." .
+soc:amNone        a soc:ApprovalMode ; rdfs:label "none" ;
+    rdfs:comment "No protector approval required — the protected person may accept connections independently. Not recommended for structural vulnerabilities." .
+
+soc:vppMaxDisclosureLevel a rdf:Property ;
+    rdfs:label "max disclosure level" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  soc:DisclosureLevel ;
+    rdfs:comment "The maximum disclosure level permitted for the protected person's connections — e.g. for minors typically 'acquaintance' or 'personal', never 'intimate' or 'selfhood'. For DV survivors, location-related disclosure may be restricted." .
+
+soc:vppMonitoringMode a rdf:Property ;
+    rdfs:label "monitoring mode" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  soc:MonitoringMode .
+
+soc:MonitoringMode a rdfs:Class ; rdfs:label "Monitoring Mode" .
+soc:mmPassive    a soc:MonitoringMode ; rdfs:label "passive" ;
+    rdfs:comment "Passive monitoring — the system watches for risk indicators and alerts the protector if patterns emerge. Does not inspect message content." .
+soc:mmActive     a soc:MonitoringMode ; rdfs:label "active" ;
+    rdfs:comment "Active monitoring — the system watches for risk indicators AND inspects for social-vector attack patterns (grooming, bullying, exploitation, coercive control). May inspect message metadata and conduct pattern matching. Protector is alerted if patterns are detected." .
+soc:mmOff        a soc:MonitoringMode ; rdfs:label "off" ;
+    rdfs:comment "No monitoring — the protected person's interactions are private. Not recommended for structural vulnerabilities or high-risk situational vulnerabilities." .
+
+soc:vppAlertTrigger a rdf:Property ;
+    rdfs:label "alert trigger" ;
+    rdfs:domain soc:VulnerablePersonProtection ;
+    rdfs:range  soc:AlertTrigger ;
+    rdfs:comment "Conditions that trigger an alert to the protector." .
+
+soc:AlertTrigger a rdfs:Class ; rdfs:label "Alert Trigger" .
+soc:atGroomingPattern a soc:AlertTrigger ; rdfs:label "grooming-pattern-detected" ;
+    rdfs:comment "Grooming pattern detected in interactions — love bombing, isolation, escalating contact, sexual content. Applies to all vulnerable categories, not just minors." .
+soc:atBullyingPattern a soc:AlertTrigger ; rdfs:label "bullying-pattern-detected" ;
+    rdfs:comment "Bullying pattern detected — relational aggression, social exclusion, smear campaign. Links to adversarial-relational.n3." .
+soc:atAdultContact a soc:AlertTrigger ; rdfs:label "adult-contact-minor" ;
+    rdfs:comment "An adult (age-verified) is attempting to connect with a minor without protector approval. Specific to minor protection." .
+soc:atRiskyConnection a soc:AlertTrigger ; rdfs:label "risky-connection" ;
+    rdfs:comment "A connection request with moderate or higher risk assessment has been received." .
+soc:atLocationSharing a soc:AlertTrigger ; rdfs:label "location-sharing" ;
+    rdfs:comment "The protected person is sharing location information with a connection that has not been protector-approved. Critical for DV survivors and stalking targets." .
+soc:atIsolationPattern a soc:AlertTrigger ; rdfs:label "isolation-pattern" ;
+    rdfs:comment "The protected person's social graph shows isolation patterns — reduction in existing connections, increase in single new connection. Links to adversarial-relational.n3 social isolation." .
+soc:atIdentityMismatch a soc:AlertTrigger ; rdfs:label "identity-mismatch" ;
+    rdfs:comment "A connection's presented identity does not match their ZKP-verified claims. Critical alert for all vulnerable categories." .
+soc:atCoerciveControlPattern a soc:AlertTrigger ; rdfs:label "coercive-control-pattern" ;
+    rdfs:comment "Coercive control pattern detected — charm offensive followed by isolation, dependency creation, monitoring demands. Critical for recently separated partners and DV survivors. Links to adversarial-relational.n3 coercive control phases." .
+soc:atNetworkWeaponisation a soc:AlertTrigger ; rdfs:label "network-weaponisation" ;
+    rdfs:comment "Coordinated multi-account or proxy campaign detected — multiple new connections from related accounts, flying monkey pattern. Links to adversarial-relational.n3 proxy perpetration." .
+soc:atRetaliationPattern a soc:AlertTrigger ; rdfs:label "retaliation-pattern" ;
+    rdfs:comment "Retaliation pattern detected — connections from persons in the same institution as a reported misconduct. Specific to whistleblower protection." .
+soc:atFinancialExploitation a soc:AlertTrigger ; rdfs:label "financial-exploitation" ;
+    rdfs:comment "Financial exploitation pattern detected — requests for money, financial information, or asset transfer from a new connection. Critical for elderly and cognitively impaired persons." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (social-connections.n3) links to:
+#
+# social.n3:
+#   - ConnectionRequest creates SocialEdge instances
+#   - RiskAssessment uses RiskIndicator and RiskLevel
+#   - SettingsRecommendation uses DisclosureLevel from social.n3
+#   - VulnerablePersonProtection uses DisclosureLevel and EdgeType
+#
+# agency.n3:
+#   - Connection requests involve entities (requester, target)
+#   - Vulnerable person protections involve NaturalPerson
+#     (protected person, protector)
+#
+# obligations.n3:
+#   - ZKP verification uses ZeroKnowledgeValidation
+#   - Vulnerable person protections may reference
+#     ConfidentialityInstrument
+#   - Disclosure exceptions may apply to protection alerts
+#   - Coercive circumstances link to DV survivor protections
+#
+# guardianship.n3:
+#   - VulnerablePersonProtection links to GuardianshipRelation
+#     for structural vulnerabilities
+#   - Guardian authority over protected person's social connections
+#   - GuardedSubject may include social-interaction-guardianship
+#
+# settings.n3:
+#   - SettingsRecommendation links to CapabilityScope
+#   - Privacy preferences may be overridden by mandatory protections
+#   - Profile type 'guest' may be used for unverified requesters
+#
+# provenance.n3:
+#   - All connection requests have provenance
+#   - Risk assessments are evidence-based with provenance
+#
+# adversarial-relational.n3 / adversarial-relational-scenarios.n3:
+#   - Social-vector attack types link to adversarial conduct methods
+#   - Grooming pattern detection links to sexual manipulation /
+#     coercive control phases
+#   - Trolling pattern detection links to relational aggression
+#   - Network weaponisation links to proxy perpetration /
+#     flying monkey recruitment
+#   - Coercive control entry links to coercive control phases
+#   - Isolation tactics link to social isolation methods
+#   - Reputation manipulation links to gossip/rumour spreading
+#   - Adolescent relational aggression scenario links to alert triggers
+#   - Intergenerational transmission scenario links to child protection
+#   - All scenarios inform vulnerable person category risk profiles
+#
+# agent-nomenclature.n3:
+#   - Risk assessment is computational (SoftwareAgent terms)
+#   - Emotional support is mind-dependent (NaturalAgent terms)
+#   - Protector decisions are mind-dependent (NaturalAgent terms)
+#   - Social-vector attack detection is computational pattern matching
+#
+# epistemics.n3:
+#   - ZKP verification results have epistemic status
+#   - Risk assessments have epistemic mode (computational, pattern-based)
+#   - Vulnerability category assignment has epistemic mode
+#     (structural: verified; situational: declared + assessed)

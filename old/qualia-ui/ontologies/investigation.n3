@@ -1,0 +1,939 @@
+# Investigation Ontology — Cases, Evidence, Hypotheses, Timelines, Forensic/Forecasting
+# Authoring form (N3) — compiled to investigation.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+@prefix pres:       <https://qualiadb.org/schema/ui/presentation#> .
+@prefix prov:       <https://qualiadb.org/schema/ui/provenance#> .
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix code:       <https://qualiadb.org/schema/ui/code#> .
+@prefix inv:        <https://qualiadb.org/schema/ui/investigation#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Investigation — the top-level case or inquiry
+# ────────────────────────────────────────────────────────────────────
+
+inv:Investigation a rdfs:Class ;
+    rdfs:label "Investigation" ;
+    rdfs:comment "A structured inquiry into a subject, topic, event, or case. An investigation may be forensic (backward-looking, evidence-based reconstruction) or forecasting (forward-looking, predictive modelling). Some investigations have both forensic and forecasting constituencies — they reconstruct what happened AND project what may happen next." .
+
+inv:InvestigationMode a rdfs:Class ;
+    rdfs:label "Investigation Mode" ;
+    rdfs:comment "The primary mode of an investigation." .
+
+inv:Forensic a inv:InvestigationMode ;
+    rdfs:label "Forensic" ;
+    rdfs:comment "Backward-looking. Reconstructs what happened from evidence. Focuses on chain of custody, verification, timeline reconstruction, and causal analysis. Examples: fraud investigation, incident reconstruction, historical research, medical diagnosis." .
+
+inv:Forecasting a inv:InvestigationMode ;
+    rdfs:label "Forecasting" ;
+    rdfs:comment "Forward-looking. Projects what may happen based on patterns, trends, and models. Focuses on scenario generation, probability estimation, and risk assessment. Examples: market forecasting, epidemic projection, threat assessment, climate modelling." .
+
+inv:Hybrid a inv:InvestigationMode ;
+    rdfs:label "Hybrid" ;
+    rdfs:comment "Both forensic and forecasting. Reconstructs past events AND projects future outcomes. Example: a fraud investigation that reconstructs the fraud (forensic) and forecasts future risk exposure (forecasting). A medical diagnosis that determines what happened (forensic) and projects disease progression (forecasting)." .
+
+# — Investigation properties —
+
+inv:hasMode a rdf:Property ;
+    rdfs:label "has mode" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:InvestigationMode .
+
+inv:hasSubject a rdf:Property ;
+    rdfs:label "has subject" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Subject ;
+    rdfs:comment "The primary subject of the investigation." .
+
+inv:hasTopic a rdf:Property ;
+    rdfs:label "has topic" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Topic ;
+    rdfs:comment "A topic area the investigation covers." .
+
+inv:hasEvent a rdf:Property ;
+    rdfs:label "has event" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Event ;
+    rdfs:comment "An event under investigation." .
+
+inv:hasCase a rdf:Property ;
+    rdfs:label "has case" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Case ;
+    rdfs:comment "A case file associated with the investigation." .
+
+inv:hasHypothesis a rdf:Property ;
+    rdfs:label "has hypothesis" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Hypothesis .
+
+inv:hasEvidence a rdf:Property ;
+    rdfs:label "has evidence" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Evidence .
+
+inv:hasTimeline a rdf:Property ;
+    rdfs:label "has timeline" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Timeline .
+
+inv:hasScenario a rdf:Property ;
+    rdfs:label "has scenario" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Scenario ;
+    rdfs:comment "A forecast scenario (forecasting mode)." .
+
+inv:hasConstituency a rdf:Property ;
+    rdfs:label "has constituency" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Constituency ;
+    rdfs:comment "A group with a stake in the investigation outcome." .
+
+inv:hasJurisdiction a rdf:Property ;
+    rdfs:label "has jurisdiction" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Legal or regulatory jurisdiction scope (e.g. 'AU-NSW', 'EU-GDPR', 'WHO-International')." .
+
+inv:investigationStatus a rdf:Property ;
+    rdfs:label "investigation status" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:InvestigationStatus .
+
+inv:InvestigationStatus a rdfs:Class ;
+    rdfs:label "Investigation Status" .
+
+inv:StatusOpen       a inv:InvestigationStatus ; rdfs:label "Open" .
+inv:StatusSuspended  a inv:InvestigationStatus ; rdfs:label "Suspended" .
+inv:StatusConcluded  a inv:InvestigationStatus ; rdfs:label "Concluded" .
+inv:StatusColdCase   a inv:InvestigationStatus ; rdfs:label "Cold Case" .
+inv:StatusReopened   a inv:InvestigationStatus ; rdfs:label "Reopened" .
+inv:StatusOngoing    a inv:InvestigationStatus ; rdfs:label "Ongoing" ;
+    rdfs:comment "For forecasting investigations that continuously update." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Subject, Topic, Event, Case
+# ────────────────────────────────────────────────────────────────────
+
+inv:Subject a rdfs:Class ;
+    rdfs:label "Subject" ;
+    rdfs:comment "A person, entity, organisation, system, or phenomenon under investigation. A subject may be linked to an agency:Entity (natural person, legal person) or may be a non-person subject (a disease, a market, a climate system, a technology)." .
+
+inv:subjectEntity a rdf:Property ;
+    rdfs:label "subject entity" ;
+    rdfs:domain inv:Subject ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI linking to an agency:Entity if the subject is a person or organisation." .
+
+inv:subjectType a rdf:Property ;
+    rdfs:label "subject type" ;
+    rdfs:domain inv:Subject ;
+    rdfs:range  inv:SubjectType .
+
+inv:SubjectType a rdfs:Class ; rdfs:label "Subject Type" .
+
+inv:personSubject       a inv:SubjectType ; rdfs:label "person" .
+inv:organisationSubject a inv:SubjectType ; rdfs:label "organisation" .
+inv:systemSubject       a inv:SubjectType ; rdfs:label "system" ;
+    rdfs:comment "A technical, biological, or social system under investigation." .
+inv:phenomenonSubject   a inv:SubjectType ; rdfs:label "phenomenon" ;
+    rdfs:comment "A natural or social phenomenon (disease outbreak, market trend, climate pattern)." .
+inv:eventSubject        a inv:SubjectType ; rdfs:label "event" ;
+    rdfs:comment "A specific event or incident." .
+
+inv:Topic a rdfs:Class ;
+    rdfs:label "Topic" ;
+    rdfs:comment "A subject area or theme of the investigation. Topics may be hierarchical (a topic may have sub-topics). Topics link to ontologies and datasource bindings for structured querying." .
+
+inv:topicOntology a rdf:Property ;
+    rdfs:label "topic ontology" ;
+    rdfs:domain inv:Topic ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of an ontology that defines the topic's vocabulary and structure." .
+
+inv:topicParent a rdf:Property ;
+    rdfs:label "topic parent" ;
+    rdfs:domain inv:Topic ;
+    rdfs:range  inv:Topic ;
+    rdfs:comment "Parent topic (for hierarchical topics)." .
+
+inv:Event a rdfs:Class ;
+    rdfs:label "Event" ;
+    rdfs:comment "A discrete occurrence under investigation. Events have a temporal extent (start and end), a location (which may be spatial, semantic, or virtual), and participants." .
+
+inv:eventStartTime a rdf:Property ;
+    rdfs:label "event start time" ;
+    rdfs:domain inv:Event ;
+    rdfs:range  xsd:dateTime .
+
+inv:eventEndTime a rdf:Property ;
+    rdfs:label "event end time" ;
+    rdfs:domain inv:Event ;
+    rdfs:range  xsd:dateTime .
+
+inv:eventLocation a rdf:Property ;
+    rdfs:label "event location" ;
+    rdfs:domain inv:Event ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Spatial location (GeoSPARQL), semantic location (ontology term), or virtual location (URI)." .
+
+inv:eventParticipant a rdf:Property ;
+    rdfs:label "event participant" ;
+    rdfs:domain inv:Event ;
+    rdfs:range  inv:Subject ;
+    rdfs:comment "A subject involved in the event." .
+
+inv:eventSeverity a rdf:Property ;
+    rdfs:label "event severity" ;
+    rdfs:domain inv:Event ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Severity classification (info, low, medium, high, critical)." .
+
+inv:Case a rdfs:Class ;
+    rdfs:label "Case" ;
+    rdfs:comment "A formal case file associated with an investigation. Cases carry a case number, classification level, and legal or regulatory framework. Not all investigations are formal cases — some are informal inquiries." .
+
+inv:caseNumber a rdf:Property ;
+    rdfs:label "case number" ;
+    rdfs:domain inv:Case ;
+    rdfs:range  xsd:string .
+
+inv:caseClassification a rdf:Property ;
+    rdfs:label "case classification" ;
+    rdfs:domain inv:Case ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Classification level (unclassified, restricted, confidential, secret, top-secret)." .
+
+inv:caseFramework a rdf:Property ;
+    rdfs:label "case framework" ;
+    rdfs:domain inv:Case ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Legal or regulatory framework (e.g. 'Criminal', 'Civil', 'Regulatory', 'Internal', 'Medical', 'Journalistic')." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Evidence
+# ────────────────────────────────────────────────────────────────────
+
+inv:Evidence a rdfs:Class ;
+    rdfs:label "Evidence" ;
+    rdfs:comment "A piece of evidence in an investigation. Evidence has provenance (where it came from), chain of custody (who handled it), and a verification status. Evidence links to source artifacts (documents, sensor data, testimony, forensic analysis results)." .
+
+inv:EvidenceType a rdfs:Class ;
+    rdfs:label "Evidence Type" .
+
+inv:DocumentaryEvidence  a inv:EvidenceType ; rdfs:label "documentary" ;
+    rdfs:comment "Documents, records, files, emails, messages." .
+inv:TestimonialEvidence  a inv:EvidenceType ; rdfs:label "testimonial" ;
+    rdfs:comment "Witness testimony, interviews, statements." .
+inv:PhysicalEvidence     a inv:EvidenceType ; rdfs:label "physical" ;
+    rdfs:comment "Physical objects, samples, materials." .
+inv:DigitalEvidence      a inv:EvidenceType ; rdfs:label "digital" ;
+    rdfs:comment "Digital artifacts — logs, metadata, system state, network captures." .
+inv:SensorEvidence       a inv:EvidenceType ; rdfs:label "sensor" ;
+    rdfs:comment "Sensor data — telemetry, environmental readings, biometric data." .
+inv:AnalyticalEvidence   a inv:EvidenceType ; rdfs:label "analytical" ;
+    rdfs:comment "Analysis results — forensic analysis, NLP extraction, graph analysis, statistical analysis." .
+inv:CircumstantialEvidence a inv:EvidenceType ; rdfs:label "circumstantial" ;
+    rdfs:comment "Indirect evidence that implies a fact without directly proving it." .
+
+inv:evidenceType a rdf:Property ;
+    rdfs:label "evidence type" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  inv:EvidenceType .
+
+inv:evidenceSource a rdf:Property ;
+    rdfs:label "evidence source" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source artifact (document, sensor feed, testimony record)." .
+
+inv:evidenceCollectedAt a rdf:Property ;
+    rdfs:label "collected at" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  xsd:dateTime .
+
+inv:evidenceCollectedBy a rdf:Property ;
+    rdfs:label "collected by" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor who collected the evidence." .
+
+inv:evidenceReliability a rdf:Property ;
+    rdfs:label "reliability" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  inv:ReliabilityRating .
+
+inv:ReliabilityRating a rdfs:Class ; rdfs:label "Reliability Rating" .
+
+inv:ReliabilityConfirmed  a inv:ReliabilityRating ; rdfs:label "confirmed" ;
+    rdfs:comment "Verified through independent sources or forensic analysis." .
+inv:ReliabilityLikely     a inv:ReliabilityRating ; rdfs:label "likely" ;
+    rdfs:comment "Consistent with other evidence but not independently verified." .
+inv:ReliabilityPossible   a inv:ReliabilityRating ; rdfs:label "possible" ;
+    rdfs:comment "Plausible but unverified. May be from a single source." .
+inv:ReliabilityDoubtful   a inv:ReliabilityRating ; rdfs:label "doubtful" ;
+    rdfs:comment "Inconsistent or from an unreliable source. Flagged for verification." .
+inv:ReliabilityDisputed   a inv:ReliabilityRating ; rdfs:label "disputed" ;
+    rdfs:comment "Actively disputed by a constituency. Requires adjudication." .
+inv:ReliabilityFabricated a inv:ReliabilityRating ; rdfs:label "fabricated" ;
+    rdfs:comment "Demonstrably false or fabricated. Retained for provenance." .
+
+# — Chain of custody —
+
+inv:ChainOfCustody a rdfs:Class ;
+    rdfs:label "Chain of Custody" ;
+    rdfs:comment "The documented sequence of custody for a piece of evidence. Each transfer records who, when, why, and any transformations applied. Essential for forensic admissibility." .
+
+inv:hasChainOfCustody a rdf:Property ;
+    rdfs:label "has chain of custody" ;
+    rdfs:domain inv:Evidence ;
+    rdfs:range  inv:ChainOfCustody .
+
+inv:CustodyTransfer a rdfs:Class ;
+    rdfs:label "Custody Transfer" ;
+    rdfs:comment "A single transfer in the chain of custody." .
+
+inv:transferFrom a rdf:Property ;
+    rdfs:label "transfer from" ;
+    rdfs:domain inv:CustodyTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor who held custody before transfer." .
+
+inv:transferTo a rdf:Property ;
+    rdfs:label "transfer to" ;
+    rdfs:domain inv:CustodyTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor who received custody." .
+
+inv:transferAt a rdf:Property ;
+    rdfs:label "transfer at" ;
+    rdfs:domain inv:CustodyTransfer ;
+    rdfs:range  xsd:dateTime .
+
+inv:transferReason a rdf:Property ;
+    rdfs:label "transfer reason" ;
+    rdfs:domain inv:CustodyTransfer ;
+    rdfs:range  xsd:string .
+
+inv:transferTransform a rdf:Property ;
+    rdfs:label "transfer transform" ;
+    rdfs:domain inv:CustodyTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Any transformation applied during transfer (e.g. format conversion, redaction, hash computation)." .
+
+inv:hasTransfer a rdf:Property ;
+    rdfs:label "has transfer" ;
+    rdfs:domain inv:ChainOfCustody ;
+    rdfs:range  inv:CustodyTransfer .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Hypothesis
+# ────────────────────────────────────────────────────────────────────
+
+inv:Hypothesis a rdfs:Class ;
+    rdfs:label "Hypothesis" ;
+    rdfs:comment "A testable proposition about the investigation. Hypotheses are evaluated against evidence — each piece of evidence may support, contradict, or be neutral with respect to a hypothesis. Hypotheses may be hierarchical (a hypothesis may have sub-hypotheses) and may be mutually exclusive." .
+
+inv:hypothesisStatement a rdf:Property ;
+    rdfs:label "statement" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The hypothesis statement (natural language or formal logic)." .
+
+inv:hypothesisStatus a rdf:Property ;
+    rdfs:label "hypothesis status" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  inv:HypothesisStatus .
+
+inv:HypothesisStatus a rdfs:Class ; rdfs:label "Hypothesis Status" .
+
+inv:HypProposed    a inv:HypothesisStatus ; rdfs:label "proposed" .
+inv:HypTesting     a inv:HypothesisStatus ; rdfs:label "testing" .
+inv:HypSupported   a inv:HypothesisStatus ; rdfs:label "supported" ;
+    rdfs:comment "Evidence supports the hypothesis but it is not yet confirmed." .
+inv:HypConfirmed   a inv:HypothesisStatus ; rdfs:label "confirmed" ;
+    rdfs:comment "Hypothesis is confirmed beyond reasonable doubt." .
+inv:HypContradicted a inv:HypothesisStatus ; rdfs:label "contradicted" ;
+    rdfs:comment "Evidence contradicts the hypothesis." .
+inv:HypDisproven   a inv:HypothesisStatus ; rdfs:label "disproven" .
+inv:HypInconclusive a inv:HypothesisStatus ; rdfs:label "inconclusive" ;
+    rdfs:comment "Insufficient evidence to confirm or contradict." .
+
+inv:hypothesisParent a rdf:Property ;
+    rdfs:label "parent hypothesis" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  inv:Hypothesis ;
+    rdfs:comment "Parent hypothesis (for hierarchical decomposition)." .
+
+inv:mutuallyExclusiveWith a rdf:Property ;
+    rdfs:label "mutually exclusive with" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  inv:Hypothesis ;
+    rdfs:comment "If this hypothesis is true, the referenced hypothesis must be false." .
+
+inv:evaluatesEvidence a rdf:Property ;
+    rdfs:label "evaluates evidence" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  inv:EvidenceEvaluation .
+
+inv:EvidenceEvaluation a rdfs:Class ;
+    rdfs:label "Evidence Evaluation" ;
+    rdfs:comment "An evaluation of a specific piece of evidence against a specific hypothesis." .
+
+inv:evaluationEvidence a rdf:Property ;
+    rdfs:label "evaluation evidence" ;
+    rdfs:domain inv:EvidenceEvaluation ;
+    rdfs:range  inv:Evidence .
+
+inv:evaluationVerdict a rdf:Property ;
+    rdfs:label "evaluation verdict" ;
+    rdfs:domain inv:EvidenceEvaluation ;
+    rdfs:range  inv:EvaluationVerdict .
+
+inv:EvaluationVerdict a rdfs:Class ; rdfs:label "Evaluation Verdict" .
+
+inv:VerdictSupports      a inv:EvaluationVerdict ; rdfs:label "supports" .
+inv:VerdictContradicts   a inv:EvaluationVerdict ; rdfs:label "contradicts" .
+inv:VerdictNeutral       a inv:EvaluationVerdict ; rdfs:label "neutral" .
+inv:VerdictConditional   a inv:EvaluationVerdict ; rdfs:label "conditional" ;
+    rdfs:comment "Supports or contradicts only under specific conditions." .
+
+inv:evaluationReasoning a rdf:Property ;
+    rdfs:label "evaluation reasoning" ;
+    rdfs:domain inv:EvidenceEvaluation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The reasoning behind the verdict (why does this evidence support/contradict the hypothesis?)." .
+
+inv:evaluationConfidence a rdf:Property ;
+    rdfs:label "evaluation confidence" ;
+    rdfs:domain inv:EvidenceEvaluation ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the verdict (0.0 to 1.0)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Timeline
+# ────────────────────────────────────────────────────────────────────
+
+inv:Timeline a rdfs:Class ;
+    rdfs:label "Timeline" ;
+    rdfs:comment "A temporal sequence of events and evidence in an investigation. Timelines may be linear (single track) or multi-track (parallel sequences for different subjects or themes)." .
+
+inv:TimelineEntry a rdfs:Class ;
+    rdfs:label "Timeline Entry" ;
+    rdfs:comment "A single entry on a timeline. May reference an event, a piece of evidence, or a hypothesis evaluation." .
+
+inv:entryTime a rdf:Property ;
+    rdfs:label "entry time" ;
+    rdfs:domain inv:TimelineEntry ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "The time of the entry. May be exact, approximate, or estimated." .
+
+inv:entryTimePrecision a rdf:Property ;
+    rdfs:label "entry time precision" ;
+    rdfs:domain inv:TimelineEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Precision of the time (exact, approximate±N, estimated, unknown)." .
+
+inv:entryEvent a rdf:Property ;
+    rdfs:label "entry event" ;
+    rdfs:domain inv:TimelineEntry ;
+    rdfs:range  inv:Event .
+
+inv:entryEvidence a rdf:Property ;
+    rdfs:label "entry evidence" ;
+    rdfs:domain inv:TimelineEntry ;
+    rdfs:range  inv:Evidence .
+
+inv:entryTrack a rdf:Property ;
+    rdfs:label "entry track" ;
+    rdfs:domain inv:TimelineEntry ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Track name for multi-track timelines (e.g. 'subject-A', 'financial', 'communications')." .
+
+inv:hasEntry a rdf:Property ;
+    rdfs:label "has entry" ;
+    rdfs:domain inv:Timeline ;
+    rdfs:range  inv:TimelineEntry .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Scenario (forecasting)
+# ────────────────────────────────────────────────────────────────────
+
+inv:Scenario a rdfs:Class ;
+    rdfs:label "Scenario" ;
+    rdfs:comment "A forecast scenario — a projection of a possible future state. Scenarios are built from patterns, trends, and models. Each scenario has a probability estimate, a set of driving factors, and a set of projected outcomes." .
+
+inv:ScenarioType a rdfs:Class ; rdfs:label "Scenario Type" .
+
+inv:BestCase     a inv:ScenarioType ; rdfs:label "best case" .
+inv:WorstCase    a inv:ScenarioType ; rdfs:label "worst case" .
+inv:MostLikely   a inv:ScenarioType ; rdfs:label "most likely" .
+inv:BlackSwan    a inv:ScenarioType ; rdfs:label "black swan" ;
+    rdfs:comment "Low probability, high impact. Tail-risk scenario." .
+inv:Branching    a inv:ScenarioType ; rdfs:label "branching" ;
+    rdfs:comment "A scenario that branches into sub-scenarios at decision points." .
+
+inv:scenarioType a rdf:Property ;
+    rdfs:label "scenario type" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  inv:ScenarioType .
+
+inv:scenarioProbability a rdf:Property ;
+    rdfs:label "probability" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Estimated probability (0.0 to 1.0). May be revised as new evidence arrives." .
+
+inv:scenarioTimeframe a rdf:Property ;
+    rdfs:label "timeframe" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Projected timeframe (e.g. '30 days', '1 year', '5 years')." .
+
+inv:scenarioDrivingFactor a rdf:Property ;
+    rdfs:label "driving factor" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A factor that drives the scenario (an event, trend, policy change, or condition)." .
+
+inv:scenarioOutcome a rdf:Property ;
+    rdfs:label "outcome" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  inv:ProjectedOutcome .
+
+inv:ProjectedOutcome a rdfs:Class ;
+    rdfs:label "Projected Outcome" ;
+    rdfs:comment "A projected outcome of a scenario. Outcomes may be quantitative (numeric projections) or qualitative (narrative descriptions)." .
+
+inv:outcomeDescription a rdf:Property ;
+    rdfs:label "outcome description" ;
+    rdfs:domain inv:ProjectedOutcome ;
+    rdfs:range  xsd:string .
+
+inv:outcomeMetric a rdf:Property ;
+    rdfs:label "outcome metric" ;
+    rdfs:domain inv:ProjectedOutcome ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Metric name (e.g. 'revenue', 'infection_rate', 'temperature_anomaly')." .
+
+inv:outcomeValue a rdf:Property ;
+    rdfs:label "outcome value" ;
+    rdfs:domain inv:ProjectedOutcome ;
+    rdfs:range  xsd:float .
+
+inv:outcomeUnit a rdf:Property ;
+    rdfs:label "outcome unit" ;
+    rdfs:domain inv:ProjectedOutcome ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Unit of measurement (e.g. 'USD', 'percent', 'degrees_C')." .
+
+inv:outcomeRange a rdf:Property ;
+    rdfs:label "outcome range" ;
+    rdfs:domain inv:ProjectedOutcome ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Confidence interval or range (e.g. '[0.3, 0.7]', '±15%')." .
+
+inv:scenarioBasedOn a rdf:Property ;
+    rdfs:label "based on" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of evidence, patterns, or models the scenario is based on." .
+
+inv:scenarioParent a rdf:Property ;
+    rdfs:label "parent scenario" ;
+    rdfs:domain inv:Scenario ;
+    rdfs:range  inv:Scenario ;
+    rdfs:comment "Parent scenario (for branching scenarios)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Constituency
+# ────────────────────────────────────────────────────────────────────
+
+inv:Constituency a rdfs:Class ;
+    rdfs:label "Constituency" ;
+    rdfs:comment "A group with a stake in the investigation outcome. Constituencies may have different access levels, different interests, and different roles. They may contribute evidence, review hypotheses, or receive findings." .
+
+inv:ConstituencyRole a rdfs:Class ; rdfs:label "Constituency Role" .
+
+inv:RoleInvestigator  a inv:ConstituencyRole ; rdfs:label "investigator" ;
+    rdfs:comment "Conducts the investigation. Has full access to evidence and hypotheses." .
+inv:RoleSubject       a inv:ConstituencyRole ; rdfs:label "subject" ;
+    rdfs:comment "The subject of the investigation. May have restricted access depending on legal framework." .
+inv:RoleWitness       a inv:ConstituencyRole ; rdfs:label "witness" ;
+    rdfs:comment "Provides testimony or evidence. May have limited access." .
+inv:RoleReviewer      a inv:ConstituencyRole ; rdfs:label "reviewer" ;
+    rdfs:comment "Reviews findings and hypotheses. May challenge evidence evaluations." .
+inv:RoleStakeholder   a inv:ConstituencyRole ; rdfs:label "stakeholder" ;
+    rdfs:comment "Has a stake in the outcome but does not actively investigate. Receives findings." .
+inv:RoleAuditor       a inv:ConstituencyRole ; rdfs:label "auditor" ;
+    rdfs:comment "Audits the investigation process for compliance and methodology." .
+inv:RoleBeneficiary   a inv:ConstituencyRole ; rdfs:label "beneficiary" ;
+    rdfs:comment "Benefits from the investigation outcome (e.g. a patient in a medical investigation)." .
+inv:RoleAdvocate      a inv:ConstituencyRole ; rdfs:label "advocate" ;
+    rdfs:comment "Represents the interests of a subject or stakeholder." .
+
+inv:constituencyRole a rdf:Property ;
+    rdfs:label "constituency role" ;
+    rdfs:domain inv:Constituency ;
+    rdfs:range  inv:ConstituencyRole .
+
+inv:constituencyEntity a rdf:Property ;
+    rdfs:label "constituency entity" ;
+    rdfs:domain inv:Constituency ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Entity or group that holds this constituency role." .
+
+inv:constituencyAccessLevel a rdf:Property ;
+    rdfs:label "access level" ;
+    rdfs:domain inv:Constituency ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Access level for this constituency (full, partial, findings-only, none)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Link Analysis
+# ────────────────────────────────────────────────────────────────────
+
+inv:Link a rdfs:Class ;
+    rdfs:label "Link" ;
+    rdfs:comment "A relationship between two subjects, events, or pieces of evidence in an investigation. Links may be typed (financial, communication, social, spatial, temporal, causal) and weighted by strength." .
+
+inv:linkFrom a rdf:Property ;
+    rdfs:label "link from" ;
+    rdfs:domain inv:Link ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the source subject, event, or evidence." .
+
+inv:linkTo a rdf:Property ;
+    rdfs:label "link to" ;
+    rdfs:domain inv:Link ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the target subject, event, or evidence." .
+
+inv:linkType a rdf:Property ;
+    rdfs:label "link type" ;
+    rdfs:domain inv:Link ;
+    rdfs:range  inv:LinkType .
+
+inv:LinkType a rdfs:Class ; rdfs:label "Link Type" .
+
+inv:LinkFinancial     a inv:LinkType ; rdfs:label "financial" ;
+    rdfs:comment "Financial relationship (transaction, shared account, payment)." .
+inv:LinkCommunication a inv:LinkType ; rdfs:label "communication" ;
+    rdfs:comment "Communication relationship (email, call, message)." .
+inv:LinkSocial        a inv:LinkType ; rdfs:label "social" ;
+    rdfs:comment "Social relationship (family, friend, colleague, associate)." .
+inv:LinkSpatial       a inv:LinkType ; rdfs:label "spatial" ;
+    rdfs:comment "Spatial co-location (same place at same time)." .
+inv:LinkTemporal      a inv:LinkType ; rdfs:label "temporal" ;
+    rdfs:comment "Temporal correlation (events occurred in sequence or simultaneously)." .
+inv:LinkCausal        a inv:LinkType ; rdfs:label "causal" ;
+    rdfs:comment "Causal relationship (A caused B)." .
+inv:LinkSemantic      a inv:LinkType ; rdfs:label "semantic" ;
+    rdfs:comment "Semantic relationship (shared topic, ontology term, or concept)." .
+inv:LinkProvenance    a inv:LinkType ; rdfs:label "provenance" ;
+    rdfs:comment "Provenance relationship (shared source, derivative chain, or contributor)." .
+
+inv:linkStrength a rdf:Property ;
+    rdfs:label "link strength" ;
+    rdfs:domain inv:Link ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Strength of the link (0.0 to 1.0). Based on evidence count, reliability, and corroboration." .
+
+inv:linkEvidence a rdf:Property ;
+    rdfs:label "link evidence" ;
+    rdfs:domain inv:Link ;
+    rdfs:range  inv:Evidence ;
+    rdfs:comment "Evidence supporting this link." .
+
+inv:hasLink a rdf:Property ;
+    rdfs:label "has link" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:Link .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Hypothesis Graph — living, versioned, multi-agent
+# ────────────────────────────────────────────────────────────────────
+
+inv:HypothesisGraph a rdfs:Class ;
+    rdfs:label "Hypothesis Graph" ;
+    rdfs:comment "A living, versioned graph of hypotheses, their relationships (supports, contradicts, mutually exclusive, sub-hypotheses), evidence evaluations, and dark links. The graph is dynamically updated by multiple agents over time — each contribution is provenance-tracked. As new information arrives, confidence scores shift, new hypotheses emerge, and dark links may be confirmed or refuted. The graph addresses the zero-shot deficit: at project start the graph is sparse (few hypotheses, little evidence), and it progressively enriches as agents contribute." .
+
+inv:hasHypothesisGraph a rdf:Property ;
+    rdfs:label "has hypothesis graph" ;
+    rdfs:domain inv:Investigation ;
+    rdfs:range  inv:HypothesisGraph .
+
+# — Graph versioning —
+
+inv:GraphRevision a rdfs:Class ;
+    rdfs:label "Graph Revision" ;
+    rdfs:comment "A versioned snapshot of a hypothesis graph. Revisions are immutable — once created, they record the state of the graph at a point in time. This enables diffing, rollback, and audit trails." .
+
+inv:revisionSequence a rdf:Property ;
+    rdfs:label "revision sequence" ;
+    rdfs:domain inv:GraphRevision ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Monotonically increasing sequence number." .
+
+inv:revisionTimestamp a rdf:Property ;
+    rdfs:label "revision timestamp" ;
+    rdfs:domain inv:GraphRevision ;
+    rdfs:range  xsd:dateTime .
+
+inv:revisionAgent a rdf:Property ;
+    rdfs:label "revision agent" ;
+    rdfs:domain inv:GraphRevision ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that created this revision." .
+
+inv:revisionParent a rdf:Property ;
+    rdfs:label "revision parent" ;
+    rdfs:domain inv:GraphRevision ;
+    rdfs:range  inv:GraphRevision ;
+    rdfs:comment "Parent revision (for branching)." .
+
+inv:hasRevision a rdf:Property ;
+    rdfs:label "has revision" ;
+    rdfs:domain inv:HypothesisGraph ;
+    rdfs:range  inv:GraphRevision .
+
+inv:currentRevision a rdf:Property ;
+    rdfs:label "current revision" ;
+    rdfs:domain inv:HypothesisGraph ;
+    rdfs:range  inv:GraphRevision ;
+    rdfs:comment "Pointer to the current (latest) revision." .
+
+# — Multi-agent contributions —
+
+inv:GraphContribution a rdfs:Class ;
+    rdfs:label "Graph Contribution" ;
+    rdfs:comment "A single contribution by an agent to a hypothesis graph. Contributions are atomic — each represents one agent action (add hypothesis, update evaluation, link dark link, revise confidence, flag gap). Contributions are provenance-tracked and may be merged, conflicting, or superseded." .
+
+inv:contributionAgent a rdf:Property ;
+    rdfs:label "contribution agent" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that made this contribution." .
+
+inv:contributionTimestamp a rdf:Property ;
+    rdfs:label "contribution timestamp" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  xsd:dateTime .
+
+inv:contributionType a rdf:Property ;
+    rdfs:label "contribution type" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  inv:ContributionType .
+
+inv:ContributionType a rdfs:Class ; rdfs:label "Contribution Type" .
+
+inv:ContribAddHypothesis    a inv:ContributionType ; rdfs:label "add-hypothesis" .
+inv:ContribUpdateEvaluation a inv:ContributionType ; rdfs:label "update-evaluation" .
+inv:ContribLinkDarkLink     a inv:ContributionType ; rdfs:label "link-dark-link" .
+inv:ContribReviseConfidence a inv:ContributionType ; rdfs:label "revise-confidence" .
+inv:ContribFlagGap          a inv:ContributionType ; rdfs:label "flag-gap" .
+inv:ContribReframeHypothesis a inv:ContributionType ; rdfs:label "reframe-hypothesis" ;
+    rdfs:comment "Agent reframes an existing hypothesis — replaces it with a better formulation." .
+inv:ContribMergeHypothesis  a inv:ContributionType ; rdfs:label "merge-hypothesis" ;
+    rdfs:comment "Agent merges two hypotheses into one." .
+inv:ContribSplitHypothesis  a inv:ContributionType ; rdfs:label "split-hypothesis" ;
+    rdfs:comment "Agent splits a hypothesis into sub-hypotheses." .
+inv:ContribSupersede        a inv:ContributionType ; rdfs:label "supersede" ;
+    rdfs:comment "Agent supersedes a prior contribution with new information." .
+
+inv:contributionTarget a rdf:Property ;
+    rdfs:label "contribution target" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the hypothesis, evidence evaluation, or dark link being contributed to." .
+
+inv:contributionPayload a rdf:Property ;
+    rdfs:label "contribution payload" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "CBOR-LD encoded payload with the contribution data." .
+
+inv:contributionStatus a rdf:Property ;
+    rdfs:label "contribution status" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  inv:ContributionStatus .
+
+inv:ContributionStatus a rdfs:Class ; rdfs:label "Contribution Status" .
+
+inv:ContribPending   a inv:ContributionStatus ; rdfs:label "pending" ;
+    rdfs:comment "Contribution is awaiting merge into the graph." .
+inv:ContribMerged    a inv:ContributionStatus ; rdfs:label "merged" ;
+    rdfs:comment "Contribution has been merged into the graph." .
+inv:ContribConflicting a inv:ContributionStatus ; rdfs:label "conflicting" ;
+    rdfs:comment "Contribution conflicts with an existing contribution. Requires adjudication." .
+inv:ContribSuperseded a inv:ContributionStatus ; rdfs:label "superseded" ;
+    rdfs:comment "Contribution has been superseded by a later contribution." .
+inv:ContribRejected  a inv:ContributionStatus ; rdfs:label "rejected" ;
+    rdfs:comment "Contribution was rejected (invalid, redundant, or out of scope)." .
+
+inv:contributionConflictsWith a rdf:Property ;
+    rdfs:label "conflicts with" ;
+    rdfs:domain inv:GraphContribution ;
+    rdfs:range  inv:GraphContribution ;
+    rdfs:comment "Identifies a conflicting contribution from another agent." .
+
+inv:hasContribution a rdf:Property ;
+    rdfs:label "has contribution" ;
+    rdfs:domain inv:HypothesisGraph ;
+    rdfs:range  inv:GraphContribution .
+
+# — Dark link bridge —
+# Dark links from the research ontology may be connected to hypotheses.
+# A dark link may support or contradict a hypothesis indirectly.
+# This bridge allows hypothesis graphs to incorporate inferred connections.
+
+inv:hasDarkLinkBridge a rdf:Property ;
+    rdfs:label "has dark link bridge" ;
+    rdfs:domain inv:HypothesisGraph ;
+    rdfs:range  inv:DarkLinkBridge ;
+    rdfs:comment "Connects a dark link (from research ontology) to a hypothesis in this graph." .
+
+inv:DarkLinkBridge a rdfs:Class ;
+    rdfs:label "Dark Link Bridge" ;
+    rdfs:comment "A bridge between a dark link (inferred, hidden, latent, or suppressed connection from the research ontology) and a hypothesis in the investigation ontology. The dark link may support or contradict the hypothesis indirectly. The bridge records the inference method, confidence, and the agent who made the connection." .
+
+inv:bridgeDarkLink a rdf:Property ;
+    rdfs:label "bridge dark link" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the res:DarkLink being bridged." .
+
+inv:bridgeHypothesis a rdf:Property ;
+    rdfs:label "bridge hypothesis" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  inv:Hypothesis .
+
+inv:bridgeVerdict a rdf:Property ;
+    rdfs:label "bridge verdict" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  inv:EvaluationVerdict ;
+    rdfs:comment "How the dark link relates to the hypothesis (supports, contradicts, neutral, conditional)." .
+
+inv:bridgeConfidence a rdf:Property ;
+    rdfs:label "bridge confidence" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence in the bridge (0.0 to 1.0). Combines dark link confidence and evaluation confidence." .
+
+inv:bridgeAgent a rdf:Property ;
+    rdfs:label "bridge agent" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that created this bridge." .
+
+inv:bridgeReasoning a rdf:Property ;
+    rdfs:label "bridge reasoning" ;
+    rdfs:domain inv:DarkLinkBridge ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Why the agent believes this dark link supports/contradicts the hypothesis." .
+
+# — Hypothesis gaps (known unknowns) —
+
+inv:HypothesisGap a rdfs:Class ;
+    rdfs:label "Hypothesis Gap" ;
+    rdfs:comment "A known unknown in the hypothesis graph — a question that no current hypothesis addresses, or a hypothesis that lacks sufficient evidence for evaluation. Gaps are the primary indicator of the zero-shot deficit: at project start, the graph is mostly gaps. As agents contribute, gaps close." .
+
+inv:gapType a rdf:Property ;
+    rdfs:label "gap type" ;
+    rdfs:domain inv:HypothesisGap ;
+    rdfs:range  inv:GapType .
+
+inv:GapType a rdfs:Class ; rdfs:label "Gap Type" .
+
+inv:GapNoHypothesis    a inv:GapType ; rdfs:label "no-hypothesis" ;
+    rdfs:comment "No hypothesis exists for this question or area. Agents should propose hypotheses." .
+inv:GapNoEvidence      a inv:GapType ; rdfs:label "no-evidence" ;
+    rdfs:comment "A hypothesis exists but has no evidence evaluations. Agents should seek evidence." .
+inv:GapConflicting     a inv:GapType ; rdfs:label "conflicting" ;
+    rdfs:comment "Evidence evaluations conflict — some support, some contradict. Requires adjudication." .
+inv:GapInsufficient    a inv:GapType ; rdfs:label "insufficient" ;
+    rdfs:comment "Evidence is insufficient to reach a verdict. More evidence needed." .
+inv:GapStale           a inv:GapType ; rdfs:label "stale" ;
+    rdfs:comment "Hypothesis has not been updated in a long time. May need re-evaluation with new information." .
+inv:GapDarkLinkUnresolved a inv:GapType ; rdfs:label "dark-link-unresolved" ;
+    rdfs:comment "A dark link bridge exists but the dark link has not been confirmed or refuted." .
+
+inv:gapDescription a rdf:Property ;
+    rdfs:label "gap description" ;
+    rdfs:domain inv:HypothesisGap ;
+    rdfs:range  xsd:string .
+
+inv:gapPriority a rdf:Property ;
+    rdfs:label "gap priority" ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Priority for closing this gap (critical, high, medium, low)." .
+
+inv:gapIdentifiedBy a rdf:Property ;
+    rdfs:label "gap identified by" ;
+    rdfs:domain inv:HypothesisGap ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor that identified this gap." .
+
+inv:gapIdentifiedAt a rdf:Property ;
+    rdfs:label "gap identified at" ;
+    rdfs:domain inv:HypothesisGap ;
+    rdfs:range  xsd:dateTime .
+
+inv:hasGap a rdf:Property ;
+    rdfs:label "has gap" ;
+    rdfs:domain inv:HypothesisGraph ;
+    rdfs:range  inv:HypothesisGap .
+
+# — Confidence aggregation —
+
+inv:aggregateConfidence a rdf:Property ;
+    rdfs:label "aggregate confidence" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Aggregate confidence in a hypothesis, computed from all evidence evaluations and dark link bridges. Updated dynamically as contributions arrive. Formula: weighted average of evaluation confidences, weighted by evidence reliability, plus dark link bridge contributions." .
+
+inv:supportScore a rdf:Property ;
+    rdfs:label "support score" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Net support score (supporting evidence confidence minus contradicting evidence confidence). Range -1.0 to 1.0." .
+
+inv:contributorCount a rdf:Property ;
+    rdfs:label "contributor count" ;
+    rdfs:domain inv:Hypothesis ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of distinct agents that have contributed evaluations or bridges to this hypothesis." .
+
+# — Live update stream —
+
+inv:GraphUpdateStream a rdfs:Class ;
+    rdfs:label "Graph Update Stream" ;
+    rdfs:comment "A live update stream for a hypothesis graph. Agents subscribe to receive real-time notifications when contributions are made, gaps are identified, or confidence scores change. Enables multi-agent collaborative hypothesis analysis." .
+
+inv:streamGraph a rdf:Property ;
+    rdfs:label "stream graph" ;
+    rdfs:domain inv:GraphUpdateStream ;
+    rdfs:range  inv:HypothesisGraph .
+
+inv:streamSubscriber a rdf:Property ;
+    rdfs:label "stream subscriber" ;
+    rdfs:domain inv:GraphUpdateStream ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the agency:Actor subscribed to this stream." .
+
+inv:streamFilter a rdf:Property ;
+    rdfs:label "stream filter" ;
+    rdfs:domain inv:GraphUpdateStream ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Optional filter — only receive updates matching this filter (e.g. 'hypothesis=X', 'gap-type=conflicting', 'confidence-change>0.1')." .

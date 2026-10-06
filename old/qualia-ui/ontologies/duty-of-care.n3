@@ -1,0 +1,799 @@
+# Duty of Care Ontology — Protective, Custodial, and Safety Relations
+#
+# Authoring form (N3) — compiled to duty-of-care.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Duty of Care is the broadest category of protective relation — any
+# relationship where one party (the duty-holder) has a responsibility to
+# protect, care for, oversee, or ensure the safety and wellbeing of
+# another entity, thing, or outcome (the care-subject).
+#
+# "Ward" is too narrow — a company is not a ward of its director, a
+# patient is not a ward of their doctor, a car is not a ward of its
+# mechanic. Duty of care covers all these cases:
+#
+#   - Guardianship (formal legal protection of a person) — subClass
+#   - Custodial duty (housekeeper with a key, babysitter, pet-sitter)
+#   - Professional duty (doctor-patient, mechanic-client, lawyer-client)
+#   - Stewardship duty (director-company, trustee-estate, project manager)
+#   - Safety obligation (builder ensuring work isn't dangerous, food safety)
+#   - Public service duty (social security, social work, emergency services)
+#   - Family duty (parent-child, kinship care, family caregiver)
+#
+# The care-subject may be a natural person, legal person, collective,
+# software agent, asset, project, thing, or outcome. The duty-holder
+# may be a natural person, legal person, or statutory entity.
+#
+# Duty of care is a personhood concept — socially situated and legally
+# governed. The duty-holder's access to a natural person's selfhood
+# remains limited to what the care-subject has consented to share.
+#
+# Imports: agency.n3, personhood.n3, selfhood.n3, agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+@prefix care:       <https://qualiadb.org/schema/ui/duty-of-care#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Duty of Care Relation — the umbrella class
+# ────────────────────────────────────────────────────────────────────
+
+care:DutyOfCareRelation a rdfs:Class ;
+    rdfs:subClassOf person:FiduciaryRelationship ;
+    rdfs:label "Duty of Care Relation" ;
+    rdfs:comment "Any relationship where one party (the duty-holder) holds a responsibility to protect, care for, oversee, or ensure the safety and wellbeing of another entity, thing, or outcome (the care-subject). This is the broadest protective relation — guardianship, custodial duty, professional duty, stewardship, safety obligation, public service duty, and family duty are all sub-types. The care-subject is not a 'ward' — that term is reserved for formal legal guardianship. A company is a care-subject of its director; a patient is a care-subject of their doctor; a car is a care-subject of its mechanic." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Duty Holder and Care Subject — the two poles
+# ────────────────────────────────────────────────────────────────────
+
+care:dutyHolder a rdf:Property ;
+    rdfs:label "duty holder" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that holds the duty of care. May be a natural person, legal person, or statutory entity. The duty-holder is responsible for protecting, overseeing, or ensuring the safety of the care-subject." .
+
+care:careSubject a rdf:Property ;
+    rdfs:label "care subject" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity, thing, or outcome that is the subject of the duty of care. May be a natural person, legal person, collective, software agent, asset, project, or thing. Not a 'ward' — that term is reserved for formal legal guardianship (see guardianship.n3)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Duty Type — the nature of the duty of care
+# ────────────────────────────────────────────────────────────────────
+
+care:dutyType a rdf:Property ;
+    rdfs:label "duty type" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:DutyType ;
+    rdfs:comment "The type of duty of care — determines the scope, authority, and obligations of the duty-holder." .
+
+care:DutyType a rdfs:Class ;
+    rdfs:label "Duty Type" .
+
+care:guardianship    a care:DutyType ; rdfs:label "guardianship" ;
+    rdfs:comment "Formal legal guardianship — a court-appointed or statutory protective relationship over a person. The care-subject is a 'ward' in this sub-type. See guardianship.n3 for full detail." .
+care:custodial       a care:DutyType ; rdfs:label "custodial" ;
+    rdfs:comment "Custodial duty — temporary or ongoing care of a person, property, or thing. Examples: housekeeper with a key, babysitter, pet-sitter, property manager. The duty-holder has physical access and responsibility but not legal authority over the care-subject's personhood." .
+care:professional    a care:DutyType ; rdfs:label "professional" ;
+    rdfs:comment "Professional duty — a duty arising from professional engagement. Examples: doctor-patient, lawyer-client, mechanic-client, architect-client. The duty-holder owes a professional standard of care within their domain expertise. Scope is limited to the professional engagement." .
+care:stewardship     a care:DutyType ; rdfs:label "stewardship" ;
+    rdfs:comment "Stewardship duty — ongoing responsibility for an entity's interests. Examples: company director, trustee, project manager, estate executor. The duty-holder acts in the entity's best interests within the scope of their mandate. Distinct from guardianship — the care-subject is not incapacitated." .
+care:safetyObligation a care:DutyType ; rdfs:label "safety-obligation" ;
+    rdfs:comment "Safety obligation — a duty to ensure that work, products, or services are not dangerous. Examples: builder ensuring structural safety, food vendor ensuring food safety, mechanic ensuring a car is roadworthy. The care-subject is the safety outcome or the person who may be harmed." .
+care:publicService   a care:DutyType ; rdfs:label "public-service" ;
+    rdfs:comment "Public service duty — a duty owed by a public body or statutory entity toward the population it serves. Examples: social security, social work, emergency services, public health. The care-subject may be an individual, a household, or a community. The duty arises from statute, not contract." .
+care:familyDuty      a care:DutyType ; rdfs:label "family-duty" ;
+    rdfs:comment "Family duty — a duty arising from family relationship. Examples: parent-child, kinship carer, family caregiver, adult child caring for elderly parent. The duty arises from the family relationship and may be reinforced by statute. See guardianship.n3 for family role classes." .
+care:coResident     a care:DutyType ; rdfs:label "co-resident" ;
+    rdfs:comment "Co-resident duty — a duty arising from shared habitation. Examples: housemate, flatmate, room-mate, co-tenant. The duty-holder has limited circumstantial responsibility — emergency contact, basic welfare awareness, access to shared spaces. The duty is informal and contingent on co-habitation: it activates when the parties co-reside and deactivates when co-habitation ends. The duty-holder is NOT a guardian, carer, or professional — they have no legal authority over the care-subject's personhood. The duty is narrow: emergency contact, welfare check, and relay of pre-designated emergency information. Scope is defined by the co-resident arrangement, which may be formal (tenancy agreement) or informal (verbal arrangement)." .
+care:principalAgent  a care:DutyType ; rdfs:label "principal-agent" ;
+    rdfs:comment "Principal-agent duty — a duty owed by a principal agent toward a software agent's operation and outputs. The principal delegates operational scope and retains override authority. The software agent has no personhood or selfhood. Uses computational terms." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Care Scope — what the duty covers
+# ────────────────────────────────────────────────────────────────────
+
+care:CareScope a rdfs:Class ;
+    rdfs:label "Care Scope" ;
+    rdfs:comment "Defines the extent and boundaries of a duty of care. A scope may be limited (specific tasks, domains, or outcomes) or comprehensive. The scope determines what the duty-holder can do, what they cannot do, and what requires additional authorisation." .
+
+care:scopeBreadth a rdf:Property ;
+    rdfs:label "scope breadth" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  care:ScopeBreadth ;
+    rdfs:comment "The breadth of the duty — limited or comprehensive." .
+
+care:ScopeBreadth a rdfs:Class ;
+    rdfs:label "Scope Breadth" .
+
+care:limited      a care:ScopeBreadth ; rdfs:label "limited" ;
+    rdfs:comment "Duty covers only specific tasks, domains, assets, or outcomes." .
+care:comprehensive a care:ScopeBreadth ; rdfs:label "comprehensive" ;
+    rdfs:comment "Duty is comprehensive — the duty-holder has responsibility across all relevant aspects." .
+care:emergency    a care:ScopeBreadth ; rdfs:label "emergency" ;
+    rdfs:comment "Temporary emergency duty — limited in duration, triggered by an urgent circumstance." .
+care:temporary    a care:ScopeBreadth ; rdfs:label "temporary" ;
+    rdfs:comment "Time-limited duty — expires after a defined period." .
+care:ongoing      a care:ScopeBreadth ; rdfs:label "ongoing" ;
+    rdfs:comment "Ongoing duty with no fixed end date — continues until the relationship is terminated." .
+
+care:scopeDuration a rdf:Property ;
+    rdfs:label "scope duration" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of the duty (e.g. 'permanent', 'single-visit', '90-days', 'until-revoked')." .
+
+care:startDate a rdf:Property ;
+    rdfs:label "start date" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the duty takes effect." .
+
+care:endDate a rdf:Property ;
+    rdfs:label "end date" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the duty expires. Empty means open-ended." .
+
+care:permittedActions a rdf:Property ;
+    rdfs:label "permitted actions" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions the duty-holder is permitted to take within this scope." .
+
+care:prohibitedActions a rdf:Property ;
+    rdfs:label "prohibited actions" ;
+    rdfs:domain care:CareScope ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions the duty-holder is explicitly NOT permitted to take." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Involved Parties — all entities with a role
+# ────────────────────────────────────────────────────────────────────
+
+care:InvolvedParty a rdfs:Class ;
+    rdfs:label "Involved Party" ;
+    rdfs:comment "Any entity that has a role, right, or responsibility within a duty of care relation. A duty may involve more than just the duty-holder and care-subject — supervisors, beneficiaries, family members, courts, statutory bodies, software agents, and stakeholders may all be involved parties." .
+
+care:partyEntity a rdf:Property ;
+    rdfs:label "party entity" ;
+    rdfs:domain care:InvolvedParty ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity that is the involved party." .
+
+care:partyRole a rdf:Property ;
+    rdfs:label "party role" ;
+    rdfs:domain care:InvolvedParty ;
+    rdfs:range  care:PartyRole ;
+    rdfs:comment "The role this party plays in the duty of care relation." .
+
+care:PartyRole a rdfs:Class ;
+    rdfs:label "Party Role" .
+
+care:roleDutyHolder    a care:PartyRole ; rdfs:label "duty-holder" ;
+    rdfs:comment "The primary duty-holder — holds the duty of care and authority within the scope." .
+care:roleCareSubject   a care:PartyRole ; rdfs:label "care-subject" ;
+    rdfs:comment "The entity that is the subject of the duty of care." .
+care:roleCoHolder      a care:PartyRole ; rdfs:label "co-holder" ;
+    rdfs:comment "A joint or secondary duty-holder sharing responsibility." .
+care:roleSupervisor    a care:PartyRole ; rdfs:label "supervisor" ;
+    rdfs:comment "An entity that supervises the duty — a court, regulatory body, or oversight authority." .
+care:roleBeneficiary   a care:PartyRole ; rdfs:label "beneficiary" ;
+    rdfs:comment "An entity that benefits from the duty — e.g. a family member, a community, a creditor." .
+care:rolePrincipal     a care:PartyRole ; rdfs:label "principal" ;
+    rdfs:comment "The principal agent in a principal-agent duty over a software agent." .
+care:roleSoftwareAgent a care:PartyRole ; rdfs:label "software-agent" ;
+    rdfs:comment "A software agent operating under principal-agent duty. Uses computational terms." .
+care:roleStakeholder   a care:PartyRole ; rdfs:label "stakeholder" ;
+    rdfs:comment "An entity with an interest in the duty outcome — sponsor, community member, creditor." .
+care:roleCourt         a care:PartyRole ; rdfs:label "court" ;
+    rdfs:comment "A court or tribunal with jurisdiction over the duty relation." .
+care:roleAssessor      a care:PartyRole ; rdfs:label "assessor" ;
+    rdfs:comment "An independent assessor — evaluates capacity, reviews performance, audits accounts." .
+care:roleEmergencyContact a care:PartyRole ; rdfs:label "emergency-contact" ;
+    rdfs:comment "A party designated (by the care-subject, by an agreement, or by circumstance) to be contacted in an emergency and to relay pre-designated emergency information. Examples: a housemate for an international student, a neighbour for an elderly person, a friend for a solo traveller. The emergency contact has NO guardian authority, NO medical decision-making authority, and NO selfhood access — their role is limited to notification, information relay, and welfare check. The role may be pre-registered (the care-subject designated them) or circumstantial (a co-resident who is present when an emergency occurs)." .
+care:roleFamilyMember  a care:PartyRole ; rdfs:label "family-member" ;
+    rdfs:comment "A family member with an interest in the duty relation — may have consultation or information rights. See guardianship.n3 for family role classes." .
+care:roleIntervener    a care:PartyRole ; rdfs:label "intervener" ;
+    rdfs:comment "An entity seeking to replace, interfere with, or significantly impact the duty relation. See guardianship.n3 for intervention classes." .
+
+care:hasInvolvedParty a rdf:Property ;
+    rdfs:label "has involved party" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:InvolvedParty ;
+    rdfs:comment "Links a duty of care relation to all entities with a role in it." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Party Rights — rights assigned or assignable to any party
+# ────────────────────────────────────────────────────────────────────
+
+care:PartyRight a rdfs:Class ;
+    rdfs:label "Party Right" ;
+    rdfs:comment "A right assigned or assignable to an involved party. Rights may be informational, procedural, substantive, protective, or operational. Rights are assignable: they may be granted, transferred, or revoked." .
+
+care:rightHeldBy a rdf:Property ;
+    rdfs:label "right held by" ;
+    rdfs:domain care:PartyRight ;
+    rdfs:range  care:InvolvedParty ;
+    rdfs:comment "The party that holds this right." .
+
+care:rightType a rdf:Property ;
+    rdfs:label "right type" ;
+    rdfs:domain care:PartyRight ;
+    rdfs:range  care:RightCategory ;
+    rdfs:comment "The category of right." .
+
+care:RightCategory a rdfs:Class ;
+    rdfs:label "Right Category" .
+
+care:informationalRight a care:RightCategory ; rdfs:label "informational" ;
+    rdfs:comment "Right to information — access to reports, accounts, assessments, status updates." .
+care:proceduralRight a care:RightCategory ; rdfs:label "procedural" ;
+    rdfs:comment "Right to participate in process — consultation, notice, hearing, veto." .
+care:substantiveRight a care:RightCategory ; rdfs:label "substantive" ;
+    rdfs:comment "Right to make or refuse decisions — consent, refuse, choose, manage." .
+care:protectiveRight a care:RightCategory ; rdfs:label "protective" ;
+    rdfs:comment "Right to protection — complaint, review, challenge, advocacy." .
+care:operationalRight a care:RightCategory ; rdfs:label "operational" ;
+    rdfs:comment "Right to operational control — override, terminate, limit scope. Computational terms for software agents." .
+
+care:rightDescription a rdf:Property ;
+    rdfs:label "right description" ;
+    rdfs:domain care:PartyRight ;
+    rdfs:range  xsd:string .
+
+care:rightAssignable a rdf:Property ;
+    rdfs:label "right assignable" ;
+    rdfs:domain care:PartyRight ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this right may be assigned or transferred to another party." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Party Responsibilities — duties assigned or assignable to any party
+# ────────────────────────────────────────────────────────────────────
+
+care:PartyResponsibility a rdfs:Class ;
+    rdfs:label "Party Responsibility" ;
+    rdfs:comment "A responsibility assigned or assignable to an involved party. Responsibilities may be fiduciary, procedural, operational, protective, or compliance. Responsibilities are assignable: they may be delegated, shared, or transferred." .
+
+care:responsibilityHeldBy a rdf:Property ;
+    rdfs:label "responsibility held by" ;
+    rdfs:domain care:PartyResponsibility ;
+    rdfs:range  care:InvolvedParty .
+
+care:responsibilityType a rdf:Property ;
+    rdfs:label "responsibility type" ;
+    rdfs:domain care:PartyResponsibility ;
+    rdfs:range  care:ResponsibilityCategory .
+
+care:ResponsibilityCategory a rdfs:Class ;
+    rdfs:label "Responsibility Category" .
+
+care:fiduciaryResponsibility a care:ResponsibilityCategory ; rdfs:label "fiduciary" ;
+    rdfs:comment "Fiduciary duty — care, loyalty, good faith, avoidance of conflict. The highest standard of duty. Applies to guardians, trustees, directors, and others acting in another's best interests." .
+care:professionalResponsibility a care:ResponsibilityCategory ; rdfs:label "professional" ;
+    rdfs:comment "Professional duty — adherence to professional standards of care within a domain of expertise. Examples: doctor's clinical standard, lawyer's duty to the court and client, mechanic's safety standard, engineer's design standard. Distinct from fiduciary — professional duty is domain-specific, fiduciary is relationship-specific." .
+care:civicResponsibility a care:ResponsibilityCategory ; rdfs:label "civic" ;
+    rdfs:comment "Civic duty — obligations owed to the community or polity. Examples: jury service, voting, tax compliance, community service, emergency assistance. Arises from membership in a political community, not from a contract or fiduciary relationship. Applies to natural persons and legal persons (e.g. corporate tax compliance)." .
+care:contractualResponsibility a care:ResponsibilityCategory ; rdfs:label "contractual" ;
+    rdfs:comment "Contractual duty — obligations arising from an agreement or contract between parties. Examples: employment duties, service agreements, lease obligations, supplier arrangements. The scope and limits are defined by the contract terms. Distinct from fiduciary — contractual duty is bounded by agreement, fiduciary arises from the relationship itself." .
+care:proceduralResponsibility a care:ResponsibilityCategory ; rdfs:label "procedural" ;
+    rdfs:comment "Procedural duty — reporting, accounting, consultation, notification, record-keeping." .
+care:operationalResponsibility a care:ResponsibilityCategory ; rdfs:label "operational" ;
+    rdfs:comment "Operational duty — execution, asset management, compliance, project delivery. For software agents: computation within scope, output governance, context allocation." .
+care:protectiveResponsibility a care:ResponsibilityCategory ; rdfs:label "protective" ;
+    rdfs:comment "Protective duty — monitoring, escalation, safeguarding, advocacy." .
+care:complianceResponsibility a care:ResponsibilityCategory ; rdfs:label "compliance" ;
+    rdfs:comment "Compliance duty — adherence to court orders, statutes, contracts, scope." .
+
+care:responsibilityDescription a rdf:Property ;
+    rdfs:label "responsibility description" ;
+    rdfs:domain care:PartyResponsibility ;
+    rdfs:range  xsd:string .
+
+care:responsibilityAssignable a rdf:Property ;
+    rdfs:label "responsibility assignable" ;
+    rdfs:domain care:PartyResponsibility ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this responsibility may be delegated or transferred." .
+
+care:responsibilityBreach a rdf:Property ;
+    rdfs:label "responsibility breach" ;
+    rdfs:domain care:PartyResponsibility ;
+    rdfs:range  care:BreachConsequence ;
+    rdfs:comment "Consequence if this responsibility is breached." .
+
+care:BreachConsequence a rdfs:Class ;
+    rdfs:label "Breach Consequence" .
+
+care:removal       a care:BreachConsequence ; rdfs:label "removal" ;
+    rdfs:comment "The party is removed from their role." .
+care:liability     a care:BreachConsequence ; rdfs:label "liability" ;
+    rdfs:comment "The party incurs legal or financial liability." .
+care:override      a care:BreachConsequence ; rdfs:label "override" ;
+    rdfs:comment "The party's decisions or outputs are overridden. Computational term." .
+care:escalation    a care:BreachConsequence ; rdfs:label "escalation" ;
+    rdfs:comment "The breach triggers escalation to a higher authority." .
+care:reportingBreach a care:BreachConsequence ; rdfs:label "reporting-breach" ;
+    rdfs:comment "The breach is formally reported and recorded." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Legal Basis — why the duty of care exists
+# ────────────────────────────────────────────────────────────────────
+
+care:LegalBasis a rdfs:Class ;
+    rdfs:label "Legal Basis" ;
+    rdfs:comment "The legal or social foundation for a duty of care relation. A duty may arise from a contract, a statute, a court order, customary practice, consent, or emergency necessity. The legal basis determines what law governs the relation, how it can be modified or terminated, and what remedies exist for breach. Multiple legal bases may apply simultaneously — e.g. a doctor's professional duty arises from both contract (employment) and statute (medical practice act)." .
+
+care:legalBasisType a rdf:Property ;
+    rdfs:label "legal basis type" ;
+    rdfs:domain care:LegalBasis ;
+    rdfs:range  care:LegalBasisType ;
+    rdfs:comment "The type of legal basis." .
+
+care:LegalBasisType a rdfs:Class ;
+    rdfs:label "Legal Basis Type" .
+
+care:basisAgreement  a care:LegalBasisType ; rdfs:label "agreement" ;
+    rdfs:comment "The duty arises from an agreement or contract between parties — e.g. employment contract, service agreement, power of attorney, supported decision-making agreement." .
+care:basisStatute    a care:LegalBasisType ; rdfs:label "statute" ;
+    rdfs:comment "The duty arises from legislation or regulation — e.g. child protection act, mental health act, corporations act, professional registration act." .
+care:basisCourtOrder a care:LegalBasisType ; rdfs:label "court-order" ;
+    rdfs:comment "The duty arises from a court order or tribunal decision — e.g. guardianship order, receivership order, injunction, custody order." .
+care:basisCustom    a care:LegalBasisType ; rdfs:label "custom" ;
+    rdfs:comment "The duty arises from customary practice or tradition — e.g. customary land rights, kinship obligations, professional customs. May or may not be formally codified." .
+care:basisConsent   a care:LegalBasisType ; rdfs:label "consent" ;
+    rdfs:comment "The duty arises from the care-subject's consent — e.g. voluntary guardianship, supported decision-making, medical consent. The care-subject retains the right to revoke consent unless a court has overridden." .
+care:basisEmergency a care:LegalBasisType ; rdfs:label "emergency" ;
+    rdfs:comment "The duty arises from emergency necessity — a duty-holder acts to protect the care-subject without prior authorisation. Must be subsequently ratified or revoked by a court or authority." .
+care:basisFiduciary a care:LegalBasisType ; rdfs:label "fiduciary" ;
+    rdfs:comment "The duty arises from a fiduciary relationship — the duty-holder has undertaken to act in the care-subject's best interests. Fiduciary duty may arise from statute, contract, or the nature of the relationship itself." .
+care:basisInformal   a care:LegalBasisType ; rdfs:label "informal" ;
+    rdfs:comment "The duty arises from an informal arrangement or circumstantial relationship — e.g. a housemate agreement, a neighbour keeping an eye on a property, a friend checking in on an elderly person. Not a formal contract, not a statute, not a court order — a voluntary or circumstantial undertaking recognised by social practice. The duty is narrow and context-specific. May be formalised into an agreement or superseded by a statutory or court-ordered arrangement." .
+
+care:legalBasisReference a rdf:Property ;
+    rdfs:label "legal basis reference" ;
+    rdfs:domain care:LegalBasis ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI or citation of the specific legal instrument — e.g. statute section, court order number, contract IRI." .
+
+care:hasLegalBasis a rdf:Property ;
+    rdfs:label "has legal basis" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:LegalBasis ;
+    rdfs:comment "Links a duty of care relation to its legal basis. A relation may have multiple legal bases." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Consent Basis — voluntary, involuntary, deemed, court-ordered
+# ────────────────────────────────────────────────────────────────────
+
+care:ConsentBasis a rdfs:Class ;
+    rdfs:label "Consent Basis" ;
+    rdfs:comment "The consent status of a duty of care relation — whether the care-subject voluntarily agreed, was subject to involuntary imposition, is deemed to have consented by law, or is subject to a court order. This is orthogonal to the care-subject's vulnerability — a minor's vulnerability is 'minority', but the guardianship may be voluntary (parents consent) or court-ordered (despite parents' objection). Consent basis determines revocability, procedural requirements, and the degree of ongoing oversight required." .
+
+care:consentType a rdf:Property ;
+    rdfs:label "consent type" ;
+    rdfs:domain care:ConsentBasis ;
+    rdfs:range  care:ConsentType ;
+    rdfs:comment "The type of consent basis." .
+
+care:ConsentType a rdfs:Class ;
+    rdfs:label "Consent Type" .
+
+care:voluntaryConsent a care:ConsentType ; rdfs:label "voluntary" ;
+    rdfs:comment "The care-subject voluntarily consented to the duty of care relation. The care-subject retains the right to revoke consent unless a separate court order overrides. Examples: supported decision-making agreement, voluntary power of attorney, voluntary medical treatment." .
+care:involuntaryConsent a care:ConsentType ; rdfs:label "involuntary" ;
+    rdfs:comment "The duty of care is imposed without the care-subject's consent — e.g. involuntary guardianship, compulsory treatment, child protection removal. Requires statutory authority or court order. The care-subject may object and seek review. The most restrictive form — requires ongoing judicial oversight and periodic review." .
+care:deemedConsent   a care:ConsentType ; rdfs:label "deemed" ;
+    rdfs:comment "Consent is deemed or presumed by law — e.g. emergency medical treatment when the patient is unconscious, statutory presumption of parental responsibility. The care-subject may revoke deemed consent once they have capacity to do so, unless a court order overrides." .
+care:courtOrderedConsent a care:ConsentType ; rdfs:label "court-ordered" ;
+    rdfs:comment "The duty of care is imposed by a court order — e.g. guardianship order, receivership, custody order. The court determines the scope, duration, and conditions. The care-subject may appeal but cannot unilaterally revoke. Requires periodic court review." .
+care:proxyConsent   a care:ConsentType ; rdfs:label "proxy" ;
+    rdfs:comment "Consent is given by a proxy on behalf of the care-subject — e.g. parent consenting for a child, guardian consenting for an incapacitated person, next of kin consenting for medical treatment. The proxy must act in the care-subject's best interests." .
+
+care:consentRevocable a rdf:Property ;
+    rdfs:label "consent revocable" ;
+    rdfs:domain care:ConsentBasis ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the care-subject can revoke consent. True for voluntary and deemed consent (once capacity is established). False for court-ordered and involuntary (requires court review to revoke)." .
+
+care:consentGivenAt a rdf:Property ;
+    rdfs:label "consent given at" ;
+    rdfs:domain care:ConsentBasis ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When consent was given or deemed. For court-ordered, the date of the court order." .
+
+care:consentGivenBy a rdf:Property ;
+    rdfs:label "consent given by" ;
+    rdfs:domain care:ConsentBasis ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who gave consent — the care-subject, a proxy, or a court." .
+
+care:hasConsentBasis a rdf:Property ;
+    rdfs:label "has consent basis" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:ConsentBasis ;
+    rdfs:comment "Links a duty of care relation to its consent basis." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Jurisdiction — which legal system governs the relation
+# ────────────────────────────────────────────────────────────────────
+
+care:Jurisdiction a rdfs:Class ;
+    rdfs:label "Jurisdiction" ;
+    rdfs:comment "The legal jurisdiction that governs a duty of care relation. A duty may be subject to multiple jurisdictions — e.g. a multinational corporation's directors owe duties under multiple corporate law regimes. Jurisdiction determines which courts have authority, which statutes apply, and how conflicts between legal systems are resolved. Cross-border duty of care relations (e.g. international guardianship, transnational professional duty) require explicit jurisdictional modelling." .
+
+care:governingLaw a rdf:Property ;
+    rdfs:label "governing law" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The legal system that governs the relation — e.g. 'AU-NSW', 'US-CA', 'EU-GDPR', 'customary-Maori'. May be a statute, a regulation, a treaty, or a customary law system." .
+
+care:courtJurisdiction a rdf:Property ;
+    rdfs:label "court jurisdiction" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The court or tribunal that has authority over the relation — e.g. 'NSW Supreme Court', 'Family Court of Australia', 'ICJ'. Multiple courts may have concurrent jurisdiction." .
+
+care:applicableStatutes a rdf:Property ;
+    rdfs:label "applicable statutes" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Specific statutes or regulations that apply to the relation — e.g. 'Guardianship Act 1987 (NSW)', 'Mental Health Act 2007 (NSW)', 'Corporations Act 2001 (Cth)'." .
+
+care:jurisdictionType a rdf:Property ;
+    rdfs:label "jurisdiction type" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  care:JurisdictionType ;
+    rdfs:comment "The type of jurisdiction — determines the scope of legal authority." .
+
+care:JurisdictionType a rdfs:Class ;
+    rdfs:label "Jurisdiction Type" .
+
+care:nationalJurisdiction  a care:JurisdictionType ; rdfs:label "national" ;
+    rdfs:comment "A national legal system — federal or unitary state law." .
+care:subNationalJurisdiction a care:JurisdictionType ; rdfs:label "sub-national" ;
+    rdfs:comment "A sub-national jurisdiction — state, provincial, territorial law." .
+care:internationalJurisdiction a care:JurisdictionType ; rdfs:label "international" ;
+    rdfs:comment "An international jurisdiction — treaty, convention, or international tribunal. Examples: Hague Convention on International Child Protection, UN Convention on the Rights of Persons with Disabilities." .
+care:customaryJurisdiction a care:JurisdictionType ; rdfs:label "customary" ;
+    rdfs:comment "A customary or indigenous legal system — customary law, indigenous law, religious law. May operate alongside or within a national legal system." .
+care:transnationalJurisdiction a care:JurisdictionType ; rdfs:label "transnational" ;
+    rdfs:comment "A transnational regulatory regime — e.g. EU GDPR, professional standards bodies, international accreditation. Not a sovereign jurisdiction but has binding effect within its domain." .
+
+care:crossBorderRecognition a rdf:Property ;
+    rdfs:label "cross-border recognition" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Whether and how the duty of care relation is recognised across borders — e.g. 'Hague Convention recognised', 'bilateral treaty', 'no recognition', 'comity'. Relevant for international guardianship, transnational professional duty, and cross-border child protection." .
+
+care:conflictOfLaws a rdf:Property ;
+    rdfs:label "conflict of laws" ;
+    rdfs:domain care:Jurisdiction ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If multiple jurisdictions apply, how conflicts are resolved — e.g. 'lex loci' (law of the place), 'lex fori' (law of the court), 'best interests of the child', 'most significant relationship'." .
+
+care:hasJurisdiction a rdf:Property ;
+    rdfs:label "has jurisdiction" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:Jurisdiction ;
+    rdfs:comment "Links a duty of care relation to its governing jurisdiction. A relation may have multiple jurisdictions (e.g. cross-border guardianship)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Selfhood Boundary — duty of care cannot reach selfhood
+# ────────────────────────────────────────────────────────────────────
+
+# Duty of care governs the care-subject's exterior — social relations,
+# legal status, assets, safety, and decisions. It does NOT govern the
+# care-subject's selfhood — dreams, reflections, qualia, private keys,
+# biometric baselines, or personal values.
+#
+# A duty-holder may:
+#   - Provide medical treatment (professional duty)
+#   - Manage assets (stewardship duty)
+#   - Ensure safety (safety obligation)
+#   - Care for a child (family duty)
+#
+# A duty-holder may NOT:
+#   - Access selfhood vaults without explicit consent
+#   - Read private reflections or dream records
+#   - Use private keys beyond the duty scope
+#   - Compel disclosure of selfhood data
+#
+# Exception: a court may order limited access to specific selfhood data.
+# Such access is recorded as PersonhoodData with consentGiven set to
+# the court order date and consentRevocable set to false.
+
+care:selfhoodAccessPermitted a rdf:Property ;
+    rdfs:label "selfhood access permitted" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the duty-holder has any access to the care-subject's selfhood data. Default false." .
+
+care:selfhoodAccessScope a rdf:Property ;
+    rdfs:label "selfhood access scope" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If selfhood access is permitted, the specific scope." .
+
+# ────────────────────────────────────────────────────────────────────
+# 12. Duty Origin — how the duty arose
+# ────────────────────────────────────────────────────────────────────
+
+care:DutyOrigin a rdfs:Class ;
+    rdfs:label "Duty Origin" ;
+    rdfs:comment "How a duty of care relation came into existence. This is distinct from legal basis (which describes the legal foundation) — duty origin describes whether the duty was properly established, arose from circumstance, or was fraudulently claimed. A properly constituted duty has a legal basis (agreement, statute, court order). A circumstantial duty may have no prior legal basis — it arises from the situation itself. A fraudulent duty has no legitimate basis — it is falsely claimed." .
+
+care:dutyOriginType a rdf:Property ;
+    rdfs:label "duty origin type" ;
+    rdfs:domain care:DutyOrigin ;
+    rdfs:range  care:DutyOriginType ;
+    rdfs:comment "The type of duty origin." .
+
+care:DutyOriginType a rdfs:Class ;
+    rdfs:label "Duty Origin Type" .
+
+care:constitutedOrigin a care:DutyOriginType ; rdfs:label "constituted" ;
+    rdfs:comment "The duty was properly established — through an agreement, statute, court order, or formal appointment. The duty-holder has legitimate authority and the care-subject's knowledge, consent, or legal compulsion is documented. This is the standard case — all duty types (guardianship, professional, custodial, etc.) are normally constituted." .
+care:circumstantialOrigin a care:DutyOriginType ; rdfs:label "circumstantial" ;
+    rdfs:comment "The duty arose from circumstance, not from a prior arrangement. The duty-holder became involved without the care-subject's prior knowledge, permission, or consent — e.g. a passerby at an accident, a witness to an assault who assists the victim. The duty is de facto, not de jure — it exists in fact but not necessarily in law until ratified. May be retroactively formalised (e.g. emergency medical treatment ratified by court) or may dissolve once the circumstance resolves. See care:GoodSamaritan for the well-intentioned sub-type." .
+care:fraudulentOrigin a care:DutyOriginType ; rdfs:label "fraudulent" ;
+    rdfs:comment "The duty was falsely claimed — the purported duty-holder has no legitimate authority, no agreement, no court appointment, and no genuine relationship with the care-subject. They have inserted themselves into a duty role under false pretences — e.g. claiming to be next of kin at a hospital, impersonating a guardian, fabricating a relationship. The 'duty' is not real — it is a vehicle for harm, information access, or concealment. See care:FraudulentAssumption for the full class. Fraudulent origin is a personhood concept — it involves intent to deceive, which is a mind-dependent capacity of natural persons." .
+
+care:hasDutyOrigin a rdf:Property ;
+    rdfs:label "has duty origin" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  care:DutyOrigin ;
+    rdfs:comment "Links a duty of care relation to its origin. Every relation should have a duty origin — if unknown, it should be investigated." .
+
+# ────────────────────────────────────────────────────────────────────
+# 13. Good Samaritan — circumstantial, well-intentioned assistance
+# ────────────────────────────────────────────────────────────────────
+
+care:GoodSamaritan a rdfs:Class ;
+    rdfs:subClassOf care:DutyOfCareRelation ;
+    rdfs:label "Good Samaritan" ;
+    rdfs:comment "A duty of care relation that arises when a person provides uninvited, circumstantial assistance to another person in need — without prior arrangement, knowledge, or consent of the care-subject. The Good Samaritan acts in good faith: their purpose is to help, not to harm, exploit, or gain access to the care-subject's personhood or selfhood. The assistance may or may not be successful — the outcome does not change the nature of the duty. A Good Samaritan who attempts CPR and fails is still a Good Samaritan. The duty is temporary and transfers to formal duty-holders (paramedics, doctors, police) when they arrive. Good Samaritan laws in many jurisdictions provide limited liability protection for persons acting in good faith. This class is restricted to natural persons — software agents cannot be Good Samaritans (they have no capacity for good faith, which is a mind-dependent quality)." .
+
+care:samaritanAction a rdf:Property ;
+    rdfs:label "samaritan action" ;
+    rdfs:domain care:GoodSamaritan ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The assistance provided — e.g. 'called emergency services', 'administered CPR', 'applied pressure to wound', 'removed from danger', 'provided shelter'." .
+
+care:samaritanOutcome a rdf:Property ;
+    rdfs:label "samaritan outcome" ;
+    rdfs:domain care:GoodSamaritan ;
+    rdfs:range  care:SamaritanOutcome ;
+    rdfs:comment "The outcome of the assistance — does not affect the classification as Good Samaritan." .
+
+care:SamaritanOutcome a rdfs:Class ;
+    rdfs:label "Samaritan Outcome" .
+
+care:samaritanSuccessful  a care:SamaritanOutcome ; rdfs:label "successful" ;
+    rdfs:comment "The assistance achieved its immediate purpose — e.g. the person survived, the bleeding stopped, the victim was removed from danger." .
+care:samaritanUnsuccessful a care:SamaritanOutcome ; rdfs:label "unsuccessful" ;
+    rdfs:comment "The assistance did not achieve its immediate purpose — e.g. CPR was performed but the person did not survive. The Good Samaritan classification is not affected — the intent and effort matter, not the outcome." .
+care:samaritanPartiallySuccessful a care:SamaritanOutcome ; rdfs:label "partially-successful" ;
+    rdfs:comment "The assistance partially achieved its purpose — e.g. the person was stabilised but not fully recovered, the bleeding was reduced but not stopped." .
+care:samaritanHarmful a care:SamaritanOutcome ; rdfs:label "harmful" ;
+    rdfs:comment "The assistance inadvertently caused harm — e.g. incorrect CPR technique caused injury, moving an injured person worsened spinal damage. The Good Samaritan classification may still apply if the person acted in good faith and within their capability — Good Samaritan laws typically protect against liability for unintentional harm when acting in good faith. If the harm was intentional, this is NOT a Good Samaritan — it is a FraudulentAssumption or unlawful interference." .
+
+care:samaritanGoodFaith a rdf:Property ;
+    rdfs:label "samaritan good faith" ;
+    rdfs:domain care:GoodSamaritan ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the Good Samaritan acted in good faith — genuine intent to help, no ulterior motive, no exploitation of the care-subject's vulnerability. Good faith is a mind-dependent quality — restricted to natural persons. If false, the relation is not a Good Samaritan but a FraudulentAssumption." .
+
+care:samaritanHandoverTo a rdf:Property ;
+    rdfs:label "samaritan handover to" ;
+    rdfs:domain care:GoodSamaritan ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The formal duty-holder to whom the Good Samaritan handed over responsibility — e.g. paramedics, hospital, police. The Good Samaritan's duty ends at handover. If no handover occurred (e.g. the person died before help arrived), this is empty." .
+
+care:samaritanHandoverAt a rdf:Property ;
+    rdfs:label "samaritan handover at" ;
+    rdfs:domain care:GoodSamaritan ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the handover to formal duty-holders occurred." .
+
+# ────────────────────────────────────────────────────────────────────
+# 14. Fraudulent Assumption — falsely claiming a duty role
+# ────────────────────────────────────────────────────────────────────
+
+care:FraudulentAssumption a rdfs:Class ;
+    rdfs:label "Fraudulent Assumption" ;
+    rdfs:comment "A relation in which a person falsely claims a duty of care role — guardian, next of kin, family member, carer, emergency contact — without legitimate authority, relationship, or appointment. The false claim may be made to: (a) gain access to the care-subject's personhood information (medical, legal, financial), (b) influence medical or legal decisions about the care-subject, (c) conceal a crime or protect criminal associates, (d) cause harm to the care-subject. Fraudulent assumption is a personhood concept — it involves intent to deceive, which is a mind-dependent capacity of natural persons. A software agent cannot commit fraudulent assumption (it has no intent); a software agent may produce ungrounded output that facilitates fraud, but the fraud is committed by the natural person who deployed it. This class is distinct from guard:Intervention (unlawfulInterference) — intervention targets an existing relation, while fraudulent assumption creates a false relation or inserts itself where no relation exists." .
+
+care:fraudulentClaim a rdf:Property ;
+    rdfs:label "fraudulent claim" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The role or relationship falsely claimed — e.g. 'next of kin', 'spouse', 'parent', 'guardian', 'power of attorney', 'family friend'." .
+
+care:fraudulentEvidence a rdf:Property ;
+    rdfs:label "fraudulent evidence" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "False evidence provided to support the claim — e.g. fabricated story about how the injury occurred, forged documents, false identification, coached statements to hospital staff." .
+
+care:fraudulentMotive a rdf:Property ;
+    rdfs:label "fraudulent motive" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  care:FraudulentMotive ;
+    rdfs:comment "The actual motive behind the fraudulent assumption — distinct from the claimed motive." .
+
+care:FraudulentMotive a rdfs:Class ;
+    rdfs:label "Fraudulent Motive" .
+
+care:motiveConcealCrime    a care:FraudulentMotive ; rdfs:label "conceal-crime" ;
+    rdfs:comment "To conceal a crime — e.g. an organised crime figure claims to be next of kin to prevent the victim from telling the true story, protecting themselves and associates." .
+care:motiveHarmCausing     a care:FraudulentMotive ; rdfs:label "harm-causing" ;
+    rdfs:comment "To cause harm to the care-subject — e.g. providing false medical history that leads to harmful treatment, preventing real family from being contacted." .
+care:motiveInformationAccess a care:FraudulentMotive ; rdfs:label "information-access" ;
+    rdfs:comment "To gain access to the care-subject's personhood information — medical records, financial details, legal documents — for exploitation." .
+care:motiveFinancialExploitation a care:FraudulentMotive ; rdfs:label "financial-exploitation" ;
+    rdfs:comment "To exploit the care-subject financially — e.g. claiming authority to access bank accounts, make financial decisions, or dispose of assets." .
+care:motiveCoerciveControl a care:FraudulentMotive ; rdfs:label "coercive-control" ;
+    rdfs:comment "To exert coercive control over the care-subject — e.g. preventing them from leaving a situation, controlling their medical decisions, isolating them from real family." .
+care:motiveOther           a care:FraudulentMotive ; rdfs:label "other" ;
+    rdfs:comment "Other motive not classified above." .
+
+care:fraudulentHarmCaused a rdf:Property ;
+    rdfs:label "fraudulent harm caused" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The harm caused to the care-subject by the fraudulent assumption — e.g. 'wrong medical treatment due to false history', 'real family not contacted for 48 hours', 'victim unable to report crime', 'terminal harm from delayed treatment'." .
+
+care:fraudulentDiscoveredAt a rdf:Property ;
+    rdfs:label "fraudulent discovered at" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the fraud was discovered. Empty means not yet discovered." .
+
+care:fraudulentDiscoveredBy a rdf:Property ;
+    rdfs:label "fraudulent discovered by" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who discovered the fraud — e.g. hospital staff, real family member, police, court." .
+
+care:fraudulentReportedTo a rdf:Property ;
+    rdfs:label "fraudulent reported to" ;
+    rdfs:domain care:FraudulentAssumption ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Authority to whom the fraud was reported — police, court, regulatory body." .
+
+# ────────────────────────────────────────────────────────────────────
+# 15. Verification Requirement — preventing fraudulent assumption
+# ────────────────────────────────────────────────────────────────────
+
+care:VerificationRequirement a rdfs:Class ;
+    rdfs:label "Verification Requirement" ;
+    rdfs:comment "A procedural safeguard to verify a party's identity, relationship, or authority before granting them access to the care-subject or their information. Verification requirements are the primary defence against fraudulent assumption — they ensure that a person claiming to be next of kin, guardian, or family member is who they claim to be. Verification is especially critical in emergency contexts (hospital admission, accident response) where the care-subject cannot confirm the relationship themselves. Verification requirements may be imposed by law (statutory ID requirements), by professional standards (hospital admission protocols), by institutional policy (aged care facility visitor verification), or by the care-subject's pre-designated preferences (who they have authorised as emergency contact)." .
+
+care:verificationType a rdf:Property ;
+    rdfs:label "verification type" ;
+    rdfs:domain care:VerificationRequirement ;
+    rdfs:range  care:VerificationType ;
+    rdfs:comment "What is being verified." .
+
+care:VerificationType a rdfs:Class ;
+    rdfs:label "Verification Type" .
+
+care:verifyIdentity       a care:VerificationType ; rdfs:label "identity" ;
+    rdfs:comment "Verify the party's identity — government ID, biometric, known to staff, verified by third party." .
+care:verifyRelationship   a care:VerificationType ; rdfs:label "relationship" ;
+    rdfs:comment "Verify the party's relationship to the care-subject — marriage certificate, birth certificate, tenancy agreement, statutory declaration. In emergencies: cross-check with pre-designated emergency contacts, ask the care-subject if conscious, ask other known parties." .
+care:verifyAuthority      a care:VerificationType ; rdfs:label "authority" ;
+    rdfs:comment "Verify the party's legal authority — guardianship order, power of attorney document, court appointment, statutory appointment letter." .
+care:verifyEmergencyInfo  a care:VerificationType ; rdfs:label "emergency-info" ;
+    rdfs:comment "Cross-check the party's claims against the care-subject's pre-designated emergency information (scope:EmergencyInformationAccess). If the person claiming to be next of kin is NOT listed in the pre-designated emergency contacts or next of kin, this is a red flag." .
+care:verifyConsistency    a care:VerificationType ; rdfs:label "consistency" ;
+    rdfs:comment "Verify the consistency of the party's account — does the story match the injuries? Does it match witness accounts? Does it match the care-subject's known circumstances? Inconsistencies may indicate fraudulent assumption." .
+
+care:verificationMethod a rdf:Property ;
+    rdfs:label "verification method" ;
+    rdfs:domain care:VerificationRequirement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How the verification is performed — e.g. 'sight government photo ID', 'contact pre-designated emergency contact for confirmation', 'request guardianship order from court', 'ask care-subject if conscious and capable', 'cross-check hospital records', 'police background check'." .
+
+care:verificationStatus a rdf:Property ;
+    rdfs:label "verification status" ;
+    rdfs:domain care:VerificationRequirement ;
+    rdfs:range  care:VerificationStatus ;
+    rdfs:comment "The outcome of the verification." .
+
+care:VerificationStatus a rdfs:Class ;
+    rdfs:label "Verification Status" .
+
+care:verificationPassed    a care:VerificationStatus ; rdfs:label "passed" ;
+    rdfs:comment "Verification passed — the party's identity, relationship, or authority has been confirmed." .
+care:verificationFailed    a care:VerificationStatus ; rdfs:label "failed" ;
+    rdfs:comment "Verification failed — the party's claim could not be confirmed or was contradicted. Access should be denied. The attempted access should be logged and may need to be reported." .
+care:verificationPending   a care:VerificationStatus ; rdfs:label "pending" ;
+    rdfs:comment "Verification is pending — the party has provisional access only, with supervision, until verification is completed." .
+care:verificationWaived    a care:VerificationStatus ; rdfs:label "waived" ;
+    rdfs:comment "Verification was waived due to emergency circumstances — the party was granted access without verification because the emergency justified it. Must be retroactively verified. If retroactive verification fails, this becomes a FraudulentAssumption investigation." .
+care:verificationNotRequired a care:VerificationStatus ; rdfs:label "not-required" ;
+    rdfs:comment "Verification is not required for this party or context — e.g. a pre-verified family member in a non-emergency context, or a party with a current court-verified appointment." .
+
+care:verificationVerifiedBy a rdf:Property ;
+    rdfs:label "verification verified by" ;
+    rdfs:domain care:VerificationRequirement ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who performed the verification — e.g. hospital admissions staff, police, court officer, care facility manager." .
+
+care:verificationVerifiedAt a rdf:Property ;
+    rdfs:label "verification verified at" ;
+    rdfs:domain care:VerificationRequirement ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the verification was performed." .
+
+care:hasVerificationRequirement a rdf:Property ;
+    rdfs:label "has verification requirement" ;
+    rdfs:domain care:InvolvedParty ;
+    rdfs:range  care:VerificationRequirement ;
+    rdfs:comment "Links an involved party to the verification requirements that apply to them. A party may have multiple verification requirements (identity + relationship + authority)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 16. Linking to personhood.n3 and guardianship.n3
+# ────────────────────────────────────────────────────────────────────
+
+# DutyOfCareRelation is a subClassOf FiduciaryRelationship in
+# personhood.n3. It is the umbrella for all protective relations.
+#
+# DutyOfCareRelation defines:
+#   - care:dutyHolder / care:careSubject (the two poles)
+#   - care:dutyType (guardianship, custodial, professional, stewardship, safety,
+#     public service, family, co-resident, principal-agent)
+#   - care:CareScope (breadth, duration, permitted/prohibited actions)
+#   - care:InvolvedParty (all party roles incl. emergency-contact)
+#   - care:PartyRight / care:PartyResponsibility (rights + 8 responsibility categories)
+#   - care:LegalBasis (agreement, statute, court order, custom, consent, emergency,
+#     fiduciary, informal)
+#   - care:ConsentBasis (voluntary, involuntary, deemed, court-ordered, proxy)
+#   - care:Jurisdiction (governing law, court, statutes, cross-border, conflict of laws)
+#   - care:selfhoodAccessPermitted / care:selfhoodAccessScope
+#   - care:DutyOrigin (constituted, circumstantial, fraudulent)
+#   - care:GoodSamaritan (circumstantial, good-faith assistance)
+#   - care:FraudulentAssumption (false claim of duty role)
+#   - care:VerificationRequirement (identity, relationship, authority checks)
+#
+# guardianship.n3 defines:
+#   - GuardianshipRelation (subClassOf DutyOfCareRelation)
+#   - Formal legal guardianship specifics
+#   - Ward vulnerability types
+#   - Guardianship review and revocation
+#   - Family role classes
+#   - Intervention, challenge, and replacement classes
+#
+# The duty-type property distinguishes sub-types:
+#   - care:guardianship → see guardianship.n3
+#   - care:custodial → custodial duty (housekeeper, babysitter)
+#   - care:professional → professional duty (doctor, lawyer, mechanic)
+#   - care:stewardship → stewardship duty (director, trustee, project manager)
+#   - care:safetyObligation → safety obligation (builder, food vendor)
+#   - care:publicService → public service duty (social security, emergency services)
+#   - care:coResident → co-resident duty (housemate, flatmate)
+#   - care:principalAgent → principal-agent duty (software agent oversight)
+#
+# Duty origin distinguishes how the duty arose:
+#   - care:constitutedOrigin → properly established (agreement, statute, court)
+#   - care:circumstantialOrigin → arose from circumstance (Good Samaritan)
+#   - care:fraudulentOrigin → falsely claimed (fake next of kin, impersonation)
+#
+# Good Samaritan: uninvited, circumstantial, well-intentioned assistance
+# FraudulentAssumption: falsely claiming a duty role, potentially causing harm
+# VerificationRequirement: procedural safeguards to prevent fraudulent assumption

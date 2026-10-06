@@ -1,0 +1,258 @@
+# Adversarial Relational Scenarios — Contextual Patterns
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# A companion to adversarial-relational.n3 — this file models
+# real-world scenario patterns that demonstrate how the methods
+# and factors defined in the main ontology intersect in practice.
+#
+# The purpose of this file is to ensure ontological visibility for
+# harms that are difficult to categorise because they involve
+# multiple intersecting factors: gender, wealth, family networks,
+# psychiatric vulnerability, substance dependency, sexual leverage,
+# institutional blind spots, professional position, and others.
+#
+# Each scenario is modelled as a pattern — not as a stereotype or
+# a claim about any group. Scenarios are gender-neutral in
+# principle: the factors that make a scenario work are contextual,
+# not essential. Any scenario may be enacted by persons of any
+# gender, in any combination. The scenarios are drawn from
+# observed patterns and are modelled here to ensure they can be
+# identified, reported, and addressed.
+#
+# The goal is human rights support: if these behaviours cannot be
+# ontologically defined, they cannot be identified in child
+# protection, law enforcement, family court, therapeutic, or
+# institutional contexts. Ontological invisibility is itself a
+# harm — it leaves targets without recognition and perpetrators
+# without accountability.
+#
+# Nomenclature: All scenarios involve natural persons. Mind-
+# dependent terms (coerced, perception, emotional) are used only
+# for natural persons. Legal persons may appear as instruments
+# (e.g. shell companies) but not as targets of psychological
+# methods.
+#
+# Imports: adversarial-relational.n3, adversarial-conduct.n3,
+#          obligations.n3, agency.n3, personhood.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix adv:    <https://qualiadb.org/schema/ui/adversarial-conduct#> .
+@prefix rel:    <https://qualiadb.org/schema/ui/adversarial-relational#> .
+@prefix scn:    <https://qualiadb.org/schema/ui/adversarial-relational-scenarios#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Instrumentalisation Factors — the multidimensional space
+# ────────────────────────────────────────────────────────────────────
+
+scn:SocialBiasFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "social-bias" ;
+    rdfs:comment "Social biases (gender, race, class, age, disability, appearance) that affect whether the instrument's conduct is recognised, reported, investigated, or prosecuted. Gender bias is one factor among many — it may be operative in some contexts and not others. The bias may be disbelief ('X group don't do that') or protective ('protect X group from consequence'). Both may be operative simultaneously." .
+
+scn:WealthResourceFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "wealth-resource-asymmetry" ;
+    rdfs:comment "Wealth or resource asymmetry between instigator, instrument, and target. Wealth provides: access to legal representation, ability to sustain litigation, ability to purchase silence (NDAs, settlements), social credibility, institutional access, and the ability to absorb consequences. Lack of wealth creates vulnerability: inability to defend against false claims, inability to sustain legal action, dependence on the instigator for survival. Wealth may be individual or familial — a family acting as a unit can concentrate resources against a target who has none." .
+
+scn:FamilyNetworkFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "family-network-position" ;
+    rdfs:comment "Family or network position that provides cover, resources, or credibility. A family acting as a unit can: provide alibis, coordinate harassment across multiple actors, pool financial resources, leverage community standing, and shield individual members from accountability. The family network may be the instigator (e.g. an extended family targeting an in-law) or may provide infrastructure for an individual instigator. Particularly powerful in tight-knit communities, cultural communities, and wealthy families." .
+
+scn:PsychiatricVulnerabilityFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "psychiatric-vulnerability" ;
+    rdfs:comment "Psychiatric vulnerability of the instrument that makes them both effective and disposable. A person with untreated or unmanaged psychiatric conditions may: (1) be more easily recruited or manipulated as an instrument, (2) conduct conduct that is less likely to be believed if reported (because of the psychiatric history), (3) be more easily discarded or discredited by the instigator if discovered ('she's just unwell'), (4) be considered 'untouchable' by law enforcement who may not pursue charges against someone who is psychiatrically unwell. The instigator exploits both the vulnerability (for recruitment) and the stigma (for cover). This factor intersects with falseMedicalClaim — the instigator may pathologise the instrument to discredit them if needed." .
+
+scn:SubstanceDependencyFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "substance-dependency" ;
+    rdfs:comment "Substance dependency of the instrument that creates leverage for the instigator. The instigator may: (1) provide substances to maintain dependency, (2) use the dependency to compel conduct, (3) exploit the stigma of addiction to discredit the instrument if discovered, (4) ensure the instrument's reports are not taken seriously ('she's just an addict'). Substance dependency may also affect the target — a target with substance dependency is less likely to report, less likely to be believed, and more easily discredited." .
+
+scn:SexualLeverageFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "sexual-leverage" ;
+    rdfs:comment "Sexual relationships or sexual leverage that creates networks of obligation or silence. A person may strategically cultivate sexual relationships with multiple parties to create a network of aligned individuals who will act on their behalf — the sexual relationship creates loyalty, obligation, or fear of exposure. The network may then be leveraged to execute premeditated attacks on a target. Distinct from sexualCoercion (which compels a specific person): sexual leverage builds a network of instruments. The parties in the network may not know they are being used as instruments — they may believe the relationship is genuine. Particularly effective because the sexual relationships create mutual vulnerability (if the network is exposed, all parties are exposed)." .
+
+scn:ProfessionalAuthorityFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "professional-authority" ;
+    rdfs:comment "Professional position or authority that provides cover, credibility, or access. A professional (medical, legal, financial, religious, educational) may exploit their professional standing to: (1) conduct harm under the guise of professional activity, (2) leverage professional credibility to discredit reports, (3) access vulnerable populations (patients, clients, students, parishioners), (4) use professional documentation as a weapon (false records, pathologising reports). See rel:ProfessionCorrelatedAccess in the main ontology." .
+
+scn:InstitutionalBlindSpotFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "institutional-blind-spot" ;
+    rdfs:comment "Institutional policies, cultures, or practices that fail to recognise certain patterns of harm. Examples: police defaulting to the man as perpetrator in domestic violence calls, child protection systems that default to maternal custody, professional bodies that protect members from complaints, institutions that treat relational aggression as 'just personality conflict'. The instigator exploits the blind spot — they know which institutions will not see their conduct." .
+
+scn:LegalStatusFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "legal-status-vulnerability" ;
+    rdfs:comment "Legal status that creates vulnerability or cover. Immigration status (undocumented persons cannot report without risking deportation), criminal history (prior convictions reduce credibility), guardianship status (a legal guardian can control a dependent's access to justice), corporate status (sole directorships used for phoenixing, shell companies for money laundering). The instigator may exploit the instrument's legal status to ensure they cannot seek help, or may use the instrument's legal status as cover (e.g. a sole director who 'doesn't know anything about the books')." .
+
+scn:ChildDependencyFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "child-dependency" ;
+    rdfs:comment "The presence of dependent children that creates leverage for the instigator. Children may be: (1) leverage to compel the instrument's compliance (threats to custody, threats to report the instrument to child protection), (2) witnesses who can be coached or manipulated, (3) future instruments (intergenerational transmission), (4) targets themselves (if the instrument's adversarial methods are turned on the children). Particularly powerful in single-parent situations where the instrument is the primary carer and has no other support." .
+
+scn:IsolationFactor a rel:InstrumentalisationFactor ;
+    rdfs:label "isolation" ;
+    rdfs:comment "Social or geographic isolation of the instrument or target that prevents recognition, reporting, or escape. Includes: geographic isolation (rural, remote), social isolation (no family or friends), linguistic isolation (language barriers), institutional isolation (detention, residential care), digital isolation (no online access or digital literacy). Isolation makes all other factors more effective — an isolated target has no one to validate their experience, and an isolated instrument has no one to help them exit the instigator's control." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Scenario Patterns — observed configurations
+# ────────────────────────────────────────────────────────────────────
+
+scn:ScenarioPattern a rdfs:Class ;
+    rdfs:label "Scenario Pattern" ;
+    rdfs:comment "A real-world configuration of methods and factors that constitutes a recognisable pattern of harm. Each pattern lists the methods typically involved, the factors that make the pattern effective, the dynamics that distinguish it, and the consequences for targets, instruments, and children. Patterns are not stereotypes — they are observed configurations that recur across contexts. Any pattern may be enacted by persons of any gender." .
+
+scn:scenarioMethods a rdf:Property ;
+    rdfs:label "methods" ;
+    rdfs:domain scn:ScenarioPattern ;
+    rdfs:range  adv:ConductMethod .
+
+scn:scenarioFactors a rdf:Property ;
+    rdfs:label "factors" ;
+    rdfs:domain scn:ScenarioPattern ;
+    rdfs:range  rel:InstrumentalisationFactor .
+
+scn:scenarioDynamics a rdf:Property ;
+    rdfs:label "dynamics" ;
+    rdfs:domain scn:ScenarioPattern ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The distinguishing dynamics of this scenario — what makes it work, what makes it hard to detect, what makes it hard to escape." .
+
+scn:scenarioConsequences a rdf:Property ;
+    rdfs:label "consequences" ;
+    rdfs:domain scn:ScenarioPattern ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Consequences for the target, the instrument, and any children involved." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Wealth-Family Abuse — resources concentrated against a target
+# ────────────────────────────────────────────────────────────────────
+
+scn:wealthFamilyAbuse a scn:ScenarioPattern ;
+    rdfs:label "wealth-family-abuse" ;
+    scn:scenarioMethods rel:coerciveControl, rel:legalAbuse, rel:financialControl, rel:smearCampaign, rel:socialIsolation, rel:falseAllegation ;
+    scn:scenarioFactors scn:WealthResourceFactor, scn:FamilyNetworkFactor, scn:InstitutionalBlindSpotFactor, scn:ChildDependencyFactor ;
+    scn:scenarioDynamics "A man with wealth, or whose family has wealth and acts as a unit, uses concentrated resources to abuse a woman (typically a partner or ex-partner) and control access to children. The family acts as a coordinated group: providing legal resources, alibis, social credibility, and institutional access. The target faces: sustained litigation they cannot afford, smear campaigns in communities where the family has standing, false allegations to child protection, financial control through legal processes, and social isolation as the family turns mutual contacts. The family's wealth makes each method more effective — they can outspend the target in court, out-lobby institutions, and outlast the target's resources. The target may be severely abused but unable to leave because leaving means losing access to children, financial survival, and social standing. Institutional blind spots compound the harm: family courts may see the wealthier party as more 'stable', child protection may see the poorer party as less 'capable'." ;
+    scn:scenarioConsequences "Target: severe psychological harm, financial ruin, loss of child access, social destruction, potential homelessness. Children: used as leverage, exposed to conflict, may be alienated from the target, may be coached to make false reports. Instrument (if family members are instruments): family members may be willing or coerced participants; some may not know the full picture." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Substance-Driven Exploitation — dependency as weapon
+# ────────────────────────────────────────────────────────────────────
+
+scn:substanceDrivenExploitation a scn:ScenarioPattern ;
+    rdfs:label "substance-driven-exploitation" ;
+    scn:scenarioMethods rel:sexualContentWeaponisation, rel:financialControl, rel:emotionalManipulation, rel:trapping ;
+    scn:scenarioFactors scn:SubstanceDependencyFactor, scn:IsolationFactor, scn:ChildDependencyFactor ;
+    scn:scenarioDynamics "A parent (of any gender, but the scenario is observed with single mothers where no father is present and no other family support exists) exploits their own children to fund substance dependency — e.g. exploiting children to obtain funds for tobacco, alcohol, or other substances. The children have no other carer, no family support, and no way to report. The parent's substance dependency creates a cycle: substances drive the exploitation, the exploitation generates funds for substances, and the children are trapped. The parent may not recognise the conduct as exploitation — they may frame it as necessity or normalise it. The children may not recognise it as harm — they may attribute it to 'how things are'. The scenario is distinct from organised exploitation (trafficking): it is driven by individual dependency, not by criminal enterprise. However, the scenario may intersect with trafficking if the exploitation escalates or if external actors become involved." ;
+    scn:scenarioConsequences "Children: severe developmental harm, normalisation of exploitation, risk of intergenerational transmission, potential entry into trafficking or substance dependency themselves. Parent: escalating dependency, legal risk, potential loss of custody (which may further harm children if no alternative care is available). The scenario is particularly difficult to address because removing children may cause further harm if no adequate alternative care exists." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Sexual Network Leverage — strategic relationship cultivation
+# ────────────────────────────────────────────────────────────────────
+
+scn:sexualNetworkLeverage a scn:ScenarioPattern ;
+    rdfs:label "sexual-network-leverage" ;
+    scn:scenarioMethods rel:smearCampaign, rel:relationalSabotage, rel:flyingMonkey, rel:proxyPerpetration, rel:provocationResponseInversion ;
+    scn:scenarioFactors scn:SexualLeverageFactor, scn:SocialBiasFactor, scn:IsolationFactor ;
+    scn:scenarioDynamics "A person strategically cultivates sexual relationships with multiple parties to build a network of aligned individuals, then leverages that network to execute premeditated attacks on a target. The sexual relationships create loyalty, obligation, or fear of exposure — parties in the network may act on the person's behalf because they believe the relationship is genuine, because they fear being exposed, or because they hope to maintain the relationship. The network may be used to: spread smear campaigns, sabotage the target's relationships, provide alibis, harass or intimidate the target, or provide false testimony. The target may not know the network exists or may not understand why they are being attacked from multiple directions. The person at the centre maintains deniability — they do not conduct the attacks directly; the network does. If the target responds, provocationResponseInversion may be used — the network reports the target's response as the problem. The scenario is gender-neutral but exploits sexual norms: if the person is a woman, the sexual relationships may be framed as 'just socialising' or 'she's just friendly'; if a man, as 'boys will be boys'. The sexual leverage is invisible because the relationships appear consensual and social." ;
+    scn:scenarioConsequences "Target: social destruction, relational sabotage, potential professional harm, psychological harm from multi-directional attacks. Network members: used as instruments, may not know they are being used, may face consequences if discovered. Person at centre: insulated from accountability by the network's deniability." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Adolescent Relational Aggression — schoolyard to suicide
+# ────────────────────────────────────────────────────────────────────
+
+scn:adolescentRelationalAggression a scn:ScenarioPattern ;
+    rdfs:label "adolescent-relational-aggression" ;
+    scn:scenarioMethods rel:socialExclusion, rel:gossipRumour, rel:smearCampaign, rel:socialIsolation, rel:onlineHarassmentCampaign, rel:provocationResponseInversion ;
+    scn:scenarioFactors scn:SocialBiasFactor, scn:IsolationFactor, scn:InstitutionalBlindSpotFactor ;
+    scn:scenarioDynamics "Relational aggression between adolescents (particularly girls, but not exclusively) that escalates from schoolyard exclusion to sustained campaigns of social destruction. The pattern: initial exclusion from a social group, gossip and rumour spreading, escalation to online harassment (social media posts, group chats, mass blocking), smear campaigns that extend beyond the school to the target's broader social world, and social isolation that removes all support. The target may respond with distress, anger, or self-harm — the response is then used as evidence that the target is 'the problem' (provocationResponseInversion). Institutional blind spots: schools may treat the conduct as 'just drama' or 'girls being girls', parents may not recognise the severity, online platforms may not act on reports. The target may see no escape: the aggression follows them home (online), to school (in person), and into their social world. Outcomes may include: suicide, substance use, running away, engaging in risky behaviours ('bad boys', online activities), entry into situations of sexual exploitation or trafficking. The scenario demonstrates how relational aggression, if unaddressed, can cascade into severe harm and death." ;
+    scn:scenarioConsequences "Target: psychological harm, social destruction, self-harm, suicide, substance use, risky behaviour, potential entry into exploitation or trafficking. Perpetrators: may not recognise the severity of their conduct, may escalate to adult relational aggression, intergenerational transmission. Institutions: failure to recognise or address the conduct enables the cascade." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Corporate Shield Weaponisation — sole directorships and phoenixing
+# ────────────────────────────────────────────────────────────────────
+
+scn:corporateShieldWeaponisation a scn:ScenarioPattern ;
+    rdfs:label "corporate-shield-weaponisation" ;
+    scn:scenarioMethods rel:falseAllegation, rel:financialControl, rel:smearCampaign ;
+    scn:scenarioFactors scn:PsychiatricVulnerabilityFactor, scn:LegalStatusFactor, scn:SubstanceDependencyFactor, scn:WealthResourceFactor ;
+    scn:scenarioDynamics "Organised crime uses a person as a sole director of companies to facilitate phoenixing (liquidating and re-registering companies to avoid debts and liabilities) or money laundering. The person is chosen because they are: psychiatrically unwell (reports less credible if discovered), substance-dependent (leverage to compel compliance), financially vulnerable (willing to act for payment), or socially isolated (no support network to help them exit). The person may be described as 'not knowing anything about the books' — providing deniability for the organised crime group while serving as a legal shield. If discovered, the person faces criminal charges while the organised crime group remains insulated. The person may be considered 'untouchable' by law enforcement because their psychiatric condition makes prosecution difficult — which makes them even more valuable as a shield. The scenario intersects with marginalisedGroupWeaponisation when the person is also a member of a group that benefits from protective bias. The scenario is distinct from ordinary corporate crime: the instrument is themselves vulnerable and is being exploited, not a willing participant in the criminal enterprise." ;
+    scn:scenarioConsequences "Instrument: criminal charges, psychiatric deterioration, substance escalation, potential incarceration, ongoing exploitation. Organised crime: insulated from accountability. Target (creditors, employees, taxpayers): financial harm, lost wages, lost savings. The scenario demonstrates how psychiatric vulnerability and legal status are weaponised simultaneously." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Adolescent Online Commodification — exploitation pipeline
+# ────────────────────────────────────────────────────────────────────
+
+scn:adolescentOnlineCommodification a scn:ScenarioPattern ;
+    rdfs:label "adolescent-online-commodification" ;
+    scn:scenarioMethods rel:sexualContentWeaponisation, rel:emotionalManipulation, rel:loveBombing, rel:trapping, rel:financialControl ;
+    scn:scenarioFactors scn:IsolationFactor, scn:SocialBiasFactor, scn:SubstanceDependencyFactor, scn:InstitutionalBlindSpotFactor ;
+    scn:scenarioDynamics "An adolescent (typically after experiencing relational aggression or family dysfunction) is groomed online into situations where they are treated as a commodity — producing sexual content, engaging in transactional sex, or being trafficked. The pipeline: (1) adolescent is isolated by relational aggression or family dysfunction, (2) seeks connection online (social media, gaming, forums), (3) is targeted by a groomer who uses love bombing and emotional manipulation, (4) is gradually drawn into producing sexual content or meeting in person, (5) the content or encounters are used to trap the adolescent (sexualContentWeaponisation — threats to share), (6) the adolescent is commodified — sold, traded, or used to generate content for others. The pipeline may intersect with substance dependency (drugs used to maintain control), with organised crime (the content or encounters may be commercial), and with institutional blind spots (online platforms may not detect the grooming, law enforcement may not recognise the adolescent as a victim if they 'consented'). The scenario demonstrates how multiple methods cascade: relational aggression leads to isolation, isolation leads to online vulnerability, online vulnerability leads to grooming, grooming leads to commodification, commodification leads to trafficking." ;
+    scn:scenarioConsequences "Adolescent: severe psychological harm, physical harm, sexual exploitation, substance dependency, criminal record (if prosecuted for conduct they were forced into), normalisation of exploitation, long-term trauma. Family: may not know what is happening, may blame the adolescent. Institutions: may criminalise the adolescent rather than treating them as a victim." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Proxy Harassment via Protective Bias — the untouchable instrument
+# ────────────────────────────────────────────────────────────────────
+
+scn:proxyHarassmentViaProtectiveBias a scn:ScenarioPattern ;
+    rdfs:label "proxy-harassment-via-protective-bias" ;
+    scn:scenarioMethods rel:proxyPerpetration, rel:marginalisedGroupWeaponisation, rel:provocationResponseInversion, rel:falseAllegation ;
+    scn:scenarioFactors scn:SocialBiasFactor, scn:PsychiatricVulnerabilityFactor, scn:IsolationFactor ;
+    scn:scenarioDynamics "An instigator uses a person who benefits from protective bias (e.g. a woman, in contexts where chivalric bias operates) to conduct harassment, intimidation, or violence against a target. The instrument conducts acts that would result in immediate criminal investigation if executed by someone outside the protected category, but because of the protective bias, the conduct is not investigated. The target faces the double bind: if they report, the protective bias prevents action; if they walk away, they lose evidence; if they stay, they are harmed further. The instigator remains insulated. The instrument may be psychiatrically vulnerable (making them both easier to recruit and less likely to be believed if they report the instigator) or may be a willing participant who believes the protective bias makes them untouchable. The scenario is particularly damaging because it exploits the gap between the protective bias (designed to protect vulnerable groups) and the reality (the bias is weaponised to protect the instigator). The scenario is not gendered in principle — any protective bias can be exploited. The scenario intersects with corporateShieldWeaponisation when the instrument is also used as a legal shield." ;
+    scn:scenarioConsequences "Target: ongoing harm, no access to justice, potential psychological harm from the double bind. Instrument: legal and physical danger, exploitation by instigator, potential criminal charges if the protective bias fails. Instigator: insulated. The scenario demonstrates how protective bias, while designed to protect, can be weaponised to enable harm." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Single-Parent Intergenerational Transmission
+# ────────────────────────────────────────────────────────────────────
+
+scn:singleParentIntergenerational a scn:ScenarioPattern ;
+    rdfs:label "single-parent-intergenerational-transmission" ;
+    scn:scenarioMethods rel:emotionalManipulation, rel:infantilisation, rel:triangulation, rel:socialIsolation, rel:gaslighting ;
+    scn:scenarioFactors scn:IsolationFactor, scn:SubstanceDependencyFactor, scn:PsychiatricVulnerabilityFactor, scn:ChildDependencyFactor ;
+    scn:scenarioDynamics "A single parent (of any gender, no other parent or family present) uses adversarial methods against their children or uses the children as instruments in conflicts with others. The children have no other carer, no alternative support, and no way to report — they are dependent on the parent for survival. The parent may: (1) triangulate children into conflicts with ex-partners, family, or neighbours, (2) use emotional manipulation to control children's behaviour, (3) infantilise children to prevent independence, (4) isolate children from external support (no school friends, no community contact, no access to services), (5) gaslight children about events the children have witnessed, (6) teach children adversarial methods as normal social behaviour. The children internalise the methods and may: use them against peers (schoolyard relational aggression), use them in future relationships (adult coercive control), or become targets of the same methods (if the parent turns on them). The scenario is the primary mechanism of intergenerational transmission of adversarial conduct. It is particularly difficult to address because: (1) the conduct occurs in the home, (2) the children may not recognise it as harm, (3) institutions may not intervene unless physical abuse is present, (4) removing children may cause further harm if no adequate alternative care exists, (5) the parent may be themselves a victim of intergenerational transmission. The ontological visibility of these methods is essential — if the conduct cannot be defined, child protection cannot identify it, family court cannot address it, and therapeutic services cannot treat it." ;
+    scn:scenarioConsequences "Children: developmental harm, normalisation of adversarial conduct, intergenerational transmission, potential entry into cycles of abuse (as perpetrator, victim, or both), impaired capacity for healthy relationships. Parent: may be unaware of the harm, may be themselves a victim of the same patterns, may resist intervention. The cycle continues unless ontological visibility enables identification and intervention." .
+
+# ────────────────────────────────────────────────────────────────────
+# 11. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This scenarios file links to:
+#
+# adversarial-relational.n3:
+#   - All scenarios use methods defined in the main ontology
+#   - All scenarios use factors defined in the main ontology
+#   - scn:ScenarioPattern is a companion to rel:SocialHarmPattern
+#     — SocialHarmPattern models the configuration of methods,
+#     ScenarioPattern models the real-world context in which
+#     those configurations occur, including the factors that
+#     make them effective
+#
+# adversarial-conduct.n3:
+#   - Scenarios may involve any adv:ConductMethod
+#   - Scenarios may be part of adv:ConductPattern (coordinated
+#     campaigns)
+#
+# obligations.n3:
+#   - Scenarios involving coercive circumstances link to
+#     obl:CoerciveCircumstance
+#   - Scenarios involving children link to disclosure exceptions
+#     (child protection)
+#   - Scenarios involving illegal content link to content double
+#     binds and ZKP options
+#
+# duty-of-care.n3:
+#   - Scenarios involving children link to duty-of-care relations
+#   - Scenarios involving institutions link to institutional
+#     duty of care
+#
+# personhood.n3:
+#   - Scenarios target personhood (social relations, reputation,
+#     legal status) and selfhood (perception, emotional state,
+#     autonomy)
+#
+# values.n3:
+#   - Scenarios may reveal values gaps (projected values of
+#     'good parent' vs enumerated values of coercive control)
+#
+# faith-systems.n3:
+#   - Scenarios may occur in religious community contexts
+#   - Spiritual manipulation may be a factor

@@ -1,0 +1,343 @@
+# Game World Ontology — Real-World Grounding, Game Worlds, Regions,
+# and Game Design Documents
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Split from game-design.n3 — contains world-level, grounding, and
+# design document classes. Game mechanics, characters, dialogue,
+# quests, inventory, progression, and game state are in game-design.n3.
+#
+# Imports: hypermedia.n3, portal-worlds.n3, spatial-3d.n3,
+#          game-design.n3, production-document.n3, epistemics.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix pw:     <https://purl.org/qualia/ontology/portal-worlds#> .
+@prefix sp3:    <https://purl.org/qualia/ontology/spatial-3d#> .
+@prefix pd:     <https://qualiadb.org/schema/ui/production-document#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix game:   <https://qualiadb.org/schema/ui/game-design#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Real-World Grounding — incorporating real-world data
+# ────────────────────────────────────────────────────────────────────
+
+game:RealWorldGrounding a rdfs:Class ;
+    rdfs:label "Real-World Grounding" ;
+    rdfs:comment "Configuration for incorporating real-world data into a game world. Games may ground their worlds in real geography, history, culture, or current events — either faithfully (serious games, simulations, educational games) or loosely (inspired-by, alternate history). Grounding specifies the real-world sources, the time period, the geographic scope, the fidelity level, and how real-world data maps to game world elements. Grounding carries epistemic responsibility — a serious game claiming historical accuracy should cite sources and distinguish fact from fiction." .
+
+game:groundingType a rdf:Property ;
+    rdfs:label "grounding type" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  game:GroundingType ;
+    rdfs:comment "How the game relates to the real world." .
+
+game:GroundingType a rdfs:Class ;
+    rdfs:label "Grounding Type" .
+
+game:historicalGrounding a game:GroundingType ; rdfs:label "historical" ;
+    rdfs:comment "Historical grounding — game world is set in a real historical period. May be faithful (accurate events, figures, locations) or alternate history (real setting, divergent events). Historical grounding should cite sources and distinguish documented history from creative interpretation." .
+game:geographicGrounding a game:GroundingType ; rdfs:label "geographic" ;
+    rdfs:comment "Geographic grounding — game world uses real-world geography. May be accurate (real terrain, cities, landmarks) or inspired (fictional locations based on real ones). Geographic data may include terrain heightmaps, street maps, climate data." .
+game:culturalGrounding a game:GroundingType ; rdfs:label "cultural" ;
+    rdfs:comment "Cultural grounding — game incorporates real-world cultures, languages, customs, mythology. Should be respectful and accurate — misrepresentation carries social harm risk. See adversarial-conduct.n3 for cultural misrepresentation as a conduct type." .
+game:contemporaryGrounding a game:GroundingType ; rdfs:label "contemporary" ;
+    rdfs:comment "Contemporary grounding — game is set in the present day. May use real-world current events, technology, social issues. Contemporary grounding may become outdated as the real world changes." .
+game:futureGrounding a game:GroundingType ; rdfs:label "future" ;
+    rdfs:comment "Future grounding — game is set in a projected future. May be speculative (extrapolated from current trends) or fictional (imagined future). Should distinguish extrapolation from speculation." .
+game:fictionalGrounding a game:GroundingType ; rdfs:label "fictional" ;
+    rdfs:comment "Fictional grounding — game world is entirely fictional, not grounded in real-world data. No epistemic responsibility for real-world accuracy." .
+game:hybridGrounding a game:GroundingType ; rdfs:label "hybrid" ;
+    rdfs:comment "Hybrid grounding — game world combines real and fictional elements. e.g. real city with fictional characters, real historical period with fictional events. Should distinguish which elements are real and which are fictional." .
+
+game:groundingFidelity a rdf:Property ;
+    rdfs:label "grounding fidelity" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  game:GroundingFidelity ;
+    rdfs:comment "How faithfully the game represents the real world." .
+
+game:GroundingFidelity a rdfs:Class ;
+    rdfs:label "Grounding Fidelity" .
+
+game:fidelityFaithful   a game:GroundingFidelity ; rdfs:label "faithful" ;
+    rdfs:comment "Faithful — accurate representation, sources cited, suitable for education or research." .
+game:fidelityInspired   a game:GroundingFidelity ; rdfs:label "inspired" ;
+    rdfs:comment "Inspired — real-world elements used as inspiration but altered for gameplay or narrative." .
+game:fidelityAlternate  a game:GroundingFidelity ; rdfs:label "alternate" ;
+    rdfs:comment "Alternate — real-world setting with deliberate divergences (alternate history, parallel universe)." .
+game:fidelityStylised   a game:GroundingFidelity ; rdfs:label "stylised" ;
+    rdfs:comment "Stylised — real-world elements represented in a stylised or exaggerated form." .
+
+game:groundingTimePeriod a rdf:Property ;
+    rdfs:label "grounding time period" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The time period — e.g. '1960s', 'ancient Rome 44 BCE', 'present day', 'near future 2030'." .
+
+game:groundingGeographicScope a rdf:Property ;
+    rdfs:label "grounding geographic scope" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Geographic scope — e.g. 'Europe', 'Tokyo', 'global', 'Mediterranean basin'." .
+
+game:groundingSources a rdf:Property ;
+    rdfs:label "grounding sources" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Real-world data sources — e.g. 'historical: primary documents from era', 'geographic: OpenStreetMap, SRTM heightmap', 'cultural: ethnographic studies, oral histories'. Sources should be cited for epistemic integrity." .
+
+game:groundingEpistemicModality a rdf:Property ;
+    rdfs:label "grounding epistemic modality" ;
+    rdfs:domain game:RealWorldGrounding ;
+    rdfs:range  epi:EpistemicModality ;
+    rdfs:comment "The epistemic modality of the grounding — objective (verified facts), intersubjective (scholarly consensus), subjective (interpretation or creative choice). Links to epistemics.n3." .
+
+game:hasGrounding a rdf:Property ;
+    rdfs:label "has grounding" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:RealWorldGrounding .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Game World — linking to portal-worlds
+# ────────────────────────────────────────────────────────────────────
+
+game:GameWorld a rdfs:Class ;
+    rdfs:label "Game World" ;
+    rdfs:comment "The game's world — extends pw:World with game-specific properties. A game world has regions, points of interest, fast travel points, encounter zones, and may be grounded in real-world data. A game world may be presented as a parallel universe — a distinct reality that may be layered over, juxtaposed with, or diverge from the real world. Game worlds may have coordinate systems that map to real-world (or broader: planetary, stellar, galactic, or abstract) coordinates, enabling spatial correspondence between the game world and real-world places. Multiple game worlds may exist within a single game — as parallel universes, alternate timelines, layered realities, or dimensionally distinct spaces — connected via portals (pw:PortalLink). The game world is the spatial-temporal-physics container for gameplay — mechanics, quests, characters, and items all exist within it." .
+
+game:worldStructure a rdf:Property ;
+    rdfs:label "world structure" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  game:WorldStructure ;
+    rdfs:comment "How this game world relates to other worlds and to reality — single world, parallel universe, layered reality, etc." .
+
+game:WorldStructure a rdfs:Class ;
+    rdfs:label "World Structure" .
+
+game:singleWorld      a game:WorldStructure ; rdfs:label "single-world" ;
+    rdfs:comment "Single world — one continuous game world. No parallel or layered structure." .
+game:parallelUniverse a game:WorldStructure ; rdfs:label "parallel-universe" ;
+    rdfs:comment "Parallel universe — a game world that exists alongside the real world or alongside other game worlds. May share coordinates with real-world locations but contain different content, history, or physics. Multiple parallel universes may coexist within a game, accessible via portals." .
+game:layeredReality   a game:WorldStructure ; rdfs:label "layered-reality" ;
+    rdfs:comment "Layered reality — multiple world layers superimposed on the same spatial extent. Layers may be visible simultaneously or switched between. Examples: physical layer + spirit layer, present day + historical overlay, material world + digital augmentation. Layers share coordinates but may have different physics, entities, or rules." .
+game:alternateTimeline a game:WorldStructure ; rdfs:label "alternate-timeline" ;
+    rdfs:comment "Alternate timeline — a world that diverged from real history at a specific point. Shares the same geographic and physical basis but with different events, factions, or outcomes. May be used for historical fiction, alternate history, or time-travel narratives." .
+game:pocketDimension  a game:WorldStructure ; rdfs:label "pocket-dimension" ;
+    rdfs:comment "Pocket dimension — a self-contained space with its own physics and rules, disconnected from the primary world's coordinate system. Accessed via portals. May have non-Euclidean geometry or compressed space." .
+game:multiverse       a game:WorldStructure ; rdfs:label "multiverse" ;
+    rdfs:comment "Multiverse — a collection of multiple parallel universes or alternate realities, each with its own world, rules, and physics. The game may allow travel between universes via portals. Each universe in the multiverse may have its own world structure." .
+
+game:coordinateSystem a rdf:Property ;
+    rdfs:label "coordinate system" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  game:CoordinateSystem ;
+    rdfs:comment "The coordinate system used by this game world — may map to real-world coordinates, use an abstract system, or combine both." .
+
+game:CoordinateSystem a rdfs:Class ;
+    rdfs:label "Coordinate System" ;
+    rdfs:comment "Defines how positions in the game world relate to positions in reality. A game world may use real-world coordinates (lat/lon, UTM, celestial), an abstract coordinate system (grid, hex, polar), or a hybrid that maps game coordinates to real-world coordinates via a transformation." .
+
+game:realWorldCoords  a game:CoordinateSystem ; rdfs:label "real-world-coords" ;
+    rdfs:comment "Real-world coordinates — game world positions map directly to real-world geographic coordinates (latitude/longitude, UTM, or other geodetic system). Used for geographic grounding, AR games, and simulations of real locations." .
+game:celestialCoords  a game:CoordinateSystem ; rdfs:label "celestial-coords" ;
+    rdfs:comment "Celestial coordinates — game world positions map to real-world astronomical coordinates (right ascension/declination, galactic coordinates, or orbital elements). Used for space-based games, solar system simulations, or galactic-scale games." .
+game:abstractCoords   a game:CoordinateSystem ; rdfs:label "abstract-coords" ;
+    rdfs:comment "Abstract coordinates — game world uses its own coordinate system with no direct mapping to real-world coordinates. Positions are in game units (meters, tiles, hexes). Most common for fictional worlds." .
+game:hybridCoords     a game:CoordinateSystem ; rdfs:label "hybrid-coords" ;
+    rdfs:comment "Hybrid coordinates — game world uses abstract coordinates internally but maps to real-world coordinates via a transformation function. e.g. game position [x, y] maps to lat/lon via a scale and offset. Used when a game world is inspired by real geography but scaled or reprojected for gameplay." .
+game:layeredCoords    a game:CoordinateSystem ; rdfs:label "layered-coords" ;
+    rdfs:comment "Layered coordinates — multiple world layers share the same coordinate extent but exist on different planes or frequencies. A position [x, y, z] in one layer corresponds to the same [x, y, z] in another layer, but the content at that position differs. Used for layered reality structures." .
+
+game:coordinateMapping a rdf:Property ;
+    rdfs:label "coordinate mapping" ;
+    rdfs:domain game:CoordinateSystem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For hybrid or layered coordinates, the transformation that maps game coordinates to real-world coordinates — e.g. 'scale: 0.01, offset: [35.6762, 139.6503]', 'projection: UTM zone 54N', 'layer_offset: [0, 0, 100]'. CBOR-LD encoded." .
+
+game:worldPhysicsModel a rdf:Property ;
+    rdfs:label "world physics model" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Physics model for this world — may mirror real-world physics (gravity 9.8 m/s², standard thermodynamics) or define custom physics (different gravity, magic systems, non-Euclidean geometry, time dilation). For worlds grounded in real-world data, the physics model should note where it diverges from real physics and why." .
+
+game:worldTimeModel a rdf:Property ;
+    rdfs:label "world time model" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Time model for this world — may mirror real-world time (real-time, accelerated, historical date), use a custom calendar (game-specific epochs, seasons), or support time manipulation (rewind, branching timelines). For worlds grounded in real history, the time model should map game time to real historical dates." .
+
+game:worldLayer a rdf:Property ;
+    rdfs:label "world layer" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  game:GameWorld ;
+    rdfs:comment "For layered reality structures, links a world to another world that shares the same spatial extent. The two worlds are layers — they may be visible simultaneously or switched between. Each layer may have its own physics, entities, and rules but shares coordinates." .
+
+game:parallelWorld a rdf:Property ;
+    rdfs:label "parallel world" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  game:GameWorld ;
+    rdfs:comment "Links a world to another world that exists as a parallel universe — distinct reality, may share or differ in coordinates, physics, history, or entities. Connected via portals (pw:PortalLink)." .
+
+game:worldRegion a rdf:Property ;
+    rdfs:label "world region" ;
+    rdfs:domain game:GameWorld ;
+    rdfs:range  game:WorldRegion ;
+    rdfs:comment "A region within the game world." .
+
+game:WorldRegion a rdfs:Class ;
+    rdfs:label "World Region" ;
+    rdfs:comment "A region in the game world — a named area with its own environment, encounters, and points of interest. Regions may have level ranges, faction control, weather, and fast travel points." .
+
+game:regionName a rdf:Property ;
+    rdfs:label "region name" ;
+    rdfs:domain game:WorldRegion ;
+    rdfs:range  xsd:string .
+
+game:regionLevelRange a rdf:Property ;
+    rdfs:label "region level range" ;
+    rdfs:domain game:WorldRegion ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Recommended player level range — e.g. '1-5', '10-15', 'endgame'." .
+
+game:regionEnvironment a rdf:Property ;
+    rdfs:label "region environment" ;
+    rdfs:domain game:WorldRegion ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Environment type — forest, desert, urban, dungeon, underwater, space." .
+
+game:pointOfInterest a rdf:Property ;
+    rdfs:label "point of interest" ;
+    rdfs:domain game:WorldRegion ;
+    rdfs:range  game:PointOfInterest ;
+    rdfs:comment "A point of interest within the region." .
+
+game:PointOfInterest a rdfs:Class ;
+    rdfs:label "Point of Interest" ;
+    rdfs:comment "A notable location in the game world — a landmark, dungeon entrance, NPC location, quest trigger, fast travel point, or hidden area." .
+
+game:poiType a rdf:Property ;
+    rdfs:label "POI type" ;
+    rdfs:domain game:PointOfInterest ;
+    rdfs:range  game:POIType .
+
+game:POIType a rdfs:Class ;
+    rdfs:label "POI Type" .
+
+game:poiLandmark     a game:POIType ; rdfs:label "landmark" .
+game:poiDungeon      a game:POIType ; rdfs:label "dungeon" .
+game:poiNpcLocation  a game:POIType ; rdfs:label "npc-location" .
+game:poiQuestTrigger a game:POIType ; rdfs:label "quest-trigger" .
+game:poiFastTravel   a game:POIType ; rdfs:label "fast-travel" .
+game:poiHiddenArea   a game:POIType ; rdfs:label "hidden-area" .
+game:poiVendor       a game:POIType ; rdfs:label "vendor" .
+game:poiSavePoint    a game:POIType ; rdfs:label "save-point" .
+
+game:poiPosition a rdf:Property ;
+    rdfs:label "POI position" ;
+    rdfs:domain game:PointOfInterest ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Position in world coordinates [x, y, z]. For worlds with real-world or hybrid coordinate systems, this may be [lat, lon, elevation] or [x, y, z] with a known mapping." .
+
+game:poiRealWorldRef a rdf:Property ;
+    rdfs:label "POI real-world reference" ;
+    rdfs:domain game:PointOfInterest ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "If the POI is grounded in a real-world location, the reference — e.g. 'Colosseum, Rome', 'Tower of London', 'real:35.6762,139.6503'. May also reference celestial or broader spatial coordinates — e.g. 'Mare Tranquillitatis, Moon', 'Mars: Olympus Mons', 'star: Sirius'." .
+
+game:hasGameWorld a rdf:Property ;
+    rdfs:label "has game world" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameWorld .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Game Design Document — linking to production-document
+# ────────────────────────────────────────────────────────────────────
+
+game:GameDesignDocument a rdfs:Class ;
+    rdfs:subClassOf pd:ProductionDocument ;
+    rdfs:label "Game Design Document" ;
+    rdfs:comment "A game design document (GDD) — the master document for a game production. A GDD describes the game's vision, mechanics, narrative, world, characters, art style, audio, technical requirements, and target audience. It may reference scripts, style guides, technical specs, and production briefs. A GDD may be processed by software agents to generate content — levels, dialogue, items, quest scaffolds, or balance reports." .
+
+game:gddVision a rdf:Property ;
+    rdfs:label "GDD vision" ;
+    rdfs:domain game:GameDesignDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The high-level vision — what the game is, why it exists, what experience it delivers." .
+
+game:gddTargetAudience a rdf:Property ;
+    rdfs:label "GDD target audience" ;
+    rdfs:domain game:GameDesignDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Target audience — age range, interests, platform preferences, market positioning." .
+
+game:gddMonetisation a rdf:Property ;
+    rdfs:label "GDD monetisation" ;
+    rdfs:domain game:GameDesignDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Monetisation model — premium (one-time purchase), free-to-play (microtransactions), subscription, ad-supported, hybrid." .
+
+game:gddArtStyle a rdf:Property ;
+    rdfs:label "GDD art style" ;
+    rdfs:domain game:GameDesignDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Art style — realistic, stylised, pixel art, cel-shaded, low-poly, voxel, hand-drawn." .
+
+game:gddAudioStyle a rdf:Property ;
+    rdfs:label "GDD audio style" ;
+    rdfs:domain game:GameDesignDocument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Audio style — orchestral, electronic, ambient, folk, licensed music, adaptive score." .
+
+game:hasGDD a rdf:Property ;
+    rdfs:label "has GDD" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameDesignDocument .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (game-world.n3) links to:
+#
+# game-design.n3:
+#   - Shares the game: prefix — all classes and properties are in the
+#     same namespace, split across two files for size management
+#   - game:Game, game:GameMechanic, game:GameCharacter, game:Quest,
+#     game:Inventory, game:ProgressionSystem, game:GameState are
+#     defined in game-design.n3
+#
+# hypermedia.n3:
+#   - game:Game is subClassOf hm:HypermediaAsset
+#   - Game assets (items, characters, worlds) are hypermedia assets
+#
+# portal-worlds.n3:
+#   - game:GameWorld extends pw:World with game-specific properties
+#   - Game avatars use pw:Avatar
+#   - Game environment objects use pw:EnvironmentObject
+#   - Game physics uses pw:PhysicsBody
+#   - Portal links connect game regions/worlds
+#
+# spatial-3d.n3:
+#   - Game world objects extend sp3:SceneObject
+#   - Game meshes, rigs, animations use spatial-3d classes
+#
+# production-document.n3:
+#   - game:GameDesignDocument is subClassOf pd:ProductionDocument
+#   - GDDs may reference scripts, style guides, technical specs
+#   - Agent processing directives may generate game content
+#
+# epistemics.n3:
+#   - Real-world grounding has epistemic modality (objective, subjective)
+#   - Historical grounding should distinguish fact from interpretation
+#
+# agency.n3:
+#   - NPC AI behaviour is computational — no intent, no consciousness
+#   - Software agents may process GDDs to generate content
+#
+# adversarial-conduct.n3:
+#   - Cultural misrepresentation in games may be adversarial conduct
+#   - Greenwashing/tech-washing may apply to game marketing claims

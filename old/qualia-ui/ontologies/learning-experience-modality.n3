@@ -1,0 +1,694 @@
+# Learning Experience Modality Ontology — Experience Modes,
+# Knowledge Types, Experience Records, Skill Development Trajectories,
+# and Experiential Transfer
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# The epistemological dimension of learning — distinguishes the modality
+# through which experience is acquired and the type of knowledge it
+# produces. The mode of acquisition fundamentally affects the depth,
+# transferability, and reliability of the resulting skill or knowledge.
+#
+# Key distinction: there is a profound difference between:
+#   - Doing something (direct experience — embodied, consequential)
+#   - Living something (lived experience — sustained, transformative)
+#   - Learning about something (educational — abstract, decontextualised)
+#   - Watching something (observational/mediated — visual, passive)
+#   - Engaging with someone who has experienced something
+#     (interpersonal — second-hand, perspective-mediated)
+#
+# These produce different knowledge types:
+#   - Propositional knowledge (knowing-that)
+#   - Practical knowledge (knowing-how)
+#   - Experiential knowledge (knowing-what-it-is-like) — natural agents only
+#   - Interpersonal knowledge (knowing-about-others'-experiences)
+#
+# Imports: learning-core.n3, epistemics.n3, agency.n3, personhood.n3,
+#          provenance.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix prov:   <https://qualiadb.org/schema/ui/provenance#> .
+@prefix lrn:    <https://qualiadb.org/schema/ui/learning-core#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Experience Mode — how experience is acquired
+# ────────────────────────────────────────────────────────────────────
+
+lrn:ExperienceMode a rdfs:Class ;
+    rdfs:label "Experience Mode" ;
+    rdfs:comment "The modality through which experience is acquired — the epistemological difference between doing, living, learning about, watching, and engaging with others who have experienced. The mode determines what type of knowledge is produced, how transferable it is, and what confidence is appropriate. Aligns with epi:MediationType in epistemics.n3 but adds learning-specific dimensions: duration, intensity, consequence, and embodiment. Experience mode is not a quality gradient (better vs worse) — each mode produces different knowledge that other modes cannot produce. Direct experience produces practical and experiential knowledge; educational experience produces propositional knowledge; interpersonal experience produces interpersonal knowledge. A well-rounded competency requires multiple modes." .
+
+lrn:directExperience a lrn:ExperienceMode ; rdfs:label "direct" ;
+    rdfs:comment "Direct experience — the person did the thing themselves. Firsthand, embodied, with real-world consequences. Includes working in a role, performing a task, living through an event, raising a child, recovering from illness, serving in combat. Direct experience produces practical knowledge (knowing-how) and experiential knowledge (knowing-what-it-is-like). It is the highest-fidelity mode but is limited to what the person actually encountered — a nurse who worked in emergency for 10 years has direct experience of emergency nursing but not of paediatric oncology. Direct experience is consequential — mistakes have real outcomes, which affects learning depth. Applicable to natural agents with embodied presence. For software agents, the equivalent is 'operational exposure' — processing data in a domain, but this is computation, not experience." .
+
+lrn:livedExperience a lrn:ExperienceMode ; rdfs:label "lived" ;
+    rdfs:comment "Lived experience — a sustained, transformative form of direct experience. The person not only did the thing but lived it over time — it shaped their identity, perspective, or capacities. Examples: living with a disability, growing up in a war zone, being a primary caregiver for years, surviving abuse, living as a member of a marginalised group. Lived experience is deeper than a single direct experience — it is integrated into the person's life narrative. Lived experience produces experiential knowledge that cannot be acquired through any other mode. It is the most subjective mode — deeply personal, not fully transferable — but also the most authoritative for 'what it is like'. Applicable to natural agents only. No software agent equivalent — computation does not produce lived experience." .
+
+lrn:simulatedExperience a lrn:ExperienceMode ; rdfs:label "simulated" ;
+    rdfs:comment "Simulated experience — the person performed a simulated version of the activity. Includes flight simulators, virtual labs, serious games, VR training, role-play exercises. Simulated experience approximates direct experience but lacks real-world consequences (mistakes are safe), may lack sensory fullness (haptic, olfactory, social nuance), and may not capture all variables. It is valuable for practice, rehearsal, and skill development in safe conditions. Produces practical knowledge (knowing-how) but limited experiential knowledge (the simulation is not the real thing). Transfer fidelity depends on simulation quality — a high-fidelity flight simulator transfers well to real flying; a low-fidelity medical game may not transfer to clinical practice. Applicable to natural agents. For software agents, simulation is computation — not experience." .
+
+lrn:observationalExperience a lrn:ExperienceMode ; rdfs:label "observational" ;
+    rdfs:comment "Observational experience — the person watched someone else do the thing, either in person or via recording. Includes shadowing a professional, watching a surgery, observing a master craftsman, watching a documentary. Observational experience provides visual access to the activity but no participation. It produces propositional knowledge (knowing-that it is done this way) and some practical knowledge (knowing-how by observation), but no experiential knowledge (the observer did not do it, did not feel the consequences, did not make the decisions under pressure). Observation is valuable for understanding process, technique, and context, but cannot substitute for direct practice. Aligns with epi:MedDirect (in-person observation) and epi:MedRecorded (watching a recording)." .
+
+lrn:interpersonalExperience a lrn:ExperienceMode ; rdfs:label "interpersonal" ;
+    rdfs:comment "Interpersonal experience — the person learned about an experience type through engagement with someone who has had it. Includes conversations with veterans, interviews with survivors, working alongside experienced practitioners, therapeutic relationships, community engagement. This is second-hand experience, mediated by the other person's account, perspective, and communication skill. It produces interpersonal knowledge — knowing about others' experiences — which is distinct from knowing about the subject matter itself. The quality depends on the other person's willingness and ability to share, the relationship quality, and the listener's capacity to engage. Interpersonal experience is essential for empathy, cultural understanding, and domains where direct experience is impossible or unethical to acquire (e.g., understanding trauma without experiencing it). Applicable to natural agents. The relationship quality affects the epistemic confidence — a close trust relationship yields richer sharing than a brief interview." .
+
+lrn:educationalExperience a lrn:ExperienceMode ; rdfs:label "educational" ;
+    rdfs:comment "Educational experience — the person learned about the subject through structured educational materials. Includes textbooks, courses, lectures, tutorials, curricula. Educational experience is abstract and decontextualised — it presents generalised knowledge stripped of particular circumstances. It produces propositional knowledge (knowing-that) efficiently — a textbook can convey in hours what took practitioners years to discover. But it produces limited practical knowledge (no doing) and no experiential knowledge (no lived encounter). Educational experience is high-fidelity for propositional content but low-fidelity for practical or experiential content. It is the most transferable mode — propositional knowledge generalises — but also the most detached from the reality of practice." .
+
+lrn:mediatedExperience a lrn:ExperienceMode ; rdfs:label "mediated" ;
+    rdfs:comment "Mediated experience — the person consumed media about the subject. Includes documentaries, podcasts, articles, films, news reports. Mediated experience is similar to educational but less structured and may blend fact with narrative, entertainment, or editorial framing. It produces propositional knowledge and may produce a sense of experiential knowledge (the viewer feels they understand 'what it is like'), but this sense may be illusory — media is curated, edited, and framed. The epistemic status of knowledge from mediated experience should be marked as potentially blended (fact + narrative) — see epi:RealityClassification. Mediated experience is valuable for breadth of exposure and engagement but should not be confused with direct or lived experience." .
+
+lrn:hasExperienceMode a rdf:Property ;
+    rdfs:label "has experience mode" ;
+    rdfs:range  lrn:ExperienceMode ;
+    rdfs:comment "Links a learning event, experience record, or skill development to its experience mode. A single skill may be developed through multiple modes — e.g. a nurse may have educational (nursing school), simulated (clinical skills lab), direct (clinical placements), and lived (years of practice) experience." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Knowledge Type — what kind of knowledge results from experience
+# ────────────────────────────────────────────────────────────────────
+
+lrn:KnowledgeType a rdfs:Class ;
+    rdfs:label "Knowledge Type" ;
+    rdfs:comment "The epistemological type of knowledge produced by an experience or learning event. Distinguishes knowing-that (propositional), knowing-how (practical), knowing-what-it-is-like (experiential), and knowing-about-others'-experiences (interpersonal). These are not grades of the same thing — they are fundamentally different kinds of knowledge that cannot be reduced to each other. A person can have extensive propositional knowledge about surgery without practical knowledge (they cannot operate), and extensive practical knowledge without experiential knowledge of being operated on. The knowledge type determines what the person can do with the knowledge: propositional knowledge supports explanation and analysis; practical knowledge supports performance; experiential knowledge supports empathy and contextual judgement; interpersonal knowledge supports relational understanding." .
+
+lrn:propositionalKnowledge a lrn:KnowledgeType ; rdfs:label "propositional" ;
+    rdfs:comment "Propositional knowledge — knowing that something is the case. Facts, concepts, theories, principles, definitions. Acquired primarily through educational and mediated experience. Assessable via examination, quiz, interview. High transferability — propositional knowledge generalises across contexts. Applicable to natural agents and software agents (software agents store propositional knowledge as data; they do not 'know' it in the experiential sense)." .
+
+lrn:practicalKnowledge a lrn:KnowledgeType ; rdfs:label "practical" ;
+    rdfs:comment "Practical knowledge — knowing how to do something. Procedural, motor, operational, tactical. Acquired primarily through direct, simulated, and observational experience. Assessable via practical demonstration, project work, observation. Moderate transferability — practical knowledge transfers to similar contexts but may not generalise to dissimilar ones. Applicable to natural agents (embodied skills) and software agents (computational procedures — the mechanism is computation, not embodied practice)." .
+
+lrn:experientialKnowledge a lrn:KnowledgeType ; rdfs:label "experiential" ;
+    rdfs:comment "Experiential knowledge — knowing what something is like. The phenomenal, embodied, first-person quality of an experience. Acquired only through direct and lived experience. Not fully assessable by external methods — the person knows what it was like, but others cannot verify this directly. Experiential knowledge is the least transferable — it cannot be conveyed to someone who has not had the experience, though interpersonal engagement can approximate partial understanding. Applicable to natural agents only — experiential knowledge requires consciousness and qualia. Software agents do not have experiential knowledge; they process data without phenomenal experience. To claim otherwise would be a category error." .
+
+lrn:interpersonalKnowledge a lrn:KnowledgeType ; rdfs:label "interpersonal" ;
+    rdfs:comment "Interpersonal knowledge — knowing about others' experiences through engagement with them. Distinct from propositional knowledge about a subject and from experiential knowledge of having had the experience oneself. Interpersonal knowledge includes understanding the texture of another's experience, its significance to them, and its implications — without claiming to have had that experience. Acquired through interpersonal experience — conversations, relationships, community engagement, therapeutic work. Assessable via interview, portfolio of engagement, reflective writing. Moderate transferability — interpersonal knowledge about one person's experience may partially generalise to others with similar experiences, but must not be assumed to. Applicable to natural agents only — it requires social engagement and the capacity to understand another's perspective." .
+
+lrn:producesKnowledgeType a rdf:Property ;
+    rdfs:label "produces knowledge type" ;
+    rdfs:range  lrn:KnowledgeType ;
+    rdfs:comment "Links an experience mode, learning event, or experience record to the type of knowledge it produces. An experience may produce multiple knowledge types — e.g. direct experience typically produces both practical and experiential knowledge." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Experience Record — lived experience distinct from learning events
+# ────────────────────────────────────────────────────────────────────
+
+lrn:ExperienceRecord a rdfs:Class ;
+    rdfs:label "Experience Record" ;
+    rdfs:comment "A record of lived experience — distinct from a LearningEvent. While a LearningEvent captures a discrete episode of knowledge acquisition, an ExperienceRecord captures a sustained period of doing, living, or being in a particular context. Examples: '3 years working as an emergency nurse', '18 months as primary caregiver for a dying parent', 'childhood in a rural community', '2 tours of military service', '10 years playing piano'. Experience records have a mode (direct, lived, simulated, etc.), a duration, an intensity, and may produce multiple learning events over time. They are the substrate from which skills develop through accumulated practice, encounter, and reflection. Experience records are appendable — they accumulate over a lifetime. An experience record may be used as evidence for RPL. The confidence in an experience record depends on its documentation — well-documented work experience has higher confidence than undocumented life experience." .
+
+lrn:experienceMode a rdf:Property ;
+    rdfs:label "experience mode" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:ExperienceMode ;
+    rdfs:comment "The modality through which the experience was acquired." .
+
+lrn:experiencePerson a rdf:Property ;
+    rdfs:label "experienced by" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person who had the experience." .
+
+lrn:experienceContext a rdf:Property ;
+    rdfs:label "experience context" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The context — where, when, with whom, under what conditions. e.g. 'Royal Brisbane Hospital, Emergency Department, 2020-2023, night shifts', 'home care for mother with dementia, 2021-2023'." .
+
+lrn:experienceDuration a rdf:Property ;
+    rdfs:label "duration" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of the experience — e.g. '3 years', '18 months', 'ongoing since 2015', '6 weeks intensive'." .
+
+lrn:experienceIntensity a rdf:Property ;
+    rdfs:label "intensity" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:ExperienceIntensity .
+
+lrn:ExperienceIntensity a rdfs:Class ;
+    rdfs:label "Experience Intensity" .
+
+lrn:intensityLight     a lrn:ExperienceIntensity ; rdfs:label "light" ;
+    rdfs:comment "Light — occasional, low-commitment. e.g. volunteering once a month." .
+lrn:intensityModerate  a lrn:ExperienceIntensity ; rdfs:label "moderate" ;
+    rdfs:comment "Moderate — regular, significant commitment. e.g. part-time work, weekly practice." .
+lrn:intensityHeavy     a lrn:ExperienceIntensity ; rdfs:label "heavy" ;
+    rdfs:comment "Heavy — frequent, high-commitment. e.g. full-time work, daily practice." .
+lrn:intensityImmersion a lrn:ExperienceIntensity ; rdfs:label "immersion" ;
+    rdfs:comment "Immersion — total, all-encompassing. e.g. live-in caregiving, military deployment, living in a foreign country. The experience is not just an activity but a way of life." .
+
+lrn:experienceRepetition a rdf:Property ;
+    rdfs:label "repetition" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How often the core activity was repeated — e.g. 'daily', 'hundreds of cases', '3-4 shifts per week', 'continuous'. Repetition drives skill consolidation — a single intense experience may be transformative but does not build procedural fluency the way repeated practice does." .
+
+lrn:experienceConsequence a rdf:Property ;
+    rdfs:label "consequence level" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:ConsequenceLevel ;
+    rdfs:comment "The level of real-world consequence in the experience — whether mistakes or outcomes had real effects. This distinguishes direct experience (high consequence) from simulated experience (low consequence)." .
+
+lrn:ConsequenceLevel a rdfs:Class ;
+    rdfs:label "Consequence Level" .
+
+lrn:consequenceNone     a lrn:ConsequenceLevel ; rdfs:label "none" ;
+    rdfs:comment "No real-world consequence — simulation, game, role-play. Mistakes are safe." .
+lrn:consequenceLow      a lrn:ConsequenceLevel ; rdfs:label "low" ;
+    rdfs:comment "Low consequence — practice environment with minor real effects. e.g. student clinic, supervised practice." .
+lrn:consequenceModerate a lrn:ConsequenceLevel ; rdfs:label "moderate" ;
+    rdfs:comment "Moderate consequence — real effects but with safeguards. e.g. junior role under supervision, probationary practice." .
+lrn:consequenceHigh     a lrn:ConsequenceLevel ; rdfs:label "high" ;
+    rdfs:comment "High consequence — real effects, significant stakes. e.g. independent professional practice, caregiving, live operations." .
+lrn:consequenceCritical a lrn:ConsequenceLevel ; rdfs:label "critical" ;
+    rdfs:comment "Critical consequence — life-altering or irreversible stakes. e.g. emergency medicine, military combat, crisis intervention. The intensity of consequence drives learning depth — experiences with critical consequences are remembered and integrated differently." .
+
+lrn:experienceSkills a rdf:Property ;
+    rdfs:label "experience skills" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "Skills developed or reinforced through this experience." .
+
+lrn:experienceDomains a rdf:Property ;
+    rdfs:label "experience domains" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "Knowledge domains engaged by this experience." .
+
+lrn:experienceKnowledgeType a rdf:Property ;
+    rdfs:label "experience knowledge type" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:KnowledgeType ;
+    rdfs:comment "The type(s) of knowledge produced by this experience." .
+
+lrn:experienceLearningEvents a rdf:Property ;
+    rdfs:label "learning events" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  lrn:LearningEvent ;
+    rdfs:comment "Specific learning events that occurred within this experience period. An experience record may contain many learning events — e.g. a 3-year nursing role contains hundreds of learning events (each patient encounter, each new procedure learned, each critical incident)." .
+
+lrn:experienceStartDate a rdf:Property ;
+    rdfs:label "start date" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:dateTime .
+
+lrn:experienceEndDate a rdf:Property ;
+    rdfs:label "end date" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "End date — may be open if the experience is ongoing." .
+
+lrn:experienceDocumentation a rdf:Property ;
+    rdfs:label "documentation" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Documentation quality — 'well-documented (employment records, references, portfolio)', 'partially documented', 'self-reported only'. Affects confidence and RPL evidence quality." .
+
+lrn:experienceConfidence a rdf:Property ;
+    rdfs:label "confidence" ;
+    rdfs:domain lrn:ExperienceRecord ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Confidence that the experience record accurately represents what the person experienced (0.0 to 1.0). Higher with documentation; lower with self-report only." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Skill Development — how skills develop through accumulated experience
+# ────────────────────────────────────────────────────────────────────
+
+lrn:SkillDevelopment a rdfs:Class ;
+    rdfs:label "Skill Development" ;
+    rdfs:comment "The trajectory of a person's skill development over time — how a skill grew from initial exposure through practice to current proficiency, and what experiences drove that growth. A skill development record links experience records, learning events, and assessments into a narrative of progression. It may show plateaus (periods of no improvement), breakthroughs (sudden jumps in proficiency), and decay (skill loss during periods of disuse). Skill development is not linear — different modes of experience contribute differently at different stages. Educational experience may dominate early stages; direct experience dominates middle stages; lived experience may transform understanding at any stage." .
+
+lrn:developmentSkill a rdf:Property ;
+    rdfs:label "development skill" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "The skill being developed." .
+
+lrn:developmentPerson a rdf:Property ;
+    rdfs:label "developer" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person whose skill development this tracks." .
+
+lrn:developmentStage a rdf:Property ;
+    rdfs:label "current stage" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  lrn:DevelopmentStage ;
+    rdfs:comment "The current stage of development." .
+
+lrn:DevelopmentStage a rdfs:Class ;
+    rdfs:label "Development Stage" .
+
+lrn:stageExposure     a lrn:DevelopmentStage ; rdfs:label "exposure" ;
+    rdfs:comment "Exposure — the person has encountered the skill but cannot yet perform it. May have educational or observational experience only." .
+lrn:stageNovice       a lrn:DevelopmentStage ; rdfs:label "novice" ;
+    rdfs:comment "Novice — the person can perform the skill with guidance and in controlled conditions. Some direct or simulated experience." .
+lrn:stagePractitioner a lrn:DevelopmentStage ; rdfs:label "practitioner" ;
+    rdfs:comment "Practitioner — the person can perform the skill independently in standard conditions. Substantial direct experience." .
+lrn:stageProficient   a lrn:DevelopmentStage ; rdfs:label "proficient" ;
+    rdfs:comment "Proficient — the person can handle non-standard conditions, adapt to variation, and troubleshoot. Extensive direct experience with diverse cases." .
+lrn:stageExpert       a lrn:DevelopmentStage ; rdfs:label "expert" ;
+    rdfs:comment "Expert — the person can innovate within the skill, teach others, and handle edge cases. Deep direct and lived experience, typically over many years." .
+lrn:stageMaster       a lrn:DevelopmentStage ; rdfs:label "master" ;
+    rdfs:comment "Master — the person has transformed the field through their practice. Rare — requires decades of lived experience and contribution." .
+
+lrn:developmentExperiences a rdf:Property ;
+    rdfs:label "development experiences" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  lrn:ExperienceRecord ;
+    rdfs:comment "Experience records that contributed to this skill's development." .
+
+lrn:developmentLearningEvents a rdf:Property ;
+    rdfs:label "development learning events" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  lrn:LearningEvent ;
+    rdfs:comment "Learning events that contributed to this skill's development." .
+
+lrn:developmentAssessments a rdf:Property ;
+    rdfs:label "development assessments" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  lrn:SkillAssessment ;
+    rdfs:comment "Assessments that measured proficiency at points along the development trajectory." .
+
+lrn:developmentModeMix a rdf:Property ;
+    rdfs:label "mode mix" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The mix of experience modes that contributed to development — e.g. 'educational: 20%, simulated: 10%, direct: 50%, interpersonal: 15%, lived: 5%'. A well-rounded development typically involves multiple modes. Over-reliance on a single mode (e.g. educational only) produces narrow competency (CBOR-LD encoded)." .
+
+lrn:developmentPlateau a rdf:Property ;
+    rdfs:label "plateau" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Periods where proficiency did not improve — e.g. '2021-2022: no significant improvement, routine work without new challenges'. Plateaus are normal but may indicate need for new challenges or modes of experience." .
+
+lrn:developmentBreakthrough a rdf:Property ;
+    rdfs:label "breakthrough" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Periods of sudden proficiency improvement — e.g. 'after 6 months in the ICU, rapid improvement in crisis management'. Breakthroughs often follow exposure to a new mode of experience or a new level of challenge." .
+
+lrn:developmentDecay a rdf:Property ;
+    rdfs:label "decay" ;
+    rdfs:domain lrn:SkillDevelopment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Periods of skill loss — e.g. '2 years without practice, proficiency declined from practitioner to novice'. Decay rates vary by skill type and prior experience depth — skills developed through lived experience may decay slower than skills developed through educational experience only." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Experiential Transfer — how experience transfers across contexts
+# ────────────────────────────────────────────────────────────────────
+
+lrn:ExperientialTransfer a rdfs:Class ;
+    rdfs:label "Experiential Transfer" ;
+    rdfs:comment "How experience in one context transfers to another context. Not all experience transfers — 10 years of emergency nursing does not fully transfer to paediatric oncology, though some skills (clinical reasoning, communication under pressure) do. Transfer depends on the similarity of contexts, the type of knowledge, and the mode of original experience. Propositional knowledge transfers most easily (facts about anatomy apply everywhere). Practical knowledge transfers moderately (clinical skills transfer but need adaptation). Experiential knowledge transfers least (the experience of emergency nursing does not give the experience of oncology). Interpersonal knowledge may transfer if the relational skills generalise. Understanding transfer is essential for RPL — claiming competency in a new context based on experience in an old context requires evidence of transfer." .
+
+lrn:transferFrom a rdf:Property ;
+    rdfs:label "transfer from" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  lrn:ExperienceRecord ;
+    rdfs:comment "The original experience context." .
+
+lrn:transferTo a rdf:Property ;
+    rdfs:label "transfer to" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The target context — the new domain, role, or situation where the experience is claimed to transfer." .
+
+lrn:transferFidelity a rdf:Property ;
+    rdfs:label "transfer fidelity" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  lrn:TransferFidelity ;
+    rdfs:comment "How well the experience transfers — full, partial, limited, or none." .
+
+lrn:TransferFidelity a rdfs:Class ;
+    rdfs:label "Transfer Fidelity" .
+
+lrn:transferFull     a lrn:TransferFidelity ; rdfs:label "full" ;
+    rdfs:comment "Full transfer — the experience applies directly to the new context with minimal adaptation. e.g. driving skills transfer from one car to another." .
+lrn:transferPartial  a lrn:TransferFidelity ; rdfs:label "partial" ;
+    rdfs:comment "Partial transfer — some skills and knowledge transfer, others need adaptation or new learning. e.g. emergency nursing transfers partially to intensive care — clinical reasoning transfers, specific procedures need adaptation." .
+lrn:transferLimited  a lrn:TransferFidelity ; rdfs:label "limited" ;
+    rdfs:comment "Limited transfer — few skills transfer directly; most need significant new learning. e.g. emergency nursing transfers limitedly to software engineering — general problem-solving and teamwork may transfer, domain-specific skills do not." .
+lrn:transferNone     a lrn:TransferFidelity ; rdfs:label "none" ;
+    rdfs:comment "No transfer — the experience does not apply to the new context. e.g. emergency nursing does not transfer to piloting an aircraft." .
+
+lrn:transferKnowledgeTypes a rdf:Property ;
+    rdfs:label "transfer knowledge types" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  lrn:KnowledgeType ;
+    rdfs:comment "Which knowledge types transfer — propositional, practical, experiential, interpersonal. Typically propositional transfers most, experiential transfers least." .
+
+lrn:transferGaps a rdf:Property ;
+    rdfs:label "transfer gaps" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What does not transfer — the gaps that need to be filled through new experience or learning in the target context." .
+
+lrn:transferAdaptationRequired a rdf:Property ;
+    rdfs:label "adaptation required" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What adaptation is needed for the experience to apply in the new context — e.g. 'learn local protocols', 'adapt to different patient demographics', 'acquire domain-specific regulatory knowledge'." .
+
+lrn:transferEvidence a rdf:Property ;
+    rdfs:label "transfer evidence" ;
+    rdfs:domain lrn:ExperientialTransfer ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Evidence supporting the transfer claim — demonstration in the new context, assessment results, references from the new context." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Mode-to-Knowledge-Type Matrix
+# ────────────────────────────────────────────────────────────────────
+
+# The relationship between experience mode and knowledge type is not
+# arbitrary — each mode tends to produce specific knowledge types:
+#
+#   direct experience     → practical + experiential
+#   lived experience      → experiential + interpersonal (understanding
+#                           others with similar experiences)
+#   simulated experience  → practical (limited experiential)
+#   observational         → propositional + limited practical
+#   interpersonal         → interpersonal + limited propositional
+#   educational           → propositional
+#   mediated              → propositional (potentially blended with
+#                           narrative — see epi:RealityClassification)
+#
+# This matrix is heuristic, not deterministic. A person may gain
+# propositional knowledge through direct experience (learning facts by
+# doing), or limited experiential knowledge through simulated experience
+# (high-fidelity VR may approximate some experiential qualities).
+#
+# The matrix has implications for assurance:
+#   - Claims of practical skill based only on educational experience
+#     should have lower assurance than claims based on direct experience
+#   - Claims of experiential knowledge based on mediated experience
+#     should be flagged as potentially illusory
+#   - Claims of interpersonal knowledge without actual interpersonal
+#     engagement should be flagged as unsupported
+#
+# See epistemics.n3 for epistemic mode and confidence assessment.
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Life Activity — activities with learning as a byproduct
+# ────────────────────────────────────────────────────────────────────
+
+lrn:LifeActivity a rdfs:Class ;
+    rdfs:label "Life Activity" ;
+    rdfs:comment "An activity, circumstance, or life event that is not primarily a learning activity but may produce learning as a byproduct. Most of life's activities generate knowledge, skills, and experience — not through intentional study but through doing, living, and being. A couple having their first baby is not 'learning about childcare' in an educational sense — they are living the experience of becoming parents, and learning is a consequence, not the purpose. Similarly, playing sport, performing music, cooking, gardening, travelling, volunteering, or participating in community life all generate skills and knowledge as a natural byproduct. Life activities are the primary substrate from which incidental and experiential learning emerges. A life activity may produce multiple experience records and learning events over time. The learning produced by a life activity is often broader and less structured than intentional learning — it may span multiple skills and domains simultaneously, and the learner may not recognise the learning until they reflect on it or are assessed." .
+
+lrn:activityCategory a rdf:Property ;
+    rdfs:label "activity category" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:LifeActivityCategory ;
+    rdfs:comment "The broad category of life activity." .
+
+lrn:LifeActivityCategory a rdfs:Class ;
+    rdfs:label "Life Activity Category" .
+
+lrn:catParenting      a lrn:LifeActivityCategory ; rdfs:label "parenting" ;
+    rdfs:comment "Parenting and family life — having children, raising children, caregiving for family members. Produces practical skills (childcare, time management, crisis response), experiential knowledge (what it is like to be a parent), and interpersonal knowledge (understanding children, family dynamics)." .
+lrn:catSport          a lrn:LifeActivityCategory ; rdfs:label "sport" ;
+    rdfs:comment "Sport and physical activity — team sports, individual sports, martial arts, dance, fitness. Produces physical skills, strategic thinking, teamwork, discipline." .
+lrn:catArts           a lrn:LifeActivityCategory ; rdfs:label "arts" ;
+    rdfs:comment "Arts — performance art (dance, acting, theatre, music), visual arts (painting, sculpture, crafts), literary arts (writing, poetry). Produces creative skills, expressive capacity, aesthetic knowledge, performance skills." .
+lrn:catFood           a lrn:LifeActivityCategory ; rdfs:label "food" ;
+    rdfs:comment "Food and cooking — cooking, baking, brewing, food preservation, food culture. Produces practical skills, cultural knowledge, sensory knowledge." .
+lrn:catCommunity      a lrn:LifeActivityCategory ; rdfs:label "community" ;
+    rdfs:comment "Community participation — volunteering, community leadership, activism, religious community participation, civic engagement. Produces social skills, organisational skills, civic knowledge, interpersonal knowledge." .
+lrn:catTravel         a lrn:LifeActivityCategory ; rdfs:label "travel" ;
+    rdfs:comment "Travel and cultural immersion — living in or visiting other countries, cultural exchange, migration. Produces cultural knowledge, language skills, adaptability, geographic knowledge." .
+lrn:catProfessional   a lrn:LifeActivityCategory ; rdfs:label "professional" ;
+    rdfs:comment "Professional work — employment, career progression, industry engagement, professional networks. Produces technical skills, domain expertise, professional social skills, institutional knowledge." .
+lrn:catHealth         a lrn:LifeActivityCategory ; rdfs:label "health" ;
+    rdfs:comment "Health and recovery — living with illness, recovery from injury or addiction, managing chronic conditions, mental health journeys. Produces experiential knowledge (what it is like), interpersonal knowledge (understanding others with similar conditions), practical skills (self-management, navigating healthcare systems)." .
+lrn:catHobby          a lrn:LifeActivityCategory ; rdfs:label "hobby" ;
+    rdfs:comment "Hobby and leisure — gardening, making, collecting, gaming, maker activities. Produces practical skills, domain knowledge, creative skills." .
+lrn:catLifeEvent      a lrn:LifeActivityCategory ; rdfs:label "life-event" ;
+    rdfs:comment "Significant life event — marriage, divorce, bereavement, migration, retirement, crisis. Produces experiential knowledge, resilience, interpersonal knowledge, and may transform existing skills and perspectives." .
+lrn:catUpbringing     a lrn:LifeActivityCategory ; rdfs:label "upbringing" ;
+    rdfs:comment "Upbringing and family background — growing up in a particular family, location, culture, language, faith tradition, or industry context. See §8 Upbringing Factor for detailed modelling." .
+
+lrn:activityName a rdf:Property ;
+    rdfs:label "activity name" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Name of the specific activity — e.g. 'raising first child', 'playing competitive basketball', 'oil painting as hobby', 'working as registered nurse in aged care'." .
+
+lrn:activityPrimaryPurpose a rdf:Property ;
+    rdfs:label "primary purpose" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The primary purpose of the activity — what the person was doing it for, aside from learning. e.g. 'starting a family', 'physical fitness and competition', 'creative expression', 'earning a living'. Learning is a byproduct, not the purpose." .
+
+lrn:activityLearningAspect a rdf:Property ;
+    rdfs:label "learning aspect" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What learning aspects the activity contains — what skills, knowledge, or experience the activity produces as a byproduct. e.g. 'child development knowledge, crisis management, sleep deprivation management, parent-child communication'." .
+
+lrn:activityProducesSkill a rdf:Property ;
+    rdfs:label "produces skill" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "Skills that this activity may produce or develop." .
+
+lrn:activityProducesDomain a rdf:Property ;
+    rdfs:label "produces domain" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "Knowledge domains that this activity may engage." .
+
+lrn:activityExperienceMode a rdf:Property ;
+    rdfs:label "activity experience mode" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:ExperienceMode ;
+    rdfs:comment "The primary experience mode of this activity — most life activities are 'direct' or 'lived' experience." .
+
+lrn:activityExperienceRecord a rdf:Property ;
+    rdfs:label "activity experience record" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:ExperienceRecord ;
+    rdfs:comment "Experience records generated by this life activity. A single life activity (e.g. 'raising first child') may produce multiple experience records over time." .
+
+lrn:activityLearningEvent a rdf:Property ;
+    rdfs:label "activity learning event" ;
+    rdfs:domain lrn:LifeActivity ;
+    rdfs:range  lrn:LearningEvent ;
+    rdfs:comment "Specific learning events that occurred within this life activity. These are typically incidental learning events — the person was not trying to learn, but learning occurred." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Upbringing Factor — background circumstances that confer knowledge
+# ────────────────────────────────────────────────────────────────────
+
+lrn:UpbringingFactor a rdfs:Class ;
+    rdfs:label "Upbringing Factor" ;
+    rdfs:comment "A background circumstance of a person's life that confers knowledge, skills, or perspective without any intentional learning activity. Upbringing factors are not activities the person chose — they are circumstances they were born into or raised within. These factors confer knowledge naturally: a person born in a particular place has local knowledge of that place; a person raised in a particular language has native fluency; a person raised in a family of medical professionals has absorbed medical vocabulary, context, and professional culture; a person raised in a particular faith tradition has knowledge of that tradition's texts, practices, and community. Upbringing factors are not achievements — they are circumstances. But they produce real knowledge and skills that may be relevant to assessments, RPL, and skill profiles. The assurance level for upbringing-derived knowledge varies: native language fluency is high-assurance (demonstrable); cultural knowledge may be high-assurance (lived) but difficult to assess formally; industry exposure through family may be low-assurance (observational, partial)." .
+
+lrn:upbringingType a rdf:Property ;
+    rdfs:label "upbringing type" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  lrn:UpbringingType .
+
+lrn:UpbringingType a rdfs:Class ;
+    rdfs:label "Upbringing Type" .
+
+lrn:upBirthplace       a lrn:UpbringingType ; rdfs:label "birthplace" ;
+    rdfs:comment "Birthplace and childhood location — confers local geographic knowledge, climate familiarity, regional culture, and potentially language. A person raised in rural Queensland has knowledge of rural Australian life, climate, and community that cannot be acquired through education alone." .
+lrn:upLanguage         a lrn:UpbringingType ; rdfs:label "language" ;
+    rdfs:comment "Native or heritage language — confers native fluency, cultural nuance, idiomatic expression, and pragmatic competence. A person raised bilingual has knowledge that monolingual learners cannot fully acquire through study. May include dialect, regional variety, or family language." .
+lrn:upFamilyProfession a lrn:UpbringingType ; rdfs:label "family-profession" ;
+    rdfs:comment "Family profession or industry — growing up in a family where members work in a particular field (medicine, farming, trades, arts, academia, military, business). Confers domain vocabulary, professional culture awareness, industry context, and practical exposure. e.g. a child of mechanics absorbs automotive vocabulary, diagnostic thinking, and trade culture through daily life. Not equivalent to professional competency — but provides a foundation that formal learning builds on." .
+lrn:upFaithTradition   a lrn:UpbringingType ; rdfs:label "faith-tradition" ;
+    rdfs:comment "Faith or belief tradition — growing up within a religious, spiritual, or philosophical tradition. Confers knowledge of texts, rituals, practices, community structures, ethical frameworks, and theological concepts. Also confers experiential knowledge of what it is like to practice that tradition. The person may or may not continue to practice the tradition — the knowledge persists regardless. Should be treated with epistemic care — faith-based knowledge is intersubjective within the community but may be contested outside it (see epi:RealityClassification, epi:Mythological)." .
+lrn:upCulture          a lrn:UpbringingType ; rdfs:label "culture" ;
+    rdfs:comment "Cultural background — growing up within a particular cultural context (national, ethnic, regional, socioeconomic). Confers cultural knowledge, social norms, communication styles, food traditions, customs, and cultural competency. Cultural knowledge is experiential and interpersonal — it is lived, not studied. A person raised in a culture has knowledge that outsiders cannot fully acquire through study, though they may develop strong interpersonal knowledge through sustained engagement." .
+lrn:upSocioeconomic    a lrn:UpbringingType ; rdfs:label "socioeconomic" ;
+    rdfs:comment "Socioeconomic background — growing up in a particular socioeconomic context. Confers knowledge of that context's constraints, opportunities, social codes, and survival strategies. e.g. growing up in poverty confers knowledge of resource management under scarcity that is not available to those who grew up in abundance. Should be modelled with sensitivity — not as deficit but as different experiential knowledge." .
+lrn:upFamilyCharacter  a lrn:UpbringingType ; rdfs:label "family-characteristics" ;
+    rdfs:comment "Family characteristics — family structure (single parent, extended family, blended), family dynamics, family values, family health history, family talents or conditions. Confers interpersonal knowledge, adaptive strategies, and may confer genetic or environmental predispositions relevant to certain skills (e.g. musical aptitude, athletic build)." .
+lrn:upEducation        a lrn:UpbringingType ; rdfs:label "education-background" ;
+    rdfs:comment "Educational background — the type and quality of education received during upbringing. Confers foundational knowledge, learning habits, social networks, and academic disposition. Distinct from intentional learning (learning-core) — this is the context in which that learning occurred, not the learning itself." .
+lrn:upCommunity        a lrn:UpbringingType ; rdfs:label "community" ;
+    rdfs:comment "Community context — the community or communities the person was raised in (urban, rural, religious community, diaspora community, online community). Confers community-specific knowledge, social capital, and network understanding." .
+
+lrn:upbringingDescription a rdf:Property ;
+    rdfs:label "description" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of the specific upbringing circumstance — e.g. 'raised in a bilingual household (English/Mandarin) in suburban Sydney', 'child of two registered nurses, frequent exposure to medical terminology and healthcare culture', 'grew up on a cattle station in far north Queensland'." .
+
+lrn:upbringingConfersSkill a rdf:Property ;
+    rdfs:label "confers skill" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  lrn:Skill ;
+    rdfs:comment "Skills that this upbringing factor confers — e.g. native Mandarin fluency, familiarity with medical terminology, rural Australian agricultural knowledge." .
+
+lrn:upbringingConfersDomain a rdf:Property ;
+    rdfs:label "confers domain" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  lrn:KnowledgeDomain ;
+    rdfs:comment "Knowledge domains that this upbringing factor engages — e.g. 'Mandarin language', 'healthcare systems', 'agriculture', 'Islamic theology'." .
+
+lrn:upbringingKnowledgeType a rdf:Property ;
+    rdfs:label "knowledge type" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  lrn:KnowledgeType ;
+    rdfs:comment "The type(s) of knowledge conferred. Upbringing factors typically confer experiential and interpersonal knowledge (lived, not studied), and may confer propositional knowledge (vocabulary, facts) and practical knowledge (skills absorbed through daily life)." .
+
+lrn:upbringingExperienceMode a rdf:Property ;
+    rdfs:label "experience mode" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  lrn:ExperienceMode ;
+    rdfs:comment "The experience mode through which the knowledge was acquired — upbringing is typically 'lived' experience (sustained, transformative, identity-forming)." .
+
+lrn:upbringingTransferability a rdf:Property ;
+    rdfs:label "transferability" ;
+    rdfs:domain lrn:UpbringingFactor ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How transferable the conferred knowledge is to other contexts — e.g. 'native language fluency: fully transferable to any context requiring Mandarin', 'medical terminology: partially transferable to healthcare education', 'rural agricultural knowledge: limited transfer to urban contexts'." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Knowledge Conferral — how life context produces knowledge
+# ────────────────────────────────────────────────────────────────────
+
+lrn:KnowledgeConferral a rdfs:Class ;
+    rdfs:label "Knowledge Conferral" ;
+    rdfs:comment "The mechanism by which a life activity, upbringing factor, or life context confers knowledge or skill upon a person — without intentional learning. Conferral is not teaching and is not learning in the educational sense. It is the natural acquisition of knowledge through immersion, exposure, participation, or circumstance. A child raised bilingual did not 'learn' their second language in the way a student does — they acquired it through immersion. A person who grew up in a family of chefs did not 'study' cooking — they absorbed it through years of exposure. Conferral is typically unconscious — the person may not recognise the knowledge they have until they encounter someone who lacks it. Conferral produces primarily experiential and interpersonal knowledge, with some propositional and practical knowledge. The assurance level for conferred knowledge depends on whether it can be demonstrated: native language fluency is demonstrable (high assurance); cultural competency is demonstrable in context but hard to assess formally (moderate assurance); absorbed professional vocabulary may be partial and unstructured (lower assurance). Conferral records are important for RPL — they identify knowledge that the person has but may not know how to articulate or evidence." .
+
+lrn:conferralSource a rdf:Property ;
+    rdfs:label "conferral source" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the LifeActivity or UpbringingFactor that conferred the knowledge." .
+
+lrn:conferralRecipient a rdf:Property ;
+    rdfs:label "recipient" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person who received the conferred knowledge." .
+
+lrn:conferralSkill a rdf:Property ;
+    rdfs:label "conferred skill" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  lrn:Skill .
+
+lrn:conferralDomain a rdf:Property ;
+    rdfs:label "conferred domain" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  lrn:KnowledgeDomain .
+
+lrn:conferralKnowledgeType a rdf:Property ;
+    rdfs:label "conferred knowledge type" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  lrn:KnowledgeType .
+
+lrn:conferralDepth a rdf:Property ;
+    rdfs:label "conferral depth" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  lrn:ConferralDepth ;
+    rdfs:comment "How deeply the conferred knowledge is embedded — from surface exposure to deeply integrated." .
+
+lrn:ConferralDepth a rdfs:Class ;
+    rdfs:label "Conferral Depth" .
+
+lrn:depthExposure     a lrn:ConferralDepth ; rdfs:label "exposure" ;
+    rdfs:comment "Exposure — the person has encountered the domain but has superficial knowledge. e.g. a child of engineers has heard engineering vocabulary but cannot apply it." .
+lrn:depthFamiliar     a lrn:ConferralDepth ; rdfs:label "familiar" ;
+    rdfs:comment "Familiar — the person has working familiarity but not proficiency. e.g. a child of chefs can cook basic meals and knows kitchen vocabulary but has not trained professionally." .
+lrn:depthIntegrated   a lrn:ConferralDepth ; rdfs:label "integrated" ;
+    rdfs:comment "Integrated — the knowledge is deeply integrated into the person's capacities. e.g. native language fluency, cultural competency from lifelong immersion. The person can perform without conscious effort." .
+lrn:depthTransformative a lrn:ConferralDepth ; rdfs:label "transformative" ;
+    rdfs:comment "Transformative — the conferred knowledge has shaped the person's identity or worldview. e.g. growing up in a faith tradition shapes ethical framework and self-understanding, regardless of continued practice." .
+
+lrn:conferralRecognised a rdf:Property ;
+    rdfs:label "recognised by holder" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the person recognises that they have this knowledge. Many conferred knowledge types are invisible to the holder until they encounter someone who lacks them — e.g. native speakers may not recognise their grammatical knowledge as 'knowledge' until they study linguistics or teach the language." .
+
+lrn:conferralAssessable a rdf:Property ;
+    rdfs:label "assessable" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the conferred knowledge can be formally assessed. Native language fluency is assessable; cultural competency is assessable in context; absorbed professional vocabulary may be partially assessable. Non-assessable conferred knowledge may still be valuable for RPL evidence." .
+
+lrn:conferralRPLEvidence a rdf:Property ;
+    rdfs:label "RPL evidence" ;
+    rdfs:domain lrn:KnowledgeConferral ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this conferred knowledge can serve as evidence for RPL. Upbringing factors that confer demonstrable skills (native language, cultural competency) may be strong RPL evidence. Factors that confer only exposure or familiarity may be weaker evidence." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (learning-experience-modality.n3) links to:
+#
+# learning-core.n3:
+#   - Shares the lrn: prefix
+#   - Experience records contain learning events (learning-core)
+#   - Skill development links to skills, assessments, learning events
+#     (learning-core)
+#   - Experience records may serve as RPL evidence (learning-core)
+#   - Experiential transfer informs skill gap analysis (learning-core)
+#   - LearningEvent has experienceMode and knowledgeType properties
+#     (added in learning-core.n3, referencing this file's vocabulary)
+#
+# epistemics.n3:
+#   - Experience modes align with epi:MediationType
+#     (direct = MedDirect, observational = MedDirect/MedRecorded,
+#      interpersonal = MedReported, simulated = MedSimulated,
+#      educational/mediated = MedRecorded/MedInferred)
+#   - Knowledge types have epistemic status:
+#     propositional = objective or intersubjective,
+#     practical = intersubjective (demonstrable),
+#     experiential = subjective (first-person),
+#     interpersonal = intersubjective (shared understanding)
+#   - Mediated experience may produce blended reality classification
+#     (epi:Blended) — fact mixed with narrative
+#   - Assurance levels should factor in experience mode mix
+#
+# agency.n3:
+#   - Experiential knowledge is applicable to natural agents only
+#   - Software agents do not have experiential knowledge — they process
+#     data without phenomenal experience. To claim otherwise is a
+#     category error.
+#   - Practical knowledge for software agents is computational procedure,
+#     not embodied skill
+#   - Interpersonal knowledge requires social engagement capacity —
+#     applicable to natural agents
+#
+# personhood.n3:
+#   - Experience records are part of a person's life history
+#   - Lived experience may shape identity, perspective, and social
+#     relations (personhood)
+#   - Qualifications may be granted based on experience transfer (RPL)
+#   - Upbringing factors relate to personhood — family, culture,
+#     language, faith tradition, community
+#   - Life activities may involve social relations (person:SocialRelation)
+#   - Knowledge conferral shapes a person's capacities and perspective
+#
+# epistemics.n3:
+#   - Faith tradition knowledge should use epi:Mythological or
+#     epi:Blended reality classification — intersubjective within
+#     community, contested outside
+#   - Cultural knowledge is intersubjective within the culture
+#   - Conferred knowledge may be unrecognised by the holder —
+#     epistemic assessment should account for this
+#   - Socioeconomic background knowledge is experiential — not deficit
+#     but different epistemic access
+#
+# provenance.n3:
+#   - All experience records have provenance — who recorded them, when,
+#     and from what evidence
+#   - Experience documentation quality affects provenance confidence
+#   - Upbringing factors have provenance — birth records, family history,
+#     community records

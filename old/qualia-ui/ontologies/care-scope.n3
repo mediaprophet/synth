@@ -1,0 +1,790 @@
+# Care Scope Ontology — Agreements, Legal Domains, Contexts, and
+# Scoped Task Assignments for Duty of Care Relations
+#
+# Authoring form (N3) — compiled to care-scope.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# This ontology defines the scoping framework for duty of care relations.
+# It complements duty-of-care.n3 by providing:
+#
+#   - Agreement: the specific agreement(s) underpinning a relation,
+#     with terms, status, lifecycle, and amendments
+#   - LegalDomain: the area of law that governs specific aspects of a
+#     relation (family, tax, immigration, criminal, corporate, etc.)
+#   - CareContext: the situational context that constrains a relation
+#     (school, medical, sports, childcare, workplace, project, etc.)
+#   - ScopedAssignment: assignment of specific tasks to specific parties
+#     within a scope, including software agent task delegation
+#
+# A single duty of care relation may have multiple agreements, span
+# multiple legal domains, and operate in multiple contexts. Each
+# scoped assignment specifies who does what, within which constraints.
+#
+# Imports: agency.n3, personhood.n3, duty-of-care.n3,
+#          agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+@prefix care:       <https://qualiadb.org/schema/ui/duty-of-care#> .
+@prefix scope:      <https://qualiadb.org/schema/ui/care-scope#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Agreement — the specific agreement(s) underpinning a relation
+# ────────────────────────────────────────────────────────────────────
+
+scope:Agreement a rdfs:Class ;
+    rdfs:label "Agreement" ;
+    rdfs:comment "A specific agreement that underpins or defines a duty of care relation. An agreement has terms, parties, a lifecycle (draft, active, amended, suspended, expired, revoked), and may be amended over time. Multiple agreements may apply to a single relation — e.g. a doctor's duty arises from an employment contract AND a professional registration agreement AND a patient consent form. Each agreement may have a different legal basis (contract, statute, custom) and a different jurisdiction." .
+
+scope:agreementTitle a rdf:Property ;
+    rdfs:label "agreement title" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Human-readable title of the agreement." .
+
+scope:agreementType a rdf:Property ;
+    rdfs:label "agreement type" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  scope:AgreementType ;
+    rdfs:comment "The type of agreement." .
+
+scope:AgreementType a rdfs:Class ;
+    rdfs:label "Agreement Type" .
+
+scope:employmentAgreement    a scope:AgreementType ; rdfs:label "employment" ;
+    rdfs:comment "Employment contract — employer-employee duty of care." .
+scope:serviceAgreement       a scope:AgreementType ; rdfs:label "service" ;
+    rdfs:comment "Service agreement — service provider-client duty (mechanic, consultant, contractor)." .
+scope:custodyAgreement       a scope:AgreementType ; rdfs:label "custody" ;
+    rdfs:comment "Custody agreement — parenting plan, custody order, kinship care arrangement." .
+scope:guardianshipOrder      a scope:AgreementType ; rdfs:label "guardianship-order" ;
+    rdfs:comment "Guardianship order — court-appointed guardianship with defined scope." .
+scope:powerOfAttorney        a scope:AgreementType ; rdfs:label "power-of-attorney" ;
+    rdfs:comment "Power of attorney — voluntary delegation of specific powers." .
+scope:supportedDecisionAgreement a scope:AgreementType ; rdfs:label "supported-decision" ;
+    rdfs:comment "Supported decision-making agreement — the care-subject retains capacity but receives support." .
+scope:professionalRegistration a scope:AgreementType ; rdfs:label "professional-registration" ;
+    rdfs:comment "Professional registration — licence to practice with associated professional duties." .
+scope:statutoryAppointment   a scope:AgreementType ; rdfs:label "statutory-appointment" ;
+    rdfs:comment "Statutory appointment — appointment by a statutory body (receiver, administrator, public guardian)." .
+scope:volunteerAgreement     a scope:AgreementType ; rdfs:label "volunteer" ;
+    rdfs:comment "Volunteer agreement — volunteer duty with limited scope (sports coach, community worker)." .
+scope:softwareAgentBrief     a scope:AgreementType ; rdfs:label "software-agent-brief" ;
+    rdfs:comment "Software agent brief — the operational scope and constraints assigned to a software agent by a principal. Not a legal agreement — the software agent has no capacity to consent. Uses computational terms." .
+scope:customaryArrangement   a scope:AgreementType ; rdfs:label "customary" ;
+    rdfs:comment "Customary arrangement — kinship care, community-based care, or traditional obligation. May not be formally documented." .
+
+scope:agreementStatus a rdf:Property ;
+    rdfs:label "agreement status" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  scope:AgreementStatus ;
+    rdfs:comment "The current lifecycle status of the agreement." .
+
+scope:AgreementStatus a rdfs:Class ;
+    rdfs:label "Agreement Status" .
+
+scope:draft       a scope:AgreementStatus ; rdfs:label "draft" ;
+    rdfs:comment "The agreement is drafted but not yet in effect." .
+scope:active      a scope:AgreementStatus ; rdfs:label "active" ;
+    rdfs:comment "The agreement is in effect and binding." .
+scope:amended     a scope:AgreementStatus ; rdfs:label "amended" ;
+    rdfs:comment "The agreement has been amended — see amendment history." .
+scope:suspended   a scope:AgreementStatus ; rdfs:label "suspended" ;
+    rdfs:comment "The agreement is temporarily suspended — may be reinstated." .
+scope:expired     a scope:AgreementStatus ; rdfs:label "expired" ;
+    rdfs:comment "The agreement has expired by its own terms (end date reached or purpose fulfilled)." .
+scope:revoked     a scope:AgreementStatus ; rdfs:label "revoked" ;
+    rdfs:comment "The agreement has been revoked — by consent, by court order, or by operation of law." .
+scope:superseded  a scope:AgreementStatus ; rdfs:label "superseded" ;
+    rdfs:comment "The agreement has been superseded by a newer agreement." .
+scope:underReview a scope:AgreementStatus ; rdfs:label "under-review" ;
+    rdfs:comment "The agreement is active but under review — may be amended, suspended, or revoked." .
+
+scope:agreementDate a rdf:Property ;
+    rdfs:label "agreement date" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the agreement was made or entered into." .
+
+scope:effectiveDate a rdf:Property ;
+    rdfs:label "effective date" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the agreement takes effect. May differ from agreementDate." .
+
+scope:expiryDate a rdf:Property ;
+    rdfs:label "expiry date" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the agreement expires. Empty means open-ended." .
+
+scope:agreementTerms a rdf:Property ;
+    rdfs:label "agreement terms" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific terms of the agreement — what each party has agreed to do. May reference an external document IRI." .
+
+scope:agreementReference a rdf:Property ;
+    rdfs:label "agreement reference" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI, document ID, or citation of the full agreement text." .
+
+scope:hasAmendment a rdf:Property ;
+    rdfs:label "has amendment" ;
+    rdfs:domain scope:Agreement ;
+    rdfs:range  scope:Amendment ;
+    rdfs:comment "Links an agreement to its amendments. Amendments are appendable — the original agreement text is preserved." .
+
+scope:Amendment a rdfs:Class ;
+    rdfs:label "Amendment" ;
+    rdfs:comment "An amendment to an agreement. Amendments are appendable — the original agreement is preserved, and each amendment records what changed, when, and by whom. This supports provenance: the full history of an agreement's evolution is traceable." .
+
+scope:amendmentDate a rdf:Property ;
+    rdfs:label "amendment date" ;
+    rdfs:domain scope:Amendment ;
+    rdfs:range  xsd:dateTime .
+
+scope:amendedBy a rdf:Property ;
+    rdfs:label "amended by" ;
+    rdfs:domain scope:Amendment ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who made the amendment — a party, a court, or a statutory body." .
+
+scope:amendmentDescription a rdf:Property ;
+    rdfs:label "amendment description" ;
+    rdfs:domain scope:Amendment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What was changed — the specific terms added, modified, or removed." .
+
+scope:amendmentReason a rdf:Property ;
+    rdfs:label "amendment reason" ;
+    rdfs:domain scope:Amendment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Why the amendment was made." .
+
+scope:hasAgreement a rdf:Property ;
+    rdfs:label "has agreement" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:Agreement ;
+    rdfs:comment "Links a duty of care relation to the agreement(s) that underpin it. A relation may have multiple agreements." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Legal Domain — the area of law that governs specific aspects
+# ────────────────────────────────────────────────────────────────────
+
+scope:LegalDomain a rdfs:Class ;
+    rdfs:label "Legal Domain" ;
+    rdfs:comment "An area of law that governs specific aspects of a duty of care relation. A single relation may span multiple legal domains — e.g. a child protection matter may involve family law (custody), criminal law (abuse allegations), and immigration law (if the child is a foreign national). Each legal domain may impose specific obligations, prohibitions, and procedural requirements that apply alongside the general duty of care. Legal domains interact with jurisdiction (care:Jurisdiction) — the same legal domain may have different rules in different jurisdictions." .
+
+scope:legalDomainType a rdf:Property ;
+    rdfs:label "legal domain type" ;
+    rdfs:domain scope:LegalDomain ;
+    rdfs:range  scope:LegalDomainType ;
+    rdfs:comment "The area of law." .
+
+scope:LegalDomainType a rdfs:Class ;
+    rdfs:label "Legal Domain Type" .
+
+scope:familyLaw        a scope:LegalDomainType ; rdfs:label "family-law" ;
+    rdfs:comment "Family law — custody, guardianship, adoption, child protection, domestic relations." .
+scope:taxLaw           a scope:LegalDomainType ; rdfs:label "tax-law" ;
+    rdfs:comment "Tax law — tax obligations, tax guardianship, estate tax, corporate tax compliance." .
+scope:immigrationLaw   a scope:LegalDomainType ; rdfs:label "immigration-law" ;
+    rdfs:comment "Immigration law — visa sponsorship, immigration detention, deportation, asylum." .
+scope:criminalLaw      a scope:LegalDomainType ; rdfs:label "criminal-law" ;
+    rdfs:comment "Criminal law — criminal proceedings, bail conditions, victim protection, offender supervision." .
+scope:corporateLaw     a scope:LegalDomainType ; rdfs:label "corporate-law" ;
+    rdfs:comment "Corporate law — director duties, receivership, administration, shareholder rights." .
+scope:healthLaw        a scope:LegalDomainType ; rdfs:label "health-law" ;
+    rdfs:comment "Health law — mental health, medical consent, public health, patient rights." .
+scope:propertyLaw      a scope:LegalDomainType ; rdfs:label "property-law" ;
+    rdfs:comment "Property law — trust, estate, real property, intellectual property." .
+scope:employmentLaw    a scope:LegalDomainType ; rdfs:label "employment-law" ;
+    rdfs:comment "Employment law — workplace duty of care, occupational health and safety, worker compensation." .
+scope:educationLaw     a scope:LegalDomainType ; rdfs:label "education-law" ;
+    rdfs:comment "Education law — school duty of care, student welfare, special education, mandatory reporting." .
+scope:socialSecurityLaw a scope:LegalDomainType ; rdfs:label "social-security-law" ;
+    rdfs:comment "Social security law — welfare guardianship, pension management, Centrelink/SSA representative arrangements." .
+scope:guardianshipLaw  a scope:LegalDomainType ; rdfs:label "guardianship-law" ;
+    rdfs:comment "Guardianship law — guardianship and administration acts, capacity assessment, protective jurisdiction." .
+scope:environmentalLaw a scope:LegalDomainType ; rdfs:label "environmental-law" ;
+    rdfs:comment "Environmental law — environmental stewardship, pollution control, heritage protection." .
+scope:internationalLaw a scope:LegalDomainType ; rdfs:label "international-law" ;
+    rdfs:comment "International law — treaties, conventions, cross-border recognition (Hague Convention, UN CRPD)." .
+scope:customaryLaw     a scope:LegalDomainType ; rdfs:label "customary-law" ;
+    rdfs:comment "Customary law — indigenous law, customary obligations, traditional kinship law." .
+
+scope:domainObligations a rdf:Property ;
+    rdfs:label "domain obligations" ;
+    rdfs:domain scope:LegalDomain ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Specific obligations imposed by this legal domain on the relation — e.g. 'mandatory reporting of suspected child abuse', 'annual financial account to court', 'bail conditions prohibit contact'." .
+
+scope:domainProhibitions a rdf:Property ;
+    rdfs:label "domain prohibitions" ;
+    rdfs:domain scope:LegalDomain ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Specific prohibitions imposed by this legal domain — e.g. 'cannot leave jurisdiction without court permission', 'cannot access care-subject's funds for personal use'." .
+
+scope:domainProceduralRequirements a rdf:Property ;
+    rdfs:label "domain procedural requirements" ;
+    rdfs:domain scope:LegalDomain ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Procedural requirements imposed by this legal domain — e.g. 'annual court review', 'quarterly report to statutory body', 'capacity assessment every 3 years'." .
+
+scope:hasLegalDomain a rdf:Property ;
+    rdfs:label "has legal domain" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:LegalDomain ;
+    rdfs:comment "Links a duty of care relation to the legal domain(s) that govern specific aspects. A relation may span multiple legal domains." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Care Context — the situational context that constrains a relation
+# ────────────────────────────────────────────────────────────────────
+
+scope:CareContext a rdfs:Class ;
+    rdfs:label "Care Context" ;
+    rdfs:comment "The situational context in which a duty of care operates. Context constrains what actions are appropriate — a teacher in a school context can supervise and educate but cannot make major medical decisions (beyond first aid). A sports coach can train and supervise but cannot make educational decisions. A babysitter can provide immediate care but cannot enrol a child in school. Context is orthogonal to duty type — the same person may have different contexts for different relations (a parent who is also a teacher has different duties in each context)." .
+
+scope:contextType a rdf:Property ;
+    rdfs:label "context type" ;
+    rdfs:domain scope:CareContext ;
+    rdfs:range  scope:ContextType ;
+    rdfs:comment "The type of care context." .
+
+scope:ContextType a rdfs:Class ;
+    rdfs:label "Context Type" .
+
+scope:schoolContext       a scope:ContextType ; rdfs:label "school" ;
+    rdfs:comment "School context — teacher, school staff, principal, school nurse. Permitted: education, supervision, first aid, welfare reporting. Prohibited: major medical decisions, enrolling/dismissing students without authority, accessing student selfhood." .
+scope:childcareContext    a scope:ContextType ; rdfs:label "childcare" ;
+    rdfs:comment "Childcare context — babysitter, childcare worker, nanny, after-school care. Permitted: immediate care, feeding, supervision, basic hygiene. Prohibited: medical decisions beyond first aid, enrolling in activities, accessing child's selfhood." .
+scope:sportsContext       a scope:ContextType ; rdfs:label "sports" ;
+    rdfs:comment "Sports context — coach, trainer, sports medic, referee. Permitted: training, supervision, first aid, fitness assessment. Prohibited: medical treatment beyond first aid, education decisions, accessing participant selfhood." .
+scope:medicalContext      a scope:ContextType ; rdfs:label "medical" ;
+    rdfs:comment "Medical context — doctor, nurse, paramedic, therapist, dentist. Permitted: examination, diagnosis, treatment within consent scope, prescribing. Prohibited: financial decisions, legal representation, accessing patient selfhood beyond clinical necessity." .
+scope:workplaceContext    a scope:ContextType ; rdfs:label "workplace" ;
+    rdfs:comment "Workplace context — employer, supervisor, occupational health officer, safety officer. Permitted: workplace supervision, safety enforcement, training. Prohibited: personal decisions, accessing employee selfhood, compelling non-work-related disclosures." .
+scope:homeContext         a scope:ContextType ; rdfs:label "home" ;
+    rdfs:comment "Home context — housekeeper, property manager, live-in carer, house-sitter. Permitted: property maintenance, cleaning, access to shared spaces. Prohibited: personal decisions, accessing resident selfhood, using resident's private keys." .
+scope:projectContext      a scope:ContextType ; rdfs:label "project" ;
+    rdfs:comment "Project context — project manager, team member, contractor, consultant. Permitted: project execution, milestone management, resource allocation. Prohibited: decisions outside project scope, accessing stakeholder selfhood." .
+scope:legalContext        a scope:ContextType ; rdfs:label "legal" ;
+    rdfs:comment "Legal context — lawyer, legal guardian, court officer, bail supervisor. Permitted: legal representation, court appearance, document signing within scope. Prohibited: medical decisions, financial decisions beyond legal scope." .
+scope:financialContext    a scope:ContextType ; rdfs:label "financial" ;
+    rdfs:comment "Financial context — financial advisor, accountant, trustee, property manager. Permitted: financial management, investment decisions within scope, accounting. Prohibited: medical decisions, personal decisions, accessing client selfhood." .
+scope:emergencyContext    a scope:ContextType ; rdfs:label "emergency" ;
+    rdfs:comment "Emergency context — emergency responder, paramedic, crisis worker, disaster relief worker. Permitted: immediate protective action, emergency medical treatment, temporary restraint. Prohibited: non-emergency decisions, accessing care-subject selfhood. Must hand over to non-emergency duty-holder once crisis resolves." .
+scope:residentialContext  a scope:ContextType ; rdfs:label "residential" ;
+    rdfs:comment "Residential context — aged care facility, group home, boarding house, shelter. Permitted: daily care, medication administration, welfare monitoring. Prohibited: financial management beyond facility fees, accessing resident selfhood." .
+scope:communityContext    a scope:ContextType ; rdfs:label "community" ;
+    rdfs:comment "Community context — community worker, social worker, volunteer, support group leader. Permitted: support, advocacy, referral, welfare check. Prohibited: medical decisions, financial decisions, accessing care-subject selfhood." .
+scope:softwareAgentContext a scope:ContextType ; rdfs:label "software-agent" ;
+    rdfs:comment "Software agent context — a software agent operating under principal-agent delegation. Permitted: computation within authorised scope, output generation within parameters, data processing within scope. Prohibited: decisions outside authorised scope, accessing any agent's selfhood (software agents have no selfhood). Uses computational terms." .
+
+scope:contextPermittedActions a rdf:Property ;
+    rdfs:label "context permitted actions" ;
+    rdfs:domain scope:CareContext ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions permitted in this context — overrides or refines care:permittedActions with context-specific constraints." .
+
+scope:contextProhibitedActions a rdf:Property ;
+    rdfs:label "context prohibited actions" ;
+    rdfs:domain scope:CareContext ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Actions prohibited in this context — overrides or refines care:prohibitedActions with context-specific constraints." .
+
+scope:contextField a rdf:Property ;
+    rdfs:label "context field" ;
+    rdfs:domain scope:CareContext ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific field or domain within the context — e.g. for a project context: 'construction', 'software development', 'medical research'. For a medical context: 'general practice', 'psychiatry', 'emergency medicine'. For a sports context: 'swimming', 'gymnastics', 'martial arts'." .
+
+scope:hasCareContext a rdf:Property ;
+    rdfs:label "has care context" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:CareContext ;
+    rdfs:comment "Links a duty of care relation to its situational context. A relation may have multiple contexts (e.g. a school nurse operates in both school and medical contexts)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Scoped Assignment — who does what within which constraints
+# ────────────────────────────────────────────────────────────────────
+
+scope:ScopedAssignment a rdfs:Class ;
+    rdfs:label "Scoped Assignment" ;
+    rdfs:comment "An assignment of specific tasks or responsibilities to a specific party within a duty of care relation. Scoped assignments enable granular delegation — within a single relation, different parties may be assigned different tasks with different constraints. Examples: a school assigns Teacher A to classroom supervision, Teacher B to sports coaching, and Teacher C to first aid. A project assigns Software Agent A to data processing, Agent B to quality checks, and Agent C to reporting. Each assignment has its own scope, constraints, and accountability." .
+
+scope:assignedTo a rdf:Property ;
+    rdfs:label "assigned to" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  care:InvolvedParty ;
+    rdfs:comment "The party to whom this task or responsibility is assigned." .
+
+scope:assignmentTask a rdf:Property ;
+    rdfs:label "assignment task" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific task or responsibility assigned — e.g. 'classroom supervision', 'data processing', 'financial accounting', 'first aid response', 'quality verification'." .
+
+scope:assignmentScope a rdf:Property ;
+    rdfs:label "assignment scope" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The scope of this assignment — what it covers and what it does not. May reference a care:CareScope or define a sub-scope within it." .
+
+scope:assignmentContext a rdf:Property ;
+    rdfs:label "assignment context" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  scope:CareContext ;
+    rdfs:comment "The context in which this assignment operates." .
+
+scope:assignmentConstraints a rdf:Property ;
+    rdfs:label "assignment constraints" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Additional constraints on this assignment — e.g. 'only during school hours', 'only for patients aged 18+', 'only for data classified as non-sensitive', 'requires secondary review before output is accepted'." .
+
+scope:assignmentPriority a rdf:Property ;
+    rdfs:label "assignment priority" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  scope:AssignmentPriority ;
+    rdfs:comment "The priority of this assignment relative to others." .
+
+scope:AssignmentPriority a rdfs:Class ;
+    rdfs:label "Assignment Priority" .
+
+scope:critical   a scope:AssignmentPriority ; rdfs:label "critical" ;
+    rdfs:comment "Critical — must be performed; failure triggers escalation." .
+scope:high       a scope:AssignmentPriority ; rdfs:label "high" ;
+    rdfs:comment "High — should be performed; failure triggers reporting." .
+scope:normal     a scope:AssignmentPriority ; rdfs:label "normal" ;
+    rdfs:comment "Normal — standard priority." .
+scope:low        a scope:AssignmentPriority ; rdfs:label "low" ;
+    rdfs:comment "Low — best-effort; failure does not trigger escalation." .
+
+scope:assignmentStatus a rdf:Property ;
+    rdfs:label "assignment status" ;
+    rdfs:domain scope:ScopedAssignment ;
+    rdfs:range  scope:AssignmentStatus ;
+    rdfs:comment "The current status of this assignment." .
+
+scope:AssignmentStatus a rdfs:Class ;
+    rdfs:label "Assignment Status" .
+
+scope:assignmentProposed  a scope:AssignmentStatus ; rdfs:label "proposed" .
+scope:assignmentActive    a scope:AssignmentStatus ; rdfs:label "active" .
+scope:assignmentPaused    a scope:AssignmentStatus ; rdfs:label "paused" ;
+    rdfs:comment "Temporarily paused — may be resumed." .
+scope:assignmentCompleted a scope:AssignmentStatus ; rdfs:label "completed" .
+scope:assignmentRevoked   a scope:AssignmentStatus ; rdfs:label "revoked" ;
+    rdfs:comment "The assignment has been revoked — the party is no longer responsible for this task." .
+scope:assignmentFailed    a scope:AssignmentStatus ; rdfs:label "failed" ;
+    rdfs:comment "The assignment has failed — the party was unable to fulfil it. For software agents: enumeration failure or ungrounded generation. Triggers escalation or reassignment." .
+
+scope:hasScopedAssignment a rdf:Property ;
+    rdfs:label "has scoped assignment" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:ScopedAssignment ;
+    rdfs:comment "Links a duty of care relation to its scoped assignments. A relation may have multiple assignments, each to a different party with different tasks and constraints." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Software Agent Task Delegation
+# ────────────────────────────────────────────────────────────────────
+
+# Software agents are assigned tasks via ScopedAssignment, but the
+# assignment has specific properties for software agents that differ
+# from natural person assignments:
+#
+# - The assignment is not an agreement (software agents have no
+#   capacity to consent) — it is a unilateral delegation by the
+#   principal agent.
+# - The assignment context is scope:softwareAgentContext.
+# - The assignment constraints include capability scope limits,
+#   output governance rules, and override conditions.
+# - The assignment status 'failed' uses computational terms:
+#   enumeration failure (the agent could not enumerate the required
+#   output) or ungrounded generation (the agent produced output
+#   without sufficient grounding).
+# - The principal agent retains override authority at all times.
+# - The software agent has no personhood or selfhood — the
+#   assignment is purely operational.
+#
+# Multiple software agents may be assigned to different tasks within
+# the same project or duty of care relation:
+#   - Agent A: data processing (scope: data classified as non-sensitive)
+#   - Agent B: quality verification (scope: all outputs from Agent A)
+#   - Agent C: report generation (scope: verified outputs only)
+#
+# Each assignment is a separate ScopedAssignment linked to the same
+# DutyOfCareRelation via scope:hasScopedAssignment.
+
+scope:SoftwareAgentDelegation a rdfs:Class ;
+    rdfs:subClassOf scope:ScopedAssignment ;
+    rdfs:label "Software Agent Delegation" ;
+    rdfs:comment "A scoped assignment to a software agent. The principal agent delegates a specific computational task with defined scope, constraints, and override conditions. The software agent has no capacity to consent — the delegation is unilateral. Uses computational terms: capability scope, output governance, override, enumeration failure, ungrounded generation." .
+
+scope:capabilityScope a rdf:Property ;
+    rdfs:label "capability scope" ;
+    rdfs:domain scope:SoftwareAgentDelegation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The capability scope of the delegated task — what the software agent is authorised to compute. E.g. 'text analysis only', 'data classification within taxonomy X', 'report generation from verified data only'." .
+
+scope:outputGovernance a rdf:Property ;
+    rdfs:label "output governance" ;
+    rdfs:domain scope:SoftwareAgentDelegation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Rules governing the software agent's output — e.g. 'requires human review before action', 'auto-publish within confidence threshold 0.9', 'flag for review if confidence below 0.7'." .
+
+scope:overrideCondition a rdf:Property ;
+    rdfs:label "override condition" ;
+    rdfs:domain scope:SoftwareAgentDelegation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Conditions under which the principal agent will override the software agent's output — e.g. 'output contradicts established fact', 'confidence below threshold', 'output triggers safety alert'." .
+
+scope:delegationPrincipal a rdf:Property ;
+    rdfs:label "delegation principal" ;
+    rdfs:domain scope:SoftwareAgentDelegation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The principal agent who delegated this task. Retains override authority." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Linking to duty-of-care.n3
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology extends duty-of-care.n3 with scoping concepts:
+#
+#   - scope:Agreement (terms, status, lifecycle, amendments)
+#     → linked via scope:hasAgreement
+#   - scope:LegalDomain (family, tax, immigration, criminal, etc.)
+#     → linked via scope:hasLegalDomain
+#   - scope:CareContext (school, medical, sports, childcare, etc.)
+#     → linked via scope:hasCareContext
+#   - scope:ScopedAssignment (task delegation to any party)
+#     → linked via scope:hasScopedAssignment
+#   - scope:SoftwareAgentDelegation (computational task delegation)
+#     → subClass of ScopedAssignment
+#
+# Together with duty-of-care.n3, the full scoping model is:
+#
+#   DutyOfCareRelation
+#     ├── care:CareScope (breadth, duration, permitted/prohibited)
+#     ├── care:LegalBasis (agreement, statute, court order, etc.)
+#     ├── care:ConsentBasis (voluntary, involuntary, deemed, etc.)
+#     ├── care:Jurisdiction (governing law, court, cross-border)
+#     ├── scope:Agreement (specific agreements with terms and lifecycle)
+#     ├── scope:LegalDomain (family, tax, immigration, criminal, etc.)
+#     ├── scope:CareContext (school, medical, sports, etc.)
+#     ├── scope:ScopedAssignment (who does what, with constraints)
+#     │   └── scope:SoftwareAgentDelegation (computational tasks)
+#     ├── scope:TemporalCondition (time-based activation/deactivation)
+#     ├── scope:ConditionalState (situation-based activation/deactivation)
+#     └── care:InvolvedParty (all parties with rights/responsibilities)
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Temporal Condition — time-based activation and deactivation
+# ────────────────────────────────────────────────────────────────────
+
+scope:TemporalCondition a rdfs:Class ;
+    rdfs:label "Temporal Condition" ;
+    rdfs:comment "A time-based condition that activates, modifies, or deactivates aspects of a duty of care relation. Temporal conditions are transient — they do not change the underlying relation, they change which duties are active at a given time. Examples: a school camp activates additional supervision duties for the camp duration; a holiday deactivates a teacher's duty toward a student; a scheduled surgery activates a surgeon's professional duty for the procedure window. Temporal conditions may be recurring (weekly schedule, school term) or one-off (specific event, specific date range)." .
+
+scope:temporalType a rdf:Property ;
+    rdfs:label "temporal type" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  scope:TemporalType ;
+    rdfs:comment "The type of temporal condition." .
+
+scope:TemporalType a rdfs:Class ;
+    rdfs:label "Temporal Type" .
+
+scope:scheduled      a scope:TemporalType ; rdfs:label "scheduled" ;
+    rdfs:comment "A scheduled time window — the condition activates and deactivates at predetermined times. Examples: school hours (9am-3pm weekdays), school term, sports training schedule, work shift." .
+scope:recurring      a scope:TemporalType ; rdfs:label "recurring" ;
+    rdfs:comment "A recurring time window — the condition activates on a repeating schedule. Examples: weekly supervision duty, monthly financial review, annual medical check." .
+scope:eventWindow    a scope:TemporalType ; rdfs:label "event-window" ;
+    rdfs:comment "A time window tied to a specific event — the condition activates before, during, or after the event. Examples: school camp (3-day window), medical procedure (2-hour window), court hearing (hearing day), project milestone (milestone period)." .
+scope:seasonal       a scope:TemporalType ; rdfs:label "seasonal" ;
+    rdfs:comment "A seasonal or cyclical condition — activates during a season or cyclical period. Examples: flu season (public health duty), harvest season (agricultural safety), holiday period (reduced supervision)." .
+scope:continuous     a scope:TemporalType ; rdfs:label "continuous" ;
+    rdfs:comment "A continuous condition with no end time — the duty is active until explicitly deactivated. Examples: ongoing medical monitoring, continuous software agent oversight, permanent guardianship." .
+
+scope:temporalStart a rdf:Property ;
+    rdfs:label "temporal start" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the temporal condition activates." .
+
+scope:temporalEnd a rdf:Property ;
+    rdfs:label "temporal end" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the temporal condition deactivates. Empty means active until explicitly deactivated." .
+
+scope:temporalRecurrence a rdf:Property ;
+    rdfs:label "temporal recurrence" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For recurring conditions, the recurrence rule — e.g. 'weekly Mon-Fri 09:00-15:00', 'every 3 months', 'daily 22:00-06:00'. May use iCal RRULE format." .
+
+scope:temporalEventRef a rdf:Property ;
+    rdfs:label "temporal event reference" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "For event-window conditions, the event that triggers activation — e.g. 'school-camp-2026-03', 'surgery-2026-03-15', 'court-hearing-2026-04-02'." .
+
+scope:temporalEffect a rdf:Property ;
+    rdfs:label "temporal effect" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  scope:TemporalEffect ;
+    rdfs:comment "What the temporal condition does to the relation when active." .
+
+scope:TemporalEffect a rdfs:Class ;
+    rdfs:label "Temporal Effect" .
+
+scope:activates      a scope:TemporalEffect ; rdfs:label "activates" ;
+    rdfs:comment "The condition activates duties that are otherwise dormant — e.g. school camp activates 24-hour supervision duty." .
+scope:deactivates    a scope:TemporalEffect ; rdfs:label "deactivates" ;
+    rdfs:comment "The condition deactivates duties that are otherwise active — e.g. school holiday deactivates a teacher's classroom supervision duty." .
+scope:modifies       a scope:TemporalEffect ; rdfs:label "modifies" ;
+    rdfs:comment "The condition modifies the scope or constraints of active duties — e.g. a school camp modifies the care context from 'school' to 'school + residential + outdoor', expanding permitted actions to include overnight supervision." .
+scope:escalates      a scope:TemporalEffect ; rdfs:label "escalates" ;
+    rdfs:comment "The condition escalates the duty level — e.g. a medical emergency during a school camp escalates the teacher's duty from supervision to emergency first aid + immediate notification." .
+
+scope:temporalModifiedContext a rdf:Property ;
+    rdfs:label "temporal modified context" ;
+    rdfs:domain scope:TemporalCondition ;
+    rdfs:range  scope:CareContext ;
+    rdfs:comment "For 'modifies' effects, the context that replaces or supplements the original context during the temporal window." .
+
+scope:hasTemporalCondition a rdf:Property ;
+    rdfs:label "has temporal condition" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:TemporalCondition ;
+    rdfs:comment "Links a duty of care relation to its temporal conditions. A relation may have multiple temporal conditions active simultaneously." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Conditional State — situation-based activation and deactivation
+# ────────────────────────────────────────────────────────────────────
+
+scope:ConditionalState a rdfs:Class ;
+    rdfs:label "Conditional State" ;
+    rdfs:comment "A situation-based condition that activates, modifies, or deactivates aspects of a duty of care relation. Unlike temporal conditions (which are time-based), conditional states are triggered by the state of the care-subject, the duty-holder, or the environment. Examples: a care-subject is unconscious (activates emergency medical duty and proxy consent); a care-subject is temporarily not of sound mind (activates temporary guardianship provisions); a duty-holder is unavailable (activates delegated or successive duty-holder); a care-subject is on a plane (activates limited remote-duty provisions). Conditional states are transient — they activate and deactivate based on state changes, not time. A conditional state may co-occur with a temporal condition (e.g. a student is unconscious during a school camp)." .
+
+scope:conditionalType a rdf:Property ;
+    rdfs:label "conditional type" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  scope:ConditionalType ;
+    rdfs:comment "The type of conditional state." .
+
+scope:ConditionalType a rdfs:Class ;
+    rdfs:label "Conditional Type" .
+
+scope:capacityState      a scope:ConditionalType ; rdfs:label "capacity-state" ;
+    rdfs:comment "The care-subject's capacity is temporarily altered — unconscious (accident, anaesthesia, sleep), not of sound mind (intoxication, mental health crisis, delirium), or temporarily unable to communicate (stroke, intubation). Activates proxy consent, emergency medical duty, or temporary guardianship provisions. Distinct from permanent incapacity (which is a VulnerabilityType in guardianship.n3) — this is transient." .
+scope:availabilityState  a scope:ConditionalType ; rdfs:label "availability-state" ;
+    rdfs:comment "The care-subject or duty-holder is temporarily unavailable — sleeping, on holiday, on a plane, in a meeting, uncontactable, in a remote area without signal. Activates delegated duty-holder, delayed decision provisions, or automated fallback (e.g. software agent monitoring). Does not imply incapacity — the person retains capacity but is unavailable." .
+scope:locationState      a scope:ConditionalType ; rdfs:label "location-state" ;
+    rdfs:comment "The care-subject's location changes the applicable context or jurisdiction — e.g. a student on a school camp (school + residential + outdoor context), a patient transferred to another hospital (different medical context + different jurisdiction), a child travelling internationally with one parent (different jurisdiction + potential immigration law implications)." .
+scope:emergencyState     a scope:ConditionalType ; rdfs:label "emergency-state" ;
+    rdfs:comment "An emergency situation is active — accident, natural disaster, medical emergency, security incident, missing person. Activates emergency duty provisions, emergency consent (deemed consent), and may override normal scope constraints. Must be deactivated once the emergency resolves, with a formal handover to non-emergency duty arrangements." .
+scope:environmentalState a scope:ConditionalType ; rdfs:label "environmental-state" ;
+    rdfs:comment "An environmental condition affects the duty — extreme weather (activates additional safety duty for outdoor activities), public health emergency (activates infection control duty), infrastructure failure (activates manual fallback procedures). Environmental states may affect multiple relations simultaneously." .
+scope:relationalState    a scope:ConditionalType ; rdfs:label "relational-state" ;
+    rdfs:comment "A change in the relationship structure — a parent becomes unavailable (activates co-parent or kinship carer), a guardian resigns (activates successive guardian), a software agent's principal is offline (activates delegated principal or automated fallback). Relational states change who holds the duty, not what the duty covers." .
+scope:legalState         a scope:ConditionalType ; rdfs:label "legal-state" ;
+    rdfs:comment "A legal proceeding or status change affects the duty — a court hearing is scheduled (activates legal representation duty), bail conditions are imposed (activates supervision conditions), an immigration hold is placed (activates immigration law domain). Legal states may override or constrain normal duty provisions." .
+
+scope:conditionalSubject a rdf:Property ;
+    rdfs:label "conditional subject" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The entity whose state change triggers the condition — typically the care-subject, but may be the duty-holder (e.g. duty-holder unavailable) or a third party (e.g. co-parent unavailable)." .
+
+scope:conditionalTrigger a rdf:Property ;
+    rdfs:label "conditional trigger" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific trigger that activates this condition — e.g. 'unconsciousness', 'blood alcohol above 0.08', 'no signal for 2+ hours', 'natural disaster declared', 'court order issued', 'flight departure'." .
+
+scope:conditionalEffect a rdf:Property ;
+    rdfs:label "conditional effect" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  scope:TemporalEffect ;
+    rdfs:comment "What the conditional state does to the relation when active. Reuses the TemporalEffect enum: activates, deactivates, modifies, escalates." .
+
+scope:conditionalActivatedAt a rdf:Property ;
+    rdfs:label "conditional activated at" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the condition was activated. Empty means not currently active." .
+
+scope:conditionalDeactivatedAt a rdf:Property ;
+    rdfs:label "conditional deactivated at" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the condition was deactivated. Empty means still active. Conditions are appendable — a re-activation creates a new activation record." .
+
+scope:conditionalAssessedBy a rdf:Property ;
+    rdfs:label "conditional assessed by" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who assessed or declared the condition — a clinician (for capacity states), a duty-holder (for availability states), an authority (for emergency states), a court (for legal states)." .
+
+scope:conditionalDeactivationTrigger a rdf:Property ;
+    rdfs:label "conditional deactivation trigger" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What must happen for the condition to deactivate — e.g. 'care-subject regains consciousness', 'duty-holder returns from leave', 'emergency declared over', 'court order expires', 'flight lands'." .
+
+scope:conditionalModifiedContext a rdf:Property ;
+    rdfs:label "conditional modified context" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  scope:CareContext ;
+    rdfs:comment "For 'modifies' effects, the context that replaces or supplements the original context while the condition is active." .
+
+scope:conditionalFallbackParty a rdf:Property ;
+    rdfs:label "conditional fallback party" ;
+    rdfs:domain scope:ConditionalState ;
+    rdfs:range  care:InvolvedParty ;
+    rdfs:comment "For 'relational-state' conditions, the party who assumes the duty while the condition is active — e.g. co-parent, successive guardian, delegated principal, automated software agent." .
+
+scope:hasConditionalState a rdf:Property ;
+    rdfs:label "has conditional state" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:ConditionalState ;
+    rdfs:comment "Links a duty of care relation to its conditional states. A relation may have multiple conditional states active simultaneously." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Temporal and Conditional Interaction
+# ────────────────────────────────────────────────────────────────────
+
+# Temporal conditions and conditional states may co-occur and interact:
+#
+# Example: A student is on a school camp (temporal: event-window, 3 days)
+# and becomes unconscious due to an accident (conditional: capacity-state,
+# emergency-state). The interaction:
+#   - Temporal: school camp modifies context to 'school + residential +
+#     outdoor', activates 24-hour supervision
+#   - Conditional: unconsciousness activates emergency medical duty,
+#     proxy consent, and escalates the teacher's duty to first aid +
+#     immediate notification
+#   - Conditional: emergency-state activates emergency consent (deemed)
+#     and may override normal scope constraints
+#
+# The combined effect is computed by evaluating all active temporal
+# conditions and conditional states together. Conflicts are resolved
+# by priority:
+#   1. Emergency states override all other conditions
+#   2. Legal states override non-emergency conditions
+#   3. Conditional states override temporal conditions for the same
+#      scope aspect
+#   4. Temporal conditions modify the baseline duty
+#
+# All activations and deactivations are recorded for provenance —
+# the full history of when conditions activated, what they changed,
+# and when they deactivated is traceable.
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Emergency Information Access — pre-designated info for emergencies
+# ────────────────────────────────────────────────────────────────────
+
+# A care-subject may pre-designate specific information that can be
+# shared with emergency duty-holders (emergency contacts, paramedics,
+# hospital staff) WITHOUT granting selfhood access. This is distinct
+# from selfhood access — the care-subject has explicitly classified
+# this information as emergency-shareable.
+#
+# Example: an international student pre-designates:
+#   - Emergency contacts: parents (home country), housemate (local)
+#   - Medical: blood type, allergies, current medications, organ donor
+#   - Insurance: health insurance provider, policy number
+#   - Consular: embassy contact, visa type
+#   - Advance directives: religious objections to specific treatments
+#
+# When an emergency occurs, the emergency contact (e.g. housemate)
+# can relay this information to paramedics or hospital staff. They
+# CANNOT access the care-subject's selfhood — private reflections,
+# dream records, qualia memories, private keys. Only the pre-
+# designated emergency information is accessible.
+#
+# The emergency information access is activated by a conditional
+# state (emergency-state or capacity-state) and deactivated when
+# the emergency resolves. All access is logged for provenance.
+
+scope:EmergencyInformationAccess a rdfs:Class ;
+    rdfs:label "Emergency Information Access" ;
+    rdfs:comment "Pre-designated information that a care-subject has classified as shareable with emergency duty-holders during an emergency. This is NOT selfhood access — the care-subject has explicitly curated this information for emergency sharing. The information is accessed only when an emergency-state or capacity-state conditional state is active, and only by parties with the emergency-contact, medical, or emergency-responder role. All access is logged." .
+
+scope:emergencyInfoCategory a rdf:Property ;
+    rdfs:label "emergency info category" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  scope:EmergencyInfoCategory ;
+    rdfs:comment "The category of emergency information." .
+
+scope:EmergencyInfoCategory a rdfs:Class ;
+    rdfs:label "Emergency Info Category" .
+
+scope:emergencyContacts     a scope:EmergencyInfoCategory ; rdfs:label "emergency-contacts" ;
+    rdfs:comment "Emergency contact persons — family, friends, housemates, colleagues. Includes name, relationship, phone, email, and location (home country, local)." .
+scope:medicalInfo           a scope:EmergencyInfoCategory ; rdfs:label "medical-info" ;
+    rdfs:comment "Medical information relevant to emergency treatment — blood type, allergies, current medications, chronic conditions, organ donor status, advance directives (religious or personal objections to specific treatments)." .
+scope:insuranceInfo         a scope:EmergencyInfoCategory ; rdfs:label "insurance-info" ;
+    rdfs:comment "Insurance information — health insurance provider, policy number, emergency assistance number. May include travel insurance for international contexts." .
+scope:consularInfo          a scope:EmergencyInfoCategory ; rdfs:label "consular-info" ;
+    rdfs:comment "Consular and immigration information — embassy contact, visa type, passport number, immigration status. Relevant for international students, foreign workers, and travellers." .
+scope:advanceDirectives     a scope:EmergencyInfoCategory ; rdfs:label "advance-directives" ;
+    rdfs:comment "Advance directives — the care-subject's prior expressed wishes regarding medical treatment. Distinct from selfhood — these are personhood-level decisions the care-subject has pre-declared for emergency use. May include refusal of specific treatments, religious objections, or preferred medical facility." .
+scope:nextOfKin             a scope:EmergencyInfoCategory ; rdfs:label "next-of-kin" ;
+    rdfs:comment "Next of kin — the care-subject's legally recognised next of kin for notification purposes. May differ from emergency contacts (e.g. emergency contact is a housemate, next of kin is a parent in another country)." .
+
+scope:emergencyInfoContent a rdf:Property ;
+    rdfs:label "emergency info content" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The actual information content — or an IRI reference to a secure document containing the information. The content is encrypted and accessible only to authorised parties during an active emergency state." .
+
+scope:emergencyInfoDesignatedBy a rdf:Property ;
+    rdfs:label "emergency info designated by" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who designated this information as emergency-shareable — typically the care-subject. If designated by someone else (e.g. a guardian, a parent), the designation must be noted as proxy-designated." .
+
+scope:emergencyInfoAccessibleTo a rdf:Property ;
+    rdfs:label "emergency info accessible to" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  care:PartyRole ;
+    rdfs:comment "Which party roles may access this information during an emergency — e.g. emergency-contact, medical (doctor/nurse), emergency-responder (paramedic)." .
+
+scope:emergencyInfoAccessCondition a rdf:Property ;
+    rdfs:label "emergency info access condition" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  scope:ConditionalType ;
+    rdfs:comment "Which conditional state must be active for this information to be accessible — typically emergency-state or capacity-state. Some information (e.g. emergency contacts) may be accessible under availability-state as well." .
+
+scope:emergencyInfoAccessedAt a rdf:Property ;
+    rdfs:label "emergency info accessed at" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the information was accessed. Appendable — each access is logged for provenance." .
+
+scope:emergencyInfoAccessedBy a rdf:Property ;
+    rdfs:label "emergency info accessed by" ;
+    rdfs:domain scope:EmergencyInformationAccess ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "Who accessed the information. Appendable — each access is logged." .
+
+scope:hasEmergencyInfoAccess a rdf:Property ;
+    rdfs:label "has emergency info access" ;
+    rdfs:domain care:DutyOfCareRelation ;
+    rdfs:range  scope:EmergencyInformationAccess ;
+    rdfs:comment "Links a duty of care relation to the pre-designated emergency information that may be accessed under emergency conditions." .

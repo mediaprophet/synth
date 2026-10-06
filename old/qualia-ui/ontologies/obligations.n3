@@ -1,0 +1,667 @@
+# Obligations & Responsibilities Ontology — Confidentiality, Secrecy,
+# Human Dignity, Zero-Knowledge Validation, Coercive Circumstances,
+# and Disclosure Exceptions
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Models obligations and responsibilities beyond the basic legal
+# obligations in personhood.n3 — particularly:
+#
+#   1. Confidentiality obligations — duties to keep information secret
+#   2. Secrecy instruments — NDAs, deeds of secrecy, privileged
+#      communications, sealed records
+#   3. Human dignity protections — obligations to preserve dignity
+#   4. Zero-knowledge validation — proving claims without disclosing
+#      underlying sensitive data
+#   5. Coercive circumstances — situations where disclosure obligations
+#      conflict with safety (threats to self, children, others)
+#   6. Disclosure exceptions — when confidentiality may or must be
+#      breached (law enforcement, courts, mandatory reporting, imminent
+#      harm, public interest)
+#   7. Disclosure exclusions — roles or contexts where standard
+#      confidentiality does not apply or is overridden
+#
+# Key design principle: the system must support both the obligation to
+# keep confidence AND the obligation to disclose when safety requires it.
+# These obligations may conflict. The ontology models the conflict, not
+# just one side. Zero-knowledge proofs provide a technical path to
+# resolve some conflicts — validate a claim without revealing the data.
+#
+# Nomenclature:
+#   - "coerced" — mind-dependent term, applicable to natural agents only.
+#     Legal persons: "subject to legal compulsion". Software agents:
+#     "computationally constrained" or "overridden".
+#   - "honourable" — moral concept for natural agents. Legal persons:
+#     "consistent with institutional obligations".
+#   - "duress" — applicable to natural agents. Legal persons: "under
+#     legal compulsion" or "subject to regulatory pressure".
+#
+# Imports: agency.n3, personhood.n3, duty-of-care.n3, care-scope.n3,
+#          adversarial-conduct.n3, epistemics.n3, values.n3,
+#          provenance.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix person: <https://qualiadb.org/schema/ui/personhood#> .
+@prefix care:   <https://qualiadb.org/schema/ui/duty-of-care#> .
+@prefix scope:  <https://qualiadb.org/schema/ui/care-scope#> .
+@prefix vals:   <https://qualiadb.org/schema/ui/values#> .
+@prefix prov:   <https://qualiadb.org/schema/ui/provenance#> .
+@prefix obl:    <https://qualiadb.org/schema/ui/obligations#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Obligation — the general concept
+# ────────────────────────────────────────────────────────────────────
+
+obl:Obligation a rdfs:Class ;
+    rdfs:label "Obligation" ;
+    rdfs:comment "A duty or requirement binding an entity. Obligations extend person:LegalObligation to include non-legal duties: confidentiality, professional ethics, human dignity, moral commitments, and community obligations. Obligations may conflict — an entity may be obligated to keep confidence AND obligated to disclose harm. The ontology models both the obligations and their conflict resolution. Obligations are held by natural agents (personal duties), legal persons (institutional obligations), and may be assigned to software agents as operational constraints (the software agent does not 'owe' the obligation — it operates under constraints that reflect the principal's obligations)." .
+
+obl:obligationHolder a rdf:Property ;
+    rdfs:label "held by" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity that holds this obligation." .
+
+obl:obligationOwedTo a rdf:Property ;
+    rdfs:label "owed to" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity to whom the obligation is owed — a person, institution, community, or the public." .
+
+obl:obligationType a rdf:Property ;
+    rdfs:label "obligation type" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  obl:ObligationType .
+
+obl:ObligationType a rdfs:Class ;
+    rdfs:label "Obligation Type" .
+
+obl:typeConfidentiality  a obl:ObligationType ; rdfs:label "confidentiality" ;
+    rdfs:comment "Confidentiality — duty to keep information secret. Arises from professional ethics, contracts, or law." .
+obl:typeSecrecy          a obl:ObligationType ; rdfs:label "secrecy" ;
+    rdfs:comment "Secrecy — duty to keep information secret, typically under formal agreement (NDA, deed of secrecy). Stronger than confidentiality — may include legal penalties for breach." .
+obl:typePrivilege        a obl:ObligationType ; rdfs:label "privileged-communication" ;
+    rdfs:comment "Privileged communication — communication that is protected from disclosure by law. e.g. lawyer-client, doctor-patient, priest-penitent, journalist-source. Privilege is a legal right of the client/patient/penitent, not the professional." .
+obl:typeDignity          a obl:ObligationType ; rdfs:label "human-dignity" ;
+    rdfs:comment "Human dignity — obligation to preserve the dignity of persons. Includes privacy of body, identity, personal history, and vulnerability. Dignity obligations may override transparency obligations." .
+obl:typeMoral            a obl:ObligationType ; rdfs:label "moral" ;
+    rdfs:comment "Moral — obligation arising from personal ethics or values, not from law or contract. e.g. a promise to a friend, a commitment to protect someone. Applicable to natural agents. Legal persons: 'institutional commitment'." .
+obl:typeCommunity        a obl:ObligationType ; rdfs:label "community" ;
+    rdfs:comment "Community — obligation to a community. e.g. cultural protocols, community trust, indigenous knowledge protocols (see faith:IndigenousKnowledgeProtocol)." .
+obl:typeSafety           a obl:ObligationType ; rdfs:label "safety" ;
+    rdfs:comment "Safety — obligation to protect the safety of self or others. May override confidentiality and secrecy obligations. See §5 Coercive Circumstances and §6 Disclosure Exceptions." .
+obl:typeFiduciary        a obl:ObligationType ; rdfs:label "fiduciary" ;
+    rdfs:comment "Fiduciary — duty of loyalty, good faith, and care owed by a fiduciary. Links to person:fiduciaryDuty." .
+obl:typeProfessional     a obl:ObligationType ; rdfs:label "professional-ethics" ;
+    rdfs:comment "Professional ethics — obligations arising from professional registration or code of ethics. e.g. medical confidentiality, legal professional privilege, engineering safety obligations." .
+obl:typeStatutory        a obl:ObligationType ; rdfs:label "statutory" ;
+    rdfs:comment "Statutory — obligation imposed by law. Links to person:statutoryDuty." .
+obl:typeContractual      a obl:ObligationType ; rdfs:label "contractual" ;
+    rdfs:comment "Contractual — obligation arising from a contract or agreement. Links to person:contractualDuty and agency:Contract." .
+
+obl:obligationSource a rdf:Property ;
+    rdfs:label "obligation source" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the instrument, agreement, law, or relationship that creates this obligation." .
+
+obl:obligationStrength a rdf:Property ;
+    rdfs:label "obligation strength" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  obl:ObligationStrength ;
+    rdfs:comment "The strength or weight of the obligation — determines precedence when obligations conflict." .
+
+obl:ObligationStrength a rdfs:Class ;
+    rdfs:label "Obligation Strength" .
+
+obl:strengthAbsolute    a obl:ObligationStrength ; rdfs:label "absolute" ;
+    rdfs:comment "Absolute — cannot be overridden. Rare. e.g. prohibition on torture, obligation to protect a child's life." .
+obl:strengthStrong     a obl:ObligationStrength ; rdfs:label "strong" ;
+    rdfs:comment "Strong — overrides most other obligations. e.g. safety of a child, legal privilege, statutory mandatory reporting." .
+obl:strengthStandard   a obl:ObligationStrength ; rdfs:label "standard" ;
+    rdfs:comment "Standard — normal weight. Overridden by strong or absolute obligations." .
+obl:strengthWeak       a obl:ObligationStrength ; rdfs:label "weak" ;
+    rdfs:comment "Weak — moral or aspirational obligation, easily overridden by stronger obligations." .
+
+obl:obligationConflict a rdf:Property ;
+    rdfs:label "conflicts with" ;
+    rdfs:domain obl:Obligation ;
+    rdfs:range  obl:Obligation ;
+    rdfs:comment "Another obligation that may conflict with this one. e.g. confidentiality conflicts with safety; secrecy conflicts with mandatory reporting. Conflicts are not defects — they are the normal condition of complex obligation systems. Resolution depends on obligation strength, context, and applicable law." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Confidentiality Instrument — formal secrecy agreements
+# ────────────────────────────────────────────────────────────────────
+
+obl:ConfidentialityInstrument a rdfs:Class ;
+    rdfs:label "Confidentiality Instrument" ;
+    rdfs:comment "A formal agreement or legal instrument that establishes confidentiality or secrecy obligations. Includes NDAs (non-disclosure agreements), deeds of secrecy, confidentiality clauses in contracts, sealed court records, suppression orders, and professional confidentiality codes. Confidentiality instruments define what information is confidential, who is bound, for how long, and what exceptions apply. A confidentiality instrument may be mutual (both parties bound) or one-way. It may have a sunset clause (expires after a period) or be perpetual. It may be subject to legal override (e.g. court order, mandatory reporting). The instrument itself is a record — it can be referenced without revealing the confidential information it protects." .
+
+obl:instrumentTitle a rdf:Property ;
+    rdfs:label "instrument title" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:string .
+
+obl:instrumentType a rdf:Property ;
+    rdfs:label "instrument type" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  obl:ConfidentialityType .
+
+obl:ConfidentialityType a rdfs:Class ;
+    rdfs:label "Confidentiality Type" .
+
+obl:confNDA             a obl:ConfidentialityType ; rdfs:label "nda" ;
+    rdfs:comment "Non-disclosure agreement — contractual obligation not to disclose specified information." .
+obl:confDeedOfSecrecy   a obl:ConfidentialityType ; rdfs:label "deed-of-secrecy" ;
+    rdfs:comment "Deed of secrecy — formal deed, often under seal, with stronger legal force than an NDA. Common in government, defence, and sensitive professions." .
+obl:confClause          a obl:ConfidentialityType ; rdfs:label "contractual-clause" ;
+    rdfs:comment "Confidentiality clause within a broader contract or agreement." .
+obl:confSuppression     a obl:ConfidentialityType ; rdfs:label "suppression-order" ;
+    rdfs:comment "Court suppression order — legally prohibits disclosure of information. May be non-publication, non-disclosure, or closed court." .
+obl:confSealed          a obl:ConfidentialityType ; rdfs:label "sealed-record" ;
+    rdfs:comment "Sealed record — court or government record that is sealed and not accessible without specific authorisation." .
+obl:confProfessional    a obl:ConfidentialityType ; rdfs:label "professional-code" ;
+    rdfs:comment "Professional confidentiality code — confidentiality required by professional ethics. e.g. medical confidentiality, legal professional privilege." .
+obl:confNationalSecurity a obl:ConfidentialityType ; rdfs:label "national-security" ;
+    rdfs:comment "National security classification — classified information protected by law. e.g. official secret, classified document." .
+obl:confCultural        a obl:ConfidentialityType ; rdfs:label "cultural-protocol" ;
+    rdfs:comment "Cultural confidentiality — information protected by indigenous cultural protocols. e.g. men's business, women's business, sacred-secret knowledge. Links to faith:IndigenousKnowledgeProtocol." .
+
+obl:instrumentParties a rdf:Property ;
+    rdfs:label "parties" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRIs of entities bound by the instrument." .
+
+obl:instrumentScope a rdf:Property ;
+    rdfs:label "scope" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What information is covered — description without revealing the information itself. e.g. 'financial records 2020-2024', 'patient treatment records', 'defence project specifications'." .
+
+obl:instrumentDuration a rdf:Property ;
+    rdfs:label "duration" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "How long the confidentiality lasts — 'perpetual', '5 years from execution', 'until publicly disclosed', 'until court order'." .
+
+obl:instrumentExceptions a rdf:Property ;
+    rdfs:label "exceptions" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  obl:DisclosureException ;
+    rdfs:comment "Exceptions under which confidentiality may be breached. See §6." .
+
+obl:instrumentPenalty a rdf:Property ;
+    rdfs:label "penalty for breach" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Consequences of breaching confidentiality — 'liquidated damages: $500,000', 'criminal prosecution', 'professional deregistration', 'termination of employment'." .
+
+obl:instrumentMutual a rdf:Property ;
+    rdfs:label "mutual" ;
+    rdfs:domain obl:ConfidentialityInstrument ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the instrument is mutual (all parties bound) or one-way." .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Human Dignity — dignity as a protected concept
+# ────────────────────────────────────────────────────────────────────
+
+obl:HumanDignity a rdfs:Class ;
+    rdfs:label "Human Dignity" ;
+    rdfs:comment "The inherent worth and value of a human being, which must be respected and protected. Human dignity is not granted by law or convention — it is inherent. Law and convention recognise and protect it. Dignity is the foundation of human rights (UDHR Article 1: 'All human beings are born free and equal in dignity and rights'). Dignity obligations include: privacy of body and identity, protection from humiliation and degradation, respect for autonomy and self-determination, protection of personal history and vulnerability, and respect for cultural and spiritual identity. Dignity may require that certain information not be disclosed even when transparency would otherwise demand it — e.g. a person's medical history, trauma history, or identity as a victim of abuse. Dignity obligations apply to natural agents. Legal persons have institutional obligations to respect dignity. Software agents operate under constraints that reflect dignity obligations — they do not 'respect' dignity (no capacity for respect) but their outputs must be filtered for dignity." .
+
+obl:dignityAspect a rdf:Property ;
+    rdfs:label "dignity aspect" ;
+    rdfs:domain obl:HumanDignity ;
+    rdfs:range  obl:DignityAspect .
+
+obl:DignityAspect a rdfs:Class ;
+    rdfs:label "Dignity Aspect" .
+
+obl:dignityBodily        a obl:DignityAspect ; rdfs:label "bodily-integrity" ;
+    rdfs:comment "Bodily integrity — privacy and autonomy over one's body. Medical history, body image, reproductive history, disability, health status." .
+obl:dignityIdentity      a obl:DignityAspect ; rdfs:label "identity-privacy" ;
+    rdfs:comment "Identity privacy — protection of personal identity, including legal identity, gender identity, cultural identity, and pseudonymous identity." .
+obl:dignityTrauma        a obl:DignityAspect ; rdfs:label "trauma-history" ;
+    rdfs:comment "Trauma history — protection of information about past trauma, abuse, violence, or suffering. Disclosure may cause re-traumatisation." .
+obl:dignityVulnerability a obl:DignityAspect ; rdfs:label "vulnerability" ;
+    rdfs:comment "Vulnerability — protection of information that reveals vulnerability. e.g. mental health status, disability, refugee status, domestic violence victim status. Disclosure may enable exploitation." .
+obl:dignityCultural      a obl:DignityAspect ; rdfs:label "cultural-spiritual" ;
+    rdfs:comment "Cultural and spiritual dignity — respect for cultural identity, faith tradition, indigenous heritage. Includes protection of sacred knowledge and cultural protocols. Links to faith-systems.n3." .
+obl:dignityAutonomy      a obl:DignityAspect ; rdfs:label "autonomy-self-determination" ;
+    rdfs:comment "Autonomy and self-determination — the right to make one's own decisions about one's life, body, and information. Includes the right to withhold consent." .
+obl:dignityReputation    a obl:DignityAspect ; rdfs:label "reputation-honour" ;
+    rdfs:comment "Reputation and honour — protection from false or damaging claims. Distinct from privacy — reputation is about how others perceive you, not what they know about you." .
+obl:dignityDegradation   a obl:DignityAspect ; rdfs:label "freedom-from-degradation" ;
+    rdfs:comment "Freedom from degradation — protection from treatment that degrades, humiliates, or dehumanises. Includes cruel, inhuman, or degrading treatment (UDHR Article 5)." .
+
+obl:dignityProtectedInfo a rdf:Property ;
+    rdfs:label "protected information" ;
+    rdfs:domain obl:HumanDignity ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of information protected by this dignity aspect — without revealing the information itself. e.g. 'medical history of reproductive health', 'identity as survivor of domestic violence', 'indigenous cultural knowledge restricted under protocol'." .
+
+obl:dignityObligation a rdf:Property ;
+    rdfs:label "dignity obligation" ;
+    rdfs:domain obl:HumanDignity ;
+    rdfs:range  obl:Obligation ;
+    rdfs:comment "The obligation created by this dignity aspect — typically a strong or absolute obligation not to disclose protected information." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Zero-Knowledge Validation — prove without revealing
+# ────────────────────────────────────────────────────────────────────
+
+obl:ZeroKnowledgeValidation a rdfs:Class ;
+    rdfs:label "Zero-Knowledge Validation" ;
+    rdfs:comment "A method for validating a claim without disclosing the underlying sensitive data. Zero-knowledge proofs (ZKPs) allow a prover to demonstrate that a statement is true without revealing the information that makes it true. This is critical for resolving the tension between confidentiality obligations and verification requirements. Example: a person may need to prove they are over 18 without revealing their date of birth. A person may need to prove they have a medical qualification without revealing which institution granted it or when. A person may need to prove they are not on a sanctions list without revealing their identity. ZKPs enable minimally invasive validation — the verifier learns only what they need to know, nothing more. The system should support ZKP-based validation wherever confidentiality obligations conflict with verification requirements. ZKPs are a computational method — they do not involve judgement or understanding by software agents. The software agent generates and verifies proofs; it does not know what they mean." .
+
+obl:zkpClaim a rdf:Property ;
+    rdfs:label "claim" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The claim being validated — e.g. 'age > 18', 'holds qualification X', 'not on sanctions list Y', 'income in range Z', 'is member of community C'." .
+
+obl:zkpProver a rdf:Property ;
+    rdfs:label "prover" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity making the claim (the prover)." .
+
+obl:zkpVerifier a rdf:Property ;
+    rdfs:label "verifier" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the entity validating the claim (the verifier)." .
+
+obl:zkpProtectedData a rdf:Property ;
+    rdfs:label "protected data" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of the data that is protected — what is NOT revealed. e.g. 'date of birth not revealed', 'institution name not revealed', 'identity not revealed'." .
+
+obl:zkpRevealedData a rdf:Property ;
+    rdfs:label "revealed data" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What IS revealed — the minimum necessary. e.g. 'boolean: over 18', 'boolean: qualified', 'boolean: not sanctioned'." .
+
+obl:zkpProofType a rdf:Property ;
+    rdfs:label "proof type" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  obl:ZKPType .
+
+obl:ZKPType a rdfs:Class ;
+    rdfs:label "ZKP Type" .
+
+obl:zkpRange           a obl:ZKPType ; rdfs:label "range-proof" ;
+    rdfs:comment "Range proof — proves a value is within a range without revealing the value. e.g. age in range, income in range." .
+obl:zkpMembership      a obl:ZKPType ; rdfs:label "set-membership" ;
+    rdfs:comment "Set membership — proves membership in a set without revealing which member. e.g. 'is a registered doctor' without revealing which one." .
+obl:zkpNonMembership   a obl:ZKPType ; rdfs:label "set-non-membership" ;
+    rdfs:comment "Set non-membership — proves non-membership in a set. e.g. 'not on sanctions list' without revealing identity." .
+obl:zkpCredential      a obl:ZKPType ; rdfs:label "credential-verification" ;
+    rdfs:comment "Credential verification — proves possession of a credential without revealing the credential. e.g. 'holds medical licence' without revealing licence number or issuer." .
+obl:zkpAttribute       a obl:ZKPType ; rdfs:label "attribute-proof" ;
+    rdfs:comment "Attribute proof — proves an attribute without revealing identity. e.g. 'is over 18 and resident of Australia' without revealing name or address." .
+obl:zkpRelationship    a obl:ZKPType ; rdfs:label "relationship-proof" ;
+    rdfs:comment "Relationship proof — proves a relationship exists without revealing the nature or details. e.g. 'is a party to a values agreement' without revealing the agreement or other party." .
+obl:zkpObligation      a obl:ZKPType ; rdfs:label "obligation-proof" ;
+    rdfs:comment "Obligation proof — proves an obligation is satisfied without revealing how. e.g. 'has filed tax return' without revealing income." .
+
+obl:zkpConfidentialityInstrument a rdf:Property ;
+    rdfs:label "protects under" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  obl:ConfidentialityInstrument ;
+    rdfs:comment "The confidentiality instrument that motivates this ZKP — the obligation being honoured while still providing validation." .
+
+obl:zkpDignityAspect a rdf:Property ;
+    rdfs:label "protects dignity" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  obl:DignityAspect ;
+    rdfs:comment "The dignity aspect protected by this ZKP." .
+
+obl:zkpVerificationResult a rdf:Property ;
+    rdfs:label "verification result" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Result of the verification — true (claim validated) or false (claim not validated). Does not reveal underlying data." .
+
+obl:zkpTimestamp a rdf:Property ;
+    rdfs:label "timestamp" ;
+    rdfs:domain obl:ZeroKnowledgeValidation ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the proof was generated and verified." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Coercive Circumstance — when disclosure endangers
+# ────────────────────────────────────────────────────────────────────
+
+obl:CoerciveCircumstance a rdfs:Class ;
+    rdfs:label "Coercive Circumstance" ;
+    rdfs:comment "A situation where an entity is subject to pressure, threats, or danger that affects their ability to freely decide whether to disclose or withhold information. Coercive circumstances are critical because they create a conflict between the obligation to disclose (e.g. to a court, to an employer, to a partner) and the safety of the entity or others. Example: a person is bound by a secrecy deed but is threatened with violence if they do not breach it. Or: a person is asked to disclose information but doing so would endanger their children. In these cases, the person is not freely choosing — they are under duress. The ontology models: the nature of the coercion, the threat level, who is endangered, what information is at stake, and what protections are available. Coercive circumstances may justify non-disclosure even when disclosure would otherwise be required. 'Coerced' is a mind-dependent term applicable to natural agents. For legal persons: 'subject to legal compulsion' or 'under regulatory pressure'. Software agents: 'computationally constrained' or 'overridden'." .
+
+obl:coercionSubject a rdf:Property ;
+    rdfs:label "subject" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of the person subject to coercion." .
+
+obl:coercionType a rdf:Property ;
+    rdfs:label "coercion type" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  obl:CoercionType .
+
+obl:CoercionType a rdfs:Class ;
+    rdfs:label "Coercion Type" .
+
+obl:coerPhysical        a obl:CoercionType ; rdfs:label "physical-threat" ;
+    rdfs:comment "Physical threat — threat of violence, injury, or death to the subject or others. The most severe form of coercion." .
+obl:coerPsychological   a obl:CoercionType ; rdfs:label "psychological-pressure" ;
+    rdfs:comment "Psychological pressure — threat of emotional harm, social destruction, reputation damage, or relationship destruction. May be as severe as physical threat in its effects." .
+obl:coerRelational      a obl:CoercionType ; rdfs:label "relational-coercion" ;
+    rdfs:comment "Relational coercion — pressure exerted through the manipulation of relationships, social standing, and emotional dependency. Includes gaslighting, social isolation, trapping, emotional manipulation, coercive control, love bombing, financial control, smear campaigns, and monitoring/stalking (see adversarial-conduct.n3 §11e). These methods are often characterised as 'feminine' in cultural stereotypes because they operate through relational channels rather than physical force — this characterisation is misleading; these methods are used by actors of any gender. Relational coercion is often cumulative — individual acts may seem minor but the pattern constitutes severe coercion. The subject may not recognise the coercion as such — they may attribute their compliance to love, loyalty, or obligation. Particularly relevant to disclosure decisions: a subject under relational coercion may be unable to disclose abuse because the coercive control has removed their support network, financial autonomy, and epistemic confidence. Links to adv:gaslighting, adv:socialIsolation, adv:trapping, adv:emotionalManipulation, adv:coerciveControl, adv:loveBombing, adv:financialControl, adv:smearCampaign, adv:monitoringStalking." .
+obl:coerEconomic        a obl:CoercionType ; rdfs:label "economic-coercion" ;
+    rdfs:comment "Economic coercion — threat of financial ruin, job loss, or economic deprivation. May endanger the subject's ability to survive." .
+obl:coerLegal           a obl:CoercionType ; rdfs:label "legal-coercion" ;
+    rdfs:comment "Legal coercion — use of legal process to compel disclosure. e.g. subpoena, court order. May be legitimate (court) or abusive (strategic litigation). Legal coercion is not necessarily wrongful — courts have authority to compel. But legal coercion may conflict with safety obligations." .
+obl:coerInstitutional   a obl:CoercionType ; rdfs:label "institutional-pressure" ;
+    rdfs:comment "Institutional pressure — pressure from an institution (employer, government, religious body) to disclose. May include threatened consequences short of legal action." .
+obl:coerFamilial        a obl:CoercionType ; rdfs:label "familial-pressure" ;
+    rdfs:comment "Familial pressure — pressure from family members to disclose or withhold. May involve cultural or community consequences." .
+
+obl:coercionThreatLevel a rdf:Property ;
+    rdfs:label "threat level" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  obl:ThreatLevel .
+
+obl:ThreatLevel a rdfs:Class ;
+    rdfs:label "Threat Level" .
+
+obl:threatImminent      a obl:ThreatLevel ; rdfs:label "imminent-danger" ;
+    rdfs:comment "Imminent danger — threat is immediate and severe. Risk of death or serious injury. Justifies almost any non-disclosure." .
+obl:threatSerious       a obl:ThreatLevel ; rdfs:label "serious" ;
+    rdfs:comment "Serious — threat is significant but not immediate. Risk of substantial harm. Justifies non-disclosure in most circumstances." .
+obl:threatModerate      a obl:ThreatLevel ; rdfs:label "moderate" ;
+    rdfs:comment "Moderate — threat is real but manageable. Risk of harm that is significant but not life-altering." .
+obl:threatLow           a obl:ThreatLevel ; rdfs:label "low" ;
+    rdfs:comment "Low — threat is present but minor. May not justify non-disclosure on its own." .
+
+obl:coercionEndangered a rdf:Property ;
+    rdfs:label "endangered parties" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Who is endangered by disclosure — 'self', 'children', 'family members', 'community members', 'sources', 'witnesses'. May be the subject or others." .
+
+obl:coercionInfoAtStake a rdf:Property ;
+    rdfs:label "information at stake" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Description of the information that disclosure would reveal — without revealing the information. e.g. 'identity of confidential source', 'location of family member', 'medical records'." .
+
+obl:coercionProtection a rdf:Property ;
+    rdfs:label "available protections" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Protections available to the subject — 'witness protection programme', 'legal representation', 'ZKP validation available', 'safe house', 'court protective order'." .
+
+obl:coercionZKPOption a rdf:Property ;
+    rdfs:label "zkp option" ;
+    rdfs:domain obl:CoerciveCircumstance ;
+    rdfs:range  obl:ZeroKnowledgeValidation ;
+    rdfs:comment "If a ZKP option exists, it may resolve the coercion — the subject can validate the claim without disclosing the endangered information." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Disclosure Exception — when confidence may be breached
+# ────────────────────────────────────────────────────────────────────
+
+obl:DisclosureException a rdfs:Class ;
+    rdfs:label "Disclosure Exception" ;
+    rdfs:comment "A circumstance under which confidentiality or secrecy obligations may be overridden, permitting or requiring disclosure. Disclosure exceptions are the safety valve in the confidentiality system — they recognise that some obligations (safety, justice, public health) may override confidentiality. Exceptions may be permissive (disclosure is allowed but not required) or mandatory (disclosure is required). Exceptions may be limited — they permit disclosure only to specific parties (e.g. law enforcement, not the public) or for specific purposes. The existence of an exception does not automatically override the obligation — the entity must assess whether the exception applies, whether the disclosure is proportionate, and whether less invasive alternatives (e.g. ZKP) exist." .
+
+obl:exceptionType a rdf:Property ;
+    rdfs:label "exception type" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  obl:ExceptionType .
+
+obl:ExceptionType a rdfs:Class ;
+    rdfs:label "Disclosure Exception Type" .
+
+obl:excImminentHarm     a obl:ExceptionType ; rdfs:label "imminent-harm" ;
+    rdfs:comment "Imminent harm — disclosure is permitted/required to prevent imminent death or serious injury to any person. The strongest exception — overrides almost all confidentiality." .
+obl:excChildProtection  a obl:ExceptionType ; rdfs:label "child-protection" ;
+    rdfs:comment "Child protection — mandatory reporting of child abuse or neglect. Overrides professional confidentiality in most jurisdictions." .
+obl:excVulnerableAdult  a obl:ExceptionType ; rdfs:label "vulnerable-adult" ;
+    rdfs:comment "Vulnerable adult protection — mandatory reporting of abuse of vulnerable adults (elderly, disabled, cognitively impaired)." .
+obl:excCourtOrder       a obl:ExceptionType ; rdfs:label "court-order" ;
+    rdfs:comment "Court order — disclosure compelled by court. May override professional privilege (varies by jurisdiction and privilege type)." .
+obl:excLawEnforcement   a obl:ExceptionType ; rdfs:label "law-enforcement" ;
+    rdfs:comment "Law enforcement — disclosure to law enforcement for investigation of serious crime. May be permissive or mandatory depending on jurisdiction and crime severity." .
+obl:excPublicHealth     a obl:ExceptionType ; rdfs:label "public-health" ;
+    rdfs:comment "Public health — disclosure required to protect public health. e.g. infectious disease notification, food safety." .
+obl:excPublicInterest   a obl:ExceptionType ; rdfs:label "public-interest" ;
+    rdfs:comment "Public interest — disclosure permitted where the public interest in disclosure outweighs the confidentiality interest. e.g. whistleblowing, exposure of corruption." .
+obl:excConsent          a obl:ExceptionType ; rdfs:label "consent-of-subject" ;
+    rdfs:comment "Consent — the person whose information is protected consents to disclosure. Consent must be informed, voluntary, and specific." .
+obl:excWhistleblower    a obl:ExceptionType ; rdfs:label "whistleblower" ;
+    rdfs:comment "Whistleblower — disclosure of wrongdoing by an insider. Protected by whistleblower legislation in many jurisdictions." .
+obl:excSelfDefence      a obl:ExceptionType ; rdfs:label "self-defence" ;
+    rdfs:comment "Self-defence — disclosure necessary to protect the subject from imminent harm, including from the very person who imposed the confidentiality obligation. e.g. a domestic violence victim disclosing abuse despite NDA." .
+
+obl:exceptionStrength a rdf:Property ;
+    rdfs:label "exception strength" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  obl:ObligationStrength ;
+    rdfs:comment "The strength of the exception — absolute (cannot be overridden), strong (overrides most confidentiality), standard, weak." .
+
+obl:exceptionMandatory a rdf:Property ;
+    rdfs:label "mandatory" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether disclosure is mandatory (required by law) or permissive (allowed but not required)." .
+
+obl:exceptionDiscloseTo a rdf:Property ;
+    rdfs:label "disclose to" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Who disclosure may be made to — 'law enforcement', 'child protection services', 'court', 'public health authority', 'the subject's legal representative'. May be limited to specific parties." .
+
+obl:exceptionProportionality a rdf:Property ;
+    rdfs:label "proportionality" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Proportionality requirement — disclosure must be proportionate to the harm being prevented. Minimum necessary disclosure. If ZKP can achieve the purpose, full disclosure may not be proportionate." .
+
+obl:exceptionZKPFirst a rdf:Property ;
+    rdfs:label "zkp-first" ;
+    rdfs:domain obl:DisclosureException ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether a ZKP or minimally invasive method must be attempted before full disclosure. If true, the entity should seek a ZKP solution before disclosing fully." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Disclosure Exclusion — roles with special disclosure rules
+# ────────────────────────────────────────────────────────────────────
+
+obl:DisclosureExclusion a rdfs:Class ;
+    rdfs:label "Disclosure Exclusion" ;
+    rdfs:comment "A role, context, or entity type that has special rules regarding disclosure — either excluded from certain confidentiality obligations, subject to enhanced confidentiality, or having unique disclosure authority. Exclusions recognise that certain roles have different relationships with information: law enforcement may be exempt from some confidentiality in the public interest; courts have inherent power to compel disclosure; doctors have professional confidentiality that is stronger than ordinary confidentiality; social workers may have mandatory reporting obligations that override confidentiality; members of parliament may have parliamentary privilege. Exclusions are not blanket exemptions — they are context-specific and may be subject to oversight, review, or challenge." .
+
+obl:exclusionRole a rdf:Property ;
+    rdfs:label "role" ;
+    rdfs:domain obl:DisclosureExclusion ;
+    rdfs:range  obl:ExclusionRole .
+
+obl:ExclusionRole a rdfs:Class ;
+    rdfs:label "Exclusion Role" .
+
+obl:roleLawEnforcement  a obl:ExclusionRole ; rdfs:label "law-enforcement" ;
+    rdfs:comment "Law enforcement — police, investigators, prosecutors. May be exempt from certain confidentiality obligations in the public interest. May compel disclosure through warrants and subpoenas. Subject to oversight and judicial review. Disclosure to law enforcement is governed by legal process, not voluntary decision." .
+obl:roleCourt           a obl:ExclusionRole ; rdfs:label "court-of-law" ;
+    rdfs:comment "Court of law — has inherent power to compel disclosure, seal records, issue suppression orders, and override confidentiality. Courts are the ultimate arbiter of disclosure conflicts. However, courts also respect privilege (legal professional privilege, spousal privilege) and may refuse to compel disclosure in certain circumstances." .
+obl:roleSocialWorker    a obl:ExclusionRole ; rdfs:label "social-worker" ;
+    rdfs:comment "Social worker — mandatory reporter for child protection and vulnerable adult protection. Confidentiality is professional but overridden by mandatory reporting obligations. Social workers may also be bound by confidentiality to their clients." .
+obl:roleDoctor          a obl:ExclusionRole ; rdfs:label "medical-professional" ;
+    rdfs:comment "Medical professional — doctor, nurse, psychologist. Bound by strong professional confidentiality (doctor-patient privilege). Also mandatory reporters for child protection, infectious disease, and certain injuries. The balance between confidentiality and mandatory reporting is jurisdiction-specific." .
+obl:roleMentalHealth    a obl:ExclusionRole ; rdfs:label "mental-health-specialist" ;
+    rdfs:comment "Mental health specialist — psychiatrist, psychologist, counsellor. Bound by strong professional confidentiality. May disclose if the patient poses imminent risk to self or others (duty to warn/protect). Balance between confidentiality and safety is particularly sensitive." .
+obl:roleParliament      a obl:ExclusionRole ; rdfs:label "parliamentarian" ;
+    rdfs:comment "Member of parliament — may have parliamentary privilege (freedom from legal action for statements made in parliament). May also be subject to disclosure obligations (register of interests, ministerial standards). Parliamentary privilege enables disclosure in the public interest that might otherwise be suppressed." .
+obl:roleJournalist      a obl:ExclusionRole ; rdfs:label "journalist" ;
+    rdfs:comment "Journalist — may have source protection (journalist-source privilege in some jurisdictions). Enables confidential sources to provide information without disclosure. Not universally recognised — varies by jurisdiction." .
+obl:roleLegal           a obl:ExclusionRole ; rdfs:label "legal-professional" ;
+    rdfs:comment "Legal professional — lawyer, solicitor, barrister. Bound by legal professional privilege (client communications protected from disclosure). One of the strongest confidentiality protections. May be overridden only by crime-fraud exception or court order in exceptional circumstances." .
+obl:roleClergy          a obl:ExclusionRole ; rdfs:label "clergy" ;
+    rdfs:comment "Clergy — may have priest-penitent privilege (confession protected). Recognition varies by jurisdiction and faith tradition. May conflict with mandatory reporting obligations." .
+obl:roleDefence         a obl:ExclusionRole ; rdfs:label "defence-national-security" ;
+    rdfs:comment "Defence and national security — subject to official secrecy obligations that are stronger than ordinary confidentiality. May have security clearances that impose additional obligations. Disclosure may constitute a criminal offence." .
+obl:roleResearcher      a obl:ExclusionRole ; rdfs:label "researcher" ;
+    rdfs:comment "Researcher — bound by research ethics (institutional review board, human research ethics committee). Participant confidentiality is a core research obligation. May be compelled by court to disclose participant data — researchers may resist through legal challenge." .
+obl:roleAuditor         a obl:ExclusionRole ; rdfs:label "auditor" ;
+    rdfs:comment "Auditor — has both confidentiality obligations and disclosure obligations. Must maintain client confidentiality but must also disclose certain findings (material misstatements, fraud) to regulators or the public." .
+
+obl:exclusionRule a rdf:Property ;
+    rdfs:label "exclusion rule" ;
+    rdfs:domain obl:DisclosureExclusion ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The specific rule that applies to this role — what is excluded, what is enhanced, what is unique. e.g. 'legal professional privilege: client communications protected from disclosure, overridden only by crime-fraud exception', 'mandatory reporter: must report child abuse to child protection services'." .
+
+obl:exclusionOversight a rdf:Property ;
+    rdfs:label "oversight" ;
+    rdfs:domain obl:DisclosureExclusion ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What oversight applies to this exclusion — 'judicial review', 'professional registration board', 'parliamentary standards commissioner', 'independent commission against corruption'. Exclusions without oversight are more susceptible to abuse." .
+
+obl:exclusionJurisdiction a rdf:Property ;
+    rdfs:label "jurisdiction" ;
+    rdfs:domain obl:DisclosureExclusion ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Jurisdiction in which the exclusion applies — varies by country and state. What is privileged in one jurisdiction may not be in another." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Obligation Conflict Resolution — resolving competing obligations
+# ────────────────────────────────────────────────────────────────────
+
+obl:ObligationConflict a rdfs:Class ;
+    rdfs:label "Obligation Conflict" ;
+    rdfs:comment "A conflict between two or more obligations — e.g. confidentiality vs safety, secrecy vs mandatory reporting, privilege vs court order. The ontology models the conflict, the obligations involved, the resolution path, and the outcome. Conflict resolution is not algorithmic — it requires judgement, context, and often legal advice. The system should support the entity in navigating the conflict by: (a) identifying the obligations in conflict, (b) assessing their relative strength, (c) identifying available exceptions, (d) checking for ZKP or minimally invasive alternatives, (e) documenting the decision and rationale. Conflict resolution is appendable — the decision and its rationale are recorded for future review." .
+
+obl:conflictObligation1 a rdf:Property ;
+    rdfs:label "obligation 1" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:Obligation .
+
+obl:conflictObligation2 a rdf:Property ;
+    rdfs:label "obligation 2" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:Obligation .
+
+obl:conflictCoercion a rdf:Property ;
+    rdfs:label "coercive circumstance" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:CoerciveCircumstance ;
+    rdfs:comment "If a coercive circumstance is involved, link to it." .
+
+obl:conflictException a rdf:Property ;
+    rdfs:label "applicable exception" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:DisclosureException ;
+    rdfs:comment "If a disclosure exception applies, link to it." .
+
+obl:conflictZKP a rdf:Property ;
+    rdfs:label "zkp alternative" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:ZeroKnowledgeValidation ;
+    rdfs:comment "If a ZKP alternative is available, link to it. ZKP may resolve the conflict without full disclosure." .
+
+obl:conflictResolution a rdf:Property ;
+    rdfs:label "resolution" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  obl:ConflictResolution .
+
+obl:ConflictResolution a rdfs:Class ;
+    rdfs:label "Conflict Resolution" .
+
+obl:resZKP            a obl:ConflictResolution ; rdfs:label "zkp-resolution" ;
+    rdfs:comment "Resolved by ZKP — the claim was validated without full disclosure. Preferred resolution where available." .
+obl:resDisclose       a obl:ConflictResolution ; rdfs:label "disclosed" ;
+    rdfs:comment "Resolved by disclosure — the entity disclosed the information. Based on exception, court order, or judgement that disclosure was required." .
+obl:resWithhold       a obl:ConflictResolution ; rdfs:label "withheld" ;
+    rdfs:comment "Resolved by withholding — the entity did not disclose. Based on privilege, coercion, or judgement that confidentiality prevailed." .
+obl:resPartial        a obl:ConflictResolution ; rdfs:label "partial-disclosure" ;
+    rdfs:comment "Resolved by partial disclosure — the entity disclosed some information but not all. Minimally invasive disclosure." .
+obl:resDeferred       a obl:ConflictResolution ; rdfs:label "deferred" ;
+    rdfs:comment "Deferred — the conflict is not yet resolved. The entity is seeking legal advice, negotiating, or waiting for circumstances to change." .
+obl:resEscalated      a obl:ConflictResolution ; rdfs:label "escalated" ;
+    rdfs:comment "Escalated — the conflict has been escalated to a court, tribunal, or oversight body for resolution." .
+
+obl:conflictRationale a rdf:Property ;
+    rdfs:label "rationale" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The entity's rationale for the resolution — why this obligation prevailed, why this exception applied, why this level of disclosure was chosen. Recorded for accountability and future review." .
+
+obl:conflictDate a rdf:Property ;
+    rdfs:label "conflict date" ;
+    rdfs:domain obl:ObligationConflict ;
+    rdfs:range  xsd:dateTime .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Linking to other ontologies
+# ────────────────────────────────────────────────────────────────────
+
+# This ontology (obligations.n3) links to:
+#
+# personhood.n3:
+#   - Extends person:LegalObligation with non-legal obligation types
+#   - Obligations are held by entities (agency:Entity)
+#   - Rights and obligations may conflict (person:LegalRight,
+#     person:LegalObligation)
+#
+# duty-of-care.n3:
+#   - Duty of care is a type of obligation (obl:typeFiduciary,
+#     obl:typeSafety)
+#   - Care-scope agreements may create confidentiality obligations
+#   - Mandatory reporting is a disclosure exception
+#
+# care-scope.n3:
+#   - Care agreements may include confidentiality clauses
+#   - Agreement lifecycle (scope:AgreementStatus) applies to
+#     confidentiality instruments
+#
+# adversarial-conduct.n3:
+#   - Coercive circumstances may involve adversarial conduct
+#   - Secrecy obligations may be exploited to conceal wrongdoing
+#   - Whistleblower exceptions relate to adversarial conduct exposure
+#
+# epistemics.n3:
+#   - ZKP verification results have epistemic status (objective:
+#     the proof is valid or not)
+#   - Confidentiality instruments have epistemic mode (intersubjective:
+#     the obligation is recognised by parties)
+#   - Coercive circumstances affect epistemic assessment (claims made
+#     under coercion have different epistemic status)
+#
+# values.n3:
+#   - Values agreements may create confidentiality obligations
+#   - Values instruments may define dignity obligations
+#   - Values credentials may use ZKP for validation
+#   - Human dignity is a value (vals:catMoral)
+#
+# faith-systems.n3:
+#   - Indigenous knowledge protocols create confidentiality obligations
+#   - Sacred-secret knowledge has absolute-strength confidentiality
+#   - Faith community practices may involve privileged communications
+#   - Cultural confidentiality (obl:confCultural) links to
+#     faith:IndigenousKnowledgeProtocol
+#
+# provenance.n3:
+#   - All obligation records, conflict resolutions, and ZKP verifications
+#     have provenance
+#   - Confidentiality instruments are provenance records
+#   - Disclosure decisions are recorded with rationale for accountability

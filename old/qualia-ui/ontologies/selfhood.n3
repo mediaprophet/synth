@@ -1,0 +1,417 @@
+# Selfhood Ontology — Inner Experience, Private Keys, Qualia Memories,
+# Dreams, Reflections, Biometric Baselines, Sensory Pacing, Personal Values
+#
+# Authoring form (N3) — compiled to selfhood.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Selfhood encompasses the deeply personal, interior aspects of a natural
+# agent that are NOT social, NOT legal, and NOT subject to external claim.
+# Selfhood is protected FROM surveillance, organisational access, and any
+# right any agency or organisation may seek to exercise over it.
+#
+# This ontology is strictly scoped to NaturalAgent (see agent-nomenclature.n3).
+# No term herein applies to LegalPerson or SoftwareAgent.
+#
+# Imports: agency.n3, agent-nomenclature.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Selfhood — the interior of a natural agent
+# ────────────────────────────────────────────────────────────────────
+
+self:Selfhood a rdfs:Class ;
+    rdfs:label "Selfhood" ;
+    rdfs:comment "The deeply personal, interior aspects of a natural agent that exist independently of any social relation or legal status. Selfhood is the inner life — dreams, reflections, qualia, values, private keys, biometric baselines — that no external entity has a right to claim, surveil, or access. Selfhood is NOT personhood: personhood is the socially situated, legally governed exterior. Selfhood is protected from external claims; personhood is subject to law." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:belongsTo a rdf:Property ;
+    rdfs:label "belongs to" ;
+    rdfs:domain self:Selfhood ;
+    rdfs:range  agency:NaturalPerson ;
+    rdfs:comment "The natural person whose selfhood this is. One person, one selfhood." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Inner Experience — dreams, reflections, qualia records
+# ────────────────────────────────────────────────────────────────────
+
+self:InnerExperience a rdfs:Class ;
+    rdfs:label "Inner Experience" ;
+    rdfs:comment "A record of subjective, interior experience — dreams, personal reflections, meditations, emotional states, qualia descriptions. These are not social artefacts; they are the inner life of the natural agent. No organisation has a right to access these." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:DreamRecord a rdfs:Class ;
+    rdfs:subClassOf self:InnerExperience ;
+    rdfs:label "Dream Record" ;
+    rdfs:comment "A recorded dream — text, audio, or multimodal. May include dream journal metadata (date, mood, fragments). Dreams are purely selfhood; they have no social or legal standing." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:Reflection a rdfs:Class ;
+    rdfs:subClassOf self:InnerExperience ;
+    rdfs:label "Reflection" ;
+    rdfs:comment "A personal reflection or journal entry — thoughts, feelings, contemplations. Not addressed to any audience; not a communication. Distinct from a letter or message (which are personhood/social)." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:QualiaMemory a rdfs:Class ;
+    rdfs:subClassOf self:InnerExperience ;
+    rdfs:label "Qualia Memory" ;
+    rdfs:comment "A record of subjective sensory or emotional qualia — the felt quality of an experience. May include synesthetic associations, sensory impressions, mood traces. These are first-person phenomenal records." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:EmotionalState a rdfs:Class ;
+    rdfs:subClassOf self:InnerExperience ;
+    rdfs:label "Emotional State" ;
+    rdfs:comment "A recorded emotional state — mood, affect, intensity. This is the inner feeling, not its social expression (which would be personhood). Mind-dependent term: applies only to natural agents." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# — Inner experience properties —
+
+self:recordedAt a rdf:Property ;
+    rdfs:label "recorded at" ;
+    rdfs:domain self:InnerExperience ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the inner experience was recorded." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:experienceType a rdf:Property ;
+    rdfs:label "experience type" ;
+    rdfs:domain self:InnerExperience ;
+    rdfs:range  self:ExperienceType ;
+    rdfs:comment "The type of inner experience." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:ExperienceType a rdfs:Class ;
+    rdfs:label "Experience Type" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:dream        a self:ExperienceType ; rdfs:label "dream" .
+self:reflection   a self:ExperienceType ; rdfs:label "reflection" .
+self:meditation   a self:ExperienceType ; rdfs:label "meditation" .
+self:qualia       a self:ExperienceType ; rdfs:label "qualia" .
+self:emotion      a self:ExperienceType ; rdfs:label "emotion" .
+self:memory       a self:ExperienceType ; rdfs:label "memory" .
+self:intuition    a self:ExperienceType ; rdfs:label "intuition" .
+
+self:contentHash a rdf:Property ;
+    rdfs:label "content hash" ;
+    rdfs:domain self:InnerExperience ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "BLAKE3 hash of the encrypted content. The plaintext is never exposed outside the selfhood enclave." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:encryptionKey a rdf:Property ;
+    rdfs:label "encryption key" ;
+    rdfs:domain self:InnerExperience ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Reference to the key used to encrypt this record. The key itself is stored in a PrivateKeyRing, not inline." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Private Key Ring — cryptographic keys for selfhood
+# ────────────────────────────────────────────────────────────────────
+
+self:PrivateKeyRing a rdfs:Class ;
+    rdfs:label "Private Key Ring" ;
+    rdfs:comment "A collection of private cryptographic keys belonging to a natural agent. These keys are selfhood — they are not social tokens or legal instruments. Access requires biometric authentication. No organisation has a right to demand these keys." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:PrivateKey a rdfs:Class ;
+    rdfs:label "Private Key" ;
+    rdfs:comment "A single private cryptographic key. Stored encrypted, accessible only via biometric unlock. Used for signing, decryption, and self-attestation." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:keyType a rdf:Property ;
+    rdfs:label "key type" ;
+    rdfs:domain self:PrivateKey ;
+    rdfs:range  self:KeyType ;
+    rdfs:comment "The cryptographic algorithm." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:KeyType a rdfs:Class ;
+    rdfs:label "Key Type" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:ed25519   a self:KeyType ; rdfs:label "ed25519" .
+self:secp256k1 a self:KeyType ; rdfs:label "secp256k1" .
+self:rsa4096   a self:KeyType ; rdfs:label "rsa-4096" .
+self:bls12_381 a self:KeyType ; rdfs:label "bls12-381" .
+
+self:keyPurpose a rdf:Property ;
+    rdfs:label "key purpose" ;
+    rdfs:domain self:PrivateKey ;
+    rdfs:range  self:KeyPurpose ;
+    rdfs:comment "What this key is used for." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:KeyPurpose a rdfs:Class ;
+    rdfs:label "Key Purpose" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:signing      a self:KeyPurpose ; rdfs:label "signing" ;
+    rdfs:comment "Signing attestations, documents, or transactions." .
+self:decryption   a self:KeyPurpose ; rdfs:label "decryption" ;
+    rdfs:comment "Decrypting selfhood vaults and private communications." .
+self:attestation  a self:KeyPurpose ; rdfs:label "attestation" ;
+    rdfs:comment "Self-attestation of identity or claims." .
+self:recovery     a self:KeyPurpose ; rdfs:label "recovery" ;
+    rdfs:comment "Recovery key for regaining access to selfhood vaults." .
+
+self:biometricUnlock a rdf:Property ;
+    rdfs:label "biometric unlock" ;
+    rdfs:domain self:PrivateKeyRing ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this key ring requires biometric authentication to unlock. True by default." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:keyRingHash a rdf:Property ;
+    rdfs:label "key ring hash" ;
+    rdfs:domain self:PrivateKeyRing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Merkle root hash of the key ring for integrity verification." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Biometric Baseline — physiological and sensory baselines
+# ────────────────────────────────────────────────────────────────────
+
+self:BiometricBaseline a rdfs:Class ;
+    rdfs:label "Biometric Baseline" ;
+    rdfs:comment "Physiological and sensory baseline measurements for a natural agent. Used for biometric authentication, health tracking, and sensory pacing. These are selfhood — no organisation has a right to access them without explicit, revocable consent. Distinct from medical records (which may be personhood if shared with a clinician)." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:baselineType a rdf:Property ;
+    rdfs:label "baseline type" ;
+    rdfs:domain self:BiometricBaseline ;
+    rdfs:range  self:BaselineType ;
+    rdfs:comment "The type of biometric baseline." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:BaselineType a rdfs:Class ;
+    rdfs:label "Baseline Type" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:vocalTract      a self:BaselineType ; rdfs:label "vocal-tract" ;
+    rdfs:comment "10D articulatory vocal tract model." .
+self:heartRate       a self:BaselineType ; rdfs:label "heart-rate" .
+self:circadian       a self:BaselineType ; rdfs:label "circadian" ;
+    rdfs:comment "Circadian rest-activity cycle baseline." .
+self:acousticResonance a self:BaselineType ; rdfs:label "acoustic-resonance" .
+self:gaitPattern     a self:BaselineType ; rdfs:label "gait-pattern" .
+self:retinalPattern  a self:BaselineType ; rdfs:label "retinal-pattern" .
+
+self:baselineValue a rdf:Property ;
+    rdfs:label "baseline value" ;
+    rdfs:domain self:BiometricBaseline ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The baseline measurement data (encrypted). Format depends on baseline type." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:measuredAt a rdf:Property ;
+    rdfs:label "measured at" ;
+    rdfs:domain self:BiometricBaseline ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the baseline was measured." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Sensory Pacing — biological and cognitive rest cycles
+# ────────────────────────────────────────────────────────────────────
+
+self:SensoryPacing a rdfs:Class ;
+    rdfs:label "Sensory Pacing" ;
+    rdfs:comment "Configuration for biological and sensory rest cycles. Manages immersion duration, rest intervals, ambient resonance, visual sensory mode, and focus shielding. These are selfhood — they govern the natural agent's interaction with their environment, not social obligations." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:immersionDuration a rdf:Property ;
+    rdfs:label "immersion duration" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of focused immersion before rest (e.g. '45m')." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:restDuration a rdf:Property ;
+    rdfs:label "rest duration" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Duration of biological rest between immersion periods (e.g. '10m')." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:ambientResonance a rdf:Property ;
+    rdfs:label "ambient resonance" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Ambient sensory resonance setting (e.g. '432 Hz harmonic soft tone')." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:visualSensoryMode a rdf:Property ;
+    rdfs:label "visual sensory mode" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Visual sensory processing mode (e.g. 'high-legibility cyber-glassmorphism')." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:focusShielding a rdf:Property ;
+    rdfs:label "focus shielding" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Focus shielding configuration — notification gating, interruption policy." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:ambientLightAdaptation a rdf:Property ;
+    rdfs:label "ambient light adaptation" ;
+    rdfs:domain self:SensoryPacing ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Ambient light adaptation mode (e.g. 'circadian sync warm evening palette')." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Personal Values — non-negotiable ethical directives
+# ────────────────────────────────────────────────────────────────────
+
+self:PersonalValues a rdfs:Class ;
+    rdfs:label "Personal Values" ;
+    rdfs:comment "Non-negotiable ethical directives, privacy boundaries, and personal principles. These are selfhood — they govern how the natural agent wishes to live, independent of social obligation or legal requirement. They may inform personhood decisions (e.g. choosing not to sign a contract that violates personal values) but are not themselves social or legal." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:valueStatement a rdf:Property ;
+    rdfs:label "value statement" ;
+    rdfs:domain self:PersonalValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A single personal value or ethical directive." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:privacyBoundary a rdf:Property ;
+    rdfs:label "privacy boundary" ;
+    rdfs:domain self:PersonalValues ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "A specific privacy boundary — what the natural agent does not consent to share." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:nonNegotiable a rdf:Property ;
+    rdfs:label "non-negotiable" ;
+    rdfs:domain self:PersonalValues ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether this value is non-negotiable (cannot be overridden by social or legal pressure)." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Selfhood Vault — encrypted local storage
+# ────────────────────────────────────────────────────────────────────
+
+self:SelfhoodVault a rdfs:Class ;
+    rdfs:label "Selfhood Vault" ;
+    rdfs:comment "An encrypted, air-gapped local storage vault for selfhood data. Contains inner experiences, private keys, biometric baselines, and personal values. 100% local encrypted BLAKE3 CRDT — zero cloud exfiltration. Access requires biometric authentication. No external entity has a right to access this vault." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:vaultType a rdf:Property ;
+    rdfs:label "vault type" ;
+    rdfs:domain self:SelfhoodVault ;
+    rdfs:range  self:VaultType ;
+    rdfs:comment "The type of selfhood vault." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:VaultType a rdfs:Class ;
+    rdfs:label "Vault Type" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:innerExperienceVault a self:VaultType ; rdfs:label "inner-experience-vault" ;
+    rdfs:comment "Vault for dreams, reflections, qualia memories, emotional states." .
+self:keyRingVault         a self:VaultType ; rdfs:label "key-ring-vault" ;
+    rdfs:comment "Vault for private cryptographic keys." .
+self:biometricVault       a self:VaultType ; rdfs:label "biometric-vault" ;
+    rdfs:comment "Vault for biometric baselines." .
+self:valuesVault          a self:VaultType ; rdfs:label "values-vault" ;
+    rdfs:comment "Vault for personal values and privacy boundaries." .
+
+self:vaultHash a rdf:Property ;
+    rdfs:label "vault hash" ;
+    rdfs:domain self:SelfhoodVault ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Merkle root hash of the vault contents for integrity verification." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:vaultQuadCount a rdf:Property ;
+    rdfs:label "vault quad count" ;
+    rdfs:domain self:SelfhoodVault ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of RDF quads stored in the vault." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:airGapped a rdf:Property ;
+    rdfs:label "air-gapped" ;
+    rdfs:domain self:SelfhoodVault ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the vault is air-gapped (no network connectivity). True by default." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Selfhood Protection — what selfhood is protected from
+# ────────────────────────────────────────────────────────────────────
+
+self:ProtectionScope a rdfs:Class ;
+    rdfs:label "Protection Scope" ;
+    rdfs:comment "Defines what selfhood is protected from. Selfhood is not subject to external claim — no organisation, government, or other entity has a right to access, surveil, or compel disclosure of selfhood data. This is distinct from personhood, which may be subject to legal compulsion." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:protectedFrom a rdf:Property ;
+    rdfs:label "protected from" ;
+    rdfs:domain self:Selfhood ;
+    rdfs:range  self:ProtectionScope ;
+    rdfs:comment "What this selfhood is protected from." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:ProtectionType a rdfs:Class ;
+    rdfs:label "Protection Type" ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+self:noSurveillance       a self:ProtectionType ; rdfs:label "no-surveillance" ;
+    rdfs:comment "No surveillance — no entity may monitor selfhood data." .
+self:noCompelledDisclosure a self:ProtectionType ; rdfs:label "no-compelled-disclosure" ;
+    rdfs:comment "No compelled disclosure — no entity may force disclosure of selfhood data." .
+self:noOrganisationalAccess a self:ProtectionType ; rdfs:label "no-organisational-access" ;
+    rdfs:comment "No organisational access — no employer, institution, or service may access selfhood data." .
+self:noDataExfiltration   a self:ProtectionType ; rdfs:label "no-data-exfiltration" ;
+    rdfs:comment "No data exfiltration — selfhood data must remain local and encrypted." .
+
+self:protectionType a rdf:Property ;
+    rdfs:label "protection type" ;
+    rdfs:domain self:ProtectionScope ;
+    rdfs:range  self:ProtectionType ;
+    rdfs:comment "The type of protection applied to this selfhood." ;
+    epi:applicableAgentType epi:NaturalAgent .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Selfhood vs Personhood — the boundary
+# ────────────────────────────────────────────────────────────────────
+
+# Selfhood is the interior; personhood is the exterior.
+# Selfhood is NOT subject to law; personhood IS subject to law.
+# Selfhood has NO social relations; personhood HAS social relations.
+# Selfhood is protected FROM external claims; personhood may BE claimed
+#   by legal processes, social obligations, and contractual duties.
+#
+# The boundary: when an inner experience is shared with another agent
+# (a clinician, a friend, a legal representative), it crosses from
+# selfhood into personhood. The original selfhood record remains
+# protected; the shared instance becomes personhood data governed by
+# the personhood ontology.
+#
+# Example: A dream recorded in the selfhood vault is selfhood.
+#   If the dream is shared with a therapist, the therapist's copy is
+#   personhood (medical record, fiduciary relationship).
+#   The original remains selfhood — protected, local, encrypted.
+#
+# Example: A private key in the selfhood vault is selfhood.
+#   When used to sign a legal document, the signature is personhood
+#   (legal act). The key itself remains selfhood.

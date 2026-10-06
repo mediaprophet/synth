@@ -1,0 +1,402 @@
+# Personhood Ontology — Social Relations, Legal Status, Rights/Obligations,
+# Fiduciary Relationships, Causality Consequences and Benefits
+#
+# Authoring form (N3) — compiled to personhood.cbor (CBOR-LD) for runtime
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Personhood encompasses the socially situated, legally governed aspects
+# of an entity. Unlike selfhood (which is interior, non-social, non-legal,
+# and protected from external claims), personhood is the exterior that
+# engages with the world through social relations, legal rights, and
+# contractual obligations. Law applies to personhood; law does not apply
+# to selfhood.
+#
+# Personhood applies to both NaturalPerson and LegalPerson. A natural
+# person has both selfhood AND personhood; a legal person has only
+# personhood. Software entities do not have personhood (they have agency
+# per agency.n3, but not personhood — no legal standing, no social
+# relations in the human sense).
+#
+# Imports: agency.n3, agent-nomenclature.n3, selfhood.n3
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix agency:     <https://qualiadb.org/schema/ui/agency#> .
+@prefix epi:        <https://purl.org/qualia/ontology/epistemics#> .
+@prefix self:       <https://qualiadb.org/schema/ui/selfhood#> .
+@prefix person:     <https://qualiadb.org/schema/ui/personhood#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Personhood — the socially situated, legally governed exterior
+# ────────────────────────────────────────────────────────────────────
+
+person:Personhood a rdfs:Class ;
+    rdfs:label "Personhood" ;
+    rdfs:comment "The socially situated, legally governed aspects of an entity. Personhood encompasses social relations, legal status, rights, obligations, fiduciary relationships, and causality consequences/benefits. A natural person has both selfhood (interior) and personhood (exterior); a legal person has only personhood. Selfhood is protected from external claims; personhood is subject to law, social obligation, and contractual duty." .
+
+person:hasPersonhood a rdf:Property ;
+    rdfs:label "has personhood" ;
+    rdfs:domain agency:Entity ;
+    rdfs:range  person:Personhood ;
+    rdfs:comment "Links an entity to its personhood. Both NaturalPerson and LegalPerson have personhood; SoftwareEntity does not." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Social Relations — relationships between persons
+# ────────────────────────────────────────────────────────────────────
+
+person:SocialRelation a rdfs:Class ;
+    rdfs:label "Social Relation" ;
+    rdfs:comment "A relationship between two or more persons (natural or legal). Social relations are the fabric of personhood — they are how persons connect, collaborate, transact, and form communities. Distinct from selfhood, which has no social dimension." .
+
+person:relationType a rdf:Property ;
+    rdfs:label "relation type" ;
+    rdfs:domain person:SocialRelation ;
+    rdfs:range  person:RelationType ;
+    rdfs:comment "The type of social relation." .
+
+person:RelationType a rdfs:Class ;
+    rdfs:label "Relation Type" .
+
+person:familial      a person:RelationType ; rdfs:label "familial" ;
+    rdfs:comment "Family relationship — parent, child, sibling, spouse, partner." .
+person:professional  a person:RelationType ; rdfs:label "professional" ;
+    rdfs:comment "Professional relationship — colleague, employer, employee, contractor." .
+person:community     a person:RelationType ; rdfs:label "community" ;
+    rdfs:comment "Community relationship — neighbour, member, volunteer." .
+person:commercial    a person:RelationType ; rdfs:label "commercial" ;
+    rdfs:comment "Commercial relationship — customer, vendor, business partner." .
+person:fiduciary     a person:RelationType ; rdfs:label "fiduciary" ;
+    rdfs:comment "Fiduciary relationship — trustee, guardian, power-of-attorney, executor." .
+person:medical       a person:RelationType ; rdfs:label "medical" ;
+    rdfs:comment "Medical relationship — clinician, therapist, patient." .
+person:educational   a person:RelationType ; rdfs:label "educational" ;
+    rdfs:comment "Educational relationship — teacher, student, mentor." .
+person:creative      a person:RelationType ; rdfs:label "creative" ;
+    rdfs:comment "Creative relationship — collaborator, co-author, co-producer." .
+
+person:hasParticipant a rdf:Property ;
+    rdfs:label "has participant" ;
+    rdfs:domain person:SocialRelation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "A participant in the social relation. A relation has at least two participants." .
+
+person:relationStrength a rdf:Property ;
+    rdfs:label "relation strength" ;
+    rdfs:domain person:SocialRelation ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Strength or closeness of the relation (e.g. 'close', 'acquaintance', 'formal')." .
+
+person:relationStatus a rdf:Property ;
+    rdfs:label "relation status" ;
+    rdfs:domain person:SocialRelation ;
+    rdfs:range  person:RelationStatus ;
+    rdfs:comment "The current status of the social relation." .
+
+person:RelationStatus a rdfs:Class ;
+    rdfs:label "Relation Status" .
+
+person:active    a person:RelationStatus ; rdfs:label "active" .
+person:suspended a person:RelationStatus ; rdfs:label "suspended" .
+person:ended     a person:RelationStatus ; rdfs:label "ended" .
+person:dormant   a person:RelationStatus ; rdfs:label "dormant" .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Legal Status — legal recognition and standing
+# ────────────────────────────────────────────────────────────────────
+
+person:LegalStatus a rdfs:Class ;
+    rdfs:label "Legal Status" ;
+    rdfs:comment "The legal recognition and standing of a person. A natural person has legal status by virtue of birth (or naturalisation); a legal person has legal status by virtue of incorporation or registration. Legal status is what makes personhood subject to law — selfhood is not subject to law because it has no legal status." .
+
+person:legalStatusType a rdf:Property ;
+    rdfs:label "legal status type" ;
+    rdfs:domain person:LegalStatus ;
+    rdfs:range  person:LegalStatusType ;
+    rdfs:comment "The type of legal status." .
+
+person:LegalStatusType a rdfs:Class ;
+    rdfs:label "Legal Status Type" .
+
+person:naturalCitizen    a person:LegalStatusType ; rdfs:label "natural-citizen" ;
+    rdfs:comment "A natural person with citizenship in a jurisdiction." .
+person:naturalResident   a person:LegalStatusType ; rdfs:label "natural-resident" ;
+    rdfs:comment "A natural person with residency but not citizenship." .
+person:corporateEntity   a person:LegalStatusType ; rdfs:label "corporate-entity" ;
+    rdfs:comment "A legal person incorporated under corporate law." .
+person:statutoryEntity   a person:LegalStatusType ; rdfs:label "statutory-entity" ;
+    rdfs:comment "A legal person created by statute (government body, authority)." .
+person:unincorporated    a person:LegalStatusType ; rdfs:label "unincorporated" ;
+    rdfs:comment "An entity without formal legal personality but with some legal recognition." .
+person:stateless         a person:LegalStatusType ; rdfs:label "stateless" ;
+    rdfs:comment "A natural person without recognised citizenship in any jurisdiction." .
+
+person:jurisdiction a rdf:Property ;
+    rdfs:label "jurisdiction" ;
+    rdfs:domain person:LegalStatus ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The legal jurisdiction under which this status applies (e.g. 'AU-NSW', 'US-CA', 'EU-DE')." .
+
+person:registeredAt a rdf:Property ;
+    rdfs:label "registered at" ;
+    rdfs:domain person:LegalStatus ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the legal status was registered or recognised." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Rights and Obligations — legal entitlements and duties
+# ────────────────────────────────────────────────────────────────────
+
+person:LegalRight a rdfs:Class ;
+    rdfs:label "Legal Right" ;
+    rdfs:comment "A legal entitlement held by a person. Rights are personhood — they are granted, recognised, and enforced by law. Selfhood does not have legal rights; selfhood is protected from law (and from other claims). Rights may be human rights, property rights, contractual rights, or statutory rights." .
+
+person:rightType a rdf:Property ;
+    rdfs:label "right type" ;
+    rdfs:domain person:LegalRight ;
+    rdfs:range  person:RightType ;
+    rdfs:comment "The type of legal right." .
+
+person:RightType a rdfs:Class ;
+    rdfs:label "Right Type" .
+
+person:humanRight      a person:RightType ; rdfs:label "human-right" ;
+    rdfs:comment "Fundamental human right — life, liberty, privacy, expression." .
+person:propertyRight   a person:RightType ; rdfs:label "property-right" ;
+    rdfs:comment "Right to own, use, and dispose of property." .
+person:contractualRight a person:RightType ; rdfs:label "contractual-right" ;
+    rdfs:comment "Right arising from a contract or agreement." .
+person:intellectualRight a person:RightType ; rdfs:label "intellectual-right" ;
+    rdfs:comment "Intellectual property right — copyright, patent, trademark." .
+person:statutoryRight  a person:RightType ; rdfs:label "statutory-right" ;
+    rdfs:comment "Right granted by statute or regulation." .
+person:customaryRight  a person:RightType ; rdfs:label "customary-right" ;
+    rdfs:comment "Right recognised by custom or tradition (e.g. water rights, land rights)." .
+
+person:LegalObligation a rdfs:Class ;
+    rdfs:label "Legal Obligation" ;
+    rdfs:comment "A legal duty binding a person. Obligations are personhood — they arise from law, contract, or social duty. Selfhood does not have legal obligations; selfhood is not subject to compulsion. Obligations may be tax duties, contractual duties, fiduciary duties, or statutory duties." .
+
+person:obligationType a rdf:Property ;
+    rdfs:label "obligation type" ;
+    rdfs:domain person:LegalObligation ;
+    rdfs:range  person:ObligationType ;
+    rdfs:comment "The type of legal obligation." .
+
+person:ObligationType a rdfs:Class ;
+    rdfs:label "Obligation Type" .
+
+person:taxDuty         a person:ObligationType ; rdfs:label "tax-duty" .
+person:contractualDuty a person:ObligationType ; rdfs:label "contractual-duty" .
+person:fiduciaryDuty   a person:ObligationType ; rdfs:label "fiduciary-duty" ;
+    rdfs:comment "Duty of care, loyalty, or good faith owed by a fiduciary." .
+person:statutoryDuty   a person:ObligationType ; rdfs:label "statutory-duty" .
+person:civicDuty       a person:ObligationType ; rdfs:label "civic-duty" ;
+    rdfs:comment "Duty of civic participation — jury, voting, community service." .
+
+person:heldBy a rdf:Property ;
+    rdfs:label "held by" ;
+    rdfs:domain person:LegalRight ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person who holds this right." .
+
+person:owedBy a rdf:Property ;
+    rdfs:label "owed by" ;
+    rdfs:domain person:LegalObligation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person who owes this obligation." .
+
+person:owedTo a rdf:Property ;
+    rdfs:label "owed to" ;
+    rdfs:domain person:LegalObligation ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person or entity to whom the obligation is owed." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Fiduciary Relationships — trust, guardianship, delegation
+# ────────────────────────────────────────────────────────────────────
+
+person:FiduciaryRelationship a rdfs:Class ;
+    rdfs:subClassOf person:SocialRelation ;
+    rdfs:label "Fiduciary Relationship" ;
+    rdfs:comment "A relationship of trust where one person (the fiduciary) holds duty of care, loyalty, or good faith toward another (the beneficiary). Fiduciary relationships are personhood — they are socially situated and legally governed. Examples: power-of-attorney, trustee-beneficiary, guardian-ward, executor-heir. The fiduciary's access to the beneficiary's selfhood is limited to what the beneficiary has explicitly consented to share." .
+
+person:fiduciaryRole a rdf:Property ;
+    rdfs:label "fiduciary role" ;
+    rdfs:domain person:FiduciaryRelationship ;
+    rdfs:range  person:FiduciaryRole ;
+    rdfs:comment "The role of the fiduciary in this relationship." .
+
+person:FiduciaryRole a rdfs:Class ;
+    rdfs:label "Fiduciary Role" .
+
+person:powerOfAttorney a person:FiduciaryRole ; rdfs:label "power-of-attorney" ;
+    rdfs:comment "Holds authority to act on behalf of the principal in legal/financial matters." .
+person:trustee         a person:FiduciaryRole ; rdfs:label "trustee" ;
+    rdfs:comment "Holds and manages assets on behalf of beneficiaries." .
+person:guardian        a person:FiduciaryRole ; rdfs:label "guardian" ;
+    rdfs:comment "Holds duty of care for a person unable to care for themselves." .
+person:executor        a person:FiduciaryRole ; rdfs:label "executor" ;
+    rdfs:comment "Administers the estate of a deceased person." .
+person:medicalProxy    a person:FiduciaryRole ; rdfs:label "medical-proxy" ;
+    rdfs:comment "Holds authority to make medical decisions on behalf of the principal." .
+
+person:dutyLevel a rdf:Property ;
+    rdfs:label "duty level" ;
+    rdfs:domain person:FiduciaryRelationship ;
+    rdfs:range  person:DutyLevel ;
+    rdfs:comment "The level of fiduciary duty." .
+
+person:DutyLevel a rdfs:Class ;
+    rdfs:label "Duty Level" .
+
+person:level1 a person:DutyLevel ; rdfs:label "level-1" ;
+    rdfs:comment "Standard duty of care." .
+person:level2 a person:DutyLevel ; rdfs:label "level-2" ;
+    rdfs:comment "Enhanced duty — good faith + loyalty." .
+person:level3 a person:DutyLevel ; rdfs:label "level-3" ;
+    rdfs:comment "Sovereign gate — zero ambient authority, biometric key required." .
+
+person:thresholdScheme a rdf:Property ;
+    rdfs:label "threshold scheme" ;
+    rdfs:domain person:FiduciaryRelationship ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Multi-sig threshold for fiduciary access (e.g. '3-of-5')." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Causality Consequences and Benefits
+# ────────────────────────────────────────────────────────────────────
+
+person:CausalityConsequence a rdfs:Class ;
+    rdfs:label "Causality Consequence" ;
+    rdfs:comment "A consequence that befalls a person as a result of their actions or circumstances. Consequences are personhood — they arise from social and legal causality, not from inner experience. Selfhood does not have causality consequences; selfhood is not subject to external judgement. Consequences may be legal penalties, social repercussions, or contractual liabilities." .
+
+person:consequenceType a rdf:Property ;
+    rdfs:label "consequence type" ;
+    rdfs:domain person:CausalityConsequence ;
+    rdfs:range  person:ConsequenceType ;
+    rdfs:comment "The type of consequence." .
+
+person:ConsequenceType a rdfs:Class ;
+    rdfs:label "Consequence Type" .
+
+person:legalPenalty    a person:ConsequenceType ; rdfs:label "legal-penalty" ;
+    rdfs:comment "Legal penalty — fine, imprisonment, injunction, community service." .
+person:contractualLiability a person:ConsequenceType ; rdfs:label "contractual-liability" ;
+    rdfs:comment "Liability arising from breach of contract — damages, specific performance." .
+person:socialRepercussion a person:ConsequenceType ; rdfs:label "social-repercussion" ;
+    rdfs:comment "Social consequence — reputation impact, loss of trust, exclusion." .
+person:financialLoss   a person:ConsequenceType ; rdfs:label "financial-loss" ;
+    rdfs:comment "Financial loss arising from an action or circumstance." .
+
+person:CausalityBenefit a rdfs:Class ;
+    rdfs:label "Causality Benefit" ;
+    rdfs:comment "A benefit that accrues to a person as a result of their actions or circumstances. Benefits are personhood — they arise from social and legal causality. Selfhood does not have causality benefits; selfhood is its own reward. Benefits may be legal entitlements, social recognition, or financial gains." .
+
+person:benefitType a rdf:Property ;
+    rdfs:label "benefit type" ;
+    rdfs:domain person:CausalityBenefit ;
+    rdfs:range  person:BenefitType ;
+    rdfs:comment "The type of benefit." .
+
+person:BenefitType a rdfs:Class ;
+    rdfs:label "Benefit Type" .
+
+person:legalEntitlement a person:BenefitType ; rdfs:label "legal-entitlement" ;
+    rdfs:comment "Legal entitlement — compensation, damages, inheritance." .
+person:socialRecognition a person:BenefitType ; rdfs:label "social-recognition" ;
+    rdfs:comment "Social recognition — award, honour, reputation gain." .
+person:financialGain   a person:BenefitType ; rdfs:label "financial-gain" ;
+    rdfs:comment "Financial gain — income, dividend, capital appreciation." .
+person:contractualBenefit a person:BenefitType ; rdfs:label "contractual-benefit" ;
+    rdfs:comment "Benefit arising from a contract — payment, service, delivery." .
+
+person:consequenceOf a rdf:Property ;
+    rdfs:label "consequence of" ;
+    rdfs:domain person:CausalityConsequence ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The action or circumstance that caused this consequence." .
+
+person:benefitOf a rdf:Property ;
+    rdfs:label "benefit of" ;
+    rdfs:domain person:CausalityBenefit ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The action or circumstance that produced this benefit." .
+
+person:accruedTo a rdf:Property ;
+    rdfs:label "accrued to" ;
+    rdfs:domain person:CausalityBenefit ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person to whom the benefit accrued." .
+
+person:borneBy a rdf:Property ;
+    rdfs:label "borne by" ;
+    rdfs:domain person:CausalityConsequence ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person who bears the consequence." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Personhood Data — shared selfhood that crosses the boundary
+# ────────────────────────────────────────────────────────────────────
+
+person:PersonhoodData a rdfs:Class ;
+    rdfs:label "Personhood Data" ;
+    rdfs:comment "Data that originated as selfhood but has been shared with another person, crossing the boundary into personhood. The original selfhood record remains protected (local, encrypted, air-gapped); this shared instance is governed by personhood rules — social relation, legal status, and fiduciary duty. Example: a dream shared with a therapist becomes personhood data (medical record) while the original remains selfhood." .
+
+person:originatedFrom a rdf:Property ;
+    rdfs:label "originated from" ;
+    rdfs:domain person:PersonhoodData ;
+    rdfs:range  self:InnerExperience ;
+    rdfs:comment "The selfhood record from which this personhood data originated. The original remains protected." .
+
+person:sharedWith a rdf:Property ;
+    rdfs:label "shared with" ;
+    rdfs:domain person:PersonhoodData ;
+    rdfs:range  agency:Entity ;
+    rdfs:comment "The person or entity with whom the selfhood-derived data was shared." .
+
+person:sharedUnderRelation a rdf:Property ;
+    rdfs:label "shared under relation" ;
+    rdfs:domain person:PersonhoodData ;
+    rdfs:range  person:SocialRelation ;
+    rdfs:comment "The social relation under which the data was shared (e.g. medical, fiduciary)." .
+
+person:consentGiven a rdf:Property ;
+    rdfs:label "consent given" ;
+    rdfs:domain person:PersonhoodData ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the natural agent consented to share this data. Consent is revocable." .
+
+person:consentRevocable a rdf:Property ;
+    rdfs:label "consent revocable" ;
+    rdfs:domain person:PersonhoodData ;
+    rdfs:range  xsd:boolean ;
+    rdfs:comment "Whether the consent to share this data can be revoked. True by default." .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Personhood vs Selfhood — the boundary
+# ────────────────────────────────────────────────────────────────────
+
+# Personhood is the exterior; selfhood is the interior.
+# Personhood IS subject to law; selfhood is NOT subject to law.
+# Personhood HAS social relations; selfhood has NO social relations.
+# Personhood MAY be claimed by legal processes; selfhood is protected
+#   FROM legal processes, surveillance, and organisational access.
+#
+# A natural person has BOTH selfhood and personhood.
+# A legal person has ONLY personhood.
+# A software entity has NEITHER (it has agency per agency.n3).
+#
+# The boundary is crossed when selfhood data is shared:
+#   - Sharing a dream with a therapist: selfhood → personhood (medical)
+#   - Using a private key to sign a contract: selfhood (key) → personhood (signature)
+#   - Disclosing personal values in a negotiation: selfhood → personhood (social)
+#
+# The original selfhood record always remains protected.
+# The shared instance becomes personhood, governed by social relation,
+# legal status, fiduciary duty, and consent rules.

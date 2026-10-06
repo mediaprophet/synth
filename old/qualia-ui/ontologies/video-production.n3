@@ -1,0 +1,189 @@
+# Video Production Ontology — timeline, clips, colour, transitions, effects
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+#
+# Prefix: vid: (video production domain)
+# Imports: hypermedia.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix vid:    <https://purl.org/qualia/ontology/video-production#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Video Asset
+# ────────────────────────────────────────────────────────────────────
+
+vid:VideoAsset a rdfs:Class ;
+    rdfs:label "Video Asset" ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:comment "A video asset — clip, sequence, render output, or live stream." .
+
+vid:VideoType a rdfs:Class ;
+    rdfs:label "Video Type" .
+
+vid:VideoClip a vid:VideoType ; rdfs:label "clip" .
+vid:VideoSequence a vid:VideoType ; rdfs:label "sequence" .
+vid:VideoRender a vid:VideoType ; rdfs:label "render" .
+vid:VideoStream a vid:VideoType ; rdfs:label "stream" .
+
+vid:videoType a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  vid:VideoType .
+
+vid:resolution a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Resolution — 1920x1080, 3840x2160, etc." .
+
+vid:frameRate a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Frame rate in FPS — 23.976, 24, 25, 29.97, 30, 50, 59.94, 60." .
+
+vid:videoCodec a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Video codec — H.264, H.265, ProRes, DNxHR, AV1, VP9." .
+
+vid:videoColourSpace a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Colour space — Rec.709, Rec.2020, DCI-P3, sRGB." .
+
+vid:videoBitDepth a rdf:Property ;
+    rdfs:domain vid:VideoAsset ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Bit depth — 8, 10, 12." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Timeline Track
+# ────────────────────────────────────────────────────────────────────
+
+vid:VideoTrack a rdfs:Class ;
+    rdfs:label "Video Track" ;
+    rdfs:subClassOf hm:CompositionElement ;
+    rdfs:comment "A track on a video timeline — video, audio, or overlay." .
+
+vid:VideoTrackType a rdfs:Class ;
+    rdfs:label "Video Track Type" .
+
+vid:TrackVideo a vid:VideoTrackType ; rdfs:label "video" .
+vid:TrackAudio a vid:VideoTrackType ; rdfs:label "audio" .
+vid:TrackOverlay a vid:VideoTrackType ; rdfs:label "overlay" .
+
+vid:videoTrackType a rdf:Property ;
+    rdfs:domain vid:VideoTrack ;
+    rdfs:range  vid:VideoTrackType .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Transition
+# ────────────────────────────────────────────────────────────────────
+
+vid:Transition a rdfs:Class ;
+    rdfs:label "Transition" ;
+    rdfs:comment "A transition between two clips on a timeline." .
+
+vid:TransitionType a rdfs:Class ;
+    rdfs:label "Transition Type" .
+
+vid:CutTransition a vid:TransitionType ; rdfs:label "cut" .
+vid:CrossfadeTransition a vid:TransitionType ; rdfs:label "crossfade" .
+vid:WipeTransition a vid:TransitionType ; rdfs:label "wipe" .
+vid:DissolveTransition a vid:TransitionType ; rdfs:label "dissolve" .
+vid:PushTransition a vid:TransitionType ; rdfs:label "push" .
+vid:SlideTransition a vid:TransitionType ; rdfs:label "slide" .
+vid:ZoomTransition a vid:TransitionType ; rdfs:label "zoom" .
+
+vid:transitionType a rdf:Property ;
+    rdfs:domain vid:Transition ;
+    rdfs:range  vid:TransitionType .
+
+vid:transitionDuration a rdf:Property ;
+    rdfs:domain vid:Transition ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Duration in seconds." .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Video Effect
+# ────────────────────────────────────────────────────────────────────
+
+vid:VideoEffect a rdfs:Class ;
+    rdfs:label "Video Effect" ;
+    rdfs:comment "An effect applied to a video clip." .
+
+vid:VideoEffectType a rdfs:Class ;
+    rdfs:label "Video Effect Type" .
+
+vid:ColourCorrection a vid:VideoEffectType ; rdfs:label "colour-correction" .
+vid:Stabilisation a vid:VideoEffectType ; rdfs:label "stabilisation" .
+vid:SpeedChange a vid:VideoEffectType ; rdfs:label "speed-change" .
+vid:TransformEffect a vid:VideoEffectType ; rdfs:label "transform" .
+vid:Keying a vid:VideoEffectType ; rdfs:label "keying" .
+vid:Tracking a vid:VideoEffectType ; rdfs:label "tracking" .
+
+vid:videoEffectType a rdf:Property ;
+    rdfs:domain vid:VideoEffect ;
+    rdfs:range  vid:VideoEffectType .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Colour Grade
+# ────────────────────────────────────────────────────────────────────
+
+vid:ColourGrade a rdfs:Class ;
+    rdfs:label "Colour Grade" ;
+    rdfs:comment "A colour grade applied to a clip — LUT-based, primary, secondary, or node-based." .
+
+vid:GradeType a rdfs:Class ;
+    rdfs:label "Grade Type" .
+
+vid:LUTGrade a vid:GradeType ; rdfs:label "lut" .
+vid:PrimaryGrade a vid:GradeType ; rdfs:label "primary" .
+vid:SecondaryGrade a vid:GradeType ; rdfs:label "secondary" .
+vid:NodeGrade a vid:GradeType ; rdfs:label "node-based" .
+
+vid:gradeType a rdf:Property ;
+    rdfs:domain vid:ColourGrade ;
+    rdfs:range  vid:GradeType .
+
+vid:liftParam a rdf:Property ;
+    rdfs:domain vid:ColourGrade ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Lift [r,g,b] values." .
+
+vid:gammaParam a rdf:Property ;
+    rdfs:domain vid:ColourGrade ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Gamma [r,g,b] values." .
+
+vid:gainParam a rdf:Property ;
+    rdfs:domain vid:ColourGrade ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Gain [r,g,b] values." .
+
+vid:lutIRI a rdf:Property ;
+    rdfs:domain vid:ColourGrade ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IRI of LUT file (.cube, .3dl)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Generator
+# ────────────────────────────────────────────────────────────────────
+
+vid:Generator a rdfs:Class ;
+    rdfs:label "Generator" ;
+    rdfs:comment "A generated content clip — title, lower-third, shape, colour-matte, noise." .
+
+vid:GeneratorType a rdfs:Class ;
+    rdfs:label "Generator Type" .
+
+vid:TitleGenerator a vid:GeneratorType ; rdfs:label "title" .
+vid:LowerThirdGenerator a vid:GeneratorType ; rdfs:label "lower-third" .
+vid:ShapeGenerator a vid:GeneratorType ; rdfs:label "shape" .
+vid:ColourMatteGenerator a vid:GeneratorType ; rdfs:label "colour-matte" .
+vid:NoiseGenerator a vid:GeneratorType ; rdfs:label "noise" .
+
+vid:generatorType a rdf:Property ;
+    rdfs:domain vid:Generator ;
+    rdfs:range  vid:GeneratorType .

@@ -1,0 +1,705 @@
+# Game Design Ontology — Game Mechanics, Rules, Narratives, Worlds,
+# and Real-World Grounding for Game Production
+#
+# Copyright © 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+#
+# Defines vocabulary for game design and game environments. Covers game
+# mechanics, rules, objectives, NPCs, quests, dialogue, inventory,
+# progression, win/lose conditions, player roles, game states, and
+# grounding of game worlds in real-world data (historical, geographic,
+# cultural, present-day or past).
+#
+# Imports: hypermedia.n3, portal-worlds.n3, spatial-3d.n3,
+#          production-document.n3, epistemics.n3, agency.n3
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix hm:     <https://purl.org/qualia/ontology/hypermedia#> .
+@prefix pw:     <https://purl.org/qualia/ontology/portal-worlds#> .
+@prefix sp3:    <https://purl.org/qualia/ontology/spatial-3d#> .
+@prefix pd:     <https://qualiadb.org/schema/ui/production-document#> .
+@prefix epi:    <https://purl.org/qualia/ontology/epistemics#> .
+@prefix agency: <https://qualiadb.org/schema/ui/agency#> .
+@prefix game:   <https://qualiadb.org/schema/ui/game-design#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Game — the umbrella class
+# ────────────────────────────────────────────────────────────────────
+
+game:Game a rdfs:Class ;
+    rdfs:subClassOf hm:HypermediaAsset ;
+    rdfs:label "Game" ;
+    rdfs:comment "A game — interactive entertainment, simulation, or serious game. A game has mechanics, rules, objectives, a world (which may be fictional, real-world-grounded, or hybrid), player roles, and win/lose conditions. Games may incorporate real-world data — historical events, geographic locations, cultural contexts — in the present or past. A game may be authored using production documents (game design documents, scripts, style guides) and processed by software agents for content generation." .
+
+game:gameType a rdf:Property ;
+    rdfs:label "game type" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameType ;
+    rdfs:comment "The genre/type of the game." .
+
+game:GameType a rdfs:Class ;
+    rdfs:label "Game Type" .
+
+game:actionGame       a game:GameType ; rdfs:label "action" ;
+    rdfs:comment "Action game — reflexes, coordination, combat." .
+game:adventureGame    a game:GameType ; rdfs:label "adventure" ;
+    rdfs:comment "Adventure game — exploration, puzzle-solving, narrative." .
+game:rpgGame          a game:GameType ; rdfs:label "rpg" ;
+    rdfs:comment "Role-playing game — character progression, narrative choices, stats." .
+game:strategyGame     a game:GameType ; rdfs:label "strategy" ;
+    rdfs:comment "Strategy game — resource management, tactical decisions, planning." .
+game:simulationGame   a game:GameType ; rdfs:label "simulation" ;
+    rdfs:comment "Simulation game — models real or hypothetical systems, processes, or activities." .
+game:sportsGame       a game:GameType ; rdfs:label "sports" ;
+    rdfs:comment "Sports game — simulates athletic competition." .
+game:puzzleGame       a game:GameType ; rdfs:label "puzzle" ;
+    rdfs:comment "Puzzle game — logic, pattern recognition, problem-solving." .
+game:seriousGame      a game:GameType ; rdfs:label "serious" ;
+    rdfs:comment "Serious game — designed for education, training, health, or policy purposes rather than pure entertainment. May model real-world scenarios." .
+game:sandboxGame      a game:GameType ; rdfs:label "sandbox" ;
+    rdfs:comment "Sandbox game — open-ended, player-driven objectives, emergent gameplay." .
+game:narrativeGame    a game:GameType ; rdfs:label "narrative" ;
+    rdfs:comment "Narrative game — story-first, player choices drive branching narrative." .
+game:multiplayerGame  a game:GameType ; rdfs:label "multiplayer" ;
+    rdfs:comment "Multiplayer game — competitive or cooperative play with multiple human players." .
+game:augmentedReality a game:GameType ; rdfs:label "augmented-reality" ;
+    rdfs:comment "Augmented reality game — overlays game elements on real-world environment via device camera/GPS." .
+
+game:gamePerspective a rdf:Property ;
+    rdfs:label "game perspective" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:Perspective ;
+    rdfs:comment "The player's perspective on the game world." .
+
+game:Perspective a rdfs:Class ;
+    rdfs:label "Perspective" .
+
+game:firstPerson   a game:Perspective ; rdfs:label "first-person" .
+game:thirdPerson   a game:Perspective ; rdfs:label "third-person" .
+game:topDown       a game:Perspective ; rdfs:label "top-down" .
+game:sideScrolling a game:Perspective ; rdfs:label "side-scrolling" .
+game:isometric     a game:Perspective ; rdfs:label "isometric" .
+game:omnipresent   a game:Perspective ; rdfs:label "omnipresent" ;
+    rdfs:comment "God-view / strategy camera — player sees the whole field." .
+
+game:gamePlatform a rdf:Property ;
+    rdfs:label "game platform" ;
+    rdfs:domain game:Game ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Target platform — PC, console, mobile, web, VR, AR, tabletop." .
+
+game:playerCount a rdf:Property ;
+    rdfs:label "player count" ;
+    rdfs:domain game:Game ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Player count — single-player, 2-player, 2-4, 2-16, MMO (massive)." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Game Mechanic — rules and systems
+# ────────────────────────────────────────────────────────────────────
+
+game:GameMechanic a rdfs:Class ;
+    rdfs:label "Game Mechanic" ;
+    rdfs:comment "A rule or system that governs gameplay — how players interact with the game world and how the game responds. Mechanics are the verbs of the game: move, jump, shoot, trade, build, negotiate, explore. Each mechanic has parameters (speed, damage, cost, cooldown), triggers (what activates it), and effects (what it changes in the game state)." .
+
+game:mechanicType a rdf:Property ;
+    rdfs:label "mechanic type" ;
+    rdfs:domain game:GameMechanic ;
+    rdfs:range  game:MechanicType ;
+    rdfs:comment "The category of mechanic." .
+
+game:MechanicType a rdfs:Class ;
+    rdfs:label "Mechanic Type" .
+
+game:movement        a game:MechanicType ; rdfs:label "movement" ;
+    rdfs:comment "Movement — walking, running, jumping, flying, swimming, driving." .
+game:combat          a game:MechanicType ; rdfs:label "combat" ;
+    rdfs:comment "Combat — melee, ranged, magic, stealth, defence." .
+game:resourceMgmt    a game:MechanicType ; rdfs:label "resource-management" ;
+    rdfs:comment "Resource management — gathering, crafting, trading, economy." .
+game:progression     a game:MechanicType ; rdfs:label "progression" ;
+    rdfs:comment "Progression — levelling, skill trees, unlocks, achievements." .
+game:puzzle          a game:MechanicType ; rdfs:label "puzzle" ;
+    rdfs:comment "Puzzle — logic, pattern matching, spatial reasoning." .
+game:social          a game:MechanicType ; rdfs:label "social" ;
+    rdfs:comment "Social — dialogue, negotiation, reputation, faction." .
+game:exploration     a game:MechanicType ; rdfs:label "exploration" ;
+    rdfs:comment "Exploration — discovery, mapping, fast travel, hidden areas." .
+game:construction    a game:MechanicType ; rdfs:label "construction" ;
+    rdfs:comment "Construction — building, terraforming, city planning." .
+game:stealth         a game:MechanicType ; rdfs:label "stealth" ;
+    rdfs:comment "Stealth — hiding, sneaking, distraction, detection avoidance." .
+game:timeManipulation a game:MechanicType ; rdfs:label "time-manipulation" ;
+    rdfs:comment "Time manipulation — rewind, pause, fast-forward, parallel timelines." .
+game:physicsBased    a game:MechanicType ; rdfs:label "physics-based" ;
+    rdfs:comment "Physics-based — gravity, momentum, collisions, ragdoll." .
+game:procedural      a game:MechanicType ; rdfs:label "procedural" ;
+    rdfs:comment "Procedural — algorithmically generated content, levels, or events." .
+
+game:mechanicParameter a rdf:Property ;
+    rdfs:label "mechanic parameter" ;
+    rdfs:domain game:GameMechanic ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Parameters — e.g. 'speed: 5.0', 'damage: 25', 'cooldown: 3s', 'cost: 10 gold'." .
+
+game:mechanicTrigger a rdf:Property ;
+    rdfs:label "mechanic trigger" ;
+    rdfs:domain game:GameMechanic ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What activates the mechanic — player input, proximity, timer, event, condition." .
+
+game:mechanicEffect a rdf:Property ;
+    rdfs:label "mechanic effect" ;
+    rdfs:domain game:GameMechanic ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What the mechanic changes — game state, player stats, world objects, narrative flags." .
+
+game:hasMechanic a rdf:Property ;
+    rdfs:label "has mechanic" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameMechanic .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Game Objective — goals and win/lose conditions
+# ────────────────────────────────────────────────────────────────────
+
+game:GameObjective a rdfs:Class ;
+    rdfs:label "Game Objective" ;
+    rdfs:comment "A goal that the player or players pursue. Objectives may be primary (required to win), secondary (optional, for bonus content), or hidden (discovered through exploration). Objectives have conditions for completion and may trigger rewards, narrative events, or new objectives." .
+
+game:objectiveType a rdf:Property ;
+    rdfs:label "objective type" ;
+    rdfs:domain game:GameObjective ;
+    rdfs:range  game:ObjectiveType ;
+    rdfs:comment "The type of objective." .
+
+game:ObjectiveType a rdfs:Class ;
+    rdfs:label "Objective Type" .
+
+game:primaryObjective   a game:ObjectiveType ; rdfs:label "primary" ;
+    rdfs:comment "Required to win or progress — the main goal." .
+game:secondaryObjective a game:ObjectiveType ; rdfs:label "secondary" ;
+    rdfs:comment "Optional — bonus content, extra rewards, side quests." .
+game:hiddenObjective    a game:ObjectiveType ; rdfs:label "hidden" ;
+    rdfs:comment "Hidden — discovered through exploration or specific actions." .
+game:failCondition      a game:ObjectiveType ; rdfs:label "fail-condition" ;
+    rdfs:comment "A condition that causes the player to lose — death, time expiry, detection, resource depletion." .
+game:winCondition       a game:ObjectiveType ; rdfs:label "win-condition" ;
+    rdfs:comment "A condition that causes the player to win — reaching a score, defeating a boss, completing all primary objectives." .
+
+game:completionCondition a rdf:Property ;
+    rdfs:label "completion condition" ;
+    rdfs:domain game:GameObjective ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "What must be true for the objective to be complete — e.g. 'all enemies defeated', 'artifact retrieved', 'score >= 1000'." .
+
+game:objectiveReward a rdf:Property ;
+    rdfs:label "objective reward" ;
+    rdfs:domain game:GameObjective ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Reward for completing the objective — items, experience, narrative progression, unlock." .
+
+game:objectivePrerequisite a rdf:Property ;
+    rdfs:label "objective prerequisite" ;
+    rdfs:domain game:GameObjective ;
+    rdfs:range  game:GameObjective ;
+    rdfs:comment "An objective that must be completed before this one becomes available." .
+
+game:hasObjective a rdf:Property ;
+    rdfs:label "has objective" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameObjective .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Game Character — player and non-player characters
+# ────────────────────────────────────────────────────────────────────
+
+game:GameCharacter a rdfs:Class ;
+    rdfs:label "Game Character" ;
+    rdfs:comment "A character in a game — player-controlled or non-player. Game characters may be defined in production documents (scripts) and instantiated in the game world. Characters have stats, abilities, inventory, relationships, and may have dialogue trees, AI behaviour configurations, and narrative arcs." .
+
+game:characterType a rdf:Property ;
+    rdfs:label "character type" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  game:CharacterType ;
+    rdfs:comment "Whether the character is player-controlled or NPC." .
+
+game:CharacterType a rdfs:Class ;
+    rdfs:label "Character Type" .
+
+game:playerCharacter    a game:CharacterType ; rdfs:label "player-character" ;
+    rdfs:comment "Player character (PC) — controlled by a human player. Has an avatar, controller mapping, and player-specific state." .
+game:npc                a game:CharacterType ; rdfs:label "npc" ;
+    rdfs:comment "Non-player character (NPC) — controlled by the game system. Has AI behaviour configuration, dialogue tree, and schedule." .
+game:companion          a game:CharacterType ; rdfs:label "companion" ;
+    rdfs:comment "Companion — an NPC that follows or assists the player. May have limited player commands." .
+game:antagonist         a game:CharacterType ; rdfs:label "antagonist" ;
+    rdfs:comment "Antagonist — an NPC that opposes the player. May be a boss, rival, or recurring enemy." .
+game:questGiver         a game:CharacterType ; rdfs:label "quest-giver" ;
+    rdfs:comment "Quest giver — an NPC that provides objectives to the player." .
+game:vendor             a game:CharacterType ; rdfs:label "vendor" ;
+    rdfs:comment "Vendor — an NPC that trades items, services, or information." .
+game:crowd              a game:CharacterType ; rdfs:label "crowd" ;
+    rdfs:comment "Crowd / ambient NPC — background characters for atmosphere. Minimal or no interaction." .
+
+game:characterStats a rdf:Property ;
+    rdfs:label "character stats" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Character statistics — health, mana, strength, agility, intelligence, etc. (CBOR-LD encoded)." .
+
+game:characterAbilities a rdf:Property ;
+    rdfs:label "character abilities" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  game:GameMechanic ;
+    rdfs:comment "Abilities the character can use — links to game mechanics." .
+
+game:characterArc a rdf:Property ;
+    rdfs:label "character arc" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Narrative arc — how the character changes over the course of the game. May reference script document sections." .
+
+game:aiBehaviour a rdf:Property ;
+    rdfs:label "AI behaviour" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  game:AIBehaviour ;
+    rdfs:comment "AI behaviour configuration for NPCs — how the game system controls the character." .
+
+game:AIBehaviour a rdfs:Class ;
+    rdfs:label "AI Behaviour" ;
+    rdfs:comment "Configuration for how a software agent or game system controls an NPC. This is a computational configuration — behaviour trees, state machines, utility functions, scripted sequences, or LLM-driven generation. The NPC has no intent, consciousness, or agency — it executes computational instructions. For LLM-driven NPCs, the character definition (personality, knowledge, constraints, dialogue style) serves as the prompt context; the LLM generates responses computationally — this is ungrounded generation unless grounded in game-world data. The NPC does not understand, think, or feel — it computes outputs from inputs. Behaviour configurations specify states, transitions, conditions, actions, and optionally an LLM agent binding with character definition and grounding context." .
+
+game:behaviourType a rdf:Property ;
+    rdfs:label "behaviour type" ;
+    rdfs:domain game:AIBehaviour ;
+    rdfs:range  game:BehaviourType ;
+    rdfs:comment "The AI architecture used." .
+
+game:BehaviourType a rdfs:Class ;
+    rdfs:label "Behaviour Type" .
+
+game:behaviourTree    a game:BehaviourType ; rdfs:label "behaviour-tree" ;
+    rdfs:comment "Behaviour tree — hierarchical decision structure with selector and sequence nodes." .
+game:stateMachine    a game:BehaviourType ; rdfs:label "state-machine" ;
+    rdfs:comment "Finite state machine — states with conditional transitions." .
+game:utilityAI       a game:BehaviourType ; rdfs:label "utility-ai" ;
+    rdfs:comment "Utility AI — scores actions by utility and selects the highest-scoring." .
+game:scriptedSequence a game:BehaviourType ; rdfs:label "scripted-sequence" ;
+    rdfs:comment "Scripted sequence — pre-authored sequence of actions triggered by events." .
+game:goap            a game:BehaviourType ; rdfs:label "goap" ;
+    rdfs:comment "Goal-Oriented Action Planning — planner selects actions to achieve goals." .
+game:navMesh         a game:BehaviourType ; rdfs:label "nav-mesh" ;
+    rdfs:comment "Navigation mesh — pathfinding configuration for movement." .
+game:llmDriven       a game:BehaviourType ; rdfs:label "llm-driven" ;
+    rdfs:comment "LLM-driven — NPC actions and dialogue are generated by a language model at runtime. The character definition (personality, knowledge bounds, behavioural constraints, dialogue style, relationship to player) provides the prompt context. The LLM computes responses from the current game state, player input, and character definition. Output is ungrounded generation unless the prompt context includes grounded game-world data (facts, events, state). The NPC does not understand or intend — it computes text from patterns. May be combined with other behaviour types — e.g. an LLM-driven NPC that uses a behaviour tree for movement and LLM generation for dialogue." .
+
+game:behaviourStates a rdf:Property ;
+    rdfs:label "behaviour states" ;
+    rdfs:domain game:AIBehaviour ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "States or nodes — e.g. 'idle, patrol, alert, attack, flee, dead' (CBOR-LD encoded)." .
+
+game:llmAgentBinding a rdf:Property ;
+    rdfs:label "LLM agent binding" ;
+    rdfs:domain game:AIBehaviour ;
+    rdfs:range  game:LLMAgentBinding ;
+    rdfs:comment "For llm-driven behaviour, the binding configuration that links the NPC to a language model agent. Specifies the model, the character definition, grounding context, and generation constraints." .
+
+game:LLMAgentBinding a rdfs:Class ;
+    rdfs:label "LLM Agent Binding" ;
+    rdfs:comment "Configuration for binding an NPC to a language model agent. The NPC character definition (personality, knowledge, constraints, dialogue style) provides the prompt context. The binding specifies: the model or agent endpoint, the system prompt (character definition), the grounding context (what game-world facts the agent may reference), generation parameters (temperature, max tokens, safety filters), and fallback behaviour (what happens if the LLM is unavailable or output fails validation). The LLM agent is a software agent — it computes text outputs from inputs. It does not understand, intend, or feel. Its outputs are ungrounded generation unless grounded in game-world data provided via the grounding context. All LLM-generated NPC dialogue should be marked with provenance — the model, the binding, and the game state at generation time." .
+
+game:characterDefinition a rdf:Property ;
+    rdfs:label "character definition" ;
+    rdfs:domain game:LLMAgentBinding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The character definition provided as prompt context — personality, knowledge bounds, behavioural constraints, dialogue style, relationships, backstory. This is the 'who the NPC is' from the game's perspective. The LLM uses this to generate consistent responses. The definition is authored by the human game writer — the LLM does not create it." .
+
+game:groundingContext a rdf:Property ;
+    rdfs:label "grounding context" ;
+    rdfs:domain game:LLMAgentBinding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Game-world data that the LLM agent may reference when generating responses — current quest state, known facts about the world, NPC relationships, recent events. Without grounding context, LLM output is ungrounded generation. With grounding context, the output is grounded in specified game-world data. The grounding context is injected at runtime from the game state — it is not static." .
+
+game:generationConstraints a rdf:Property ;
+    rdfs:label "generation constraints" ;
+    rdfs:domain game:LLMAgentBinding ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Constraints on LLM output — temperature, max tokens, forbidden topics, required format, safety filters, content rating. Ensures generated dialogue is appropriate for the game's rating and consistent with the character definition." .
+
+game:fallbackBehaviour a rdf:Property ;
+    rdfs:label "fallback behaviour" ;
+    rdfs:domain game:LLMAgentBinding ;
+    rdfs:range  game:AIBehaviour ;
+    rdfs:comment "Fallback behaviour if the LLM is unavailable or output fails validation — e.g. switch to a scripted sequence or state machine. Ensures the NPC remains functional even if the LLM endpoint is unreachable." .
+
+game:behaviourTransitions a rdf:Property ;
+    rdfs:label "behaviour transitions" ;
+    rdfs:domain game:AIBehaviour ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Transitions between states — conditions that trigger state changes (CBOR-LD encoded)." .
+
+game:hasCharacter a rdf:Property ;
+    rdfs:label "has character" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:GameCharacter .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Dialogue Tree — branching conversations
+# ────────────────────────────────────────────────────────────────────
+
+game:DialogueTree a rdfs:Class ;
+    rdfs:label "Dialogue Tree" ;
+    rdfs:comment "A branching dialogue structure for NPC conversations. Consists of nodes (lines of dialogue) and edges (player choices that lead to other nodes). Dialogue trees may have conditions (requirements to unlock a node), effects (game state changes when a node is reached), and may reference script documents for voice acting or narrative context. A dialogue tree may operate in scripted mode (pre-authored nodes and choices) or dynamic mode (LLM-driven generation using the character definition and grounding context). In dynamic mode, the tree structure provides the framing — entry points, exit conditions, and topic constraints — while the LLM generates the specific dialogue text. Dynamic dialogue is ungrounded generation unless grounded via the LLM agent binding's grounding context." .
+
+game:dialogueMode a rdf:Property ;
+    rdfs:label "dialogue mode" ;
+    rdfs:domain game:DialogueTree ;
+    rdfs:range  game:DialogueMode ;
+    rdfs:comment "Whether the dialogue tree operates in scripted or dynamic mode." .
+
+game:DialogueMode a rdfs:Class ;
+    rdfs:label "Dialogue Mode" .
+
+game:scriptedDialogue  a game:DialogueMode ; rdfs:label "scripted" ;
+    rdfs:comment "Scripted — all dialogue nodes and choices are pre-authored. The tree is fully deterministic. Used for critical narrative moments where exact wording matters." .
+game:dynamicDialogue   a game:DialogueMode ; rdfs:label "dynamic" ;
+    rdfs:comment "Dynamic — dialogue text is generated at runtime by an LLM agent. The tree structure provides framing (entry points, topics, exit conditions) but the specific text is computed by the LLM from the character definition and grounding context. Output is ungrounded generation unless grounded in game-world data. Used for open-ended conversations, ambient NPCs, and replayability." .
+game:hybridDialogue    a game:DialogueMode ; rdfs:label "hybrid" ;
+    rdfs:comment "Hybrid — critical narrative nodes are scripted, while ambient or optional conversation branches are LLM-driven. Combines narrative control with conversational flexibility. The transition between scripted and dynamic branches is defined by the tree structure." .
+
+game:dialogueNode a rdf:Property ;
+    rdfs:label "dialogue node" ;
+    rdfs:domain game:DialogueTree ;
+    rdfs:range  game:DialogueNode ;
+    rdfs:comment "A node in the dialogue tree." .
+
+game:DialogueNode a rdfs:Class ;
+    rdfs:label "Dialogue Node" ;
+    rdfs:comment "A single point in a dialogue tree — an NPC line with optional player response choices." .
+
+game:speaker a rdf:Property ;
+    rdfs:label "speaker" ;
+    rdfs:domain game:DialogueNode ;
+    rdfs:range  game:GameCharacter ;
+    rdfs:comment "The character who speaks this line." .
+
+game:dialogueText a rdf:Property ;
+    rdfs:label "dialogue text" ;
+    rdfs:domain game:DialogueNode ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The spoken text or voice-over reference." .
+
+game:playerChoices a rdf:Property ;
+    rdfs:label "player choices" ;
+    rdfs:domain game:DialogueNode ;
+    rdfs:range  game:DialogueChoice ;
+    rdfs:comment "Available player response choices at this node." .
+
+game:DialogueChoice a rdfs:Class ;
+    rdfs:label "Dialogue Choice" ;
+    rdfs:comment "A player response option in a dialogue tree. Has text, a condition (may be locked), an effect (may change game state), and a target node (the next node in the tree)." .
+
+game:choiceText a rdf:Property ;
+    rdfs:label "choice text" ;
+    rdfs:domain game:DialogueChoice ;
+    rdfs:range  xsd:string .
+
+game:choiceCondition a rdf:Property ;
+    rdfs:label "choice condition" ;
+    rdfs:domain game:DialogueChoice ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Condition that must be true for this choice to be available — e.g. 'charisma >= 5', 'has_item: key'." .
+
+game:choiceEffect a rdf:Property ;
+    rdfs:label "choice effect" ;
+    rdfs:domain game:DialogueChoice ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Game state change when this choice is selected — e.g. 'reputation +5', 'set_flag: met_king'." .
+
+game:choiceTarget a rdf:Property ;
+    rdfs:label "choice target" ;
+    rdfs:domain game:DialogueChoice ;
+    rdfs:range  game:DialogueNode ;
+    rdfs:comment "The next dialogue node if this choice is selected." .
+
+game:hasDialogueTree a rdf:Property ;
+    rdfs:label "has dialogue tree" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  game:DialogueTree .
+
+game:dialogueLLMBinding a rdf:Property ;
+    rdfs:label "dialogue LLM binding" ;
+    rdfs:domain game:DialogueTree ;
+    rdfs:range  game:LLMAgentBinding ;
+    rdfs:comment "For dynamic or hybrid dialogue modes, the LLM agent binding that generates dialogue text. Links the dialogue tree to the character definition, grounding context, and generation constraints." .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Quest — structured objectives with narrative
+# ────────────────────────────────────────────────────────────────────
+
+game:Quest a rdfs:Class ;
+    rdfs:label "Quest" ;
+    rdfs:comment "A structured objective with narrative context — given by an NPC or discovered through exploration. Quests have stages (sequential or branching steps), rewards, prerequisites, and may fail or be abandoned. Quests may reference script documents for narrative content and may trigger game events, dialogue, or world changes." .
+
+game:questStage a rdf:Property ;
+    rdfs:label "quest stage" ;
+    rdfs:domain game:Quest ;
+    rdfs:range  game:QuestStage ;
+    rdfs:comment "A stage or step in the quest." .
+
+game:QuestStage a rdfs:Class ;
+    rdfs:label "Quest Stage" ;
+    rdfs:comment "A single step in a quest — has a description, completion condition, and may trigger the next stage or a branching choice." .
+
+game:stageDescription a rdf:Property ;
+    rdfs:label "stage description" ;
+    rdfs:domain game:QuestStage ;
+    rdfs:range  xsd:string .
+
+game:stageObjective a rdf:Property ;
+    rdfs:label "stage objective" ;
+    rdfs:domain game:QuestStage ;
+    rdfs:range  game:GameObjective ;
+    rdfs:comment "The game objective associated with this stage." .
+
+game:stageNext a rdf:Property ;
+    rdfs:label "stage next" ;
+    rdfs:domain game:QuestStage ;
+    rdfs:range  game:QuestStage ;
+    rdfs:comment "The next stage upon completion — may branch to multiple stages." .
+
+game:questGiverChar a rdf:Property ;
+    rdfs:label "quest giver" ;
+    rdfs:domain game:Quest ;
+    rdfs:range  game:GameCharacter ;
+    rdfs:comment "The NPC who gives the quest." .
+
+game:questPrerequisite a rdf:Property ;
+    rdfs:label "quest prerequisite" ;
+    rdfs:domain game:Quest ;
+    rdfs:range  game:Quest ;
+    rdfs:comment "A quest that must be completed before this one is available." .
+
+game:questReward a rdf:Property ;
+    rdfs:label "quest reward" ;
+    rdfs:domain game:Quest ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Reward for completing the quest — items, experience, currency, unlocks." .
+
+game:questType a rdf:Property ;
+    rdfs:label "quest type" ;
+    rdfs:domain game:Quest ;
+    rdfs:range  game:QuestType .
+
+game:QuestType a rdfs:Class ;
+    rdfs:label "Quest Type" .
+
+game:mainQuest      a game:QuestType ; rdfs:label "main-quest" ;
+    rdfs:comment "Main quest — advances the primary narrative. Required to complete the game." .
+game:sideQuest      a game:QuestType ; rdfs:label "side-quest" ;
+    rdfs:comment "Side quest — optional, provides additional content and rewards." .
+game:fetchQuest     a game:QuestType ; rdfs:label "fetch-quest" ;
+    rdfs:comment "Fetch quest — retrieve an item and return it." .
+game:escortQuest    a game:QuestType ; rdfs:label "escort-quest" ;
+    rdfs:comment "Escort quest — protect an NPC to a destination." .
+game:investigationQuest a game:QuestType ; rdfs:label "investigation" ;
+    rdfs:comment "Investigation quest — gather clues, interview NPCs, solve a mystery." .
+game:collectionQuest a game:QuestType ; rdfs:label "collection" ;
+    rdfs:comment "Collection quest — gather a set of items or complete a set of objectives." .
+
+game:hasQuest a rdf:Property ;
+    rdfs:label "has quest" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:Quest .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Inventory and Items
+# ────────────────────────────────────────────────────────────────────
+
+game:GameItem a rdfs:Class ;
+    rdfs:label "Game Item" ;
+    rdfs:comment "An item in the game — weapon, armour, consumable, key item, crafting material, currency, cosmetic. Items have properties (weight, value, rarity, stats) and may be equipped, consumed, traded, or used in crafting." .
+
+game:itemType a rdf:Property ;
+    rdfs:label "item type" ;
+    rdfs:domain game:GameItem ;
+    rdfs:range  game:ItemType .
+
+game:ItemType a rdfs:Class ;
+    rdfs:label "Item Type" .
+
+game:weapon        a game:ItemType ; rdfs:label "weapon" .
+game:armour        a game:ItemType ; rdfs:label "armour" .
+game:consumable    a game:ItemType ; rdfs:label "consumable" .
+game:keyItem       a game:ItemType ; rdfs:label "key-item" ;
+    rdfs:comment "Key item — quest-critical, cannot be dropped or sold." .
+game:craftingMaterial a game:ItemType ; rdfs:label "crafting-material" .
+game:currency      a game:ItemType ; rdfs:label "currency" .
+game:cosmetic      a game:ItemType ; rdfs:label "cosmetic" .
+game:document      a game:ItemType ; rdfs:label "document" ;
+    rdfs:comment "In-game document — letter, map, book, note that the player can read. May contain lore or clues." .
+
+game:itemStats a rdf:Property ;
+    rdfs:label "item stats" ;
+    rdfs:domain game:GameItem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Item statistics — damage, defence, weight, value, durability (CBOR-LD encoded)." .
+
+game:itemRarity a rdf:Property ;
+    rdfs:label "item rarity" ;
+    rdfs:domain game:GameItem ;
+    rdfs:range  game:ItemRarity .
+
+game:ItemRarity a rdfs:Class ;
+    rdfs:label "Item Rarity" .
+
+game:common    a game:ItemRarity ; rdfs:label "common" .
+game:uncommon  a game:ItemRarity ; rdfs:label "uncommon" .
+game:rare      a game:ItemRarity ; rdfs:label "rare" .
+game:epic      a game:ItemRarity ; rdfs:label "epic" .
+game:legendary a game:ItemRarity ; rdfs:label "legendary" .
+game:unique    a game:ItemRarity ; rdfs:label "unique" ;
+    rdfs:comment "Unique — one-of-a-kind item, often quest-critical." .
+
+game:Inventory a rdfs:Class ;
+    rdfs:label "Inventory" ;
+    rdfs:comment "A character's or player's inventory — the items they carry. Has capacity limits, organisation (grid, slots, weight), and may support stacking, sorting, and filtering." .
+
+game:inventoryCapacity a rdf:Property ;
+    rdfs:label "inventory capacity" ;
+    rdfs:domain game:Inventory ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Capacity limit — 'weight: 100', 'slots: 30', 'grid: 10x10'." .
+
+game:inventoryItem a rdf:Property ;
+    rdfs:label "inventory item" ;
+    rdfs:domain game:Inventory ;
+    rdfs:range  game:GameItem ;
+    rdfs:comment "An item in the inventory." .
+
+game:hasInventory a rdf:Property ;
+    rdfs:label "has inventory" ;
+    rdfs:domain game:GameCharacter ;
+    rdfs:range  game:Inventory .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Progression — levelling, skills, unlocks
+# ────────────────────────────────────────────────────────────────────
+
+game:ProgressionSystem a rdfs:Class ;
+    rdfs:label "Progression System" ;
+    rdfs:comment "A system for player or character progression — experience points, levels, skill trees, unlocks, achievements. Progression provides long-term goals and rewards sustained play." .
+
+game:progressionType a rdf:Property ;
+    rdfs:label "progression type" ;
+    rdfs:domain game:ProgressionSystem ;
+    rdfs:range  game:ProgressionType .
+
+game:ProgressionType a rdfs:Class ;
+    rdfs:label "Progression Type" .
+
+game:experienceLevel a game:ProgressionType ; rdfs:label "experience-level" ;
+    rdfs:comment "XP and levels — gain XP from actions, level up at thresholds, gain stat increases or ability points." .
+game:skillTree      a game:ProgressionType ; rdfs:label "skill-tree" ;
+    rdfs:comment "Skill tree — branching unlock paths, prerequisites, specialisations." .
+game:achievement    a game:ProgressionType ; rdfs:label "achievement" ;
+    rdfs:comment "Achievements — meta-goals that track player accomplishments. May unlock rewards or cosmetics." .
+game:unlockSystem   a game:ProgressionType ; rdfs:label "unlock-system" ;
+    rdfs:comment "Unlock system — content gated behind progression (new areas, items, abilities, modes)." .
+game:reputation     a game:ProgressionType ; rdfs:label "reputation" ;
+    rdfs:comment "Reputation system — standing with factions or groups, affected by player actions." .
+
+game:progressionData a rdf:Property ;
+    rdfs:label "progression data" ;
+    rdfs:domain game:ProgressionSystem ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Progression configuration — XP curves, level thresholds, skill tree structure, achievement criteria (CBOR-LD encoded)." .
+
+game:hasProgression a rdf:Property ;
+    rdfs:label "has progression" ;
+    rdfs:domain game:Game ;
+    rdfs:range  game:ProgressionSystem .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Game State — save games, sessions, world state
+# ────────────────────────────────────────────────────────────────────
+
+game:GameState a rdfs:Class ;
+    rdfs:label "Game State" ;
+    rdfs:comment "The state of a game at a point in time — player position, stats, inventory, quest progress, world flags, NPC states, time of day. Game states are saved and loaded. A game state is a snapshot — it captures all variables that define the current situation. Game states may be persisted as save files, shared between players, or used for rollback/replay." .
+
+game:stateType a rdf:Property ;
+    rdfs:label "state type" ;
+    rdfs:domain game:GameState ;
+    rdfs:range  game:StateType .
+
+game:StateType a rdfs:Class ;
+    rdfs:label "State Type" .
+
+game:saveState      a game:StateType ; rdfs:label "save" ;
+    rdfs:comment "A saved game — player-initiated or auto-save checkpoint." .
+game:checkpointState a game:StateType ; rdfs:label "checkpoint" ;
+    rdfs:comment "A checkpoint — automatic save at key points in the game." .
+game:sessionState   a game:StateType ; rdfs:label "session" ;
+    rdfs:comment "A session state — the current active play session, not yet saved." .
+game:replayState    a game:StateType ; rdfs:label "replay" ;
+    rdfs:comment "A replay — recorded inputs and state deltas for playback." .
+game:sharedState    a game:StateType ; rdfs:label "shared" ;
+    rdfs:comment "A shared state — synchronised between players in multiplayer." .
+
+game:stateData a rdf:Property ;
+    rdfs:label "state data" ;
+    rdfs:domain game:GameState ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Serialised state data — all variables, positions, flags, inventory (CBOR-LD encoded)." .
+
+game:stateTimestamp a rdf:Property ;
+    rdfs:label "state timestamp" ;
+    rdfs:domain game:GameState ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "When the state was captured." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Split module — game-world.n3
+# ────────────────────────────────────────────────────────────────────
+#
+# The following sections are in game-world.n3 (same game: prefix):
+#
+#   § Real-World Grounding — historical, geographic, cultural,
+#     contemporary, future, fictional, hybrid grounding types;
+#     fidelity levels; time period; geographic scope; sources;
+#     epistemic modality
+#   § Game World — regions, points of interest, fast travel,
+#     encounter zones, real-world references
+#   § Game Design Document — GDD (subClass of pd:ProductionDocument),
+#     vision, target audience, monetisation, art style, audio style
+#   § Linking — connections to hypermedia, portal-worlds, spatial-3d,
+#     production-document, epistemics, agency, adversarial-conduct
+#
+# This ontology (game-design.n3) links to:
+#
+# hypermedia.n3:
+#   - game:Game is subClassOf hm:HypermediaAsset
+#
+# portal-worlds.n3:
+#   - Game avatars use pw:Avatar
+#   - Game environment objects use pw:EnvironmentObject
+#   - Game physics uses pw:PhysicsBody
+#
+# spatial-3d.n3:
+#   - Game world objects extend sp3:SceneObject
+#
+# production-document.n3:
+#   - game:GameDesignDocument (in game-world.n3) is subClassOf pd:ProductionDocument
+#   - Agent processing directives may generate game content
+#
+# agency.n3:
+#   - NPC AI behaviour is computational — no intent, no consciousness
+#
+# epistemics.n3:
+#   - Real-world grounding (in game-world.n3) has epistemic modality

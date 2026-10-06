@@ -1,0 +1,594 @@
+# Presentation Ontology — Display Modalities, Form Factors, Accessibility, i18n, Hardware
+# Authoring form (N3) — compiled to presentation.cbor (CBOR-LD) for runtime
+#
+# Copyright (c) 2026 Timothy Charles Holborn. All rights reserved.
+# Principal / inventor: Timothy Charles Holborn <timothy.holborn@gmail.com>
+# Assignment: COPYRIGHT.md · Licence: LICENSE (CC BY-NC-ND 4.0)
+
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ui:         <https://qualiadb.org/schema/ui#> .
+@prefix pres:       <https://qualiadb.org/schema/ui/presentation#> .
+@prefix container:  <https://qualiadb.org/schema/ui/container#> .
+
+# ────────────────────────────────────────────────────────────────────
+# 1. Presentation Context (the negotiated result)
+# ────────────────────────────────────────────────────────────────────
+
+pres:PresentationContext a rdfs:Class ;
+    rdfs:label "Presentation Context" ;
+    rdfs:comment "The negotiated result of matching container presentation hints against a machine profile. Describes how a container is actually rendered on this machine for this user." .
+
+pres:forContainer a rdf:Property ;
+    rdfs:label "for container" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  container:Container .
+
+pres:modality a rdf:Property ;
+    rdfs:label "modality" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "The display modality actually selected after negotiation." .
+
+pres:formFactor a rdf:Property ;
+    rdfs:label "form factor" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:FormFactor ;
+    rdfs:comment "The physical display class of the current machine." .
+
+pres:accessibilityProfile a rdf:Property ;
+    rdfs:label "accessibility profile" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:AccessibilityProfile ;
+    rdfs:comment "Active accessibility settings for this user session." .
+
+pres:locale a rdf:Property ;
+    rdfs:label "locale" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:LocaleProfile ;
+    rdfs:comment "Active locale and internationalisation settings." .
+
+pres:hardwareTier a rdf:Property ;
+    rdfs:label "hardware tier" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:HardwareTier ;
+    rdfs:comment "The rendering capacity tier of the current machine." .
+
+pres:spectralPerception a rdf:Property ;
+    rdfs:label "spectral perception" ;
+    rdfs:domain pres:PresentationContext ;
+    rdfs:range  pres:SpectralPerception ;
+    rdfs:comment "The EMF spectral perception range of the current viewer (human or agent). Determines how σ from the Q42 10D tensor is projected. Humans get the phenomenal portal projection (visible 400-700nm / audible 20Hz-20kHz). Agents may access the full EMF spectrum directly." .
+
+# ────────────────────────────────────────────────────────────────────
+# 2. Display Modality
+# ────────────────────────────────────────────────────────────────────
+
+pres:DisplayModality a rdfs:Class ;
+    rdfs:label "Display Modality" ;
+    rdfs:comment "How content is rendered to the user. A machine may support multiple modalities." .
+
+pres:Modality2D a pres:DisplayModality ;
+    rdfs:label "2D" ;
+    rdfs:comment "Flat 2D rendering — text, images, vector graphics, standard UI chrome." .
+
+pres:Modality3D a pres:DisplayModality ;
+    rdfs:label "3D" ;
+    rdfs:comment "Stereoscopic or monoscopic 3D rendering via wgpu. Meshes, volumetric, spatial UI." .
+
+pres:Modality4D a pres:DisplayModality ;
+    rdfs:label "4D (Time)" ;
+    rdfs:comment "3D with temporal dimension — animations, simulations, time-series volumetric." .
+
+pres:ModalityAR a pres:DisplayModality ;
+    rdfs:label "AR" ;
+    rdfs:comment "Augmented reality — overlays 3D content on the physical world via passthrough or projection." .
+
+pres:ModalityVR a pres:DisplayModality ;
+    rdfs:label "VR" ;
+    rdfs:comment "Virtual reality — fully immersive head-mounted display rendering." .
+
+pres:ModalityAudioOnly a pres:DisplayModality ;
+    rdfs:label "Audio Only" ;
+    rdfs:comment "No visual output. Content is rendered as speech, sonification, or audio cues. Used for screen-reader-only agents and visually impaired users." .
+
+pres:ModalityTactile a pres:DisplayModality ;
+    rdfs:label "Tactile" ;
+    rdfs:comment "Haptic output — braille displays, force feedback, vibration patterns. For deafblind access and hardware feedback." .
+
+pres:ModalityAgentReadable a pres:DisplayModality ;
+    rdfs:label "Agent Readable" ;
+    rdfs:comment "No human-facing rendering. Content is serialised as CBOR-LD for software agent consumption. The 'display' is a structured data stream." .
+
+# — Modality relationships —
+
+pres:degradesTo a rdf:Property ;
+    rdfs:label "degrades to" ;
+    rdfs:domain pres:DisplayModality ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "A modality can degrade to a lower-fidelity modality (e.g. 4D → 3D → 2D → AudioOnly → AgentReadable)." .
+
+pres:Modality4D pres:degradesTo pres:Modality3D .
+pres:Modality3D pres:degradesTo pres:Modality2D .
+pres:Modality2D pres:degradesTo pres:ModalityAudioOnly .
+pres:ModalityAudioOnly pres:degradesTo pres:ModalityAgentReadable .
+pres:ModalityVR pres:degradesTo pres:Modality3D .
+pres:ModalityAR pres:degradesTo pres:Modality3D .
+
+# ────────────────────────────────────────────────────────────────────
+# 3. Form Factor
+# ────────────────────────────────────────────────────────────────────
+
+pres:FormFactor a rdfs:Class ;
+    rdfs:label "Form Factor" ;
+    rdfs:comment "The physical display class of the machine. Determines layout constraints, input methods, and available modalities." .
+
+pres:Mobile a pres:FormFactor ;
+    rdfs:label "Mobile" ;
+    rdfs:comment "Phone or tablet. Touch-first, small screen, limited GPU. Portrait or landscape." .
+
+pres:Desktop a pres:FormFactor ;
+    rdfs:label "Desktop / Laptop" ;
+    rdfs:comment "Desktop or laptop. Mouse + keyboard, medium-to-large screen, mid-to-high GPU." .
+
+pres:LargeFormat a pres:FormFactor ;
+    rdfs:label "Large Format" ;
+    rdfs:comment "TV, projector, wall display, digital signage. Large screen, possibly touch, possibly remote input." .
+
+pres:HeadMounted a pres:FormFactor ;
+    rdfs:label "Head-Mounted" ;
+    rdfs:comment "VR headset or AR glasses. Immersive, head-tracked, controller or hand-tracked input." .
+
+pres:Embedded a pres:FormFactor ;
+    rdfs:label "Embedded" ;
+    rdfs:comment "IoT device, kiosk, sensor display. Minimal screen or no screen. Headless agent contexts." .
+
+# — Form factor constraints —
+
+pres:supportsModality a rdf:Property ;
+    rdfs:label "supports modality" ;
+    rdfs:domain pres:FormFactor ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "Which display modalities a form factor can support (hardware-permitting)." .
+
+pres:Mobile      pres:supportsModality pres:Modality2D, pres:Modality3D, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:Desktop     pres:supportsModality pres:Modality2D, pres:Modality3D, pres:Modality4D, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:LargeFormat pres:supportsModality pres:Modality2D, pres:Modality3D, pres:Modality4D, pres:ModalityAgentReadable .
+pres:HeadMounted pres:supportsModality pres:Modality3D, pres:Modality4D, pres:ModalityVR, pres:ModalityAR, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:Embedded    pres:supportsModality pres:Modality2D, pres:ModalityAudioOnly, pres:ModalityTactile, pres:ModalityAgentReadable .
+
+pres:screenWidthPx a rdf:Property ;
+    rdfs:label "screen width (px)" ;
+    rdfs:domain pres:FormFactor ;
+    rdfs:range  xsd:integer .
+
+pres:screenHeightPx a rdf:Property ;
+    rdfs:label "screen height (px)" ;
+    rdfs:domain pres:FormFactor ;
+    rdfs:range  xsd:integer .
+
+pres:density a rdf:Property ;
+    rdfs:label "pixel density" ;
+    rdfs:domain pres:FormFactor ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Pixels per physical unit (DPI/PPI)." .
+
+pres:inputMethod a rdf:Property ;
+    rdfs:label "input method" ;
+    rdfs:domain pres:FormFactor ;
+    rdfs:range  pres:InputMethod .
+
+pres:InputMethod a rdfs:Class ;
+    rdfs:label "Input Method" .
+
+pres:touch       a pres:InputMethod ; rdfs:label "touch" .
+pres:mouse       a pres:InputMethod ; rdfs:label "mouse" .
+pres:keyboard    a pres:InputMethod ; rdfs:label "keyboard" .
+pres:stylus      a pres:InputMethod ; rdfs:label "stylus" .
+pres:voice       a pres:InputMethod ; rdfs:label "voice" .
+pres:gesture     a pres:InputMethod ; rdfs:label "gesture" .
+pres:controller  a pres:InputMethod ; rdfs:label "controller" .
+pres:eyeTracking a pres:InputMethod ; rdfs:label "eye tracking" .
+pres:switch      a pres:InputMethod ; rdfs:label "switch" .
+pres:api         a pres:InputMethod ; rdfs:label "API (programmatic)" .
+
+# ────────────────────────────────────────────────────────────────────
+# 4. Accessibility
+# ────────────────────────────────────────────────────────────────────
+
+pres:AccessibilityProfile a rdfs:Class ;
+    rdfs:label "Accessibility Profile" ;
+    rdfs:comment "Active accessibility settings for a user session. Multiple features may be active simultaneously." .
+
+pres:accessibilityFeature a rdf:Property ;
+    rdfs:label "accessibility feature" ;
+    rdfs:domain pres:AccessibilityProfile ;
+    rdfs:range  pres:AccessibilityFeature .
+
+pres:AccessibilityFeature a rdfs:Class ;
+    rdfs:label "Accessibility Feature" .
+
+pres:ScreenReader a pres:AccessibilityFeature ;
+    rdfs:label "Screen Reader" ;
+    rdfs:comment "Content is read aloud. Requires semantic structure, ARIA-like roles, text alternatives for non-text content." .
+
+pres:HighContrast a pres:AccessibilityFeature ;
+    rdfs:label "High Contrast" ;
+    rdfs:comment "Increased contrast ratio for text and UI elements. Minimum WCAG AA (4.5:1) or AAA (7:1)." .
+
+pres:ReducedMotion a pres:AccessibilityFeature ;
+    rdfs:label "Reduced Motion" ;
+    rdfs:comment "Animations and transitions are minimised or removed. No parallax, no auto-playing video." .
+
+pres:FontScaling a pres:AccessibilityFeature ;
+    rdfs:label "Font Scaling" ;
+    rdfs:comment "User-adjusted font size. Layout must reflow without horizontal scrolling." .
+
+pres:SwitchControl a pres:AccessibilityFeature ;
+    rdfs:label "Switch Control" ;
+    rdfs:comment "Single or multi-switch input for users with limited motor control. Requires focus order, keyboard-equivalent navigation." .
+
+pres:VoiceControl a pres:AccessibilityFeature ;
+    rdfs:label "Voice Control" ;
+    rdfs:comment "Speech recognition for navigation and activation. Requires voice-accessible labels and commands." .
+
+pres:Captioning a pres:AccessibilityFeature ;
+    rdfs:label "Captioning" ;
+    rdfs:comment "Real-time captions for audio content. Required for deaf and hard-of-hearing users." .
+
+pres:AudioDescription a pres:AccessibilityFeature ;
+    rdfs:label "Audio Description" ;
+    rdfs:comment "Narrated description of visual content for blind and low-vision users." .
+
+pres:ColorBlindSafe a pres:AccessibilityFeature ;
+    rdfs:label "Colour-Blind Safe" ;
+    rdfs:comment "Colour palettes that are distinguishable for dichromatic and anomalous trichromatic vision. No colour-only encoding." .
+
+pres:SeizureSafe a pres:AccessibilityFeature ;
+    rdfs:label "Seizure Safe" ;
+    rdfs:comment "Content avoids flashing, rapid strobing, or patterns that may trigger photosensitive seizures. Max 3 flashes/sec." .
+
+pres:AgentAccessible a pres:AccessibilityFeature ;
+    rdfs:label "Agent Accessible" ;
+    rdfs:comment "Content is structured for software agent consumption — semantic markup, machine-readable labels, CBOR-LD serialisation. Not a disability accommodation per se, but an access modality." .
+
+# ────────────────────────────────────────────────────────────────────
+# 5. Spectral Perception (EMF spectrum — human vs agent)
+#
+# Normative reference: q42-10d-tensor-standard.md v1.2 §1.3
+# The Q42 10D tensor's σ dimension encodes an EMF spectral position.
+# Humans perceive a narrow band (visible 400-700nm, audible 20Hz-20kHz).
+# Agents may perceive the full EMF spectrum — UV, IR, radio, microwave,
+# X-ray — via σ directly, without human-range clamping.
+# ────────────────────────────────────────────────────────────────────
+
+pres:SpectralPerception a rdfs:Class ;
+    rdfs:label "Spectral Perception" ;
+    rdfs:comment "The EMF spectral perception range of a viewer. Determines how the Q42 10D tensor's σ dimension is projected for display. Humans receive the phenomenal portal projection (visible light + audible frequency). Agents may access σ directly across the full EMF spectrum." .
+
+pres:HumanVisible a pres:SpectralPerception ;
+    rdfs:label "Human Visible" ;
+    rdfs:comment "Human visible light range: 400-700nm. σ projected via fract(σ) → λ_nm = 400 + fract(σ)×300 → CIE 1931 XYZ → linear sRGB. This is the default for human-facing presentation." .
+
+pres:HumanAudible a pres:SpectralPerception ;
+    rdfs:label "Human Audible" ;
+    rdfs:comment "Human audible range: 20Hz-20kHz. σ projected via same λ_nm → f_hz = lerp(1760, 110, t) synaesthetic mapping. Used when modality is AudioOnly or when auditory augmentation is active." .
+
+pres:AgentFullSpectrum a pres:SpectralPerception ;
+    rdfs:label "Agent Full Spectrum" ;
+    rdfs:comment "Agent perception: full EMF spectrum via σ without clamping. Includes UV (<400nm), IR (>700nm), radio, microwave, X-ray. The agent accesses σ directly — the phenomenal portal projection (sRGB/audible) is a human-facing fallback, not the canonical representation. Used with ModalityAgentReadable." .
+
+pres:AgentCustomRange a pres:SpectralPerception ;
+    rdfs:label "Agent Custom Range" ;
+    rdfs:comment "An agent with a specific spectral range (e.g. IR sensor array 700-1400nm, radio telescope, multi-spectral imager). The range is defined by the agent's capability declaration and may span non-contiguous bands." .
+
+# — Spectral perception properties —
+
+pres:spectralRangeMin a rdf:Property ;
+    rdfs:label "spectral range min" ;
+    rdfs:domain pres:SpectralPerception ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Minimum wavelength (nm) or frequency (Hz) the perceiver can access. For humans: 400nm visible, 20Hz audible. For full-spectrum agents: 0 (unbounded)." .
+
+pres:spectralRangeMax a rdf:Property ;
+    rdfs:label "spectral range max" ;
+    rdfs:domain pres:SpectralPerception ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Maximum wavelength (nm) or frequency (Hz) the perceiver can access. For humans: 700nm visible, 20000Hz audible. For full-spectrum agents: infinity (unbounded)." .
+
+pres:spectralProjection a rdf:Property ;
+    rdfs:label "spectral projection" ;
+    rdfs:domain pres:SpectralPerception ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The projection formula applied to σ for this perceiver. Humans: fract(σ)→λ_nm→CIE XYZ→sRGB (visual) or λ_nm→f_hz (auditory). Agents: σ accessed directly (no projection)." .
+
+pres:spectralBands a rdf:Property ;
+    rdfs:label "spectral bands" ;
+    rdfs:domain pres:SpectralPerception ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Number of spectral bands the perceiver can distinguish. Humans: ~3 (trichromatic) for vision, ~1 for audio pitch. Agents may have dozens or hundreds of bands (multi-spectral, hyper-spectral)." .
+
+# — Set known values —
+
+pres:HumanVisible      pres:spectralRangeMin 400.0 ; pres:spectralRangeMax 700.0 ; pres:spectralBands 3 ;
+    pres:spectralProjection "fract(σ)→λ_nm=400+fract(σ)×300→CIE1931 XYZ→sRGB" .
+pres:HumanAudible      pres:spectralRangeMin 20.0 ; pres:spectralRangeMax 20000.0 ; pres:spectralBands 1 ;
+    pres:spectralProjection "λ_nm→f_hz=lerp(1760,110,(λ_nm−400)/300)" .
+pres:AgentFullSpectrum pres:spectralRangeMin 0.0 ; pres:spectralRangeMax 1.0e30 ; pres:spectralBands 64 ;
+    pres:spectralProjection "σ direct (no projection)" .
+
+# — Modality interaction —
+
+pres:modalitySpectralPerception a rdf:Property ;
+    rdfs:label "modality spectral perception" ;
+    rdfs:domain pres:DisplayModality ;
+    rdfs:range  pres:SpectralPerception ;
+    rdfs:comment "The default spectral perception for a modality. Modality2D/3D/4D → HumanVisible. ModalityAudioOnly → HumanAudible. ModalityAgentReadable → AgentFullSpectrum." .
+
+pres:Modality2D            pres:modalitySpectralPerception pres:HumanVisible .
+pres:Modality3D            pres:modalitySpectralPerception pres:HumanVisible .
+pres:Modality4D            pres:modalitySpectralPerception pres:HumanVisible .
+pres:ModalityAR            pres:modalitySpectralPerception pres:HumanVisible .
+pres:ModalityVR            pres:modalitySpectralPerception pres:HumanVisible .
+pres:ModalityAudioOnly     pres:modalitySpectralPerception pres:HumanAudible .
+pres:ModalityTactile       pres:modalitySpectralPerception pres:HumanAudible .
+pres:ModalityAgentReadable pres:modalitySpectralPerception pres:AgentFullSpectrum .
+
+# ────────────────────────────────────────────────────────────────────
+# 6. Internationalisation
+# ────────────────────────────────────────────────────────────────────
+
+pres:LocaleProfile a rdfs:Class ;
+    rdfs:label "Locale Profile" ;
+    rdfs:comment "Active locale and internationalisation settings for a user session." .
+
+pres:languageTag a rdf:Property ;
+    rdfs:label "language tag" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "BCP 47 language tag (e.g. 'en-AU', 'zh-Hans-CN', 'ar-SA')." .
+
+pres:textDirection a rdf:Property ;
+    rdfs:label "text direction" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  pres:TextDirection .
+
+pres:TextDirection a rdfs:Class ;
+    rdfs:label "Text Direction" .
+
+pres:ltr a pres:TextDirection ; rdfs:label "left-to-right" .
+pres:rtl a pres:TextDirection ; rdfs:label "right-to-left" .
+pres:ttb a pres:TextDirection ; rdfs:label "top-to-bottom" .
+pres:btt a pres:TextDirection ; rdfs:label "bottom-to-top" .
+
+pres:calendar a rdf:Property ;
+    rdfs:label "calendar" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Calendar system (gregorian, islamic, hebrew, japanese, chinese, etc.)." .
+
+pres:numberFormat a rdf:Property ;
+    rdfs:label "number format" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Number formatting pattern (decimal separator, grouping, negative representation)." .
+
+pres:currencyFormat a rdf:Property ;
+    rdfs:label "currency format" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Currency symbol placement, decimal places, grouping." .
+
+pres:dateFormat a rdf:Property ;
+    rdfs:label "date format" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Date formatting pattern (short, medium, long, full)." .
+
+pres:timeFormat a rdf:Property ;
+    rdfs:label "time format" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Time formatting pattern (12h, 24h, timezone display)." .
+
+pres:timezone a rdf:Property ;
+    rdfs:label "timezone" ;
+    rdfs:domain pres:LocaleProfile ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "IANA timezone identifier (e.g. 'Australia/Sydney')." .
+
+# ────────────────────────────────────────────────────────────────────
+# 7. Hardware Capacity
+# ────────────────────────────────────────────────────────────────────
+
+pres:HardwareTier a rdfs:Class ;
+    rdfs:label "Hardware Tier" ;
+    rdfs:comment "The rendering capacity of the current machine. Used to gate modalities and quality levels." .
+
+pres:TierMinimal a pres:HardwareTier ;
+    rdfs:label "Minimal" ;
+    rdfs:comment "Low-end mobile, embedded, or headless agent. No GPU or integrated GPU only. ≤4GB RAM. 2D only, no 3D." .
+
+pres:TierLow a pres:HardwareTier ;
+    rdfs:label "Low" ;
+    rdfs:comment "Budget mobile or old laptop. Integrated GPU. 4-8GB RAM. 2D + basic 3D, no 4D." .
+
+pres:TierMid a pres:HardwareTier ;
+    rdfs:label "Mid" ;
+    rdfs:comment "Modern laptop or mid-range desktop. Discrete or good integrated GPU. 8-16GB RAM. 2D + 3D + limited 4D." .
+
+pres:TierHigh a pres:HardwareTier ;
+    rdfs:label "High" ;
+    rdfs:comment "High-end desktop or workstation. Discrete GPU with ≥8GB VRAM. 16-32GB RAM. Full 4D, VR-ready." .
+
+pres:TierEnthusiast a pres:HardwareTier ;
+    rdfs:label "Enthusiast" ;
+    rdfs:comment "Top-tier workstation or server. Multiple GPUs, ≥32GB RAM. Full 4D, VR, AR, real-time volumetric." .
+
+pres:TierAgent a pres:HardwareTier ;
+    rdfs:label "Agent" ;
+    rdfs:comment "No human-facing display. The 'machine' is a software agent. Rendering is CBOR-LD serialisation only." .
+
+# — Hardware properties —
+
+pres:gpuVendor a rdf:Property ;
+    rdfs:label "GPU vendor" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:string .
+
+pres:gpuModel a rdf:Property ;
+    rdfs:label "GPU model" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:string .
+
+pres:vramMB a rdf:Property ;
+    rdfs:label "VRAM (MB)" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:integer .
+
+pres:ramMB a rdf:Property ;
+    rdfs:label "RAM (MB)" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:integer .
+
+pres:cpuCores a rdf:Property ;
+    rdfs:label "CPU cores" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:integer .
+
+pres:networkBandwidthMbps a rdf:Property ;
+    rdfs:label "network bandwidth (Mbps)" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:float ;
+    rdfs:comment "Available network bandwidth. 0 for offline, -1 for unknown." .
+
+pres:maxTextureSize a rdf:Property ;
+    rdfs:label "max texture size" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  xsd:integer ;
+    rdfs:comment "Maximum texture dimension supported by the GPU." .
+
+# — Tier to modality gating —
+
+pres:tierSupportsModality a rdf:Property ;
+    rdfs:label "tier supports modality" ;
+    rdfs:domain pres:HardwareTier ;
+    rdfs:range  pres:DisplayModality .
+
+pres:TierMinimal     pres:tierSupportsModality pres:Modality2D, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:TierLow         pres:tierSupportsModality pres:Modality2D, pres:Modality3D, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:TierMid         pres:tierSupportsModality pres:Modality2D, pres:Modality3D, pres:Modality4D, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:TierHigh        pres:tierSupportsModality pres:Modality2D, pres:Modality3D, pres:Modality4D, pres:ModalityVR, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:TierEnthusiast  pres:tierSupportsModality pres:Modality2D, pres:Modality3D, pres:Modality4D, pres:ModalityVR, pres:ModalityAR, pres:ModalityAudioOnly, pres:ModalityAgentReadable .
+pres:TierAgent       pres:tierSupportsModality pres:ModalityAgentReadable .
+
+# ────────────────────────────────────────────────────────────────────
+# 8. Machine Profile (loaded at startup)
+# ────────────────────────────────────────────────────────────────────
+
+pres:MachineProfile a rdfs:Class ;
+    rdfs:label "Machine Profile" ;
+    rdfs:comment "Describes what the current machine supports. Loaded at startup from hardware detection + user preferences. The runtime uses this to negotiate presentation contexts." .
+
+pres:hasFormFactor a rdf:Property ;
+    rdfs:label "has form factor" ;
+    rdfs:domain pres:MachineProfile ;
+    rdfs:range  pres:FormFactor .
+
+pres:hasHardwareTier a rdf:Property ;
+    rdfs:label "has hardware tier" ;
+    rdfs:domain pres:MachineProfile ;
+    rdfs:range  pres:HardwareTier .
+
+pres:hasAccessibilityProfile a rdf:Property ;
+    rdfs:label "has accessibility profile" ;
+    rdfs:domain pres:MachineProfile ;
+    rdfs:range  pres:AccessibilityProfile .
+
+pres:hasLocaleProfile a rdf:Property ;
+    rdfs:label "has locale profile" ;
+    rdfs:domain pres:MachineProfile ;
+    rdfs:range  pres:LocaleProfile .
+
+pres:supportedModalities a rdf:Property ;
+    rdfs:label "supported modalities" ;
+    rdfs:domain pres:MachineProfile ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "The intersection of form-factor-supported and tier-supported modalities. The runtime computes this at startup." .
+
+# ────────────────────────────────────────────────────────────────────
+# 9. Presentation Hints (per-container preferences)
+# ────────────────────────────────────────────────────────────────────
+
+pres:PresentationHints a rdfs:Class ;
+    rdfs:label "Presentation Hints" ;
+    rdfs:comment "Per-container preferences for how the container wants to be rendered. The runtime negotiates these against the machine profile." .
+
+pres:preferredModality a rdf:Property ;
+    rdfs:label "preferred modality" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "The container's first-choice display modality." .
+
+pres:fallbackModality a rdf:Property ;
+    rdfs:label "fallback modality" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  pres:DisplayModality ;
+    rdfs:comment "Ordered fallback chain if the preferred modality is unavailable. The runtime walks this list and picks the first match." .
+
+pres:minHardwareTier a rdf:Property ;
+    rdfs:label "minimum hardware tier" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  pres:HardwareTier ;
+    rdfs:comment "The minimum hardware tier required for the container's preferred modality. Below this, the fallback chain is used." .
+
+pres:requiresAccessibility a rdf:Property ;
+    rdfs:label "requires accessibility" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  pres:AccessibilityFeature ;
+    rdfs:comment "Accessibility features the container content requires (e.g. captioning for audio content)." .
+
+pres:supportsAccessibility a rdf:Property ;
+    rdfs:label "supports accessibility" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  pres:AccessibilityFeature ;
+    rdfs:comment "Accessibility features the container can provide (e.g. text alternatives, semantic structure)." .
+
+pres:supportsLocale a rdf:Property ;
+    rdfs:label "supports locale" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "BCP 47 language tags the container content is available in." .
+
+pres:defaultLocale a rdf:Property ;
+    rdfs:label "default locale" ;
+    rdfs:domain pres:PresentationHints ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The container's original language tag if no supported locale matches the user's preference." .
+
+# ────────────────────────────────────────────────────────────────────
+# 10. Negotiation rules (declarative)
+# ────────────────────────────────────────────────────────────────────
+
+# The runtime negotiates a PresentationContext by:
+# 1. Start with the container's preferredModality.
+# 2. If the machine's supportedModalities does not include it, walk the fallbackModality chain.
+# 3. If no fallback matches, use ModalityAgentReadable (always available).
+# 4. Check minHardwareTier — if the machine's tier is below, use the fallback chain.
+# 5. Apply accessibility features: if the user's profile requires a feature the container
+#    does not support, warn but do not block (degrade gracefully).
+# 6. Select locale: match user's languageTag against container's supportsLocale list.
+#    If no match, use container's defaultLocale.
+# 7. Select spectral perception: if the viewer is human, use the modality's default
+#    spectral perception (HumanVisible for visual, HumanAudible for audio). If the
+#    viewer is an agent, use AgentFullSpectrum or AgentCustomRange per the agent's
+#    capability declaration. The σ dimension of the Q42 10D tensor is projected
+#    accordingly — humans get the phenomenal portal (sRGB/audible), agents get σ
+#    directly.
+# 8. Produce a PresentationContext with the negotiated values.
+
+# These rules are enforced by the runtime, not by N3 inference.
+# The ontology defines the vocabulary; the negotiation logic lives in Rust.
