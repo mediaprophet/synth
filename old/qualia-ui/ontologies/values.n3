@@ -101,7 +101,7 @@ vals:catProfessional a vals:ValueCategory ; rdfs:label "professional" ;
 vals:catSpiritual    a vals:ValueCategory ; rdfs:label "spiritual" ;
     rdfs:comment "Spiritual value — relationship to the sacred or transcendent. e.g. reverence, humility, devotion, sacredness of life. Links to faith-systems.n3." .
 vals:catAesthetic    a vals:ValueCategory ; rdfs:label "aesthetic" ;
-    rdfs:comment "Aesthetic value — beauty, form, expression. e.g. artistic integrity, beauty, craftsmanship." .
+    rdfs:comment "Aesthetic value — beauty, form, expression. e.g. artistic integrity, beauty, mastery." .
 vals:catEpistemic    a vals:ValueCategory ; rdfs:label "epistemic" ;
     rdfs:comment "Epistemic value — truth, knowledge, evidence. e.g. intellectual honesty, rigour, transparency, openness to revision." .
 

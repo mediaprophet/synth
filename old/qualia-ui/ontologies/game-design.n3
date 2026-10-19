@@ -119,7 +119,7 @@ game:movement        a game:MechanicType ; rdfs:label "movement" ;
 game:combat          a game:MechanicType ; rdfs:label "combat" ;
     rdfs:comment "Combat — melee, ranged, magic, stealth, defence." .
 game:resourceMgmt    a game:MechanicType ; rdfs:label "resource-management" ;
-    rdfs:comment "Resource management — gathering, crafting, trading, economy." .
+    rdfs:comment "Resource management — gathering, fabrication, trading, economy." .
 game:progression     a game:MechanicType ; rdfs:label "progression" ;
     rdfs:comment "Progression — levelling, skill trees, unlocks, achievements." .
 game:puzzle          a game:MechanicType ; rdfs:label "puzzle" ;
@@ -523,7 +523,7 @@ game:hasQuest a rdf:Property ;
 
 game:GameItem a rdfs:Class ;
     rdfs:label "Game Item" ;
-    rdfs:comment "An item in the game — weapon, armour, consumable, key item, crafting material, currency, cosmetic. Items have properties (weight, value, rarity, stats) and may be equipped, consumed, traded, or used in crafting." .
+    rdfs:comment "An item in the game — weapon, armour, consumable, key item, fabrication material, currency, cosmetic. Items have properties (weight, value, rarity, stats) and may be equipped, consumed, traded, or used in fabrication." .
 
 game:itemType a rdf:Property ;
     rdfs:label "item type" ;
@@ -538,7 +538,7 @@ game:armour        a game:ItemType ; rdfs:label "armour" .
 game:consumable    a game:ItemType ; rdfs:label "consumable" .
 game:keyItem       a game:ItemType ; rdfs:label "key-item" ;
     rdfs:comment "Key item — quest-critical, cannot be dropped or sold." .
-game:craftingMaterial a game:ItemType ; rdfs:label "crafting-material" .
+game:fabricationMaterial a game:ItemType ; rdfs:label "fabrication-material" .
 game:currency      a game:ItemType ; rdfs:label "currency" .
 game:cosmetic      a game:ItemType ; rdfs:label "cosmetic" .
 game:document      a game:ItemType ; rdfs:label "document" ;
