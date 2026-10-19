@@ -11,6 +11,17 @@ use crate::tool_chest::core::tool::ToolKind;
 pub fn toolbox_glyph(id: &str) -> &'static str {
     match id {
         "epistemic" => "🧭",
+        "grid_studio" => "📊",
+        "word_studio" => "📝",
+        "deck_studio" => "📑",
+        "pdf_studio" => "📕",
+        "vector_studio" => "🎨",
+        "photo_studio" => "🖼️",
+        "light_studio" => "📷",
+        "cad_studio" => "📐",
+        "sound_studio" => "🎛️",
+        "film_studio" => "🎬",
+        "art_studio" => "🪄",
         "office" | "word_processor" | "tb_word_processor" | "doc" => "📝",
         "sheet" | "tb_spreadsheet" => "📊",
         "image" | "graphics" | "tb_graphics" => "🎨",

@@ -38,12 +38,15 @@ mod register_office_toolbox;
 mod register_rights_toolbox;
 mod register_scientific_toolbox;
 mod register_cg_live;
+mod register_authoring_toolboxes;
 mod register_sdn_toolbox;
 mod register_sheet_toolbox;
 mod register_spatial_toolbox;
+mod register_qpu_toolbox;
 
 use register_ai_toolbox::register_ai_toolbox;
 use register_audio_toolbox::register_audio_toolbox;
+use register_authoring_toolboxes::register_all_authoring_toolboxes;
 use register_code_toolbox::register_code_toolbox;
 use register_communication_toolbox::register_communication_toolbox;
 use register_compact_toolbox::register_compact_toolbox;
@@ -54,6 +57,7 @@ use register_health_toolbox::register_health_toolbox;
 use register_image_toolbox::register_image_toolbox;
 use register_mail_toolbox::register_mail_toolbox;
 use register_office_toolbox::register_office_toolbox;
+use register_qpu_toolbox::register_qpu_toolbox;
 use register_rights_toolbox::register_rights_toolbox;
 use register_scientific_toolbox::register_scientific_toolbox;
 use register_sdn_toolbox::register_sdn_toolbox;
@@ -93,6 +97,8 @@ pub fn build_registry() -> Registry {
     register_code_toolbox(&mut reg);
     register_ai_toolbox(&mut reg);
     register_sdn_toolbox(&mut reg);
+    register_all_authoring_toolboxes(&mut reg);
+    register_qpu_toolbox(&mut reg);
     crate::browser::spec_tools::register_all(&mut reg);
 
     for seed in manifolds::all_seeds() {
@@ -4720,6 +4726,63 @@ mod tests {
         assert!(id_live.tools().iter().any(|t| {
             t.metadata().id == "rights:id_live_agency"
                 && t.metadata().capability_scope.as_deref() == Some("Agency.evaluate")
+        }));
+    }
+
+    #[test]
+    fn qpu_toolbox_binds_quantum_and_scheduler_capabilities() {
+        let registry = super::build_registry();
+        let qpu = registry.toolbox("qpu").expect("qpu toolbox");
+        assert_eq!(qpu.metadata().family, "qpu");
+        assert_eq!(qpu.chains().len(), 4);
+
+        let exec = qpu
+            .chains()
+            .iter()
+            .find(|c| c.metadata().id == "qpu:execution")
+            .expect("qpu:execution chain");
+        assert!(exec.tools().iter().any(|t| {
+            t.metadata().id == "qpu:circuit_execute"
+                && t.metadata().capability_scope.as_deref() == Some("Qpu.execute_circuit")
+        }));
+        assert!(exec.tools().iter().any(|t| {
+            t.metadata().id == "qpu:statevector_to_quins"
+                && t.metadata().capability_scope.as_deref() == Some("Qpu.statevector_to_quins")
+        }));
+        assert!(exec.tools().iter().any(|t| {
+            t.metadata().id == "qpu:bell_state_verifier"
+                && t.metadata().capability_scope.as_deref() == Some("Qpu.bell_state_verifier")
+        }));
+
+        let dqc = qpu
+            .chains()
+            .iter()
+            .find(|c| c.metadata().id == "qpu:dqc_scheduler")
+            .expect("qpu:dqc_scheduler chain");
+        assert!(dqc.tools().iter().any(|t| {
+            t.metadata().id == "qpu:dqc_scheduler"
+                && t.metadata().capability_scope.as_deref() == Some("Qpu.schedule_dqc")
+        }));
+
+        let chem = qpu
+            .chains()
+            .iter()
+            .find(|c| c.metadata().id == "qpu:chemistry_vqe")
+            .expect("qpu:chemistry_vqe chain");
+        assert!(chem.tools().iter().any(|t| {
+            t.metadata().id == "qpu:vqe_energy_estimator"
+                && t.metadata().capability_scope.as_deref() == Some("Qpu.vqe_energy_estimator")
+        }));
+
+        let cont = qpu
+            .chains()
+            .iter()
+            .find(|c| c.metadata().id == "qpu:containers")
+            .expect("qpu:containers chain");
+        assert_eq!(cont.tools().len(), 3);
+        assert!(cont.tools().iter().all(|t| {
+            t.metadata().kind == ToolKind::PlaceContainer
+                && t.metadata().capability_scope.as_deref() == Some(SCOPE_PLACE)
         }));
     }
 }

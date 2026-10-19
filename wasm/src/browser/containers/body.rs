@@ -4,10 +4,11 @@
 use crate::tool_chest::core::registry::SeedContainer;
 use web_sys::{Document, Element};
 
-use super::{body_core, body_health, body_ontology, body_project, body_studio};
+use super::{body_authoring, body_core, body_health, body_ontology, body_project, body_studio};
 
 pub(super) fn fill_body(document: &Document, container: &SeedContainer, body: &Element) {
-    if body_project::try_fill(document, container, body)
+    if body_authoring::try_fill(document, container, body)
+        || body_project::try_fill(document, container, body)
         || body_health::try_fill(document, container, body)
         || body_studio::try_fill(document, container, body)
         || body_ontology::try_fill(document, container, body)

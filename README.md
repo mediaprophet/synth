@@ -1,6 +1,24 @@
 # NLP
 NLP Dev
 
+## Current Poet implementation programme (2026-10-11)
+
+Poet is now a standalone workspace: `wasm/` contains the authoring frontend and `native/` currently contains the VibeScript CLI, not a graphical desktop frontend. Dependencies on sibling QualiaDB are intentional. The Webizen OS shell is the target operating-environment UI; useful legacy Webizen Desktop services are to be extracted into toolkit-independent host libraries, not retained as a required competing UI.
+
+The comprehensive cross-repository programme is maintained in the existing QualiaDB planning documents:
+
+- [ST architecture, contracts, app mappings, graphics, supervision and release gates](../qualiaDB/docs/work-in-progress/POET_UPDATED_IMPLEMENTATION_PLAN_2026-09-05.md#st-programme-2026-10-11--storytold-apps-poet-and-webizen-os).
+- [ST-00 through ST-39 execution packets and continuation prompt](../qualiaDB/docs/POET_LOWER_COST_AGENT_EXECUTION_PLAYBOOK_2026-09-04.md#18-st-programme-execution-packets-2026-10-11).
+- [VibeScript application-language extension specification (ST-N)](../qualiaDB/docs/work-in-progress/POET_UPDATED_IMPLEMENTATION_PLAN_2026-09-05.md#st-n-vibescript-as-the-canonical-application-language).
+- [VB-00 through VB-09 language/runtime/binding/tooling migration packets](../qualiaDB/docs/POET_LOWER_COST_AGENT_EXECUTION_PLAYBOOK_2026-09-04.md#19-vb-programme--vibescript-javascript-replacement-extensions).
+- [Append-only execution and verification ledger](../qualiaDB/docs/POET_IMPLEMENTATION_SESSION_LEDGER.md).
+
+Read the ST sections before the historical September instructions. New Poet changes belong here, not in retained `qualiaDB/crates/poet` copies. The plan covers all eleven Storytold apps, a shared command/context system, connected command orbs, contextual menus, macro/micro attention, native/WASM execution and first-class supervised agents. Planning is not a completion claim: start with `ST-00`, execute one bounded subunit and retain real test/UAT evidence. No implementation packet is complete solely because its plan exists.
+
+The planning branch is `0.0.40.8-dev` in Poet and QualiaDB. Other repositories require their own checked branch/status before editing. No commit, push, publication, paid provider call or user-data deletion is implicit in the plan.
+
+The original NLP/product notes below are retained historical context; their Webizen Desktop UI destination does not supersede the current ST programme.
+
 **Copyright © 2026 Timothy Charles Holborn.** All rights reserved.  
 **Principal / inventor:** Timothy Charles Holborn &lt;timothy.holborn@gmail.com&gt;  
 See [`COPYRIGHT.md`](COPYRIGHT.md) and [`LICENSE`](LICENSE) (CC BY-NC-ND 4.0).

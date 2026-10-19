@@ -5,6 +5,7 @@
 mod attrs;
 mod body;
 mod body_core;
+mod body_authoring;
 mod body_health;
 mod body_ontology;
 mod body_project;

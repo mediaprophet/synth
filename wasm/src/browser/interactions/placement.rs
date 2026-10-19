@@ -150,14 +150,43 @@ pub fn place_container_via_menu(document: &Document, container_type: &str, label
 pub(super) fn place_container_on_canvas(document: &Document, container_type: &str, label: &str) {
     use crate::tool_chest::core::registry::SeedContainer;
 
-    let width = if container_type == "health_calculators" || container_type == "chemical_explorer" {
+    let width = if container_type == "health_calculators"
+        || container_type == "chemical_explorer"
+        || matches!(
+            container_type,
+            "grid_studio"
+                | "word_studio"
+                | "deck_studio"
+                | "pdf_studio"
+                | "vector_studio"
+                | "photo_studio"
+                | "light_studio"
+                | "cad_studio"
+                | "sound_studio"
+                | "film_studio"
+                | "art_studio"
+        ) {
         720.0
     } else {
         400.0
     };
-    let height = if container_type == "health_calculators" || container_type == "chemical_explorer"
-    {
+    let height = if container_type == "health_calculators" || container_type == "chemical_explorer" {
         520.0
+    } else if matches!(
+        container_type,
+        "grid_studio"
+            | "word_studio"
+            | "deck_studio"
+            | "pdf_studio"
+            | "vector_studio"
+            | "photo_studio"
+            | "light_studio"
+            | "cad_studio"
+            | "sound_studio"
+            | "film_studio"
+            | "art_studio"
+    ) {
+        480.0
     } else {
         300.0
     };

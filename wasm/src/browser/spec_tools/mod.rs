@@ -153,7 +153,7 @@ mod tests {
 
     #[test]
     fn row_count_matches_named_spec_tools() {
-        assert_eq!(all_rows().len(), 702, "named spec-tool inventory drifted");
+        assert_eq!(all_rows().len(), 704, "named spec-tool inventory drifted");
     }
 
     #[test]

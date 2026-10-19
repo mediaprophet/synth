@@ -1,22 +1,23 @@
 //! BASE-01 inventory integrity checks.
 
+mod support;
+
+use crate::support::{delegated_view_files, qualia_root};
 use serde_json::Value;
 use std::collections::BTreeSet;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[test]
 fn inventory_matches_the_live_delegation_audit() {
-    let root = manifest_dir().join("../..");
-    let browser = manifest_dir().join("src/browser");
+    let root = qualia_root();
     let inventory: Value = serde_json::from_str(
         &fs::read_to_string(root.join("docs/poet/surface-inventory.json"))
             .expect("surface inventory"),
     )
     .expect("valid surface inventory JSON");
 
-    let mut delegated_files = BTreeSet::new();
-    collect_delegated_files(&browser, &mut delegated_files);
+    let delegated_files = delegated_view_files(&manifest_dir().join("src/browser"));
     let surfaces = inventory["surfaces"].as_array().expect("surfaces array");
     assert_eq!(
         inventory["counts"]["delegation_source_audit"].as_u64(),
@@ -120,34 +121,4 @@ fn inventory_matches_the_live_delegation_audit() {
 
 fn manifest_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-}
-
-fn collect_delegated_files(directory: &Path, out: &mut BTreeSet<String>) {
-    let Ok(entries) = fs::read_dir(directory) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            collect_delegated_files(&path, out);
-        } else if path.extension().and_then(|value| value.to_str()) == Some("rs") {
-            let Ok(source) = fs::read_to_string(&path) else {
-                continue;
-            };
-            if source.lines().any(|line| {
-                let line = line.trim_start();
-                line.starts_with("pub use ") && line.contains("build_") && line.contains("_view")
-            }) {
-                let repository_root = manifest_dir()
-                    .join("../..")
-                    .canonicalize()
-                    .expect("repository root");
-                let canonical_path = path.canonicalize().expect("delegated source path");
-                let relative = canonical_path
-                    .strip_prefix(repository_root)
-                    .expect("source under repository root");
-                out.insert(relative.to_string_lossy().replace('\\', "/"));
-            }
-        }
-    }
 }

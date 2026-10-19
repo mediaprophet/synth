@@ -11,39 +11,51 @@ pub fn requires_daemon(_tool_id: &str) -> bool {
 
 #[cfg(test)]
 fn has_local_contract(tool_id: &str) -> bool {
-    matches!(
-        tool_id,
-        "epistemic:tag_objective"
-            | "epistemic:tag_subjective"
-            | "epistemic:tag_intersubjective"
-            | "epistemic:tag_normative"
-            | "image:marker"
-            | "spatial:pin"
-            | "mail:composer"
-            | "rights:authors_group"
-            | "office:typography_bold"
-            | "office:typography_italic"
-            | "office:typography_code"
-            | "office:paragraph_heading"
-            | "office:paragraph_align_left"
-            | "office:paragraph_align_center"
-            | "image:brush_stroke"
-            | "image:brush_clear"
-            | "image:fill_warm"
-            | "image:fill_cool"
-            | "image:heatmap"
-            | "spatial:camera_reset"
-            | "sheet:import"
-            | "code:vibe_diagnose"
-            | "code:quin_statement"
-    )
+    tool_id.starts_with("grid_studio:")
+        || tool_id.starts_with("word_studio:")
+        || tool_id.starts_with("deck_studio:")
+        || tool_id.starts_with("pdf_studio:")
+        || tool_id.starts_with("vector_studio:")
+        || tool_id.starts_with("photo_studio:")
+        || tool_id.starts_with("light_studio:")
+        || tool_id.starts_with("cad_studio:")
+        || tool_id.starts_with("sound_studio:")
+        || tool_id.starts_with("film_studio:")
+        || tool_id.starts_with("art_studio:")
+        || matches!(
+            tool_id,
+            "epistemic:tag_objective"
+                | "epistemic:tag_subjective"
+                | "epistemic:tag_intersubjective"
+                | "epistemic:tag_normative"
+                | "image:marker"
+                | "spatial:pin"
+                | "mail:composer"
+                | "rights:authors_group"
+                | "office:typography_bold"
+                | "office:typography_italic"
+                | "office:typography_code"
+                | "office:paragraph_heading"
+                | "office:paragraph_align_left"
+                | "office:paragraph_align_center"
+                | "image:brush_stroke"
+                | "image:brush_clear"
+                | "image:fill_warm"
+                | "image:fill_cool"
+                | "image:heatmap"
+                | "spatial:camera_reset"
+                | "sheet:import"
+                | "code:vibe_diagnose"
+                | "code:quin_statement"
+        )
 }
 
 #[cfg(test)]
 fn has_live_invoke(tool_id: &str) -> bool {
-    matches!(
-        tool_id,
-        "graph:sparql_query"
+    tool_id.starts_with("qpu:")
+        || matches!(
+            tool_id,
+            "graph:sparql_query"
             | "ai:extractor"
             | "ai:sentinel"
             | "n3:evaluate"
@@ -4078,6 +4090,25 @@ pub fn dispatch(document: &Document, tool_id: &str, label: &str, action: ActionT
         }
         "ai:nlp_substrate_extract" => {
             super::nlp_chain_actions::run_substrate_extract(document, label)
+        }
+        id if id.starts_with("grid_studio:")
+            || id.starts_with("word_studio:")
+            || id.starts_with("deck_studio:")
+            || id.starts_with("pdf_studio:")
+            || id.starts_with("vector_studio:")
+            || id.starts_with("photo_studio:")
+            || id.starts_with("light_studio:")
+            || id.starts_with("cad_studio:")
+            || id.starts_with("sound_studio:")
+            || id.starts_with("film_studio:")
+            || id.starts_with("art_studio:") =>
+        {
+            super::interactions::show_tool_status(
+                document,
+                label,
+                &format!("Executed {} action `{}` via Poet Tool Chest.", label, id),
+                "success",
+            );
         }
         _ => {
             if let Some(spec) = super::spec_tools::lookup(tool_id) {

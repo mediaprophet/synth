@@ -108,6 +108,17 @@ pub fn build_toolbox_dock(document: &Document, toolboxes: &[Toolbox]) -> Element
     );
 
     let quick_containers = [
+        ("grid_studio", "📊 Grid Studio"),
+        ("word_studio", "📝 Document Studio"),
+        ("deck_studio", "📑 Presentation Studio"),
+        ("pdf_studio", "📕 PDF Studio"),
+        ("vector_studio", "🎨 Vector Studio"),
+        ("photo_studio", "🖼️ Photo Studio"),
+        ("light_studio", "📷 Light Studio"),
+        ("cad_studio", "📐 CAD Studio"),
+        ("sound_studio", "🎛️ Sound Studio"),
+        ("film_studio", "🎬 Film Studio"),
+        ("art_studio", "🪄 Art Studio"),
         ("doc", "📄 Doc"),
         ("sheet", "📊 Sheet"),
         ("code", "💻 Script"),

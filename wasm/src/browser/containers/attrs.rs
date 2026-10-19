@@ -106,7 +106,10 @@ pub(super) fn container_type_filter_attrs(container_type: &str) -> (&'static str
 
         // Technical strata
         "code" | "ontology" | "graph" | "doc" | "sheet" | "latex" | "slide" | "subcanvas"
-        | "pulse" | "aura" | "library" => ("technical", "objective"),
+        | "pulse" | "aura" | "library"
+        | "grid_studio" | "word_studio" | "deck_studio" | "pdf_studio" | "vector_studio"
+        | "photo_studio" | "light_studio" | "cad_studio" | "sound_studio" | "film_studio"
+        | "art_studio" => ("technical", "objective"),
 
         // Workflow panels — technical
         "checkpoint-tray"
@@ -181,10 +184,10 @@ pub(super) fn container_type_filter_attrs(container_type: &str) -> (&'static str
 pub(super) fn media_surface_for(container_type: &str) -> &'static str {
     match container_type {
         "media" | "video_view" | "animation_timeline" | "animation_export" | "transport"
-        | "channel_strip" | "meter_bridge" => "film",
+        | "channel_strip" | "meter_bridge" | "sound_studio" | "film_studio" => "film",
         "dual_studio" | "dual-studio" | "lighting_editor" | "material_editor"
         | "shader_pipelines" | "scene_graph" | "scene_view" | "lod_chain" | "ragdoll_skin"
-        | "shadow_settings" | "spatial_10d" | "tensor_inspector" => "cg",
+        | "shadow_settings" | "spatial_10d" | "tensor_inspector" | "art_studio" => "cg",
         "map" | "gis_maps" => "map",
         "media_3d" | "spatial" => "3d",
         _ => "2d",
@@ -206,6 +209,17 @@ pub(super) fn container_type_tag(container_type: &str) -> (&'static str, &'stati
         "media" => ("tag-media", "MEDIA"),
         "code" => ("tag-code", "VIBE"),
         "doc" => ("tag-doc", "DOC"),
+        "grid_studio" => ("tag-sheet", "GRID"),
+        "word_studio" => ("tag-doc", "WORD"),
+        "deck_studio" => ("tag-doc", "DECK"),
+        "pdf_studio" => ("tag-doc", "PDF"),
+        "vector_studio" => ("tag-media", "VECTOR"),
+        "photo_studio" => ("tag-media", "PHOTO"),
+        "light_studio" => ("tag-media", "LIGHT"),
+        "cad_studio" => ("tag-workflow", "CAD"),
+        "sound_studio" => ("tag-media", "SOUND"),
+        "film_studio" => ("tag-media", "FILM"),
+        "art_studio" => ("tag-media", "ART"),
         // Workflow panel containers
         "checkpoint-tray" => ("tag-workflow", "WORKFLOW"),
         "credential-inspector" => ("tag-workflow", "CREDENTIAL"),
