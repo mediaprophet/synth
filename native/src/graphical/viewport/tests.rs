@@ -1,0 +1,334 @@
+use super::*;
+use crate::graphical::{
+    assembly::{AssemblyRenderSettings, CompiledAssembly, CompiledPart},
+    preview::{PreviewCamera, PreviewLimits, SourceRef},
+};
+use qualia_core_db::{
+    container_10d::{MaterialRecord, OpacityMode, SubmeshRange},
+    poet_host::invoke::studio_store::{self, StudioArtifact},
+    render::{assets::Mesh, temporal_producers::Mat4ColumnMajor},
+};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+
+static NEXT: AtomicU64 = AtomicU64::new(1);
+fn source() -> SourceRef {
+    let id = format!(
+        "urn:poet:r9:viewport-test:{}:{}",
+        std::process::id(),
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    );
+    let (_, stamp) = studio_store::create_artifact_if_absent(StudioArtifact::new(
+        &id,
+        "Geometry",
+        "viewport calibration",
+    ))
+    .unwrap();
+    SourceRef {
+        artifact_id: id,
+        stamp,
+    }
+}
+fn camera() -> PreviewCamera {
+    PreviewCamera {
+        yaw: 0.0,
+        pitch: 0.0,
+        distance: 4.0,
+        target: [0.0; 3],
+    }
+}
+fn scene() -> CompiledAssembly {
+    let mut material = MaterialRecord::legacy_default();
+    material.base_color = [0.8, 0.15, 0.08, 1.0];
+    // Front and back overlap in the image; the visible nearer part is not first.
+    CompiledAssembly {
+        mesh: Mesh {
+            positions: vec![
+                [-1.0, -1.0, 0.0],
+                [1.0, -1.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [-1.0, -1.0, 1.0],
+                [1.0, -1.0, 1.0],
+                [0.0, 1.0, 1.0],
+            ],
+            triangles: vec![[0, 1, 2], [3, 4, 5]],
+            min: [-1.0, -1.0, 0.0],
+            max: [1.0, 1.0, 1.0],
+        },
+        materials: vec![material],
+        ranges: (0..2)
+            .map(|i| SubmeshRange {
+                first_index: i * 3,
+                index_count: 3,
+                material_id: material.id,
+                semantic_id: 101 + i as u64,
+            })
+            .collect(),
+        parts: (0..2)
+            .map(|i| CompiledPart {
+                key: if i == 0 { "rear" } else { "front" }.into(),
+                parent: None,
+                semantic_id: 101 + i as u64,
+                first_index: i * 3,
+                index_count: 3,
+            })
+            .collect(),
+        normals: vec![[0.0, 0.0, 1.0]; 6],
+        uv0: vec![[0.0, 0.0]; 6],
+    }
+}
+
+#[test]
+fn viewport_gestures_use_canonical_clamps_and_projection_axes() {
+    let moved = apply_gesture(
+        camera(),
+        ViewportGesture::Orbit {
+            dx: 20.0,
+            dy: 8192.0,
+        },
+        512,
+        512,
+    )
+    .unwrap();
+    assert_eq!(moved.pitch, 1.45);
+    let zoom = apply_gesture(camera(), ViewportGesture::Zoom { steps: 100.0 }, 512, 512).unwrap();
+    assert_eq!(
+        zoom.distance,
+        qualia_core_db::render::camera::CAMERA_MIN_ZOOM
+    );
+    let pan = apply_gesture(
+        camera(),
+        ViewportGesture::Pan { dx: 64.0, dy: 0.0 },
+        512,
+        512,
+    )
+    .unwrap();
+    assert!(pan.target[0] < 0.0);
+    assert_eq!(pan.target[1], 0.0);
+    assert_eq!(pan.target[2], 0.0);
+    assert!(apply_gesture(
+        camera(),
+        ViewportGesture::Zoom { steps: f32::NAN },
+        512,
+        512
+    )
+    .is_err());
+}
+
+#[test]
+fn viewport_framing_accounts_for_portrait_aspect_and_off_origin_parts() {
+    let bounds = ([9.0, -1.0, -1.0], [11.0, 1.0, 1.0]);
+    let wide = frame_bounds(camera(), bounds.0, bounds.1, 1024, 512).unwrap();
+    let portrait = frame_bounds(camera(), bounds.0, bounds.1, 256, 512).unwrap();
+    assert_eq!(wide.target, [10.0, 0.0, 0.0]);
+    assert!(portrait.distance > wide.distance);
+    for (c, aspect) in [(wide, 2.0), (portrait, 0.5)] {
+        let matrix = Mat4ColumnMajor::from_cols(camera_state(c).unwrap().view_projection(aspect));
+        for x in [9.0, 11.0] {
+            for y in [-1.0, 1.0] {
+                for z in [-1.0, 1.0] {
+                    let p = picking::project(&matrix, [x, y, z]).unwrap();
+                    assert!(p[0].abs() <= 1.0 && p[1].abs() <= 1.0);
+                }
+            }
+        }
+    }
+    assert!(frame_bounds(camera(), [-f32::MAX; 3], [f32::MAX; 3], 512, 512).is_err());
+}
+
+#[test]
+fn viewport_pick_maps_nearest_actual_triangle_to_exact_source_part() {
+    let source = source();
+    let scene = scene();
+    let cancel = AtomicBool::new(false);
+    let hit = picking::pick_part(&source, 7, &scene, camera(), 64, 64, 32.0, 32.0, 2, &cancel)
+        .unwrap()
+        .unwrap();
+    assert_eq!(hit.part_key, "front");
+    assert_eq!(hit.semantic_id, 102);
+    assert_eq!(hit.triangle_index, 1);
+    assert_eq!(hit.frame_id, 7);
+    assert!(
+        picking::pick_part(&source, 7, &scene, camera(), 64, 64, 0.0, 0.0, 2, &cancel)
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        picking::pick_part(&source, 7, &scene, camera(), 64, 64, 64.0, 32.0, 2, &cancel).is_err()
+    );
+    assert!(
+        picking::pick_part(&source, 7, &scene, camera(), 64, 64, 32.0, 32.0, 1, &cancel).is_err()
+    );
+}
+
+#[test]
+fn viewport_pick_uses_same_non_square_projection_and_pixel_centers() {
+    let source = source();
+    let scene = scene();
+    let cancel = AtomicBool::new(false);
+    for (width, height) in [(128, 64), (64, 128)] {
+        let hit = picking::pick_part(
+            &source,
+            1,
+            &scene,
+            camera(),
+            width,
+            height,
+            width as f32 / 2.0,
+            height as f32 / 2.0,
+            2,
+            &cancel,
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(hit.part_key, "front");
+    }
+}
+
+#[test]
+fn viewport_alpha_wind_cancel_and_late_source_changes_fail_closed() {
+    let source = source();
+    let mut scene = scene();
+    let cancel = AtomicBool::new(false);
+    scene.materials[0].opacity_mode = OpacityMode::Mask;
+    assert!(
+        picking::pick_part(&source, 1, &scene, camera(), 64, 64, 32.0, 32.0, 2, &cancel).is_err()
+    );
+    scene.materials[0].opacity_mode = OpacityMode::Opaque;
+    scene.materials[0].wind_animated = true;
+    assert!(
+        picking::pick_part(&source, 1, &scene, camera(), 64, 64, 32.0, 32.0, 2, &cancel).is_err()
+    );
+    scene.materials[0].wind_animated = false;
+    cancel.store(true, Ordering::Release);
+    assert!(
+        picking::pick_part(&source, 1, &scene, camera(), 64, 64, 32.0, 32.0, 2, &cancel).is_err()
+    );
+    cancel.store(false, Ordering::Release);
+    studio_store::mutate_artifact_stamped(&source.artifact_id, &source.stamp, |artifact| {
+        artifact.title = "changed".into();
+        Ok(())
+    })
+    .unwrap();
+    assert!(
+        picking::pick_part(&source, 1, &scene, camera(), 64, 64, 32.0, 32.0, 2, &cancel).is_err()
+    );
+}
+
+#[test]
+fn viewport_empty_and_byte_budgets_reject_before_device_creation() {
+    let limits = PreviewLimits {
+        side: 64,
+        vertices: 16,
+        indices: 16,
+    };
+    let mut view = RetainedViewport::new(
+        limits,
+        ViewportBudget {
+            working_bytes: 1,
+            ..ViewportBudget::default()
+        },
+    )
+    .unwrap();
+    assert!(view
+        .replace_scene(
+            source(),
+            scene(),
+            AssemblyRenderSettings::for_camera(camera()),
+            None,
+            None,
+            &AtomicBool::new(false)
+        )
+        .err()
+        .unwrap()
+        .contains("byte budget"));
+    assert_eq!(view.counters().device_creations, 0);
+    view.invalidate();
+    assert_eq!(view.frame_id(), None);
+}
+
+/// Explicit native headless GPU qualification; not native window/input/human acceptance.
+/// Run separately with --ignored --exact graphical::viewport::tests::r9_native_gpu_retains_device_scene_and_picks_visible_part
+#[test]
+#[ignore = "requires explicit native GPU qualification"]
+fn r9_native_gpu_retains_device_scene_and_picks_visible_part() {
+    let source = source();
+    let cancel = AtomicBool::new(false);
+    let mut view = RetainedViewport::new(
+        PreviewLimits {
+            side: 64,
+            vertices: 16,
+            indices: 16,
+        },
+        ViewportBudget::default(),
+    )
+    .unwrap();
+    let mut settings = AssemblyRenderSettings::for_camera(camera());
+    settings.shadows = false;
+    settings.screen_space_ao = false;
+    let first = view
+        .replace_scene(source.clone(), scene(), settings, None, None, &cancel)
+        .unwrap();
+    let id = view.frame_id().unwrap();
+    let selected = view
+        .pick(source.clone(), id, 32.0, 32.0, &cancel)
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        (
+            selected.part_key.as_str(),
+            selected.semantic_id,
+            selected.triangle_index
+        ),
+        ("front", 102, 1)
+    );
+    // Actual GPU pixels at projected interior differ from clear background, not just a histogram.
+    let center = (32 * 64 + 32) * 4;
+    assert_ne!(&first.rgba8[center..center + 3], &first.rgba8[0..3]);
+    let highlighted = view.render(source.clone(), camera(), &cancel).unwrap();
+    assert!(highlighted
+        .rgba8
+        .chunks_exact(4)
+        .any(|p| p == [255, 194, 45, 255]));
+    assert!(view.pick(source.clone(), id, 32.0, 32.0, &cancel).is_err());
+    view.clear_selection();
+    let moved = apply_gesture(
+        camera(),
+        ViewportGesture::Orbit { dx: 5.0, dy: 2.0 },
+        64,
+        64,
+    )
+    .unwrap();
+    let second = view.render(source.clone(), moved, &cancel).unwrap();
+    assert_ne!(first.rgba8, second.rgba8);
+    let matrix = Mat4ColumnMajor::from_cols(camera_state(moved).unwrap().view_projection(1.0));
+    let projected = picking::project(&matrix, [0.0, -1.0 / 3.0, 1.0]).unwrap();
+    let x = (projected[0] * 0.5 + 0.5) * 64.0;
+    let y = (0.5 - projected[1] * 0.5) * 64.0;
+    let selected = view
+        .pick(source.clone(), view.frame_id().unwrap(), x, y, &cancel)
+        .unwrap()
+        .unwrap();
+    assert_eq!(selected.part_key, "front");
+    assert_eq!(
+        view.counters(),
+        ViewportCounters {
+            device_creations: 1,
+            scene_uploads: 1,
+            frames: 3
+        }
+    );
+    let old_id = view.frame_id().unwrap();
+    view.invalidate();
+    assert!(view.pick(source.clone(), old_id, x, y, &cancel).is_err());
+    let _ = view
+        .replace_scene(source.clone(), scene(), settings, None, None, &cancel)
+        .unwrap();
+    assert!(view.frame_id().unwrap() > old_id);
+    assert_eq!(view.counters().device_creations, 1);
+    studio_store::mutate_artifact_stamped(&source.artifact_id, &source.stamp, |a| {
+        a.title = "retired GPU source".into();
+        Ok(())
+    })
+    .unwrap();
+    assert!(view.render(source, camera(), &cancel).is_err());
+}

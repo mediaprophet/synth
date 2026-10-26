@@ -3,6 +3,8 @@
 mod format;
 mod lint;
 mod repl;
+#[cfg(feature = "native-graphical")]
+use poet_cli::graphical;
 
 use std::env;
 use std::fs;
@@ -14,11 +16,17 @@ fn print_usage() {
         vibe::LANGUAGE_VERSION
     );
     println!("\nUsage:");
-    println!("  poet repl           Start an interactive VibeScript REPL");
+    println!("  poet repl [--grant <capability>]...  Interactive REPL; default grants: none");
     println!("  poet format <file>  Format a .vibe file");
     println!("  poet lint <file>    Run static analysis checks on a .vibe file");
     println!("  poet eval <file>    Evaluate a .vibe file and print result");
     println!("  poet help           Show this help message");
+    #[cfg(feature = "native-graphical")]
+    println!(
+        "  poet studio --diagnostic-new-source [--grant <capability>]...  Native Aether Studio"
+    );
+    #[cfg(feature = "native-graphical")]
+    println!("  poet studio --native-project <directory> [--check-project]  Native enrollment, contributor and reviewer workspace");
 }
 
 fn main() {
@@ -29,8 +37,35 @@ fn main() {
     }
 
     match args[1].as_str() {
+        #[cfg(feature = "native-graphical")]
+        "mcp" => {
+            if args.len() != 2 {
+                eprintln!(
+                    "Usage: poet mcp; project admission is supplied only by a native embedding"
+                );
+                process::exit(1);
+            }
+            if let Err(error) = graphical::mcp::run_unbound_stdio() {
+                eprintln!("Poet MCP: {error}");
+                process::exit(1);
+            }
+        }
+        #[cfg(feature = "native-graphical")]
+        "studio" => {
+            if let Err(error) = graphical::entry::run(&args[2..]) {
+                eprintln!("Poet Studio: {error}");
+                process::exit(1);
+            }
+        }
         "repl" => {
-            if let Err(e) = repl::run_repl() {
+            let grants = match repl::parse_repl_grants(&args[2..]) {
+                Ok(grants) => grants,
+                Err(error) => {
+                    eprintln!("REPL option error: {error}");
+                    process::exit(1);
+                }
+            };
+            if let Err(e) = repl::run_repl_with_grants(grants) {
                 eprintln!("REPL error: {e}");
                 process::exit(1);
             }

@@ -89,4 +89,4 @@ web-sys = { workspace = true, features = [
 ] }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3"
+wasm-bindgen-test = "=0.3.79"

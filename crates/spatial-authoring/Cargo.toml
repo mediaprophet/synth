@@ -1,0 +1,20 @@
+[package]
+name = "poet-spatial-authoring"
+description = "Poet source-backed metric profiles and identified spatial assembly helpers"
+version = "0.4.0"
+edition = "2024"
+license = "MIT"
+rust-version = "1.90"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[dependencies]
+poet-geometry = { path = "../geometry" }
+qualia-core-db = { path = "C:/github/qualiaDB/crates/qualia-core-db", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"] }

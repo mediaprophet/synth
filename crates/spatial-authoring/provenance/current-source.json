@@ -1,0 +1,318 @@
+{
+  "utc": "2026-10-25T00:50:07.983674+00:00",
+  "selected_license": "MIT",
+  "no_original_or_staged_source_removed": true,
+  "no_independent_document_state": true,
+  "unused_profile_revision_wrapper_removed": true,
+  "rustfmt_exit_code": 0,
+  "cargo_run_by_worker": false,
+  "source_transitions": [
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\bounds.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\bounds.rs",
+      "source_sha256": "e9227ca6f12a4b0d83827d35938cf59d851c1a44a104209834103ce091eb07e9",
+      "target_sha256": "e9227ca6f12a4b0d83827d35938cf59d851c1a44a104209834103ce091eb07e9",
+      "current_target_sha256": "e9227ca6f12a4b0d83827d35938cf59d851c1a44a104209834103ce091eb07e9",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\curve.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\curve.rs",
+      "source_sha256": "b451ca7277cd95702167a75cd675959b0f784c9a160767bbca983f7318195ac8",
+      "target_sha256": "b451ca7277cd95702167a75cd675959b0f784c9a160767bbca983f7318195ac8",
+      "current_target_sha256": "b451ca7277cd95702167a75cd675959b0f784c9a160767bbca983f7318195ac8",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\intersect.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\intersect.rs",
+      "source_sha256": "23aabb289ae1b72af4e59cf3b4604ce3fac15d380c99ef1b6163695801358bcd",
+      "target_sha256": "23aabb289ae1b72af4e59cf3b4604ce3fac15d380c99ef1b6163695801358bcd",
+      "current_target_sha256": "23aabb289ae1b72af4e59cf3b4604ce3fac15d380c99ef1b6163695801358bcd",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\lib.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\lib.rs",
+      "source_sha256": "246ab5b08b6a1714fb65d9268f47456fbbfc8b303b5b8018c1ae9238e719fe2a",
+      "target_sha256": "246ab5b08b6a1714fb65d9268f47456fbbfc8b303b5b8018c1ae9238e719fe2a",
+      "current_target_sha256": "246ab5b08b6a1714fb65d9268f47456fbbfc8b303b5b8018c1ae9238e719fe2a",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\mat.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\mat.rs",
+      "source_sha256": "e47810e00928ff0a95daedf615d1a7a2e3acab2d9368cec9ff4964e65a617a3d",
+      "target_sha256": "e47810e00928ff0a95daedf615d1a7a2e3acab2d9368cec9ff4964e65a617a3d",
+      "current_target_sha256": "e47810e00928ff0a95daedf615d1a7a2e3acab2d9368cec9ff4964e65a617a3d",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\region.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\region.rs",
+      "source_sha256": "a953cbd48b3899b1ecd7a4dedc5d055d2784868546ceaa6755d486ec926c9607",
+      "target_sha256": "a953cbd48b3899b1ecd7a4dedc5d055d2784868546ceaa6755d486ec926c9607",
+      "current_target_sha256": "a953cbd48b3899b1ecd7a4dedc5d055d2784868546ceaa6755d486ec926c9607",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\spline.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\spline.rs",
+      "source_sha256": "58f67277bb7a9021046f2360662de26cd174994f7348950874298e5447dd388f",
+      "target_sha256": "58f67277bb7a9021046f2360662de26cd174994f7348950874298e5447dd388f",
+      "current_target_sha256": "58f67277bb7a9021046f2360662de26cd174994f7348950874298e5447dd388f",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\tests.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\tests.rs",
+      "source_sha256": "a2119bf17fe160eafcf6011af34b43251c54996ff97d4e31c125d04af971467b",
+      "target_sha256": "a2119bf17fe160eafcf6011af34b43251c54996ff97d4e31c125d04af971467b",
+      "current_target_sha256": "a2119bf17fe160eafcf6011af34b43251c54996ff97d4e31c125d04af971467b",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\geom\\src\\vec.rs",
+      "target": "C:\\github\\poet\\crates\\geometry\\src\\vec.rs",
+      "source_sha256": "f8fd2fd51a853e081a6756cb032faccf6156c6e472f019677c445795e389f74c",
+      "target_sha256": "f8fd2fd51a853e081a6756cb032faccf6156c6e472f019677c445795e389f74c",
+      "current_target_sha256": "f8fd2fd51a853e081a6756cb032faccf6156c6e472f019677c445795e389f74c",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\assembly.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\assembly.rs",
+      "source_sha256": "3a2012601a66191fd4de2301dc3d7a3a2a015d20f92f6709cc6415af60133662",
+      "target_sha256": "7de713b7f1e4fd8e4b6ebb16ccd88a8760ebc449d45d1bdf1a9cb4451a698ba6",
+      "current_target_sha256": "31ee785f3878e88291b83cc84a82cd0348ea98e42250bcf3c4b0cb83c2dc41ee",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\frames.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\frames.rs",
+      "source_sha256": "3c7e14eb0817d5de7ce7b708449c6e89fbba65736e035b25109c389b43f6f329",
+      "target_sha256": "8942b853f996f0a164cd3f6871b692e8889851130a9f71d8977d793e49ae06a2",
+      "current_target_sha256": "b7b7827b86be75c7acd2084a47627f1d0883107e8a7bfafc2bebdfee438b8b0a",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\geometry.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\geometry.rs",
+      "source_sha256": "d464b71ce3a3bf668466a1d1d2b57736ebf1bd1a13998c6664c9b150c8114d6b",
+      "target_sha256": "6170562aa0d26b459fad664bc3adda1a46bf20468d309ef8c2127bb1215e1f84",
+      "current_target_sha256": "fd9c9ea10f81869488aead648f2084715961cf338ecf49ab040639fbfb7e287a",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\lib.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\lib.rs",
+      "source_sha256": "00a40c883e4c5330d7aace7ddbe0a68d92f76f38c834942b9163e22e79e3d82e",
+      "target_sha256": "64336d408c0853233576683f8c2ae1933c4598b612023579f7035e104ad5d524",
+      "current_target_sha256": "1daf08641fd95834aa990c68e95f14f296ef15c6ea7072e55fef7f75af635e68",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\profile.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\profile.rs",
+      "source_sha256": "99db0a6fa5fe5957e1d863d018ca212d86bd39738d447bdf37f444a93c89f4fc",
+      "target_sha256": "0fbb691a254b612f2eadec624aa800a15dc613e064482d2e06c34f0dcdcceac8",
+      "current_target_sha256": "b894158cbc6a9f1dfdc927ea29c03436c422b10a13a3d7e34094ec5e5627abe4",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\craft\\crates\\authoring\\src\\tests.rs",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\src\\tests.rs",
+      "source_sha256": "82824aa8c1c1b8eaff5666d6049ebbcea19ce71dfb1f125e9f22f3b6f1baef1e",
+      "target_sha256": "a6e848d0abed145dd7d5a458db1da97d1222584df33419bd8ec4445db05f0b49",
+      "current_target_sha256": "b52c01de27d2d7027f2c1d10ec3bce5450d62e806716d84840aa389385dd02fa",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\poet-cadcraft\\LICENSE-MIT",
+      "target": "C:\\github\\poet\\crates\\geometry\\LICENSE-MIT",
+      "source_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "target_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "current_target_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\poet-cadcraft\\LICENSE-MIT",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\LICENSE-MIT",
+      "source_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "target_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "current_target_sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\poet\\native\\src\\graphical\\craft_host.rs",
+      "target": "C:\\github\\poet\\native\\src\\graphical\\spatial_host.rs",
+      "source_sha256": "ae7366dd6f5367e15f366b2741a708afe301d829bbc3094ca353a033f6a4c918",
+      "target_sha256": "dc5a664fa36294c725d23d3993b7324a67eea111467a2517f0a70e4a39820e00",
+      "current_target_sha256": "e2a5375c6b448a82662e1fe3062497e21c88eaf6ed14c69b8f1671d9ecb02794",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\poet\\native\\src\\graphical\\geometry_host.rs",
+      "target": "C:\\github\\poet\\native\\src\\graphical\\geometry_host.rs",
+      "source_sha256": "ec6c34be352d4fd351d1add31d36d4793c0e11e4b03ee9ca70590f368b43dc15",
+      "target_sha256": "48472ad5d02b76c124c444cf82ad37380913587f96f0343648dbe7837e035d72",
+      "current_target_sha256": "d22fb4eb9b5a4a6bf48e8579ce9619725bbdf8a6cf33f8ee0c0e62394b14373c"
+    },
+    {
+      "source": "C:\\github\\poet-cadcraft\\NOTICE",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\provenance\\original-NOTICE",
+      "source_sha256": "cdfbfa6606bc6c389758cfdc5addeccb47a2a2cc7bfb7fcc4be9a2b783bd1561",
+      "target_sha256": "cdfbfa6606bc6c389758cfdc5addeccb47a2a2cc7bfb7fcc4be9a2b783bd1561",
+      "current_target_sha256": "cdfbfa6606bc6c389758cfdc5addeccb47a2a2cc7bfb7fcc4be9a2b783bd1561",
+      "preserved_source_unchanged": true
+    },
+    {
+      "source": "C:\\github\\poet-cadcraft\\ATTRIBUTION.md",
+      "target": "C:\\github\\poet\\crates\\spatial-authoring\\provenance\\original-ATTRIBUTION.md",
+      "source_sha256": "f7c53dffd94302510948de78af6b646c2eb355fe6048ed655c60aff45ff51a58",
+      "target_sha256": "f7c53dffd94302510948de78af6b646c2eb355fe6048ed655c60aff45ff51a58",
+      "current_target_sha256": "f7c53dffd94302510948de78af6b646c2eb355fe6048ed655c60aff45ff51a58",
+      "preserved_source_unchanged": true
+    }
+  ],
+  "files": [
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\Cargo.toml",
+      "sha256": "83d32567dfc2f56f16418131196cf2a34f66320cecf6a4341dcf78191d3dc36a",
+      "bytes": 374,
+      "lines": 19
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\LICENSE-MIT",
+      "sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "bytes": 1100,
+      "lines": 21
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\README.md",
+      "sha256": "d402ba504cfdc9ec232188bcfe61e0c183a67838598b52a3f76ed747a0e22689",
+      "bytes": 789,
+      "lines": 13
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\bounds.rs",
+      "sha256": "e9227ca6f12a4b0d83827d35938cf59d851c1a44a104209834103ce091eb07e9",
+      "bytes": 3397,
+      "lines": 101
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\curve.rs",
+      "sha256": "b451ca7277cd95702167a75cd675959b0f784c9a160767bbca983f7318195ac8",
+      "bytes": 21414,
+      "lines": 595
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\intersect.rs",
+      "sha256": "23aabb289ae1b72af4e59cf3b4604ce3fac15d380c99ef1b6163695801358bcd",
+      "bytes": 4771,
+      "lines": 128
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\lib.rs",
+      "sha256": "246ab5b08b6a1714fb65d9268f47456fbbfc8b303b5b8018c1ae9238e719fe2a",
+      "bytes": 2474,
+      "lines": 73
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\mat.rs",
+      "sha256": "e47810e00928ff0a95daedf615d1a7a2e3acab2d9368cec9ff4964e65a617a3d",
+      "bytes": 5261,
+      "lines": 149
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\region.rs",
+      "sha256": "a953cbd48b3899b1ecd7a4dedc5d055d2784868546ceaa6755d486ec926c9607",
+      "bytes": 21240,
+      "lines": 532
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\spline.rs",
+      "sha256": "58f67277bb7a9021046f2360662de26cd174994f7348950874298e5447dd388f",
+      "bytes": 11200,
+      "lines": 299
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\tests.rs",
+      "sha256": "a2119bf17fe160eafcf6011af34b43251c54996ff97d4e31c125d04af971467b",
+      "bytes": 13036,
+      "lines": 323
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\geometry\\src\\vec.rs",
+      "sha256": "f8fd2fd51a853e081a6756cb032faccf6156c6e472f019677c445795e389f74c",
+      "bytes": 6454,
+      "lines": 228
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\Cargo.toml",
+      "sha256": "ac99b726da7f74fe9335094eb5371477d9db6246f05df6c87940c6dfa5ff59dd",
+      "bytes": 676,
+      "lines": 20
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\LICENSE-MIT",
+      "sha256": "54b0fc87ed7b61b59c20340070dd2b8c7f9d0b53795347819c3bd7c67ea2508a",
+      "bytes": 1100,
+      "lines": 21
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\README.md",
+      "sha256": "13f80518c3a2b84e99a188fcb2244536a8550bd3ef66fb1912132d6975ef7b10",
+      "bytes": 2304,
+      "lines": 34
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\assembly.rs",
+      "sha256": "31ee785f3878e88291b83cc84a82cd0348ea98e42250bcf3c4b0cb83c2dc41ee",
+      "bytes": 11737,
+      "lines": 331
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\frames.rs",
+      "sha256": "b7b7827b86be75c7acd2084a47627f1d0883107e8a7bfafc2bebdfee438b8b0a",
+      "bytes": 2223,
+      "lines": 60
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\geometry.rs",
+      "sha256": "fd9c9ea10f81869488aead648f2084715961cf338ecf49ab040639fbfb7e287a",
+      "bytes": 8523,
+      "lines": 266
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\lib.rs",
+      "sha256": "1daf08641fd95834aa990c68e95f14f296ef15c6ea7072e55fef7f75af635e68",
+      "bytes": 996,
+      "lines": 31
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\profile.rs",
+      "sha256": "b894158cbc6a9f1dfdc927ea29c03436c422b10a13a3d7e34094ec5e5627abe4",
+      "bytes": 8312,
+      "lines": 239
+    },
+    {
+      "path": "C:\\github\\poet\\crates\\spatial-authoring\\src\\tests.rs",
+      "sha256": "b52c01de27d2d7027f2c1d10ec3bce5450d62e806716d84840aa389385dd02fa",
+      "bytes": 5530,
+      "lines": 169
+    },
+    {
+      "path": "C:\\github\\poet\\native\\src\\graphical\\geometry_host.rs",
+      "sha256": "d22fb4eb9b5a4a6bf48e8579ce9619725bbdf8a6cf33f8ee0c0e62394b14373c",
+      "bytes": 11984,
+      "lines": 298
+    },
+    {
+      "path": "C:\\github\\poet\\native\\src\\graphical\\spatial_host.rs",
+      "sha256": "e2a5375c6b448a82662e1fe3062497e21c88eaf6ed14c69b8f1671d9ecb02794",
+      "bytes": 9980,
+      "lines": 272
+    }
+  ]
+}

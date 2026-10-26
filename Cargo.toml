@@ -2,6 +2,8 @@
 members = [
     "native",
     "wasm",
+    "crates/geometry",
+    "crates/spatial-authoring",
 ]
 resolver = "2"
 
@@ -14,10 +16,10 @@ chrono = { version = "0.4.45", default-features = false }
 console_error_panic_hook = "0.1.7"
 base64 = { version = "0.22.1", default-features = false }
 serde-wasm-bindgen = "0.6.5"
-wasm-bindgen = "=0.2.125"
-wasm-bindgen-futures = "0.4.75"
-js-sys = "0.3.102"
-web-sys = "0.3.102"
+wasm-bindgen = "=0.2.129"
+wasm-bindgen-futures = "=0.4.79"
+js-sys = "=0.3.106"
+web-sys = "=0.3.106"
 vibe = { path = "../qualiaDB/crates/vibe" }
 
 [profile.wasm-release]
@@ -26,3 +28,7 @@ opt-level = "s"
 lto = true
 codegen-units = 1
 strip = "symbols"
+
+[patch.crates-io]
+wgpu = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualia-main" }
+naga = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualia-main" }

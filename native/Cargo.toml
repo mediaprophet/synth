@@ -5,7 +5,89 @@ edition = "2021"
 
 [dependencies]
 vibe = { workspace = true }
+dioxus = { path = "C:/github/rust-app-framework/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { path = "C:/github/rust-app-framework/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "data-uri", "clipboard", "accessibility"], optional = true }
+qualia-core-db = { path = "C:/github/qualiaDB/crates/qualia-core-db", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"], optional = true }
+qualia-geospatial = { path = "C:/github/qualiaDB/crates/qualia-geospatial", optional = true }
+webizen-render = { path = "C:/github/qualiaDB/crates/webizen-render", optional = true }
+poet-spatial-authoring = { path = "../crates/spatial-authoring", optional = true }
+base64 = { version = "=0.22.1", optional = true }
+futures-channel = { version = "=0.3.34", optional = true }
+
+qualia-cooperative-core = { path = "C:/github/qualiaDB/crates/qualia-cooperative-core", optional = true }
+qualia-mcp = { path = "C:/github/qualiaDB/crates/qualia-mcp", default-features = false, features = ["authoring"], optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
+serde_json = { workspace = true, optional = true }
+sha2 = { version = "0.10", optional = true }
+ciborium = { workspace = true, optional = true }
+
+[features]
+# Match the canonical integration test cfg to the already-required native crypto capability.
+sanctuary-crypto = ["qualia-core-db/sanctuary-crypto"]
+native-graphical = ["sanctuary-crypto","dep:dioxus", "dep:dioxus-native", "dep:qualia-core-db", "dep:webizen-render", "dep:base64", "dep:futures-channel", "dep:qualia-cooperative-core", "dep:qualia-mcp", "dep:serde", "dep:serde_json", "dep:sha2", "dep:poet-spatial-authoring", "dep:qualia-geospatial", "dep:ciborium"]
 
 [[bin]]
 name = "poet"
 path = "src/main.rs"
+
+[[example]]
+name = "growing_reference"
+path = "examples/growing_reference/main.rs"
+required-features = ["native-graphical"]
+
+[dev-dependencies]
+ciborium.workspace = true
+tempfile = "=3.27.0"
+
+# Run the canonical public codec regressions against Poet's exact native dependency closure.
+[[test]]
+name = "mesh_section_bounds"
+path = "../../qualiaDB/crates/qualia-core-db/tests/mesh_section_bounds.rs"
+required-features = ["native-graphical"]
+
+# Canonical package policy and native authority cases against this exact native consumer closure.
+[[test]]
+name = "foundation_package_policy"
+path = "../../qualiaDB/crates/qualia-cooperative-core/tests/package_review.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_native_package_review"
+path = "../../qualiaDB/crates/qualia-core-db/tests/native_package_review.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_fiel"
+path = "tests/foundation_fiel.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name="foundation_geometry_catalog"
+path="../../qualiaDB/crates/vibe/tests/poet_geometry_catalog.rs"
+required-features=["native-graphical"]
+
+# Canonical HMC texture union through the actual native Poet dependency closure.
+[[test]]
+name = "foundation_hmc_texture_union"
+path = "../../qualiaDB/crates/qualia-core-db/tests/studio_hmc_texture_union.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_uv_atlas"
+path = "../../qualiaDB/crates/qualia-core-db/tests/uv_atlas_native.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_image_source_over"
+path = "../../qualiaDB/crates/qualia-core-db/tests/image_source_over.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_source_carrier"
+path = "tests/foundation_source_carrier.rs"
+required-features = ["native-graphical"]
+
+[[test]]
+name = "foundation_image_completion"
+path = "tests/foundation_image_completion.rs"
+required-features = ["native-graphical"]
