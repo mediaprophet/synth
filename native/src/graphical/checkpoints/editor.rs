@@ -20,10 +20,18 @@ impl CheckpointEditorHost {
 }
 
 impl EditorHost for CheckpointEditorHost {
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { self.inner.retire_retained_viewport() }
     fn viewport_action(&mut self, request: crate::graphical::viewport::ViewportCommand,
         expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool,
     ) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
-        self.inner.viewport_action(request, expected, cancelled)
+        if let crate::graphical::viewport::ViewportCommand::RigPreview { resource, delta_seconds } = request {
+            crate::graphical::viewport_contract::validate_command(&crate::graphical::viewport::ViewportCommand::RigPreview { resource: resource.clone(), delta_seconds })?;
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) || self.inner.snapshot()?.source != expected { return Err("Rig preview source changed or was cancelled".into()); }
+            let bytes = self.service.read_selected_resource(resource.clone(), &expected, 16 * 1024 * 1024, cancelled)?;
+            self.inner.preview_rig_from_selected_resource(&resource.key, &bytes, expected, delta_seconds, cancelled)
+        } else {
+            self.inner.viewport_action(request, expected, cancelled)
+        }
     }
 
     fn retained_surface_carrier(
@@ -64,6 +72,21 @@ impl EditorHost for CheckpointEditorHost {
             let resources = self.service.surface_resources(&request, &expected)?;
             self.inner.install_surface_resources(resources, expected)
         }
+    }
+
+    fn bind_surface_package_transaction(
+        &mut self,
+        request: crate::graphical::surface_host::SurfacePackageRequest,
+        expected: SourceRef,
+    ) -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+        use crate::graphical::surface_host::SurfaceBindingFailure;
+        request.validate().map_err(SurfaceBindingFailure::BeforeMutation)?;
+        // Loading and validating the package only reads bounded source files;
+        // no host resource or epoch has changed before installation starts.
+        let resources = self.service.surface_resources(&request, &expected)
+            .map_err(SurfaceBindingFailure::BeforeMutation)?;
+        self.inner.install_surface_resources(resources, expected)
+            .map_err(SurfaceBindingFailure::MayHaveMutated)
     }
 
     fn inspect_typed_10d(
@@ -146,17 +169,27 @@ impl EditorHost for CheckpointEditorHost {
         }
         Ok(result)
     }
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { self.inner.numeric_sheet_view(expected) }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> { self.inner.numeric_sheet_edit(edit, expected) }
     fn authoring_view(
         &self,
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.inner.authoring_view(e)
     }
+    fn rig_authoring_edit(&mut self, resource: super::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled before resource read".into()); }
+        if self.inner.snapshot()?.source != expected { return Err("Rig source changed; no read".into()); }
+        let bytes = self.service.read_selected_resource(resource.clone(), &expected, 16 * 1024 * 1024, cancelled)?;
+        if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled after resource read".into()); }
+        self.inner.edit_rig_from_selected_resource(&resource.key, &bytes, control, expected, cancelled)
+    }
     fn authoring_edit(
         &mut self,
         a: crate::graphical::authoring::AuthoringEdit,
         e: SourceRef,
     ) -> Result<EditorOutcome, String> {
+        if matches!(&a, crate::graphical::authoring::AuthoringEdit::Rig { .. }) { return Err("Rig edit requires the cancellation-aware route".into()); }
         self.inner.authoring_edit(a, e)
     }
     fn compiled_assets(

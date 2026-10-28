@@ -1,22 +1,21 @@
 mod projection;
 pub(super) use projection::{project, WorkbenchProjection};
 
-use dioxus::prelude::*;
 use super::package::hex_digest;
+use dioxus::prelude::*;
 use projection::DecisionRow;
 
 fn decision_row(row: &DecisionRow, historical: bool) -> Element {
-    let scope = if historical { "Historical source revision" } else { "Decision on displayed revision" };
-    let acceptance = if row.decision == qualia_cooperative_core::authoring::ReviewDecision::Accepted
-        && row.reviewer_kind == qualia_cooperative_core::authoring::PrincipalKind::Human {
-        "Human source decision; this does not accept the HMC package or master."
+    let scope = if historical {
+        "Historical source revision"
     } else {
-        "Source decision only; this does not establish human acceptance of an HMC package or master."
+        "Decision on displayed revision"
     };
+    let acceptance = "Recorded actor capacity is an admission label. This source decision does not establish adopted human authority, independent human review, or actual human/domain acceptance of an HMC package or master.";
     rsx! {
         article { style:"padding:10px;border:1px solid #465463;margin:6px 0;overflow-wrap:anywhere;",
             p { "{scope} · revision {row.revision} · {row.decision:?}" }
-            p { "{row.id} · {row.reviewer_subject} · {row.reviewer_kind:?}" }
+            p { "Decision {row.id} · acting subject {row.reviewer_subject} · admitted capacity {row.reviewer_kind:?}" }
             p { "{row.rationale} · evidence {row.evidence_ref}" }
             small { "{acceptance}" }
         }

@@ -46,10 +46,15 @@ pub(super) fn preview() -> Box<dyn PreviewProvider> {
         .expect("host-selected native preview limits are valid"),
     )
 }
-// Explicit native-host opt-in; retained project attachment never adds the new kernel by default.
+// Bounded pure sheet editing is part of the native project profile; cooperative authority remains separate.
+// Revolve and botanical kernels remain explicit native-host opt-ins.
 fn native_geometry_grants(revolve: bool, botanical: bool) -> Vec<String> {
     let mut grants = [
         "capability.invoke",
+        "Sheet.set_cell",
+        "Sheet.stats",
+        "Sheet.sum_range",
+        "Sheet.eval_formula",
         "ComputationalGeometry.extrude_profile",
         "ComputationalGeometry.swung_surface",
         "ComputationalGeometry.profile_sweep",
@@ -97,6 +102,20 @@ fn native_botanical_kernels_require_host_opt_in() {
         .iter()
         .any(|g| g == "ComputationalGeometry.pipe_model_radii"));
 }
+#[cfg(test)]
+#[test]
+fn native_project_profile_includes_bounded_sheet_capability() {
+    let grants = native_geometry_grants(false, false);
+    assert!(grants.iter().any(|g| g == "capability.invoke"));
+    assert_eq!(grants.iter().filter(|g| *g == "Sheet.set_cell").count(), 1);
+    assert_eq!(grants.iter().filter(|g| *g == "Sheet.eval_formula").count(), 1);
+    assert_eq!(grants.iter().filter(|g| *g == "Sheet.stats").count(), 1);
+    assert_eq!(grants.iter().filter(|g| *g == "Sheet.sum_range").count(), 1);
+}
+pub(super) fn botanical_profile_enabled() -> bool {
+    std::env::var("POET_NATIVE_BOTANICAL_PROFILE").as_deref() == Ok("1")
+}
+
 pub(super) fn project_config(
     files: &HostFiles,
     public: &PublicProject,
@@ -114,7 +133,7 @@ pub(super) fn project_config(
         gateway_limits: GatewayLimits::default(),
         geometry_grants: native_geometry_grants(
             std::env::var("POET_NATIVE_REVOLVE_PROFILE").as_deref() == Ok("1"),
-            std::env::var("POET_NATIVE_BOTANICAL_PROFILE").as_deref() == Ok("1"),
+            botanical_profile_enabled(),
         ),
         max_vertices: native_authoring_profile::selected().max_vertices(),
     })

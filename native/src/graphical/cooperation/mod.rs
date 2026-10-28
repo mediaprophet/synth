@@ -309,6 +309,9 @@ pub struct AuthorizedEditorHost {
 // an authorised outcome merely because its inner host supplied no native stamp.
 trait AuthorisedResult {
     fn attach_authorisation(&mut self, stamp: AuthorisationStamp);
+    // A result without an exact bound frame cannot publish retained preview state.
+    fn has_bound_frame(&self) -> bool { false }
+    fn withhold_unbound_frame(&mut self) {}
 }
 impl AuthorisedResult for EditorSnapshot {
     fn attach_authorisation(&mut self, stamp: AuthorisationStamp) {
@@ -316,6 +319,15 @@ impl AuthorisedResult for EditorSnapshot {
     }
 }
 impl AuthorisedResult for EditorOutcome {
+    fn has_bound_frame(&self) -> bool {
+        self.frame.as_ref().is_some_and(|frame| frame.source == self.snapshot.source
+            && frame.session_revision == Some(self.snapshot.session_revision)
+            && frame.execution_epoch.as_ref() == Some(&self.snapshot.execution_epoch)
+            && self.snapshot.execution_epoch.is_current() && self.snapshot.source.check_current().is_ok())
+    }
+    fn withhold_unbound_frame(&mut self) {
+        if self.frame.take().is_some() { self.message.push_str("; mismatched preview withheld"); }
+    }
     fn attach_authorisation(&mut self, stamp: AuthorisationStamp) {
         self.snapshot.attach_authorisation(stamp);
     }
@@ -413,24 +425,55 @@ impl AuthorizedEditorHost {
         action: AuthoringAction,
         operation: impl FnOnce(&mut dyn EditorHost) -> Result<T, String>,
     ) -> Result<T, String> {
-        let stamp_owner = self.owner.clone();
-        let inner = &mut self.inner;
-        with_authorized(
-            self.owner.as_ref(),
-            &self.scope,
-            Some(expected),
-            action,
-            self.limits,
-            |view, _| {
-                let mut result = operation(inner.as_mut())?;
-                result.attach_authorisation(AuthorisationStamp {
-                    owner: stamp_owner,
-                    generation: view.generation,
-                });
-                Ok(result)
-            },
-        )
+        self.write_with_view(expected, action, |_, inner| operation(inner))
     }
+
+    // The shared guard is acquired only inside the admitted authority callback
+    // and survives owner post-checks. Source and runtime effects are never rolled
+    // back or retried if the owner refuses after operation dispatch.
+    fn write_with_view<T: AuthorisedResult>(
+        &mut self,
+        expected: &SourceRef,
+        action: AuthoringAction,
+        operation: impl FnOnce(&HostAuthorityView<'_>, &mut dyn EditorHost) -> Result<T, String>,
+    ) -> Result<T, String> {
+        let stamp_owner = self.owner.clone();
+        if let Some(shared) = self.inner.shared_viewport_host() {
+            let mut guard = None;
+            let mut result = with_authorized(self.owner.as_ref(), &self.scope, Some(expected), action, self.limits, |view, _| {
+                guard = Some(shared.viewport_guard()?);
+                let mut result = operation(view, guard.as_mut().expect("guard just acquired").as_mut())?;
+                result.attach_authorisation(AuthorisationStamp { owner: stamp_owner, generation: view.generation });
+                Ok(result)
+            });
+            // A failed dispatch can have changed session, source, effects or
+            // retained preview; a successful dispatch with no bound frame can
+            // likewise have changed preview before failing to render.
+            let retire = match &result { Ok(outcome) => !outcome.has_bound_frame(), Err(_) => true };
+            if retire {
+                if let Ok(outcome) = &mut result { outcome.withhold_unbound_frame(); }
+                if let Some(editor) = guard.as_mut() {
+                    if editor.retire_retained_viewport().is_err() {
+                        shared.quarantine_viewport();
+                        return Err("Source operation may have committed or produced effects; retained viewport quarantined, shared host reconstruction and reconciliation required; no retry".into());
+                    }
+                    if let Err(ref error) = result {
+                        return Err(format!("{error}; retained viewport reset; source or effects may have committed; reconcile before retry"));
+                    }
+                }
+            }
+            return result;
+        }
+        // Compatibility for existing single-owner, nonshared hosts. No shared
+        // viewport atomicity is claimed for independently constructed wrappers.
+        let inner = &mut self.inner;
+        with_authorized(self.owner.as_ref(), &self.scope, Some(expected), action, self.limits, |view, _| {
+            let mut result = operation(view, inner.as_mut())?;
+            result.attach_authorisation(AuthorisationStamp { owner: stamp_owner, generation: view.generation });
+            Ok(result)
+        })
+    }
+
 }
 #[cfg(test)]
 mod tests;

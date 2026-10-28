@@ -13,7 +13,7 @@ impl CanonicalEditorHost {
         }
         let fallback;
         let empty = Value::Null;
-        let value = if self.preview.viewport_cached(&expected) { &empty }
+        let value = if !matches!(&request, ViewportCommand::RestoreSourceGeometry) && self.preview.viewport_cached(&expected) { &empty }
         else if let Some(parts) = self.session.value("poet_parts") { parts }
         else {
             let geometry = self.session.value("poet_geometry").ok_or("No current authored scene")?;

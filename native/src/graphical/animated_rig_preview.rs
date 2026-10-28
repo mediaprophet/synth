@@ -26,6 +26,9 @@ impl AnimatedRigPreview {
 
     /// Core samples from immutable rest data. Runtime time is not serialized.
     pub fn advance(&mut self, dt_seconds: f64, reduced_motion: bool) -> Result<AnimatedFrame<'_>, String> {
+        // Any attempt may change player buffers before failing. Retire the
+        // previously published frame before entering the fallible operation.
+        self.last = None;
         self.rig.check_current()?;
         let receipt = self.rig.player_mut().advance(dt_seconds, reduced_motion)
             .map_err(|e| format!("native rig frame refused: {e:?}"))?;

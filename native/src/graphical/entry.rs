@@ -16,7 +16,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use vibe::session::SourceSession;
 
 static NEXT_DIAGNOSTIC: AtomicU64 = AtomicU64::new(1);
-const USAGE: &str = "Usage: poet-native-authoring --diagnostic-source [--checkpoint-root EXISTING_DIRECTORY] [--reopen FILE.hmc] [--grant capability.invoke] [--grant ComputationalGeometry.extrude_profile] [--grant ComputationalGeometry.swung_surface] [--check-source]. Legacy --diagnostic-new-source admits new source only.";
+const USAGE: &str = "Usage: poet-native-authoring --diagnostic-source [--checkpoint-root EXISTING_DIRECTORY] [--reopen FILE.hmc] [--grant capability.invoke] [--grant Sheet.set_cell] [--grant Sheet.eval_formula] [--grant Sheet.stats] [--grant Sheet.sum_range] [--grant ComputationalGeometry.extrude_profile] [--grant ComputationalGeometry.swung_surface] [--check-source]. Legacy --diagnostic-new-source admits new source only.";
 const DIAGNOSTIC: &str = "LOCAL DIAGNOSTIC · no production authentication or cooperative admission";
 
 #[derive(Default)]
@@ -56,6 +56,10 @@ fn options(args: &[String]) -> Result<Options, String> {
                         if matches!(
                             value.as_str(),
                             "capability.invoke"
+                                | "Sheet.set_cell"
+                                | "Sheet.eval_formula"
+                                | "Sheet.stats"
+                                | "Sheet.sum_range"
                                 | "ComputationalGeometry.extrude_profile"
                                 | "ComputationalGeometry.swung_surface"
                                 | "ComputationalGeometry.profile_sweep"
@@ -318,6 +322,8 @@ impl EditorHost for DiagnosticEditor {
         self.inner.inspect_surface(id, expected)
     }
 
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { self.ready()?; self.inner.numeric_sheet_view(expected) }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> { self.ready()?; let r = self.inner.numeric_sheet_edit(edit, expected)?; Ok(outcome(r, false, self.inner.checkpoint_supported())) }
     fn authoring_view(
         &self,
         e: SourceRef,

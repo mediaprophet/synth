@@ -70,13 +70,14 @@ pub(super) fn Typed10dControls(
     let save_current = current.clone();
     rsx! {
         details{
-            summary{"Inspect .10d materials, frames and scientific fields"}
+            summary{"Inspect .10d materials, frames, skeletal data and scientific fields"}
             button{disabled:busy(),onclick:move |_|queue(inspect_host.clone(),inspect_current.clone(),
                 Action::InspectTyped10d{request:inspect_request.clone(),expected:inspect_current.source.clone()},panel,busy,status,on_saved,false),
                 "Inspect selected .10d snapshot"}
             if let Some(value)=value{
                 p{"Version {value.version}; {value.vertex_count} vertices; {value.index_count} indices; {value.materials.len()} materials; {value.ranges.len()} ranges; {value.fields.len()} field declarations."}
                 p{"Frames: {value.frames:?}"}
+                p{"{value.skeletal.summary()}"}
                 p{"This is the selected saved digest snapshot. Reinspect after any package change. Source association does not prove regeneration of a directly edited visual derivative."}
                 if let Some(blocker)=value.edit_blocker.clone(){
                     p{"Editing held: {blocker}"}

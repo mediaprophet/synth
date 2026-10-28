@@ -109,6 +109,12 @@ pub(super) fn NativeStudio(
     let busy = shared_busy.unwrap_or(own_busy);
     let image = use_signal(|| None::<String>);
     let selected = use_signal(String::new);
+    // Shared user-entered rig resource selection; these values grant no access.
+    let rig_filename = use_signal(|| "working.hmc".to_string());
+    let rig_package_digest = use_signal(String::new);
+    let rig_resource_key = use_signal(String::new);
+    let rig_resource_digest = use_signal(String::new);
+    let rig_ready_source = use_signal(|| None::<(jobs::Context, String)>);
     let current = view();
     let workspace =
         super::poet_workspace::WorkspaceProjection::for_source(&current.artifact_id).ok();
@@ -310,6 +316,7 @@ pub(super) fn NativeStudio(
                             }
                         }
                         p { "{status}" }
+                        super::numeric_sheet_controls::NumericSheetControls { host:host.clone(),view,draft,status,image,busy,buffer:draft_buffer.clone() }
                         super::material_controls::MaterialControls { current: current.clone(), busy: busy(), draft, status, draft_buffer:material_buffer }
                         super::cooperative_controls::CooperativeControls { host:host.clone(),current:current.clone(),busy,status,draft }
                         if current.checkpoint_supported {
@@ -319,10 +326,10 @@ pub(super) fn NativeStudio(
                     }
                     section { style: "width:512px;max-width:45%;min-width:0;flex-shrink:0;display:flex;flex-direction:column;gap:8px;",
                         h2 { style: "margin:0;font-size:20px;", "Manifold preview" }
-                        super::viewport_controls::ViewportControls{host:host.clone(),view,image,busy,status,selected}
+                        super::viewport_controls::ViewportControls{host:host.clone(),view,image,busy,status,selected,rig_filename,rig_package_digest,rig_resource_key,rig_resource_digest,rig_ready_source}
                         p { "Accepted source revision {current.source_revision} · Vibe session {current.session_revision}" }
                         p { "Native assembly/material working preview. Master quality, source rights and human review remain separate." }
-                        super::authoring::controls::AuthoringControls {host:host.clone(),view,draft,status,image,busy,selected,buffer:draft_buffer.clone()}
+                        super::authoring::controls::AuthoringControls {host:host.clone(),view,draft,status,image,busy,selected,rig_filename,rig_package_digest,rig_resource_key,rig_resource_digest,rig_ready_source,buffer:draft_buffer.clone()}
                     }
                 }
             }

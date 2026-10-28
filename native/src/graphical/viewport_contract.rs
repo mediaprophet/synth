@@ -21,6 +21,7 @@ pub fn validate_command(command: &super::viewport::ViewportCommand) -> Result<()
         Zoom {steps} => steps.is_finite() && steps.abs()<=64.0,
         Pick {frame_id,x,y} => *frame_id>0 && [x,y].iter().all(|n| n.is_finite() && **n>=0.0 && **n<=1024.0),
         FramePart {key} => !key.is_empty() && key.len()<=4096 && !key.as_bytes().contains(&0),
+        RigPreview {resource, delta_seconds} => resource.validate_bounds().is_ok() && delta_seconds.is_finite() && (0.0..=1.0).contains(delta_seconds),
         _ => true,
     };
     if valid {Ok(())} else {Err("Viewport command exceeds the native input bounds".into())}

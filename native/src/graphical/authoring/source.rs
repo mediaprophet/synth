@@ -134,6 +134,7 @@ pub(crate) fn view(
     Ok(AuthoringView {
         material_motion: Vec::new(),
         botanical: None,
+        rig: None,
         source,
         parts: result,
         parameters: params,
@@ -163,6 +164,7 @@ pub(super) fn array(xs: &[f64]) -> Result<String, String> {
 }
 /// Each generated cell is evaluated once by the existing canonical source session.
 /// Shape-safe part edits preserve every existing field; unsupported field names fail closed.
+#[cfg(test)]
 pub(crate) fn edit_source(
     parts: &Value,
     parameters: Option<&Value>,
@@ -171,6 +173,7 @@ pub(crate) fn edit_source(
 ) -> Result<String, String> {
     edit_source_with_baseline(parts, parameters, None, edit, revision)
 }
+#[cfg(test)]
 pub(crate) fn edit_source_with_baseline(
     parts: &Value,
     parameters: Option<&Value>,

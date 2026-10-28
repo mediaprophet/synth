@@ -90,11 +90,9 @@ pub fn project(evidence: &WorkflowEvidence) -> WorkbenchProjection {
 mod tests {
     use super::*;
     use qualia_cooperative_core::authoring::DocumentRevision;
-    use qualia_core_db::poet_host::native_authority::{
-        SourceReviewRequest, WorkflowEvidence,
-    };
     use qualia_cooperative_core::authoring::IdentifierAssociationEvidence;
     use qualia_cooperative_core::authoring::ReviewRecord;
+    use qualia_core_db::poet_host::native_authority::{SourceReviewRequest, WorkflowEvidence};
 
     fn revision(number: u64) -> DocumentRevision {
         DocumentRevision {
@@ -110,37 +108,81 @@ mod tests {
     fn evidence() -> WorkflowEvidence {
         let target = revision(4);
         let stale = revision(3);
-        let req = |id: &str, target: DocumentRevision, decisions: Vec<String>| SourceReviewRequest {
-            id: id.into(), target, requester_subject: "actor:requester".into(),
-            principal_kind: PrincipalKind::Human, authentication_ref: "auth".into(),
-            authority_generation: 7, occurred_at_unix: 10, evidence_ref: "review-evidence".into(),
-            decision_ids: decisions,
-        };
-        let decision = |id: &str, target: DocumentRevision, kind: PrincipalKind, value| ReviewRecord {
-            id: id.into(), target, reviewer_subject: "actor:reviewer".into(),
-            reviewer_identifier: "reviewer-id".into(), principal_kind: kind,
-            authentication_ref: "auth".into(),
-            identifier_association: IdentifierAssociationEvidence {
-                value: "reviewer-id".into(), scheme: "test".into(), issuer: "issuer".into(),
-                project_id: "project:one".into(), evidence_ref: "association".into(),
-                valid_from_unix: 1, valid_until_unix: 100,
-            },
-            membership_id: "membership".into(), admission_ref: "admission".into(),
-            review_grant_id: "grant".into(), review_admission_ref: "review-admission".into(),
-            authority_generation: 7, occurred_at_unix: 20, decision: value,
-            rationale: "reviewed this source".into(), decision_evidence_ref: "review-note".into(),
-        };
+        let req =
+            |id: &str, target: DocumentRevision, decisions: Vec<String>| SourceReviewRequest {
+                id: id.into(),
+                target,
+                requester_subject: "actor:requester".into(),
+                principal_kind: PrincipalKind::Human,
+                authentication_ref: "auth".into(),
+                authority_generation: 7,
+                occurred_at_unix: 10,
+                evidence_ref: "review-evidence".into(),
+                decision_ids: decisions,
+            };
+        let decision =
+            |id: &str, target: DocumentRevision, kind: PrincipalKind, value| ReviewRecord {
+                id: id.into(),
+                target,
+                reviewer_subject: "actor:reviewer".into(),
+                reviewer_identifier: "reviewer-id".into(),
+                principal_kind: kind,
+                authentication_ref: "auth".into(),
+                identifier_association: IdentifierAssociationEvidence {
+                    value: "reviewer-id".into(),
+                    scheme: "test".into(),
+                    issuer: "issuer".into(),
+                    project_id: "project:one".into(),
+                    evidence_ref: "association".into(),
+                    valid_from_unix: 1,
+                    valid_until_unix: 100,
+                },
+                membership_id: "membership".into(),
+                admission_ref: "admission".into(),
+                review_grant_id: "grant".into(),
+                review_admission_ref: "review-admission".into(),
+                authority_generation: 7,
+                occurred_at_unix: 20,
+                decision: value,
+                rationale: "reviewed this source".into(),
+                decision_evidence_ref: "review-note".into(),
+            };
         WorkflowEvidence {
-                target: target.clone(), principal_subject: "actor:reviewer".into(),
-                principal_kind: PrincipalKind::Human, authority_generation: 7,
-                can_contribute: false, can_review: true, contributions: vec![],
-                requests: vec![req("pending-current", target.clone(), vec![]),
-                    req("answered-current", target.clone(), vec!["decision-current".into()]),
-                    req("pending-old", stale.clone(), vec![])],
-                reviews: vec![
-                    decision("decision-current", target, PrincipalKind::Human, ReviewDecision::Accepted),
-                    decision("decision-old", stale, PrincipalKind::SoftwareAgent, ReviewDecision::Rejected),
-                ], package_writes: vec![],
+            human_authority: qualia_cooperative_core::authoring::HumanAuthorityEvidence::legacy(
+                "actor:reviewer",
+                PrincipalKind::Human,
+            ),
+            target: target.clone(),
+            principal_subject: "actor:reviewer".into(),
+            principal_kind: PrincipalKind::Human,
+            authority_generation: 7,
+            can_contribute: false,
+            can_review: true,
+            contributions: vec![],
+            requests: vec![
+                req("pending-current", target.clone(), vec![]),
+                req(
+                    "answered-current",
+                    target.clone(),
+                    vec!["decision-current".into()],
+                ),
+                req("pending-old", stale.clone(), vec![]),
+            ],
+            reviews: vec![
+                decision(
+                    "decision-current",
+                    target,
+                    PrincipalKind::Human,
+                    ReviewDecision::Accepted,
+                ),
+                decision(
+                    "decision-old",
+                    stale,
+                    PrincipalKind::SoftwareAgent,
+                    ReviewDecision::Rejected,
+                ),
+            ],
+            package_writes: vec![],
         }
     }
 
@@ -148,15 +190,39 @@ mod tests {
     fn only_unanswered_requests_for_the_exact_revision_are_pending() {
         let projection = project(&evidence());
         assert_eq!(projection.revision, 4);
-        assert_eq!(projection.pending_reviews.iter().map(|row| row.id.as_str()).collect::<Vec<_>>(),
-            vec!["pending-current"]);
-        assert_eq!(projection.current_decisions.iter().map(|row| row.id.as_str()).collect::<Vec<_>>(),
-            vec!["decision-current"]);
-        assert_eq!(projection.historical_decisions.iter().map(|row| row.id.as_str()).collect::<Vec<_>>(),
-            vec!["decision-old"]);
+        assert_eq!(
+            projection
+                .pending_reviews
+                .iter()
+                .map(|row| row.id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["pending-current"]
+        );
+        assert_eq!(
+            projection
+                .current_decisions
+                .iter()
+                .map(|row| row.id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["decision-current"]
+        );
+        assert_eq!(
+            projection
+                .historical_decisions
+                .iter()
+                .map(|row| row.id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["decision-old"]
+        );
         assert!(projection.can_review);
         assert!(!projection.can_contribute);
-        assert_eq!(projection.current_decisions[0].reviewer_kind, PrincipalKind::Human);
-        assert_eq!(projection.historical_decisions[0].reviewer_kind, PrincipalKind::SoftwareAgent);
+        assert_eq!(
+            projection.current_decisions[0].reviewer_kind,
+            PrincipalKind::Human
+        );
+        assert_eq!(
+            projection.historical_decisions[0].reviewer_kind,
+            PrincipalKind::SoftwareAgent
+        );
     }
 }

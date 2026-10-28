@@ -10,6 +10,9 @@ mod turtle_host;
 #[cfg(test)]
 #[path = "turtle_host_tests.rs"]
 mod turtle_host_tests;
+#[cfg(test)]
+#[path = "sheet_range_host_tests.rs"]
+mod sheet_range_host_tests;
 
 #[derive(Clone, Copy, Debug)]
 pub struct GeometryHostLimits {
@@ -74,6 +77,7 @@ impl GeometryHost {
     /// These bounded cold allocations are selected by the host, never by source.
     pub(crate) fn botanical_limits(
         &self,
+        has_uv0: bool,
     ) -> Result<crate::graphical::authoring::botanical::BotanicalLimits, String> {
         for required in [
             "capability.invoke",
@@ -91,10 +95,16 @@ impl GeometryHost {
             return Err("Botanical kernel dispatch/scratch budget unavailable".into());
         }
         let mut limits = crate::graphical::authoring::botanical::BotanicalLimits::default();
+        // The base reserve covers the existing three bounded geometry passes.
+        // UV-bearing source additionally reserves three two-scalar-per-vertex
+        // validations and one three-index-per-triangle correspondence scan;
+        // triangles are bounded to twice the vertices below. These are
+        // conservative abstract work units, not measured performance.
+        let work_per_vertex = if has_uv0 { 21 } else { 9 };
         limits.max_vertices = limits
             .max_vertices
             .min(self.max_vertices)
-            .min(self.limits.submission_work / 9)
+            .min(self.limits.submission_work / work_per_vertex)
             .min(self.limits.scratch_bytes / 512);
         limits.max_triangles = limits
             .max_triangles
@@ -210,6 +220,77 @@ impl Host for GeometryHost {
             return Err(denied(span));
         }
         match id {
+            "Sheet.stats" | "Sheet.sum_range" => {
+                // Retain QualiaDB's flat stats and ragged grid semantics. Bound
+                // the actual supplied input, not the potentially enormous range.
+                let grid = match args { Value::Record(fields) => fields.get("grid").ok_or_else(|| denied(span))?, _ => args };
+                let Value::List(rows) = grid else { return Err(denied(span)); };
+                if rows.len() > 4096 { return Err(denied(span)); }
+                let mut work = rows.len();
+                for item in rows {
+                    if let Value::List(cells) = item {
+                        work = work.checked_add(cells.len()).ok_or_else(|| denied(span))?;
+                    } else {
+                        // QualiaDB decides whether the flat stats item is numeric.
+                        work = work.checked_add(1).ok_or_else(|| denied(span))?;
+                    }
+                    if work > 65_536 { return Err(denied(span)); }
+                }
+                if let Value::Record(fields) = args {
+                    let spec = fields.get("range").or_else(|| fields.get("cells"));
+                    if matches!(spec, Some(Value::String(s)) if s.len() > 128) { return Err(denied(span)); }
+                }
+                let work = work.max(1);
+                if self.remaining_dispatches == 0 || work > self.remaining_work {
+                    return Err(Diagnostic::new(DiagCode::E400, span, "native sheet range dispatch/work budget exhausted"));
+                }
+                self.remaining_work -= work;
+                self.remaining_dispatches -= 1;
+                self.inner.capability_invoke(id, args, span)
+            }
+            "Sheet.eval_formula" => {
+                // Host checks input shape and reserves a conservative fixed work
+                // budget before dispatch. The QualiaDB operator enforces the
+                // formula's 64-node/16-depth AST and function/reference rules.
+                let Value::Record(fields) = args else { return Err(denied(span)); };
+                let Some(Value::String(formula)) = fields.get("formula") else { return Err(denied(span)); };
+                if !formula.starts_with('=') || formula.len() > 256 { return Err(denied(span)); }
+                if let Some(grid) = fields.get("grid") {
+                    let Value::List(rows) = grid else { return Err(denied(span)); };
+                    if rows.len() > 32 { return Err(denied(span)); }
+                    for row in rows {
+                        let Value::List(cells) = row else { return Err(denied(span)); };
+                        if cells.len() > 32 { return Err(denied(span)); }
+                    }
+                }
+                // Up to 64 AST nodes may each address a 32x32 range; add
+                // room for grid loading and scalar evaluation independently.
+                const FORMULA_WORK: usize = 131_072;
+                if self.remaining_dispatches == 0 || self.remaining_work < FORMULA_WORK {
+                    return Err(Diagnostic::new(DiagCode::E400, span, "native sheet formula dispatch/work budget exhausted"));
+                }
+                self.remaining_work -= FORMULA_WORK;
+                self.remaining_dispatches -= 1;
+                self.inner.capability_invoke(id, args, span)
+            }
+            "Sheet.set_cell" => {
+                // Bound replay work before forwarding to the QualiaDB owner.
+                let Value::Record(fields) = args else { return Err(denied(span)); };
+                let Some(Value::List(rows)) = fields.get("grid") else { return Err(denied(span)); };
+                if rows.is_empty() || rows.len() > 32 { return Err(denied(span)); }
+                let mut work = 0usize;
+                for row in rows {
+                    let Value::List(cells) = row else { return Err(denied(span)); };
+                    if cells.is_empty() || cells.len() > 32 { return Err(denied(span)); }
+                    work = work.checked_add(cells.len()).ok_or_else(|| denied(span))?;
+                }
+                if self.remaining_dispatches == 0 || work > self.remaining_work {
+                    return Err(Diagnostic::new(DiagCode::E400, span, "native sheet dispatch/work budget exhausted"));
+                }
+                self.remaining_work -= work;
+                self.remaining_dispatches -= 1;
+                self.inner.capability_invoke(id, args, span)
+            }
             "ComputationalGeometry.turtle_3d" => {
                 if self.remaining_dispatches == 0 {
                     return Err(turtle_host::bad(
@@ -372,12 +453,23 @@ mod botanical_budget_tests {
     }
     #[test]
     fn botanical_host_reserves_projection_edit_and_revalidation_work() {
-        assert!(host(8,900).botanical_limits().is_err());
-        let limits=host(9,900).botanical_limits().unwrap();
+        assert!(host(8,900).botanical_limits(false).is_err());
+        let limits=host(9,900).botanical_limits(false).unwrap();
         assert!(limits.max_vertices*9<=900);
+        let uv_limits=host(9,900).botanical_limits(true).unwrap();
+        assert!(uv_limits.max_vertices*21<=900);
+        assert!(uv_limits.max_vertices < limits.max_vertices);
         assert!(limits.max_proposal_nodes<=512 && limits.max_attractors<=256 && limits.max_iterations<=16);
         let mut denied=host(9,900);
         denied.grants.retain(|g|g!="ComputationalGeometry.pipe_model_radii");
-        assert!(denied.botanical_limits().is_err());
+        assert!(denied.botanical_limits(false).is_err());
     }
 }
+
+#[cfg(test)]
+#[path = "sheet_formula_session_tests.rs"]
+mod sheet_formula_session_tests;
+
+#[cfg(test)]
+#[path = "sheet_range_session_tests.rs"]
+mod sheet_range_session_tests;

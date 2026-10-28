@@ -13,6 +13,16 @@ struct ProbeHost {
     surface_successor: Mutex<Option<EditorSnapshot>>,
 }
 impl EditorHost for ProbeHost {
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<super::super::numeric_sheet::SheetView, String> {
+        self.calls.lock().unwrap().push(std::thread::current().id());
+        if self.surface_context_change == 2 {
+            let mut successor = self.snapshot.clone();
+            successor.session_revision += 1;
+            *self.surface_successor.lock().unwrap() = Some(successor);
+        }
+        Ok(super::super::numeric_sheet::SheetView { source: expected, execution_epoch: self.snapshot.execution_epoch.clone(), rows: vec![vec![vibe::Value::I64(1)]] })
+    }
+
     fn inspect_surface(
         &self,
         id: &str,
@@ -294,6 +304,7 @@ fn publication_rechecks_actual_store_after_worker_completion() {
     let view = host.snapshot.clone();
     let (worker, handle) = Worker::start(Box::new(host)).unwrap();
     let reply = Reply {
+        numeric_sheet: None,
         viewport: None,
         surface: None,
         typed_10d: None,
@@ -574,5 +585,19 @@ fn worker_panic_closes_reply_and_is_reported_when_owner_joins() {
     gate.wait();
     assert!(worker.finish().is_err());
     assert!(receiver.try_recv().is_err());
+    assert_eq!(calls.lock().unwrap().len(), 1);
+}
+
+#[test]
+fn numeric_sheet_worker_withholds_read_after_session_successor_and_refuses_stale_origin() {
+    let (mut host, calls) = fixture(None);
+    host.surface_context_change = 2;
+    let context = Context::from_snapshot(&host.snapshot);
+    let reply = execute(&mut host, Action::NumericSheetInspect(context.source.clone()), context.clone(), &AtomicBool::new(false));
+    assert!(reply.numeric_sheet.is_none());
+    assert_eq!(calls.lock().unwrap().len(), 1);
+    let stale = execute(&mut host, Action::NumericSheetInspect(context.source.clone()), context, &AtomicBool::new(false));
+    assert!(!stale.operation_succeeded);
+    assert!(stale.numeric_sheet.is_none());
     assert_eq!(calls.lock().unwrap().len(), 1);
 }

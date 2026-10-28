@@ -250,47 +250,6 @@ pub fn render_mesh(
     })
 }
 
-/// UNQUALIFIED, UNMOUNTED: role/colour-space and upload-refusal review is still
-/// required for the existing SDK loader. This helper is not a product capability.
-/// Existing HMC loader owns binary geometry/material/image admission. The host
-/// supplies reviewed source→package association; an equal revision alone does
-/// not establish derivation, distribution rights or human acceptance.
-pub(crate) fn render_hmc_unqualified(
-    source: SourceRef,
-    hmc: &[u8],
-    asset_key: &str,
-    camera: PreviewCamera,
-    side: u32,
-    texture_budget: qualia_core_db::render::texture_stream_policy::TextureStreamBudget,
-) -> Result<PreviewFrame, String> {
-    source.check_current()?;
-    validate_frame(side, camera)?;
-    if camera.target != [0.0; 3] {
-        return Err("HMC SDK camera target must be origin for this adapter".into());
-    }
-    let mut renderer = webizen_render::VolumetricRenderer::new_offscreen(side, side, 1)?;
-    let (_, admission) =
-        renderer.load_hmc_asset_with_texture_budget(hmc, asset_key, texture_budget)?;
-    if admission.deferred_interpretations != 0
-        || admission.capability_refusals != 0
-        || admission.resident_interpretations != admission.requested_interpretations
-    {
-        return Err("HMC material textures were deferred/refused; preview withheld".into());
-    }
-    renderer.set_camera(camera.yaw, camera.pitch, camera.distance);
-    renderer.render(0.0, &webizen_render::SystemTelemetry::default())?;
-    let mut rgba8 = vec![0; renderer.required_rgba8_bytes()];
-    renderer.read_rgba8_into(&mut rgba8)?;
-    source.check_current()?;
-    Ok(PreviewFrame {
-        source,
-        session_revision: None,
-        execution_epoch: None,
-        side,
-        rgba8,
-    })
-}
-
 /// Native Aether data-uri provider decodes this image; no browser/JS is needed.
 pub fn native_image_uri(frame: &PreviewFrame) -> Result<String, String> {
     use base64::Engine;

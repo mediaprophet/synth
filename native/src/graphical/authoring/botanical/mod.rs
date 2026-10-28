@@ -1,5 +1,6 @@
 //! Versioned source-owned botanical graph editing for the native Poet owner.
 mod controls;
+mod typed_controls;
 mod recipe;
 mod source_edit;
 #[cfg(test)]

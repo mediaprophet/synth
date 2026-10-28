@@ -19,7 +19,7 @@ fn print_usage() {
     println!("  poet repl [--grant <capability>]...  Interactive REPL; default grants: none");
     println!("  poet format <file>  Format a .vibe file");
     println!("  poet lint <file>    Run static analysis checks on a .vibe file");
-    println!("  poet eval <file>    Evaluate a .vibe file and print result");
+    println!("  poet eval <file> [--grant <capability>]...    Evaluate a .vibe file and print result");
     println!("  poet help           Show this help message");
     #[cfg(feature = "native-graphical")]
     println!(
@@ -125,13 +125,26 @@ fn main() {
             let path = &args[2];
             match fs::read_to_string(path) {
                 Ok(content) => {
-                    let mut host = vibe::LocalHost::default();
-                    let mut env = vibe::Env::default();
-                    match vibe::eval_cell(&content, &mut host, &mut env) {
-                        Ok(val) => println!("{val:?}"),
-                        Err(diag) => {
-                            eprintln!("Eval error: {}", diag.message);
-                            process::exit(1);
+                    let grants = match repl::parse_repl_grants(&args[3..]) {
+                        Ok(grants) => grants,
+                        Err(error) => { eprintln!("Eval option error: {error}"); process::exit(1); }
+                    };
+                    let mut host = repl::sheet_host::ReplHost::new(grants.clone());
+                    if grants.is_empty() {
+                        let mut env = vibe::Env::default();
+                        match vibe::eval_cell(&content, &mut host, &mut env) {
+                            Ok(val) => println!("{val:?}"),
+                            Err(diag) => { eprintln!("Eval error: {}", diag.message); process::exit(1); }
+                        }
+                    } else {
+                        let mut session = vibe::session::SourceSession::new(grants, vibe::session::SessionLimits::default());
+                        match repl::eval_session_line(&content, &mut host, &mut session) {
+                            Ok(result) => println!("{:?}", result.value),
+                            Err(error) => {
+                                eprintln!("Eval error: {}", error.diagnostic.message);
+                                if error.host_reconciliation_required { eprintln!("Host outcome requires reconciliation; no retry was attempted."); }
+                                process::exit(1);
+                            }
                         }
                     }
                 }
@@ -151,3 +164,4 @@ fn main() {
         }
     }
 }
+

@@ -10,10 +10,12 @@ use super::preview::SourceRef;
 use crate::graphical::checkpoints::typed_10d as typed;
 use qualia_core_db::poet_host::invoke::studio_store::checkpoint::{ExpectedFile, SaveReceipt};
 use std::sync::{Arc, Mutex, MutexGuard, TryLockError};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Clone)]
 pub struct SharedEditorHost {
     inner: Arc<Mutex<Box<dyn EditorHost>>>,
+    viewport_quarantined: Arc<AtomicBool>,
     // Native service availability is fixed at composition, independently of
     // current user authority or momentary lock contention. No auth is cached.
     checkpoint_supported: bool,
@@ -28,6 +30,7 @@ impl SharedEditorHost {
         let resource_import_supported = inner.resource_import_supported();
         Self {
             inner: Arc::new(Mutex::new(inner)),
+            viewport_quarantined: Arc::new(AtomicBool::new(false)),
             checkpoint_supported,
             resource_import_supported,
         }
@@ -40,9 +43,20 @@ impl SharedEditorHost {
     ) -> Result<MutexGuard<'_, Box<dyn EditorHost>>, String> {
         self.current()
     }
+    pub(crate) fn viewport_guard(&self) -> Result<MutexGuard<'_, Box<dyn EditorHost>>, String> {
+        self.current()
+    }
+    /// Caller holds the shared guard; quarantine is irreversible for this host instance.
+    pub(crate) fn quarantine_viewport(&self) { self.viewport_quarantined.store(true, Ordering::Release); }
     fn current(&self) -> Result<MutexGuard<'_, Box<dyn EditorHost>>, String> {
         match self.inner.try_lock() {
-            Ok(editor) => Ok(editor),
+            Ok(editor) => {
+                // Source edits and rebuilds can also render via the same provider.
+                // If retirement failed, quarantine the whole shared instance.
+                if self.viewport_quarantined.load(Ordering::Acquire) {
+                    Err("Retained viewport is quarantined; shared host reconstruction is required".into())
+                } else { Ok(editor) }
+            },
             Err(TryLockError::WouldBlock) => Err(
                 "Shared native editor is busy; operation was not dispatched; no automatic retry"
                     .into(),
@@ -56,10 +70,11 @@ impl SharedEditorHost {
 }
 
 impl EditorHost for SharedEditorHost {
+    fn shared_viewport_host(&self) -> Option<SharedEditorHost> { Some(self.clone()) }
     fn viewport_action(&mut self, request: crate::graphical::viewport::ViewportCommand,
         expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool,
     ) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
-        self.current()?.viewport_action(request, expected, cancelled)
+        self.viewport_guard()?.viewport_action(request, expected, cancelled)
     }
 
     fn retained_surface_carrier(
@@ -152,11 +167,16 @@ impl EditorHost for SharedEditorHost {
         self.current()?
             .inspect_package_resource(request, expected, limits, scratch)
     }
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { self.current()?.numeric_sheet_view(expected) }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> { self.current()?.numeric_sheet_edit(edit, expected) }
     fn authoring_view(
         &self,
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.current()?.authoring_view(e)
+    }
+    fn rig_authoring_edit(&mut self, resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        self.current()?.rig_authoring_edit(resource, control, expected, cancelled)
     }
     fn authoring_edit(
         &mut self,

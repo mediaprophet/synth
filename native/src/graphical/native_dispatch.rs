@@ -24,6 +24,8 @@ pub(crate) async fn run(
         | Action::EditGeoRaster { expected, .. }
         | Action::CreateGeoRaster { expected, .. }
         | Action::InspectResource { expected, .. }
+        | Action::NumericSheetInspect(expected)
+        | Action::NumericSheetEdit { expected, .. }
         | Action::AuthoringInspect(expected)
         | Action::AuthoringEdit { expected, .. }
         | Action::CompileAssembly { expected, .. }
@@ -51,6 +53,16 @@ pub(crate) async fn run(
     if origin.authorisation_stamp.is_none() {
         return jobs::run(host, action, origin).await;
     }
+    // Typed grid commands share the authenticated intent owner without a JSON payload.
+    if matches!(&action, Action::NumericSheetInspect(_) | Action::NumericSheetEdit { .. }) {
+        let intent = match action {
+            Action::NumericSheetInspect(_) => super::poet_workspace::NumericSheetIntent::Inspect,
+            Action::NumericSheetEdit { edit, .. } => super::poet_workspace::NumericSheetIntent::Edit(edit),
+            _ => unreachable!(),
+        };
+        let result = NativeIntentBus::new(host, origin)?.dispatch_numeric_sheet(intent).await?;
+        return result.reply.ok_or_else(|| format!("Poet intent rejected: {:?}", result.receipt.status));
+    }
     let (kind, parameters) = match &action {
         Action::Viewport { request, .. } => (
             ActionType::Query,
@@ -67,6 +79,7 @@ pub(crate) async fn run(
         Action::AuthoringInspect(_) => (ActionType::Query, json!({"command":"authoring.inspect"})),
         Action::AuthoringEdit { edit, .. } => {
             let p = match edit {
+                AuthoringEdit::Rig { resource, control } => json!({"command":"authoring.rig","resource":resource,"control":control}),
                 AuthoringEdit::Botanical { edit } => {
                     json!({"command":"authoring.botanical","edit":edit})
                 }

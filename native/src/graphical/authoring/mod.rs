@@ -12,6 +12,7 @@ mod cad_tests;
 pub(crate) mod controls;
 mod detail_controls;
 mod geometry_source;
+pub(crate) mod rig_source;
 pub(crate) mod material_motion;
 mod material_motion_controls;
 #[cfg(test)]
@@ -67,6 +68,7 @@ pub struct PartView {
 #[derive(Clone, Debug)]
 pub struct AuthoringView {
     pub botanical: Option<botanical::BotanicalRecipe>,
+    pub rig: Option<crate::graphical::rig_binding::RigSourceDescriptor>,
     pub material_motion: Vec<material_motion::MaterialMotionTrack>,
     pub source: SourceRef,
     pub parts: Vec<PartView>,
@@ -75,6 +77,7 @@ pub struct AuthoringView {
 
 #[derive(Clone, Debug)]
 pub enum AuthoringEdit {
+    Rig { resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl },
     Botanical {
         edit: botanical::BotanicalEdit,
     },

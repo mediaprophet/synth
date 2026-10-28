@@ -127,6 +127,13 @@ impl InteractivePreviewProvider {
         Ok(Some(frame))
     }
 
+    fn finish_rig_frame(&mut self, source: SourceRef, frame: PreviewFrame, cancelled: &AtomicBool) -> Result<ViewportOutput, String> {
+        match self.finish(source, frame, cancelled) {
+            Ok(output) => Ok(output),
+            Err(error) => { self.invalidate(); Err(error) }
+        }
+    }
+
     fn finish(
         &self,
         source: SourceRef,
@@ -156,6 +163,18 @@ impl InteractivePreviewProvider {
 }
 
 impl PreviewProvider for InteractivePreviewProvider {
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { self.invalidate(); Ok(()) }
+    fn invalidate_rig_preview(&mut self) { self.invalidate(); }
+    fn preview_selected_rig(&mut self, source: SourceRef, descriptor: super::rig_binding::RigSourceDescriptor, bytes: &[u8], delta_seconds: f64, cancelled: &AtomicBool) -> Result<ViewportOutput, String> {
+        self.check(&source, cancelled)?;
+        if !self.epoch.as_ref().is_some_and(SessionEpoch::is_current) || self.scene_source.as_ref() != Some(&source) { return Err("Current viewport and selected rig required".into()); }
+        let frame = self.viewport.preview_selected_rig(source.clone(), descriptor, bytes, delta_seconds, cancelled)?;
+        self.finish_rig_frame(source, frame, cancelled)
+    }
+    fn stage_rig_control(&mut self, source: SourceRef, descriptor: super::rig_binding::RigSourceDescriptor, bytes: &[u8], action: super::rig_binding::RigControl, cancelled: &AtomicBool) -> Result<super::rig_binding::rig_candidate::StagedRigControl,String> {
+        if !self.epoch.as_ref().is_some_and(SessionEpoch::is_current) { return Err("Rig viewport epoch retired".into()); }
+        self.viewport.stage_selected_rig(source, descriptor, bytes, action, cancelled)
+    }
     fn viewport_cached(&self, source: &SourceRef) -> bool {
         self.epoch.as_ref().is_some_and(SessionEpoch::is_current)
             && source.check_current().is_ok()
@@ -215,6 +234,12 @@ impl PreviewProvider for InteractivePreviewProvider {
         let mut prepared = prepared;
         match request {
             ViewportCommand::Redraw => {}
+            ViewportCommand::RigPreview { .. } => return Err("Rig preview requires the authorized selected-resource route".into()),
+            ViewportCommand::RestoreSourceGeometry => {
+                self.invalidate();
+                prepared = self.ensure_scene(&source, value, resources, cancelled)?;
+                camera = self.viewport.camera().unwrap_or(camera);
+            }
             ViewportCommand::FrameAll => {
                 let (min, max) = self
                     .viewport
@@ -282,3 +307,29 @@ impl PreviewProvider for InteractivePreviewProvider {
 #[cfg(test)]
 #[path = "viewport_provider_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+mod rig_finish_tests {
+    use super::*;
+    use super::super::viewport::{PartSelection, tests::{source, scene, camera}};
+    #[test]
+    fn cancellation_before_publication_retires_cached_frame_and_selection() {
+        let source = source();
+        let selected = PartSelection { source: source.clone(), frame_id: 1, part_key: "front".into(), semantic_id: 102, triangle_index: 1 };
+        let mut provider = InteractivePreviewProvider::new(MeshPreviewProvider {
+            material: qualia_core_db::container_10d::MaterialRecord::legacy_default(),
+            camera: camera(), limits: crate::graphical::preview::PreviewLimits::default(),
+        }).unwrap();
+        provider.viewport = RetainedViewport::rig_test_seed(source.clone(), scene(), selected);
+        provider.scene_source = Some(source.clone());
+        provider.source_has_parts = true;
+        assert!(provider.viewport.frame_id().is_some());
+        assert!(provider.viewport.selection().is_some());
+        let frame = PreviewFrame { source: source.clone(), session_revision: None, execution_epoch: None, side: 1, rgba8: vec![0; 4] };
+        assert!(provider.finish_rig_frame(source, frame, &AtomicBool::new(true)).is_err());
+        assert!(provider.scene_source.is_none());
+        assert!(provider.viewport.frame_id().is_none());
+        assert!(provider.viewport.selection().is_none());
+        assert!(provider.viewport.bounds().is_none());
+    }
+}

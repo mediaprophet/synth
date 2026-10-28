@@ -32,6 +32,10 @@ pub enum ViewportCommand {
         y: f32,
     },
     ClearSelection,
+    /// View-only skeletal step against an exact selected HMC resource.
+    RigPreview { resource: crate::graphical::checkpoints::ResourceInspectionRequest, delta_seconds: f64 },
+    /// Reload source geometry and discard disposable rig playback.
+    RestoreSourceGeometry,
     /// View-only illumination/exposure; never writes material, source or world physics.
     Lighting {
         exposure_ev: f32,
@@ -149,4 +153,4 @@ pub fn preview_lighting(s: ViewLighting) -> ViewportCommand {
 }
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

@@ -40,6 +40,8 @@ const REVIEWER: [u8; 32] = [43; 32];
 static NEXT: AtomicU64 = AtomicU64::new(1);
 struct NoPixels;
 impl PreviewProvider for NoPixels {
+    // This fixture does not retain a viewport or rendered frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate(&self, value: &Value) -> Result<(), String> {
         let (mesh, _) = materials::authored_scene(
             value,
@@ -404,3 +406,9 @@ mod texture_effect_workflow_tests;
 mod biosphere_round1_tests;
 #[path = "native_selected_session_tests.rs"]
 mod native_selected_session_tests;
+
+#[path = "native_project_rig_tests.rs"]
+mod rig_composed_tests;
+
+#[path = "native_project_numeric_sheet_tests.rs"]
+mod numeric_sheet_tests;

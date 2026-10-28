@@ -403,3 +403,58 @@ fn typed_10d_stale_source_package_resource_and_opaque_metadata_leave_hmc_unchang
         .is_err());
     assert_eq!(std::fs::read(path).unwrap(), before);
 }
+
+/// Synthetic engineering fixture: no biological or rights claim.
+fn skeletal_fixture() -> Vec<u8> {
+    use qualia_core_db::container_10d::{
+        skeletal_container::attach_skeletal_section_into,
+        skeletal_section::{encode_skeletal_section_into, ClipRecord, SkeletalData},
+    };
+    use qualia_core_db::render::skeletal::{Joint, Key, Motor, SkinWeight, Track};
+    let joints = [Joint { parent: None, rest_local: Motor::identity(), inverse_bind: Motor::identity() }];
+    let joint_ids = [qualia_core_db::q_hash("urn:test:inspection:root")];
+    let skins = [SkinWeight { joints: [0; 4], weights: [1.0, 0.0, 0.0, 0.0] }; 3];
+    let clips = [ClipRecord { id: qualia_core_db::q_hash("urn:test:inspection:clip"), duration: 1.0, first_track: 0, track_count: 1, looping: false }];
+    let tracks = [Track { joint: 0, first_key: 0, key_count: 1 }];
+    let keys = [Key { time: 0.0, local: Motor::identity() }];
+    let data = SkeletalData { joints: &joints, joint_ids: &joint_ids, skin: &skins, clips: &clips, tracks: &tracks, keys: &keys };
+    let mut skeletal = vec![0; 1024];
+    let n = encode_skeletal_section_into(&data, &mut skeletal).unwrap();
+    skeletal.truncate(n);
+    let mut out = vec![0; 32768];
+    let n = attach_skeletal_section_into(&fixture(), &skeletal, &mut out).unwrap();
+    out.truncate(n);
+    out
+}
+
+#[test]
+fn skeletal_inspection_distinguishes_present_absent_and_unassessed() {
+    assert_eq!(payload::inspect_skeletal(&fixture()), SkeletalInspection::Absent);
+    let bytes = skeletal_fixture();
+    assert_eq!(payload::inspect_skeletal(&bytes), SkeletalInspection::Present(
+        skeletal_section::Counts { joints: 1, vertices: 3, clips: 1, tracks: 1, keys: 1 }));
+    let mut corrupt = bytes;
+    let end = corrupt.len() - 1;
+    corrupt[end] ^= 1;
+    assert!(matches!(payload::inspect_skeletal(&corrupt), SkeletalInspection::Unassessed(_)));
+}
+
+#[test]
+fn typed_10d_selected_package_reports_skeletal_counts_and_preserves_edit_blocker() {
+    let root = tempfile::tempdir().unwrap();
+    let (service, source, mut req) = saved(root.path(), None);
+    let path = root.path().join(&req.resource.filename);
+    let limits = CheckpointLimits::default();
+    let checkpoint = core::load(&path, limits).unwrap().apply_resource_edits(
+        vec![ResourceEdit::ReplaceBytes { key: req.resource.key.clone(), expected: req.resource.resource_digest,
+            bytes: skeletal_fixture() }], limits).unwrap();
+    req.resource.resource_digest = checkpoint.inventory().into_iter()
+        .find(|r| r.key == req.resource.key).unwrap().digest;
+    let bytes = core::encode(&checkpoint, vec![], limits).unwrap();
+    req.resource.package_digest = core::save(&path, &bytes,
+        ExpectedFile::Sha256(req.resource.package_digest), limits).unwrap().digest;
+    let result = service.inspect_typed_10d(req.resource, &source, ui_typed_10d_limits()).unwrap();
+    assert_eq!(result.skeletal, SkeletalInspection::Present(
+        skeletal_section::Counts { joints: 1, vertices: 3, clips: 1, tracks: 1, keys: 1 }));
+    assert!(result.edit_blocker.is_some(), "material derivative must not silently discard dependent skeletal data");
+}

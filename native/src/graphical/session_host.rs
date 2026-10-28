@@ -182,11 +182,16 @@ impl EditorHost for SessionEditorHost {
         self.current()?
             .inspect_package_resource(request, expected, limits, scratch)
     }
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { self.current()?.numeric_sheet_view(expected) }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> { self.current()?.numeric_sheet_edit(edit, expected) }
     fn authoring_view(
         &self,
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.current()?.authoring_view(e)
+    }
+    fn rig_authoring_edit(&mut self, resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        self.current()?.rig_authoring_edit(resource, control, expected, cancelled)
     }
     fn authoring_edit(
         &mut self,

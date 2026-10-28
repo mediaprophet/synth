@@ -11,7 +11,7 @@ use qualia_core_db::{
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 static NEXT: AtomicU64 = AtomicU64::new(1);
-fn source() -> SourceRef {
+pub(crate) fn source() -> SourceRef {
     let id = format!(
         "urn:poet:r9:viewport-test:{}:{}",
         std::process::id(),
@@ -28,7 +28,7 @@ fn source() -> SourceRef {
         stamp,
     }
 }
-fn camera() -> PreviewCamera {
+pub(crate) fn camera() -> PreviewCamera {
     PreviewCamera {
         yaw: 0.0,
         pitch: 0.0,
@@ -36,7 +36,7 @@ fn camera() -> PreviewCamera {
         target: [0.0; 3],
     }
 }
-fn scene() -> CompiledAssembly {
+pub(crate) fn scene() -> CompiledAssembly {
     let mut material = MaterialRecord::legacy_default();
     material.base_color = [0.8, 0.15, 0.08, 1.0];
     // Front and back overlap in the image; the visible nearer part is not first.
@@ -331,4 +331,137 @@ fn r9_native_gpu_retains_device_scene_and_picks_visible_part() {
     })
     .unwrap();
     assert!(view.render(source, camera(), &cancel).is_err());
+}
+
+
+#[test]
+fn selected_rig_span_requires_exact_unshared_compiled_geometry() {
+    use crate::graphical::rig_binding::{BindMesh, ViewportSpan};
+    let source = source();
+    let mut compiled = scene();
+    let selected = PartSelection { source, frame_id: 1, part_key: "front".into(), semantic_id: 102, triangle_index: 1 };
+    let positions = compiled.mesh.positions[3..6].to_vec();
+    let normals = compiled.normals[3..6].to_vec();
+    let uv = compiled.uv0[3..6].to_vec();
+    let indices = [0, 1, 2];
+    let bind = || BindMesh { positions: &positions, normals: &normals, uv0: &uv, indices: &indices };
+    assert_eq!(renderer::selected_rig_span(&compiled, &selected, &bind()).unwrap(),
+        ViewportSpan { first_vertex: 3, vertex_count: 3 });
+    compiled.mesh.positions[3][0] += 0.25;
+    assert!(renderer::selected_rig_span(&compiled, &selected, &bind()).is_err());
+    compiled.mesh.positions[3][0] = positions[0][0];
+    compiled.mesh.triangles[0][0] = 3;
+    assert!(renderer::selected_rig_span(&compiled, &selected, &bind()).is_err());
+    compiled.mesh.triangles[0][0] = 0;
+    compiled.mesh.triangles[1].swap(0, 1);
+    assert!(renderer::selected_rig_span(&compiled, &selected, &bind()).is_err());
+    compiled.mesh.triangles[1].swap(0, 1);
+    compiled.normals[3][1] = 1.0;
+    assert!(renderer::selected_rig_span(&compiled, &selected, &bind()).is_err());
+}
+
+// Real retained-viewport adoption logic with seeded CPU state and no GPU.
+// Does not establish native rendering, signed admission or human usability.
+#[test]
+fn selected_rig_adoption_derives_binding_and_refuses_mismatches() {
+    use crate::graphical::rig_binding::{RigControl, RigSourceDescriptor};
+    use qualia_core_db::{
+        container_10d::{self, Container10dHeader, SectionType,
+            skeletal_container::attach_skeletal_section_into,
+            skeletal_section::{encode_skeletal_section_into, ClipRecord, SkeletalData}},
+        render::{compile_10d::compile_mesh_to_10d_with_nodes, skeletal::{Joint, Key, Motor, SkinWeight, Track}},
+    };
+    let source = source();
+    let mut compiled = scene();
+    let bind_mesh = Mesh {
+        positions: compiled.mesh.positions[3..6].to_vec(), triangles: vec![[0,1,2]],
+        min: [-1.0,-1.0,1.0], max: [1.0,1.0,1.0],
+    };
+    let base = compile_mesh_to_10d_with_nodes(&bind_mesh, &[]).unwrap();
+    let header = Container10dHeader::parse(&base).unwrap();
+    let sections = container_10d::parse_section_table(&base, &header).unwrap();
+    let mesh_section = sections.iter().find(|section| section.typ() == Some(SectionType::QuantizedMesh)).unwrap();
+    let start = mesh_section.byte_offset as usize;
+    let end = start + mesh_section.byte_length as usize;
+    let decoded = container_10d::decode_mesh_section(&base[start..end]).unwrap();
+    compiled.mesh.positions[3..6].copy_from_slice(&decoded.positions);
+    let joint_id = qualia_core_db::q_hash("urn:test:adoption:root");
+    let first_clip = qualia_core_db::q_hash("urn:test:adoption:first");
+    let second_clip = qualia_core_db::q_hash("urn:test:adoption:second");
+    let joints = [Joint { parent:None, rest_local:Motor::identity(), inverse_bind:Motor::identity() }];
+    let joint_ids = [joint_id];
+    let skins = [SkinWeight { joints:[0;4], weights:[1.0,0.0,0.0,0.0] };3];
+    let clips = [ClipRecord { id:first_clip, duration:1.0, first_track:0, track_count:1, looping:false },
+                 ClipRecord { id:second_clip, duration:1.0, first_track:1, track_count:1, looping:false }];
+    let tracks = [Track { joint:0, first_key:0, key_count:2 }, Track { joint:0, first_key:2, key_count:2 }];
+    let keys = [Key { time:0.0, local:Motor::identity() }, Key { time:1.0, local:Motor::identity() },
+                Key { time:0.0, local:Motor::identity() }, Key { time:1.0, local:Motor::identity() }];
+    let data = SkeletalData { joints:&joints, joint_ids:&joint_ids, skin:&skins, clips:&clips, tracks:&tracks, keys:&keys };
+    let mut payload = vec![0;2048];
+    let n = encode_skeletal_section_into(&data, &mut payload).unwrap();
+    payload.truncate(n);
+    let mut bytes = vec![0;8192];
+    let n = attach_skeletal_section_into(&base, &payload, &mut bytes).unwrap();
+    bytes.truncate(n);
+    let selected = PartSelection { source:source.clone(), frame_id:1, part_key:"front".into(), semantic_id:102, triangle_index:1 };
+    let viewport = renderer::RetainedViewport::rig_test_seed(source.clone(), compiled.clone(), selected.clone());
+    let seed = RigSourceDescriptor {
+        schema:"poet.bound-rig/v1".into(), source_artifact_id:source.artifact_id.clone(), part_id:"front".into(), bind_id:"local-bind".into(), resource_key:"synthetic.10d".into(),
+        resource_sha256:String::new(), bind_mesh_sha256:String::new(), normal_uv_sha256:String::new(),
+        joint_ids:vec![], clip_ids:vec![], selected_clip_id:0, seek_seconds:0.0, joint_deltas:vec![], vertex_lineage:vec![],
+    };
+    let action = RigControl::Adopt { part_id:"front".into(), bind_id:"local-bind".into() };
+    let cancelled = AtomicBool::new(false);
+    let candidate = viewport.stage_selected_rig(source.clone(), seed.clone(), &bytes, action.clone(), &cancelled).unwrap();
+    let actual = candidate.after();
+    assert_eq!(actual.source_artifact_id, source.artifact_id);
+    assert_eq!(actual.part_id, "front");
+    assert_eq!(actual.bind_id, "local-bind");
+    assert_eq!(actual.resource_key, "synthetic.10d");
+    assert_eq!(actual.resource_sha256, crate::graphical::rig_binding::resource_sha256(&bytes));
+    assert_eq!(actual.bind_mesh_sha256, crate::graphical::rig_binding::bind_mesh_sha256(&decoded.positions, &[0,1,2]));
+    assert_eq!(actual.normal_uv_sha256, crate::graphical::rig_binding::normal_uv_sha256(&compiled.normals[3..6], &compiled.uv0[3..6]));
+    assert_eq!(actual.joint_ids, vec![joint_id]);
+    assert_eq!(actual.clip_ids, vec![first_clip, second_clip]);
+    assert_eq!(actual.selected_clip_id, first_clip);
+    assert_eq!(actual.seek_seconds, 0.0);
+    assert_eq!(actual.vertex_lineage, vec![0,1,2]);
+    assert!(viewport.stage_selected_rig(source.clone(), seed.clone(), &bytes,
+        RigControl::Adopt { part_id:"rear".into(), bind_id:"local-bind".into() }, &cancelled).is_err());
+    assert!(viewport.stage_selected_rig(source.clone(), seed.clone(), &bytes,
+        RigControl::Adopt { part_id:"front".into(), bind_id:"".into() }, &cancelled).is_err());
+    let mut corrupted = bytes.clone();
+    let last = corrupted.len()-1; corrupted[last] ^= 1;
+    assert!(viewport.stage_selected_rig(source.clone(), seed.clone(), &corrupted, action.clone(), &cancelled).is_err());
+    let mut mismatched = compiled.clone(); mismatched.mesh.positions[3][0] += 0.25;
+    let wrong_viewport = renderer::RetainedViewport::rig_test_seed(source.clone(), mismatched, selected);
+    assert!(wrong_viewport.stage_selected_rig(source.clone(), seed.clone(), &bytes, action.clone(), &cancelled).is_err());
+    cancelled.store(true, Ordering::Release);
+    assert!(viewport.stage_selected_rig(source, seed, &bytes, action, &cancelled).is_err());
+}
+
+#[test]
+fn rig_pose_updates_cpu_picking_geometry_and_bounds() {
+    let mut assembly = scene();
+    let span = crate::graphical::rig_binding::ViewportSpan { first_vertex: 3, vertex_count: 3 };
+    let positions = [[2.0, 0.0, 2.0], [3.0, 0.0, 2.0], [2.0, 2.0, 2.0]];
+    let normals = [[0.0, 1.0, 0.0]; 3];
+    let tangents = [[1.0, 0.0, 0.0, 1.0]; 3];
+    super::renderer::validate_rig_pose(&assembly, span, &positions, &normals, &tangents).unwrap();
+    super::renderer::apply_rig_pose(&mut assembly, span, &positions, &normals);
+    assert_eq!(&assembly.mesh.positions[3..], &positions);
+    assert_eq!(&assembly.normals[3..], &normals);
+    assert_eq!(assembly.mesh.min, [-1.0, -1.0, 0.0]);
+    assert_eq!(assembly.mesh.max, [3.0, 2.0, 2.0]);
+}
+
+#[test]
+fn invalid_rig_pose_is_rejected_before_cpu_mutation() {
+    let assembly = scene();
+    let span = crate::graphical::rig_binding::ViewportSpan { first_vertex: 3, vertex_count: 3 };
+    let mut positions = [[0.0, 0.0, 0.0]; 3];
+    positions[1][0] = f32::NAN;
+    assert!(super::renderer::validate_rig_pose(&assembly, span, &positions, &[[0.0, 0.0, 1.0]; 3], &[[1.0, 0.0, 0.0, 1.0]; 3]).is_err());
+    assert!(super::renderer::validate_rig_pose(&assembly, span, &positions[..2], &[[0.0, 0.0, 1.0]; 3], &[[1.0, 0.0, 0.0, 1.0]; 3]).is_err());
+    assert_eq!(assembly.mesh.max, [1.0, 1.0, 1.0]);
 }

@@ -40,6 +40,18 @@ pub struct EditorOutcome {
 }
 
 pub trait PreviewProvider: Send {
+    fn preview_selected_rig(&mut self, _source: SourceRef, _descriptor: crate::graphical::rig_binding::RigSourceDescriptor, _bytes: &[u8], _delta_seconds: f64, _cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
+        Err("Rig preview is unavailable for this host".into())
+    }
+    fn stage_rig_control(&mut self, _source: SourceRef, _descriptor: crate::graphical::rig_binding::RigSourceDescriptor, _bytes: &[u8], _action: crate::graphical::rig_binding::RigControl, _cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::rig_binding::rig_candidate::StagedRigControl,String> {
+        Err("This preview provider cannot safely admit selected rig geometry".into())
+    }
+    /// Retire any state changed by an unpublishable rig frame. Stateless providers need no action.
+    fn invalidate_rig_preview(&mut self) {}
+    /// Must explicitly retire all retained viewport state or report failure.
+    /// Stateless providers can return success; custom providers must override
+    /// this to avoid quarantine after an unpublishable source or viewport result.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Err("preview provider cannot retire retained viewport".into()) }
     fn set_execution_context(&mut self, _epoch: &SessionEpoch) {}
     fn viewport_cached(&self, _source: &SourceRef) -> bool { false }
     fn viewport(&mut self, _request: crate::graphical::viewport::ViewportCommand,
@@ -83,6 +95,8 @@ pub struct MeshPreviewProvider {
 }
 
 impl PreviewProvider for MeshPreviewProvider {
+    // This provider returns newly rendered frames and retains no viewport state.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate_with_resources(
         &self,
         value: &Value,
@@ -171,6 +185,22 @@ impl PreviewProvider for MeshPreviewProvider {
 }
 
 pub trait EditorHost: Send {
+    /// Trusted capability to acquire the same shared owner after authority admission.
+    fn shared_viewport_host(&self) -> Option<crate::graphical::shared_host::SharedEditorHost> { None }
+    /// Retire tentative derived state, or fail so the shared viewport can be quarantined.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Err("host cannot retire retained viewport".into()) }
+    /// Internal checkpoint-to-preview handoff, only under current project read authority.
+    fn preview_rig_from_selected_resource(&mut self, _resource_key: &str, _bytes: &[u8], _expected: SourceRef, _delta_seconds: f64, _cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
+        Err("Selected rig preview is unavailable for this host".into())
+    }
+    /// Rig edits must use this cancellation-aware, authority-wrapped route.
+    fn rig_authoring_edit(&mut self, _resource: crate::graphical::checkpoints::ResourceInspectionRequest, _control: crate::graphical::rig_binding::RigControl, _expected: SourceRef, _cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        Err("This host cannot perform a cancellation-aware rig edit".into())
+    }
+    /// Internal checkpoint-to-source handoff; outer authority and selected-resource checks are mandatory.
+    fn edit_rig_from_selected_resource(&mut self, _resource_key: &str, _bytes: &[u8], _control: crate::graphical::rig_binding::RigControl, _expected: SourceRef, _cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        Err("This source owner cannot edit a selected rig".into())
+    }
     fn viewport_action(&mut self, _request: crate::graphical::viewport::ViewportCommand,
         _expected: SourceRef, _cancelled: &std::sync::atomic::AtomicBool,
     ) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
@@ -216,6 +246,15 @@ pub trait EditorHost: Send {
         _expected: SourceRef,
     ) -> Result<(), String> {
         Err("Native surface package binding unavailable".into())
+    }
+    /// Raw binding seam: the default cannot prove failure occurred before mutation.
+    fn bind_surface_package_transaction(
+        &mut self,
+        request: crate::graphical::surface_host::SurfacePackageRequest,
+        expected: SourceRef,
+    ) -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+        self.bind_surface_package(request, expected)
+            .map_err(crate::graphical::surface_host::SurfaceBindingFailure::MayHaveMutated)
     }
     /// Internal raw owner only; no command deserializes resources or forwards this through authority wrappers.
     fn install_surface_resources(
@@ -278,6 +317,8 @@ pub trait EditorHost: Send {
         Err("Native georaster authoring is unavailable for this host".into())
     }
 
+    fn numeric_sheet_view(&self, _expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { Err("Numeric sheet is unavailable for this host".into()) }
+    fn numeric_sheet_edit(&mut self, _edit: crate::graphical::numeric_sheet::SheetEdit, _expected: SourceRef) -> Result<EditorOutcome, String> { Err("Numeric sheet editing is unavailable for this host".into()) }
     fn authoring_view(
         &self,
         _expected: SourceRef,

@@ -5,7 +5,8 @@ use qualia_core_db::q42::m64_matter::{
     M64ReadError, M64ReadLimits, M64Reader, M64Verification,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ResourceInspectionRequest {
     pub filename: String,
     pub package_digest: [u8; 32],
@@ -96,6 +97,67 @@ pub(super) fn inspect_payload(
 }
 
 impl CheckpointService {
+    /// The caller must hold the current ReadSource guard throughout this call.
+    /// The result is immutable bytes for the exact selected package/resource;
+    /// it is not an SKL1 qualification or a grant to edit or publish anything.
+    pub fn read_selected_resource(
+        &self,
+        request: ResourceInspectionRequest,
+        expected: &crate::graphical::preview::SourceRef,
+        max_resource_bytes: usize,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<Vec<u8>, String> {
+        let live = || if cancelled.load(std::sync::atomic::Ordering::Acquire) { Err("Rig resource read cancelled") } else { Ok(()) };
+        live()?;
+        request.validate_bounds()?;
+        expected.check_current()?;
+        if expected.artifact_id != self.binding.source_id {
+            return Err("Selected resource belongs to another source".into());
+        }
+        if max_resource_bytes == 0 || max_resource_bytes > self.limits.file_bytes {
+            return Err("Selected resource byte budget is invalid".into());
+        }
+        let (artifact, stamp) = studio_store::get_artifact_stamped(&expected.artifact_id)
+            .ok_or("Selected resource source disappeared")?;
+        if stamp != expected.stamp { return Err("Selected resource source changed".into()); }
+        let digest = crate::graphical::cooperation::source_digest(
+            &artifact, crate::graphical::cooperation::GatewayLimits::default())?;
+        let path = self.path(&request.filename)?;
+        let checkpoint = core::load(&path, self.limits)?;
+        live()?;
+        self.matches(checkpoint.artifact())?;
+        if crate::graphical::cooperation::source_digest(
+            checkpoint.artifact(), crate::graphical::cooperation::GatewayLimits::default())? != digest
+        { return Err("Selected resource package source differs from current source; save/reopen a coherent base first".into()); }
+        if checkpoint.file_digest() != Some(request.package_digest) {
+            return Err("Selected resource package changed; refresh inventory".into());
+        }
+        self.check_release_input(&request.filename, request.package_digest)?;
+        let selected = checkpoint.resources().iter().find(|r| r.key == request.key)
+            .ok_or("Selected resource is absent; refresh inventory")?;
+        if selected.kind != "10d" || selected.summary().digest != request.resource_digest {
+            return Err("Selected resource kind or digest changed; refresh inventory".into());
+        }
+        if selected.bytes.len() > max_resource_bytes {
+            return Err("Selected resource exceeds the caller byte budget".into());
+        }
+        let mut bytes = Vec::new();
+        bytes.try_reserve_exact(selected.bytes.len()).map_err(|_| "Selected resource allocation refused")?;
+        bytes.extend_from_slice(&selected.bytes);
+        drop(checkpoint);
+        expected.check_current()?;
+        let current = core::load(&self.path(&request.filename)?, self.limits)?;
+        live()?;
+        self.matches(current.artifact())?;
+        self.check_release_input(&request.filename, request.package_digest)?;
+        if current.file_digest() != Some(request.package_digest) {
+            return Err("Selected resource package changed during read; result withheld".into());
+        }
+        expected.check_current()?;
+        live()?;
+        Ok(bytes)
+    }
+
     /// Caller retains the current ReadSource owner guard; this service supplies
     /// path/source/digest consistency, never authority from package contents.
     pub fn inspect_resource(

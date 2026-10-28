@@ -27,6 +27,8 @@ const TEXTURE_EFFECT_META: [u8; 4] = [0xa1, 0x61, b'p', 7];
 
 struct TextureEffectNoGpu;
 impl PreviewProvider for TextureEffectNoGpu {
+    // This fixture does not retain a viewport or rendered frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate(&self, value: &Value) -> Result<(), String> {
         crate::graphical::assembly::admit_assembly(value, PreviewLimits::default()).map(|_| ())
     }

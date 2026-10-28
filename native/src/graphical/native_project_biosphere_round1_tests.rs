@@ -15,6 +15,8 @@ const BOTANICAL_CHILD: &str = "POET_BOTANICAL_ROUND1_CHILD_ROOT";
 
 struct BotanicalNoPixels;
 impl PreviewProvider for BotanicalNoPixels {
+    // This fixture does not retain a viewport or rendered frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate(&self, value: &Value) -> Result<(), String> {
         crate::graphical::assembly::admit_assembly(value, PreviewLimits::default()).map(|_| ())
     }
@@ -432,3 +434,10 @@ fn botanical_native_edit_requires_actual_core_grants() {
         accepted
     );
 }
+
+include!("native_project_botanical_gpu_tests.inc.rs");
+
+include!("native_project_botanical_review_tests.inc.rs");
+
+include!("native_project_botanical_chain_v2_tests.inc.rs");
+include!("native_project_botanical_uv_tests.inc.rs");

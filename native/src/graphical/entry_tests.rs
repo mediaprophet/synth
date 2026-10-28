@@ -132,3 +132,27 @@ fn diagnostic_reopen_hold_also_blocks_an_empty_session_until_explicit_rebuild() 
     assert!(rebuilt.frame.is_none());
     assert!(held.check("1;").is_ok());
 }
+
+#[test]
+fn diagnostic_sheet_capability_requires_explicit_grant() {
+    let no_sheet = options(&args(&["--diagnostic-source"])).unwrap();
+    assert!(!no_sheet.grants.iter().any(|g| g == "Sheet.set_cell"));
+    let sheet = options(&args(&["--diagnostic-source", "--grant", "capability.invoke", "--grant", "Sheet.set_cell"])).unwrap();
+    assert!(sheet.grants.iter().any(|g| g == "Sheet.set_cell"));
+}
+
+#[test]
+fn diagnostic_formula_capability_requires_explicit_grant() {
+    let no_formula = options(&args(&["--diagnostic-source"])).unwrap();
+    assert!(!no_formula.grants.iter().any(|g| g == "Sheet.eval_formula"));
+    let formula = options(&args(&["--diagnostic-source", "--grant", "capability.invoke", "--grant", "Sheet.eval_formula"])).unwrap();
+    assert!(formula.grants.iter().any(|g| g == "Sheet.eval_formula"));
+}
+
+#[test]
+fn diagnostic_sheet_ranges_require_explicit_grants() {
+ let defaults = options(&args(&["--diagnostic-source"])).unwrap();
+ for id in ["Sheet.stats", "Sheet.sum_range"] { assert!(!defaults.grants.iter().any(|g| g == id)); }
+ let enabled = options(&args(&["--diagnostic-source", "--grant", "Sheet.stats", "--grant", "Sheet.sum_range"])).unwrap();
+ for id in ["Sheet.stats", "Sheet.sum_range"] { assert!(enabled.grants.iter().any(|g| g == id)); }
+}

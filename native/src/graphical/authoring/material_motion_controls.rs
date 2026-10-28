@@ -95,6 +95,40 @@ impl MotionForm {
         self.track_dirty || self.fields_dirty
     }
 
+    // Preview the retained local key draft using the same admitted sampler as
+    // the source edit. Pending key-field text is deliberately not a key yet.
+    fn local_sample(&self) -> Result<([f64; 4], f64, f64), String> {
+        self.draft.sample_factors(time_ms(&self.playhead)?)
+    }
+
+    // Strict adjacent-key navigation does not wrap, edit keys or submit source.
+    fn step_playhead(&mut self, forward: bool) -> Result<u32, String> {
+        self.draft.validate()?;
+        let current = time_ms(&self.playhead)?;
+        let next = if forward {
+            self.draft.keys.iter().find(|key| key.time_ms > current)
+        } else {
+            self.draft.keys.iter().rev().find(|key| key.time_ms < current)
+        }.ok_or(if forward { "No later local key" } else { "No earlier local key" })?;
+        let time = next.time_ms;
+        self.playhead = time.to_string();
+        Ok(time)
+    }
+
+    fn local_sample_label(&self) -> String {
+        if self.draft.keys.is_empty() {
+            return "Add a local key to inspect material factors at the playhead.".into();
+        }
+        match self.local_sample() {
+            Ok((rgba, roughness, metallic)) => format!(
+                "Local draft at {} ms: linear RGBA {:?}; roughness {}; metallic {}. Numeric inspection only; source and rendered frame are unchanged.{}",
+                self.playhead, rgba, roughness, metallic,
+                if self.fields_dirty { " Uncommitted key fields are not included." } else { "" }
+            ),
+            Err(error) => format!("Local draft sample unavailable: {error}"),
+        }
+    }
+
     fn key(&self) -> Result<MaterialMotionKey, String> {
         if self.values.len() != FACTORS.len() {
             return Err("Incomplete key fields".into());
@@ -199,6 +233,7 @@ pub(super) fn MaterialMotionControls(
             .as_ref()
             .is_some_and(|f| current.as_ref().is_some_and(|v| f.current(v, &selected())));
     let dirty = local.as_ref().is_some_and(MotionForm::dirty);
+    let local_sample = if ready { local.as_ref().map(MotionForm::local_sample_label) } else { None };
     let track_limit = local.as_ref().is_some_and(|f| !f.accepted)
         && current
             .as_ref()
@@ -231,6 +266,25 @@ pub(super) fn MaterialMotionControls(
                     input { disabled:!ready, value:"{f.playhead}", maxlength:8, aria_label:"Material motion playhead milliseconds",
                         oninput:move |e| if let Some(f)=form.write().as_mut() { f.playhead=e.value(); }
                     }
+                }
+                if let Some(sample) = local_sample { p { role:"status", "{sample}" } }
+                div { style:"display:flex;gap:6px;flex-wrap:wrap;",
+                    button { disabled:!ready||f.draft.keys.is_empty(), aria_label:"Move playhead to previous local material key",
+                        onclick:move |_| {
+                            if !ready { return; }
+                            if let Some(f)=form.write().as_mut() { match f.step_playhead(false) {
+                                Ok(time)=>message.set(format!("Playhead moved to local key at {time} milliseconds; source unchanged.")),
+                                Err(error)=>message.set(error),
+                            }}
+                        }, "Previous key" }
+                    button { disabled:!ready||f.draft.keys.is_empty(), aria_label:"Move playhead to next local material key",
+                        onclick:move |_| {
+                            if !ready { return; }
+                            if let Some(f)=form.write().as_mut() { match f.step_playhead(true) {
+                                Ok(time)=>message.set(format!("Playhead moved to local key at {time} milliseconds; source unchanged.")),
+                                Err(error)=>message.set(error),
+                            }}
+                        }, "Next key" }
                 }
                 p { "Keys are ordered by time. Interpolation belongs to the outgoing segment; the final key has no outgoing segment." }
                 ol {
@@ -393,6 +447,46 @@ mod tests {
         );
         assert!(f.track_dirty);
         assert!(!f.fields_dirty);
+    }
+
+    #[test]
+    fn local_playhead_samples_the_existing_domain_without_saving() {
+        let mut f = form();
+        assert!(f.local_sample_label().contains("Add a local key"));
+        f.key_time = "0".into();
+        f.values = ["0", "0", "0", "1", "0", "0"].into_iter().map(str::to_owned).collect();
+        f.write_key(false).unwrap();
+        f.key_time = "1000".into();
+        f.values = ["1", "1", "1", "1", "1", "1"].into_iter().map(str::to_owned).collect();
+        f.write_key(false).unwrap();
+        let before = f.draft.clone();
+        f.playhead = "500".into();
+        f.values[0] = "pending".into();
+        f.fields_dirty = true;
+        let (rgba, roughness, metallic) = f.local_sample().unwrap();
+        assert_eq!(rgba, [0.5, 0.5, 0.5, 1.0]);
+        assert_eq!((roughness, metallic), (0.5, 0.5));
+        assert!(f.local_sample_label().contains("Uncommitted key fields are not included"));
+        assert_eq!(f.draft, before);
+        assert_eq!(f.values[0], "pending");
+        assert!(f.fields_dirty);
+        f.playhead = "bad".into();
+        assert!(f.local_sample().is_err());
+        assert_eq!(f.draft, before);
+    }
+
+    #[test]
+    fn playhead_navigation_is_strict_bounded_and_preserves_pending_fields() {
+        let mut f = form();
+        f.key_time = "1000".into(); f.write_key(false).unwrap();
+        f.key_time = "2000".into(); f.write_key(false).unwrap();
+        f.playhead = "1000".into(); f.values[0] = "pending".into(); f.fields_dirty = true;
+        assert_eq!(f.step_playhead(true).unwrap(), 2000);
+        assert!(f.step_playhead(true).is_err()); assert_eq!(f.playhead, "2000");
+        assert_eq!(f.step_playhead(false).unwrap(), 1000);
+        assert!(f.step_playhead(false).is_err()); assert_eq!(f.playhead, "1000");
+        f.playhead = "invalid".into(); assert!(f.step_playhead(true).is_err());
+        assert_eq!(f.playhead, "invalid"); assert_eq!(f.values[0], "pending"); assert!(f.fields_dirty);
     }
 
     #[test]

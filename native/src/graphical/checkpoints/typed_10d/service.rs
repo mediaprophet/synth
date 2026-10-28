@@ -46,6 +46,7 @@ impl CheckpointService {
             return Err("Selected resource kind/digest changed or is not canonical 10d".into());
         }
         let payload = payload::inspect(&selected.bytes, limits)?;
+        let skeletal = payload::inspect_skeletal(&selected.bytes);
         let mut edit_blocker = payload.blocker;
         if selected.meta.is_some() {
             edit_blocker = Some("Selected resource metadata has no qualified derivative contract; use authored source".into());
@@ -74,6 +75,7 @@ impl CheckpointService {
             ranges: payload.ranges,
             fields: payload.fields,
             frames: payload.frames,
+            skeletal,
             edit_blocker,
         })
     }

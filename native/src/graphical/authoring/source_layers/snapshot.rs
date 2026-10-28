@@ -3,6 +3,7 @@
 //! clone. These are budgeted structural bytes, not measured allocator/RSS bytes.
 //! SessionLimits independently governs retained values; no source grants budget.
 use vibe::Value;
+#[cfg(test)]
 const LEGACY_BYTES: usize = 64 * 1024 * 1024;
 
 #[derive(Debug)]
@@ -79,7 +80,8 @@ fn cost(parts: Option<&Value>, base: Option<&Value>) -> Result<SnapshotCost, Str
     Ok(total)
 }
 
-/// Compatibility profile: unchanged 64 MiB combined structural-byte ceiling.
+/// Test-only compatibility profile: unchanged 64 MiB combined structural-byte ceiling.
+#[cfg(test)]
 pub(crate) fn validation_snapshot(
     parts: Option<&Value>,
     base: Option<&Value>,

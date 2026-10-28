@@ -1,13 +1,15 @@
 //! VibeScript interactive REPL (T62).
 
 use std::io::{self, BufRead, Write};
-use vibe::session::{SourceSession, SessionLimits, SubmissionError, SubmissionResult};
-use vibe::{
-    check_cell, check_program, parse_cell, parse_program, Budget, Diagnostic, Engine, Env, Host,
-    LocalHost, Value,
-};
+use vibe::session::{SessionLimits, SourceSession, SubmissionError, SubmissionResult};
+#[cfg(test)]
+use vibe::{check_cell, check_program, parse_cell, parse_program, Diagnostic, Engine, Env, Value};
+use vibe::{Budget, Host, LocalHost};
+#[path = "repl_sheet_host.rs"]
+pub(crate) mod sheet_host;
 
 /// Evaluate a single REPL line/cell within a persistent host and environment.
+#[cfg(test)]
 pub fn eval_line(line: &str, host: &mut impl Host, env: &mut Env) -> Result<Value, Diagnostic> {
     let trimmed = line.trim();
     if trimmed.is_empty() {
@@ -41,25 +43,29 @@ pub fn eval_line(line: &str, host: &mut impl Host, env: &mut Env) -> Result<Valu
 /// Evaluate once through the canonical persistent checked source gateway.
 /// The caller supplies a session whose actual grants were admitted by its host.
 pub fn eval_session_line(
-    line: &str, host: &mut impl Host, session: &mut SourceSession,
+    line: &str,
+    host: &mut impl Host,
+    session: &mut SourceSession,
 ) -> Result<SubmissionResult, SubmissionError> {
     session.submit(line, host, Budget::default())
 }
 
-/// Run an interactive REPL reading from stdin and writing to stdout.
-pub fn run_repl() -> io::Result<()> {
-    run_repl_with_grants(Vec::new())
-}
-
 /// Parse explicit host-level local grants; source requests are separate.
 pub fn parse_repl_grants(args: &[String]) -> Result<Vec<String>, String> {
-    let mut grants=Vec::new(); let mut index=0;
+    let mut grants = Vec::new();
+    let mut index = 0;
     while index < args.len() {
-        if args[index] != "--grant" { return Err(format!("unknown repl option: {}",args[index])); }
-        let cap=args.get(index+1).filter(|s| !s.trim().is_empty() && !s.starts_with("--"))
+        if args[index] != "--grant" {
+            return Err(format!("unknown repl option: {}", args[index]));
+        }
+        let cap = args
+            .get(index + 1)
+            .filter(|s| !s.trim().is_empty() && !s.starts_with("--"))
             .ok_or_else(|| "--grant requires an explicit capability identifier".to_string())?;
-        if !grants.contains(cap) { grants.push(cap.clone()); }
-        index+=2;
+        if !grants.contains(cap) {
+            grants.push(cap.clone());
+        }
+        index += 2;
     }
     Ok(grants)
 }
@@ -70,9 +76,16 @@ pub fn run_repl_with_grants(grants: Vec<String>) -> io::Result<()> {
     println!("Poet — VibeScript REPL v{}", vibe::LANGUAGE_VERSION);
     println!("Vibe is the language; Poet is this creative shell.");
     println!("Type an expression or cell statement to evaluate. Type 'exit' or Ctrl+D to quit.\n");
-    println!("Local REPL grants: {}", if grants.is_empty() { "none".to_string() } else { grants.join(", ") });
+    println!(
+        "Local REPL grants: {}",
+        if grants.is_empty() {
+            "none".to_string()
+        } else {
+            grants.join(", ")
+        }
+    );
 
-    let mut host = LocalHost::default();
+    let mut host = sheet_host::ReplHost::new(grants.clone());
     let mut session = SourceSession::new(grants, SessionLimits::default());
     let stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -94,6 +107,7 @@ pub fn run_repl_with_grants(grants: Vec<String>) -> io::Result<()> {
             continue;
         }
 
+        host.begin_submission();
         match eval_session_line(trimmed, &mut host, &mut session) {
             Ok(result) => println!("{}", result.value),
             Err(error) => {
@@ -285,3 +299,12 @@ mod tests {
         assert_eq!(val, Value::I64(20));
     }
 }
+
+
+
+
+
+#[cfg(test)]
+#[path = "repl_sheet_host_tests.rs"]
+mod sheet_host_tests;
+

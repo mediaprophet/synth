@@ -204,6 +204,8 @@ impl AuthorityOwner for FixtureOwner {
 }
 struct NoPreview;
 impl PreviewProvider for NoPreview {
+    // This headless fixture does not retain a viewport or frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn preview(&mut self, _: SourceRef, _: &vibe::Value) -> Result<PreviewFrame, String> {
         Err("fixture does not create fake rendered frames".into())
     }
@@ -466,4 +468,348 @@ fn owner_without_publication_guard_keeps_native_operations_but_cannot_publish_co
         .submit("let fixture_work: I64 = 1;", snapshot.source)
         .unwrap();
     assert_eq!(accepted.snapshot.session_revision, 1);
+}
+
+// Scripted authority fixtures exercise shared ownership only; they do not prove
+// GPU behavior, a native human workflow, or every possible publication race.
+mod viewport_outer_transaction_tests {
+    use super::*;
+    use crate::graphical::{controller::{EditorHost, EditorOutcome, EditorSnapshot}, preview::PreviewCamera,
+        shared_host::SharedEditorHost, viewport::ViewportCommand, viewport_contract::{ViewportOutput, ViewportState}};
+    use std::sync::{atomic::AtomicBool, mpsc};
+
+    struct FakeViewport { dirty: Arc<AtomicBool>, can_retire: bool }
+    impl EditorHost for FakeViewport {
+        fn viewport_action(&mut self, _: ViewportCommand, source: SourceRef, _: &AtomicBool) -> Result<ViewportOutput, String> {
+            self.dirty.store(true, Ordering::Release);
+            Ok(ViewportOutput { frame: PreviewFrame { source: source.clone(), session_revision: None, execution_epoch: None, side: 1, rgba8: vec![0;4] },
+                state: ViewportState { source, execution_epoch: None, frame_id: 1, selected_part: None,
+                    camera: PreviewCamera { yaw: 0.0, pitch: 0.0, distance: 1.0, target: [0.0;3] } } })
+        }
+        fn retire_retained_viewport(&mut self) -> Result<(), String> {
+            if !self.can_retire { return Err("retirement unsupported".into()); }
+            self.dirty.store(false, Ordering::Release); Ok(())
+        }
+        fn snapshot(&self) -> Result<EditorSnapshot,String> { Err("fixture".into()) }
+        fn check(&self, _: &str) -> Result<String,String> { Err("fixture".into()) }
+        fn submit(&mut self, _: &str, _: SourceRef) -> Result<EditorOutcome,String> { Err("fixture".into()) }
+        fn undo(&mut self, _: SourceRef) -> Result<EditorSnapshot,String> { Err("fixture".into()) }
+        fn redo(&mut self, _: SourceRef) -> Result<EditorSnapshot,String> { Err("fixture".into()) }
+    }
+    struct RejectAfter { inner: FixtureOwner }
+    impl AuthorityOwner for RejectAfter {
+        fn publication_is_current(&self, generation: u64) -> bool { self.inner.publication_is_current(generation) }
+        fn with_current(&self, op: &mut dyn FnMut(&HostAuthorityView<'_>) -> Result<(),String>) -> Result<(),String> {
+            self.inner.with_current(&mut |view| { op(view)?; Err("scripted post-callback rejection".into()) })
+        }
+    }
+    struct PauseReject { inner: FixtureOwner, entered: mpsc::Sender<()>, resume: Mutex<mpsc::Receiver<()>> }
+    impl AuthorityOwner for PauseReject {
+        fn publication_is_current(&self, generation: u64) -> bool { self.inner.publication_is_current(generation) }
+        fn with_current(&self, op: &mut dyn FnMut(&HostAuthorityView<'_>) -> Result<(),String>) -> Result<(),String> {
+            self.inner.with_current(&mut |view| { op(view)?; self.entered.send(()).unwrap();
+                self.resume.lock().unwrap().recv().unwrap(); Err("scripted post-callback rejection".into()) })
+        }
+    }
+    fn wrap(scope: &Scope, shared: &SharedEditorHost, owner: Arc<dyn AuthorityOwner>) -> AuthorizedEditorHost {
+        AuthorizedEditorHost::new(Box::new(shared.clone()), scope.clone(), owner, GatewayLimits::default()).unwrap()
+    }
+    #[test]
+    fn outer_viewport_transaction_excludes_frontend_until_rejected_frame_retired() {
+        let scope = scope(); let source = reference(&scope); let dirty = Arc::new(AtomicBool::new(false));
+        let shared = SharedEditorHost::new(Box::new(FakeViewport { dirty: dirty.clone(), can_retire: true }));
+        let (entered_tx, entered_rx) = mpsc::channel(); let (resume_tx, resume_rx) = mpsc::channel();
+        let owner = Arc::new(PauseReject { inner: FixtureOwner::new(&scope, ProjectRole::Contributor), entered: entered_tx, resume: Mutex::new(resume_rx) });
+        let mut first = wrap(&scope, &shared, owner); let first_source = source.clone();
+        let worker = std::thread::spawn(move || first.viewport_action(ViewportCommand::Redraw, first_source, &AtomicBool::new(false)));
+        entered_rx.recv().unwrap(); assert!(dirty.load(Ordering::Acquire));
+        let mut second = wrap(&scope, &shared, Arc::new(FixtureOwner::new(&scope, ProjectRole::Contributor)));
+        assert!(second.viewport_action(ViewportCommand::Redraw, source.clone(), &AtomicBool::new(false)).err().unwrap().contains("busy"));
+        resume_tx.send(()).unwrap(); assert!(worker.join().unwrap().is_err());
+        assert!(!dirty.load(Ordering::Acquire), "refused candidate must retire before release");
+        second.viewport_action(ViewportCommand::Redraw, source, &AtomicBool::new(false)).unwrap();
+        assert!(dirty.load(Ordering::Acquire), "later accepted frame must remain available");
+    }
+    #[test]
+    fn outer_viewport_transaction_quarantines_if_retirement_unavailable() {
+        let scope = scope(); let source = reference(&scope); let dirty = Arc::new(AtomicBool::new(false));
+        let shared = SharedEditorHost::new(Box::new(FakeViewport { dirty, can_retire: false }));
+        let mut first = wrap(&scope, &shared, Arc::new(RejectAfter { inner: FixtureOwner::new(&scope, ProjectRole::Contributor) }));
+        assert!(first.viewport_action(ViewportCommand::Redraw, source.clone(), &AtomicBool::new(false)).is_err());
+        let mut second = wrap(&scope, &shared, Arc::new(FixtureOwner::new(&scope, ProjectRole::Contributor)));
+        assert!(second.viewport_action(ViewportCommand::Redraw, source, &AtomicBool::new(false)).err().unwrap().contains("quarantined"));
+    }
+    struct CancelAfter { inner: FixtureOwner, cancel: Arc<AtomicBool> }
+    impl AuthorityOwner for CancelAfter {
+        fn publication_is_current(&self, generation: u64) -> bool { self.inner.publication_is_current(generation) }
+        fn with_current(&self, op: &mut dyn FnMut(&HostAuthorityView<'_>) -> Result<(),String>) -> Result<(),String> {
+            self.inner.with_current(&mut |view| { op(view)?; self.cancel.store(true, Ordering::Release); Ok(()) })
+        }
+    }
+    #[test]
+    fn outer_viewport_transaction_retires_on_post_callback_cancellation() {
+        let scope = scope(); let source = reference(&scope); let dirty = Arc::new(AtomicBool::new(false));
+        let shared = SharedEditorHost::new(Box::new(FakeViewport { dirty: dirty.clone(), can_retire: true }));
+        let cancel = Arc::new(AtomicBool::new(false));
+        let owner = Arc::new(CancelAfter { inner: FixtureOwner::new(&scope, ProjectRole::Contributor), cancel: cancel.clone() });
+        let mut editor = wrap(&scope, &shared, owner);
+        assert!(editor.viewport_action(ViewportCommand::Redraw, source, &cancel).is_err());
+        assert!(!dirty.load(Ordering::Acquire));
+    }
+    #[test]
+    fn outer_viewport_transaction_retires_on_duplicate_callback() {
+        let scope = scope(); let source = reference(&scope); let dirty = Arc::new(AtomicBool::new(false));
+        let shared = SharedEditorHost::new(Box::new(FakeViewport { dirty: dirty.clone(), can_retire: true }));
+        let owner = Arc::new(FixtureOwner::new(&scope, ProjectRole::Contributor)); owner.state.lock().unwrap().calls = 2;
+        let mut editor = wrap(&scope, &shared, owner);
+        assert!(editor.viewport_action(ViewportCommand::Redraw, source, &AtomicBool::new(false)).is_err());
+        assert!(!dirty.load(Ordering::Acquire));
+    }
+}
+
+
+// Scripted owner and CPU provider: source commits are real, rendered pixels and
+// native-authority/gpu behavior require separate integration checks.
+mod source_submit_transaction_tests {
+    use super::*;
+    use crate::graphical::shared_host::SharedEditorHost;
+    use std::sync::{atomic::AtomicBool, mpsc};
+    struct TrackedPreview { dirty: Arc<AtomicBool>, failed: bool, retire: bool }
+    impl PreviewProvider for TrackedPreview {
+        fn preview(&mut self, source: SourceRef, _: &vibe::Value) -> Result<PreviewFrame, String> {
+            self.dirty.store(true, Ordering::Release);
+            if self.failed { return Err("fixture preview failed after mutation".into()); }
+            Ok(PreviewFrame { source, session_revision: None, execution_epoch: None, side: 1, rgba8: vec![0; 4] })
+        }
+        fn retire_retained_viewport(&mut self) -> Result<(),String> {
+            if !self.retire { return Err("cannot retire".into()); }
+            self.dirty.store(false, Ordering::Release); Ok(())
+        }
+    }
+    struct PauseReject { inner: FixtureOwner, entered: mpsc::Sender<()>, resume: Mutex<mpsc::Receiver<()>> }
+    impl AuthorityOwner for PauseReject {
+        fn with_current(&self, op: &mut dyn FnMut(&HostAuthorityView<'_>) -> Result<(), String>) -> Result<(), String> {
+            self.inner.with_current(&mut |view| { op(view)?; self.entered.send(()).unwrap(); self.resume.lock().unwrap().recv().unwrap(); Err("fixture post-submit refusal".into()) })
+        }
+    }
+    fn shared(scope: &Scope, dirty: Arc<AtomicBool>, failed: bool, retire: bool) -> SharedEditorHost {
+        let host=CanonicalEditorHost::open(scope.source_id.clone(), SessionLimits::default(), GeometryHost::default(), Box::new(TrackedPreview { dirty, failed, retire })).unwrap();
+        SharedEditorHost::new(Box::new(host))
+    }
+    fn wrap(scope: &Scope, shared: &SharedEditorHost, owner: Arc<dyn AuthorityOwner>) -> AuthorizedEditorHost {
+        AuthorizedEditorHost::new(Box::new(shared.clone()), scope.clone(), owner, GatewayLimits::default()).unwrap()
+    }
+    #[test]
+    fn source_submit_transaction_holds_shared_owner_through_outer_refusal() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let shared=shared(&scope, dirty.clone(), false, true); let other=shared.clone();
+        let (entered_tx,entered_rx)=mpsc::channel(); let (resume_tx,resume_rx)=mpsc::channel();
+        let owner=Arc::new(PauseReject { inner:FixtureOwner::new(&scope,ProjectRole::Contributor), entered:entered_tx, resume:Mutex::new(resume_rx) });
+        let mut writer=wrap(&scope,&shared,owner); let first=before.clone();
+        let task=std::thread::spawn(move || writer.submit("let mut source_tx_value: I64 = 1;",first));
+        entered_rx.recv().unwrap(); assert!(dirty.load(Ordering::Acquire));
+        assert!(other.snapshot().err().unwrap().contains("busy"));
+        let committed=reference(&scope); assert_ne!(before, committed, "source commit is real and not rolled back");
+        resume_tx.send(()).unwrap(); let error=task.join().unwrap().err().unwrap();
+        assert!(error.contains("committed") && error.contains("reconcil"));
+        assert!(!dirty.load(Ordering::Acquire)); assert_eq!(reference(&scope),committed);
+        let snapshot=other.snapshot().unwrap(); assert_eq!(snapshot.source,committed);
+    }
+    #[test]
+    fn source_submit_transaction_retires_failed_preview_without_losing_commit() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let shared=shared(&scope,dirty.clone(),true,true); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        let mut writer=wrap(&scope,&shared,owner); let result=writer.submit("let mut failed_preview_value: I64 = 1;",before.clone()).unwrap();
+        assert!(result.frame.is_none()); assert!(!dirty.load(Ordering::Acquire)); assert_ne!(before,reference(&scope));
+        assert!(result.message.contains("preview unavailable"));
+    }
+    #[test]
+    fn source_submit_transaction_quarantines_unretirable_failed_preview() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let shared=shared(&scope,dirty,true,false); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        let mut writer=wrap(&scope,&shared,owner); let error=writer.submit("let mut quarantine_value: I64 = 1;",before.clone()).err().unwrap();
+        assert!(error.contains("quarantined") && error.contains("committed")); assert_ne!(before,reference(&scope));
+        assert!(shared.snapshot().err().unwrap().contains("quarantined"));
+    }
+    #[test]
+    fn source_submit_transaction_duplicate_callback_retires_without_repeating_commit() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let shared=shared(&scope,dirty.clone(),false,true); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        owner.state.lock().unwrap().calls=2; let mut writer=wrap(&scope,&shared,owner);
+        let error=writer.submit("let mut duplicate_value: I64 = 1;",before.clone()).err().unwrap();
+        assert!(error.contains("not repeated") && error.contains("reconcil"));
+        assert!(!dirty.load(Ordering::Acquire)); assert_ne!(before,reference(&scope));
+        assert_eq!(shared.source_cells(reference(&scope)).unwrap().len(),1);
+    }
+    struct MisboundFrame(CanonicalEditorHost);
+    impl EditorHost for MisboundFrame {
+        fn submit(&mut self, code: &str, source: SourceRef) -> Result<EditorOutcome,String> {
+            let mut result=self.0.submit(code,source)?;
+            result.frame.as_mut().unwrap().session_revision=None;
+            Ok(result)
+        }
+        fn retire_retained_viewport(&mut self) -> Result<(),String> { self.0.retire_retained_viewport() }
+        fn snapshot(&self)->Result<EditorSnapshot,String> { self.0.snapshot() }
+        fn check(&self, code:&str)->Result<String,String> { self.0.check(code) }
+        fn undo(&mut self, source:SourceRef)->Result<EditorSnapshot,String> { self.0.undo(source) }
+        fn redo(&mut self, source:SourceRef)->Result<EditorSnapshot,String> { self.0.redo(source) }
+    }
+    #[test]
+    fn source_submit_transaction_withholds_unbound_session_frame() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let inner=CanonicalEditorHost::open(scope.source_id.clone(), SessionLimits::default(), GeometryHost::default(), Box::new(TrackedPreview { dirty:dirty.clone(),failed:false,retire:true })).unwrap();
+        let shared=SharedEditorHost::new(Box::new(MisboundFrame(inner))); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        let mut writer=wrap(&scope,&shared,owner); let outcome=writer.submit("let mut unbound_preview_value: I64 = 1;",before.clone()).unwrap();
+        assert!(outcome.frame.is_none()); assert!(outcome.message.contains("mismatched preview withheld"));
+        assert!(!dirty.load(Ordering::Acquire)); assert_ne!(before,reference(&scope));
+    }
+    #[test]
+    fn source_submit_transaction_retains_accepted_exact_frame() {
+        let scope=scope(); let before=reference(&scope); let dirty=Arc::new(AtomicBool::new(false));
+        let shared=shared(&scope,dirty.clone(),false,true); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        let mut writer=wrap(&scope,&shared,owner); let result=writer.submit("let mut accepted_preview_value: I64 = 1;",before).unwrap();
+        assert_eq!(result.frame.unwrap().source,result.snapshot.source); assert!(dirty.load(Ordering::Acquire));
+    }
+}
+
+
+// Scripted owners verify lock/publication behavior; no GPU or human acceptance.
+mod surface_binding_transaction_tests {
+    use super::*;
+    use crate::graphical::{controller::{EditorHost, EditorOutcome, EditorSnapshot}, shared_host::SharedEditorHost,
+        surface_host::SurfacePackageRequest};
+    use std::sync::{atomic::{AtomicBool, AtomicUsize}, mpsc};
+    use std::time::Duration;
+
+    struct BindingHost { changed: Arc<AtomicBool>, calls: Arc<AtomicUsize>, fail_after_change: bool }
+    impl EditorHost for BindingHost {
+        fn bind_surface_package(&mut self, _: SurfacePackageRequest, _: SourceRef) -> Result<(), String> {
+            self.calls.fetch_add(1, Ordering::AcqRel);
+            self.changed.store(true, Ordering::Release);
+            if self.fail_after_change { Err("fixture failed after changing binding".into()) } else { Ok(()) }
+        }
+        fn bind_surface_package_transaction(&mut self, request: SurfacePackageRequest, source: SourceRef)
+            -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+            use crate::graphical::surface_host::SurfaceBindingFailure;
+            if request.filename == "missing.hmc" { return Err(SurfaceBindingFailure::BeforeMutation("fixture preflight".into())); }
+            self.bind_surface_package(request, source).map_err(SurfaceBindingFailure::MayHaveMutated)
+        }
+        fn snapshot(&self) -> Result<EditorSnapshot, String> { Err("fixture snapshot".into()) }
+        fn check(&self, _: &str) -> Result<String, String> { Ok("available".into()) }
+        fn submit(&mut self, _: &str, _: SourceRef) -> Result<EditorOutcome, String> { Err("fixture".into()) }
+        fn undo(&mut self, _: SourceRef) -> Result<EditorSnapshot, String> { Err("fixture".into()) }
+        fn redo(&mut self, _: SourceRef) -> Result<EditorSnapshot, String> { Err("fixture".into()) }
+    }
+    struct PauseReject { inner: FixtureOwner, entered: mpsc::Sender<()>, resume: Mutex<mpsc::Receiver<()>> }
+    impl AuthorityOwner for PauseReject {
+        fn with_current(&self, op: &mut dyn FnMut(&HostAuthorityView<'_>) -> Result<(), String>) -> Result<(), String> {
+            self.inner.with_current(&mut |view| {
+                op(view)?;
+                self.entered.send(()).map_err(|_| "fixture receiver closed")?;
+                self.resume.lock().map_err(|_| "fixture poisoned")?.recv_timeout(Duration::from_secs(15)).map_err(|_| "fixture resume timed out")?;
+                Err("fixture post-binding refusal".into())
+            })
+        }
+    }
+    fn request() -> SurfacePackageRequest { SurfacePackageRequest { filename:"fixture.hmc".into(), digest:[7;32] } }
+    fn wrap(scope: &Scope, shared: &SharedEditorHost, owner: Arc<dyn AuthorityOwner>) -> AuthorizedEditorHost {
+        AuthorizedEditorHost::new(Box::new(shared.clone()), scope.clone(), owner, GatewayLimits::default()).unwrap()
+    }
+    fn host(changed: Arc<AtomicBool>, calls: Arc<AtomicUsize>, fail_after_change: bool) -> SharedEditorHost {
+        SharedEditorHost::new(Box::new(BindingHost { changed, calls, fail_after_change }))
+    }
+    #[test]
+    fn surface_binding_transaction_excludes_other_frontend_and_quarantines_outer_refusal() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false));
+        let calls=Arc::new(AtomicUsize::new(0)); let shared=host(changed.clone(),calls.clone(),false);
+        let (entered_tx,entered_rx)=mpsc::channel(); let (resume_tx,resume_rx)=mpsc::channel();
+        let owner=Arc::new(PauseReject { inner:FixtureOwner::new(&scope,ProjectRole::Contributor), entered:entered_tx, resume:Mutex::new(resume_rx) });
+        let mut first=wrap(&scope,&shared,owner); let expected=before.clone();
+        let worker=std::thread::spawn(move || first.bind_surface_package(request(),expected));
+        entered_rx.recv_timeout(Duration::from_secs(15)).expect("binding callback must reach barrier");
+        assert!(changed.load(Ordering::Acquire)); assert!(shared.check("x").unwrap_err().contains("busy"));
+        resume_tx.send(()).unwrap(); let error=worker.join().unwrap().unwrap_err();
+        assert!(error.contains("quarantined") && error.contains("reconcile"));
+        assert!(shared.check("x").unwrap_err().contains("quarantined"));
+        assert_eq!(calls.load(Ordering::Acquire),1); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_accepts_binding_after_owner_checks() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let shared=host(changed.clone(),calls.clone(),false);
+        let mut editor=wrap(&scope,&shared,Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor)));
+        editor.bind_surface_package(request(),before.clone()).unwrap();
+        assert!(changed.load(Ordering::Acquire)); assert_eq!(calls.load(Ordering::Acquire),1);
+        assert_eq!(shared.check("x").unwrap(),"available"); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_preserves_host_when_authority_refuses_before_dispatch() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let shared=host(changed.clone(),calls.clone(),false);
+        let mut editor=wrap(&scope,&shared,Arc::new(UnboundAuthorityOwner));
+        assert!(editor.bind_surface_package(request(),before.clone()).is_err());
+        assert!(!changed.load(Ordering::Acquire)); assert_eq!(calls.load(Ordering::Acquire),0);
+        assert_eq!(shared.check("x").unwrap(),"available"); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_quarantines_inner_error_after_dispatch() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let shared=host(changed.clone(),calls.clone(),true);
+        let mut editor=wrap(&scope,&shared,Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor)));
+        assert!(editor.bind_surface_package(request(),before.clone()).unwrap_err().contains("quarantined"));
+        assert!(changed.load(Ordering::Acquire)); assert_eq!(calls.load(Ordering::Acquire),1);
+        assert!(shared.check("x").unwrap_err().contains("quarantined")); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_duplicate_callback_is_not_repeated_and_quarantines() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let shared=host(changed.clone(),calls.clone(),false); let owner=Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor));
+        owner.state.lock().unwrap().calls=2; let mut editor=wrap(&scope,&shared,owner);
+        assert!(editor.bind_surface_package(request(),before.clone()).unwrap_err().contains("quarantined"));
+        assert_eq!(calls.load(Ordering::Acquire),1); assert!(shared.check("x").unwrap_err().contains("quarantined"));
+        assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_preflight_refusal_preserves_host_for_retry() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let shared=host(changed.clone(),calls.clone(),false);
+        let mut editor=wrap(&scope,&shared,Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor)));
+        let mut bad=request(); bad.filename="missing.hmc".into();
+        assert!(editor.bind_surface_package(bad,before.clone()).unwrap_err().contains("preflight"));
+        assert!(!changed.load(Ordering::Acquire)); assert_eq!(shared.check("x").unwrap(),"available");
+        editor.bind_surface_package(request(),before.clone()).unwrap();
+        assert!(changed.load(Ordering::Acquire)); assert_eq!(calls.load(Ordering::Acquire),1); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_real_checkpoint_preflight_then_owner_rejection() {
+        use crate::graphical::checkpoints::{CheckpointEditorHost, CheckpointLimits, CheckpointService, ExpectedFile, TrustedBinding};
+        let scope=scope(); let before=reference(&scope); let temp=tempfile::tempdir().unwrap();
+        let binding=TrustedBinding { project_id:scope.project_id.clone(), document_id:scope.document_id.clone(), source_id:scope.source_id.clone(), domain:scope.domain.clone() };
+        let service=CheckpointService::new(temp.path(),binding,CheckpointLimits::default()).unwrap();
+        let saved=service.save(&before.stamp,"fixture.hmc",ExpectedFile::Absent,None,vec![]).unwrap();
+        let canonical=CanonicalEditorHost::open(scope.source_id.clone(),SessionLimits::default(),GeometryHost::default(),Box::new(NoPreview)).unwrap();
+        let checkpoint=CheckpointEditorHost::new(Box::new(canonical),service).unwrap();
+        let shared=SharedEditorHost::new(Box::new(checkpoint));
+        let original_epoch=shared.snapshot().unwrap().execution_epoch;
+        let mut admitted=wrap(&scope,&shared,Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor)));
+        let mut bad=request(); bad.digest=[9;32];
+        assert!(admitted.bind_surface_package(bad,before.clone()).is_err());
+        assert!(original_epoch.is_current()); assert!(shared.snapshot().is_ok());
+        let (entered_tx,entered_rx)=mpsc::channel(); let (resume_tx,resume_rx)=mpsc::channel();
+        let owner=Arc::new(PauseReject { inner:FixtureOwner::new(&scope,ProjectRole::Contributor), entered:entered_tx, resume:Mutex::new(resume_rx) });
+        let mut writer=wrap(&scope,&shared,owner); let source=before.clone(); let digest=saved.receipt.digest;
+        let worker=std::thread::spawn(move || writer.bind_surface_package(SurfacePackageRequest { filename:"fixture.hmc".into(),digest },source));
+        entered_rx.recv_timeout(Duration::from_secs(15)).expect("real checkpoint binding must reach barrier");
+        assert!(!original_epoch.is_current()); assert!(shared.snapshot().err().unwrap().contains("busy"));
+        resume_tx.send(()).unwrap(); assert!(worker.join().unwrap().unwrap_err().contains("quarantined"));
+        assert!(shared.snapshot().err().unwrap().contains("quarantined")); assert_eq!(reference(&scope),before);
+    }
+    #[test]
+    fn surface_binding_transaction_rejects_nonshared_host_before_dispatch() {
+        let scope=scope(); let before=reference(&scope); let changed=Arc::new(AtomicBool::new(false)); let calls=Arc::new(AtomicUsize::new(0));
+        let inner=BindingHost { changed:changed.clone(), calls:calls.clone(), fail_after_change:false };
+        let mut editor=AuthorizedEditorHost::new(Box::new(inner),scope.clone(),Arc::new(FixtureOwner::new(&scope,ProjectRole::Contributor)),GatewayLimits::default()).unwrap();
+        assert!(editor.bind_surface_package(request(),before.clone()).unwrap_err().contains("shared transaction"));
+        assert_eq!(calls.load(Ordering::Acquire),0); assert!(!changed.load(Ordering::Acquire)); assert_eq!(reference(&scope),before);
+    }
 }

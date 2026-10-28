@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "action", deny_unknown_fields)]
 pub enum RigControl {
+    /// Create the first binding from an authorized selected resource and viewport part.
+    Adopt { part_id: String, bind_id: String },
     SelectClip { clip_id: u64, fade_seconds: f64 },
     Seek { seconds: f64 },
     SetJointDelta { joint_id: u64, motor: [f64; 8] },
@@ -60,6 +62,7 @@ pub fn apply_control(
 ) -> Result<&RigSourceDescriptor, String> {
     rig.check_current()?;
     match action {
+        RigControl::Adopt { .. } => return Err("Rig adoption must use the selected-resource admission route".into()),
         RigControl::SelectClip {
             clip_id,
             fade_seconds,

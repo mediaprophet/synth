@@ -289,3 +289,14 @@ pub(super) fn replace(
     live(cancelled)?;
     Ok(out)
 }
+
+/// Inspect the same already-selected bytes through Core's sealed SKL1 reader.
+/// The caller has already applied the typed profile's resource/working limits.
+pub(super) fn inspect_skeletal(bytes: &[u8]) -> SkeletalInspection {
+    use qualia_core_db::container_10d::skeletal_container::{read_skeletal_section, SkeletalContainerError};
+    match read_skeletal_section(bytes) {
+        Ok(section) => SkeletalInspection::Present(section.counts()),
+        Err(SkeletalContainerError::Missing) => SkeletalInspection::Absent,
+        Err(error) => SkeletalInspection::Unassessed(format!("{error:?}")),
+    }
+}

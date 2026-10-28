@@ -3,6 +3,8 @@ use super::*;
 #[derive(Deserialize)]
 #[serde(tag = "command", deny_unknown_fields)]
 pub(super) enum Command {
+    #[serde(rename = "authoring.rig")]
+    Rig { resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl },
     #[serde(rename = "authoring.botanical")]
     Botanical {
         edit: crate::graphical::authoring::botanical::BotanicalEdit,
@@ -126,7 +128,7 @@ impl Command {
                 "Studio.edit"
             }
             Self::Viewport { .. } => "Studio.inspect",
-            Self::Botanical { .. } | Self::EnableSourceLayers | Self::MaterialMotion { .. } => {
+            Self::Rig { .. } | Self::Botanical { .. } | Self::EnableSourceLayers | Self::MaterialMotion { .. } => {
                 "Studio.edit"
             }
             Self::Inspect => "Studio.inspect",
@@ -161,6 +163,10 @@ impl Command {
             Self::Viewport { request } => {
                 crate::graphical::viewport_contract::validate_command(&request)?;
                 Action::Viewport { request, expected }
+            }
+            Self::Rig { resource, control } => {
+                resource.validate_bounds()?;
+                Action::AuthoringEdit { edit: AuthoringEdit::Rig { resource, control }, expected }
             }
             Self::Botanical { edit } => Action::AuthoringEdit {
                 edit: AuthoringEdit::Botanical { edit },

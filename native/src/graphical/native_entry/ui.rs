@@ -70,6 +70,11 @@ pub(super) fn NativeProjectShell(handle: LaunchHandle, initial: LaunchView) -> E
             header{style:"padding:18px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #465463;",
                 h1{style:"margin:0;","Poet · Cooperative Project"}
                 p{style:"margin:0;color:#bacbd9;",{crate::graphical::native_authoring_profile::selected().label()}}
+                if super::create::botanical_profile_enabled() {
+                    p { "Botanical kernel profile selected for this launch. Project access and working limits still apply." }
+                } else {
+                    p { "Botanical graph tools are disabled for this launch. Restart Poet with POET_NATIVE_BOTANICAL_PROFILE=1 to enable them." }
+                }
                 if let Some(project)=&current.project_name{
                     h2{"{project}"}
                     if let Some(fingerprint)=&current.authority_fingerprint{

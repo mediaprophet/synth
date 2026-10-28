@@ -31,6 +31,8 @@ impl Context {
 }
 
 pub enum Action {
+    NumericSheetInspect(SourceRef),
+    NumericSheetEdit { edit: super::numeric_sheet::SheetEdit, expected: SourceRef },
     Viewport { request: super::viewport::ViewportCommand, expected: SourceRef },
     InspectSurface {
         id: String,
@@ -123,6 +125,7 @@ pub enum Action {
 }
 
 pub struct Reply {
+    pub numeric_sheet: Option<super::numeric_sheet::SheetView>,
     pub viewport: Option<super::viewport_contract::ViewportState>,
     pub surface: Option<super::surfaces::inspection::SurfaceInspection>,
     pub typed_10d: Option<super::checkpoints::typed_10d::Typed10dInspection>,
@@ -280,6 +283,7 @@ fn execute(
     let mut authoring = None;
     let mut surface = None;
     let mut viewport = None;
+    let mut numeric_sheet = None;
     let mut inspection = None;
     let mut typed_10d = None;
     let mut package_workflow = None;
@@ -294,7 +298,7 @@ fn execute(
             return Err("Execution epoch retired; no command dispatched. Refresh source.".into());
         }
         let target = match &action {
-            Action::Viewport {expected,..} | Action::InspectSurface {expected,..} | Action::BindSurfacePackage {expected,..} | Action::InspectTyped10d{expected,..} | Action::EditTyped10d{expected,..} | Action::EditGeoRaster{expected,..} | Action::CreateGeoRaster{expected,..} | Action::PackageWorkflow{expected,..} | Action::InspectResource{expected,..} | Action::AuthoringInspect(expected) | Action::AuthoringEdit{expected,..} | Action::CompileAssembly{expected,..} | Action::Submit { expected, .. } | Action::Undo(expected) | Action::Redo(expected) | Action::Rebuild(expected) | Action::Save { expected, .. }
+            Action::Viewport {expected,..} | Action::InspectSurface {expected,..} | Action::BindSurfacePackage {expected,..} | Action::InspectTyped10d{expected,..} | Action::EditTyped10d{expected,..} | Action::EditGeoRaster{expected,..} | Action::CreateGeoRaster{expected,..} | Action::PackageWorkflow{expected,..} | Action::InspectResource{expected,..} | Action::NumericSheetInspect(expected) | Action::NumericSheetEdit{expected,..} | Action::AuthoringInspect(expected) | Action::AuthoringEdit{expected,..} | Action::CompileAssembly{expected,..} | Action::Submit { expected, .. } | Action::Undo(expected) | Action::Redo(expected) | Action::Rebuild(expected) | Action::Save { expected, .. }
             | Action::Inventory{expected,..} | Action::Workflow{expected,..} | Action::SaveInspected{expected,..} | Action::ResourcePlan{expected,..} | Action::ImportResource{expected,..} | Action::RemoveResource{expected,..} => Some(expected),
             _ => None,
         };
@@ -304,7 +308,7 @@ fn execute(
         if !refresh && Context::from_snapshot(&snapshot) != origin {
             return Err("Source/session changed before command start; no command dispatched. Refresh source.".into());
         }
-        perform(host, action, &mut inventory,&mut workflow,&mut authoring,&mut inspection,&mut package_workflow, &mut typed_10d, &mut surface, &mut viewport, cancelled)
+        perform(host, action, &mut inventory,&mut workflow,&mut authoring,&mut inspection,&mut package_workflow, &mut typed_10d, &mut surface, &mut viewport, &mut numeric_sheet, cancelled)
     });
     let snapshot = host.snapshot().ok();
     // Heavy host snapshots and encoding run on this worker. The UI repeats
@@ -344,6 +348,7 @@ fn execute(
         message.push_str("; package workflow context changed; inspect before retrying");
     }
     Reply {
+        numeric_sheet: if inspection_is_current { numeric_sheet } else { None },
         viewport: if inspection_is_current && image_uri.is_some() { viewport } else { None },
         surface: if inspection_is_current { surface } else { None },
         typed_10d: if inspection_is_current {

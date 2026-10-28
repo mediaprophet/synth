@@ -5,6 +5,7 @@
 //! The current profile admits exact vertex correspondence only. A changed
 //! topology, including flat-normal or atlas seam expansion, requires an
 //! explicit qualified weight/normal/UV remap before it can be admitted.
+pub mod rig_candidate;
 mod controls;
 mod native_controls;
 #[cfg(test)]

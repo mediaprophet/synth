@@ -151,19 +151,25 @@ pub(crate) fn AuthoringControls(
     image: Signal<Option<String>>,
     busy: Signal<bool>,
     mut selected: Signal<String>,
+    mut rig_filename: Signal<String>,
+    mut rig_package_digest: Signal<String>,
+    mut rig_resource_key: Signal<String>,
+    mut rig_resource_digest: Signal<String>,
+    mut rig_ready_source: Signal<Option<(Context, String)>>,
     #[props(default)] buffer: Option<crate::graphical::draft_buffer::DraftBuffer>,
 ) -> Element {
     let inspected = use_signal(|| None::<AuthoringView>);
     let mut loaded_part = use_signal(|| None::<(String, SourceRef)>);
     let mut transform = use_signal(|| fields(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]));
     let mut material = use_signal(|| fields(&[0.5, 0.5, 0.5, 1.0, 0.5, 0.0]));
-    let mut material_id = use_signal(|| 0u64);
+    let material_id = use_signal(|| 0u64);
     let mut parameter = use_signal(String::new);
     let mut parameter_value = use_signal(String::new);
     let mut parameter_context = use_signal(|| None::<(String, SourceRef)>);
     let mut filename = use_signal(|| "growing-station-derived.hmc".to_string());
     let mut asset_key = use_signal(|| "growing-station-game-v1".to_string());
     let mut expected_digest = use_signal(String::new);
+    let mut rig_bind_id = use_signal(String::new);
     let current = view();
     let fresh = inspected()
         .as_ref()
@@ -240,6 +246,9 @@ pub(crate) fn AuthoringControls(
     let motion_host = host.clone();
     let motion_buffer = buffer.clone();
     let motion_source = current.source.clone();
+    let rig_source = current.source.clone();
+    let rig_host = host.clone();
+    let rig_buffer = buffer.clone();
     let botanical_source = current.source.clone();
     let botanical_host = host.clone();
     let botanical_buffer = buffer.clone();
@@ -302,9 +311,50 @@ pub(crate) fn AuthoringControls(
                 super::surface_tools::SurfaceTools{host:tools_host.clone(),view,selected,inspected,fresh: fresh && !busy(),busy,status,
                     onedit:move|edit|send(Action::AuthoringEdit{edit,expected:tools_source.clone()},tools_host.clone(),view,draft,status,image,busy,inspected,tools_buffer.clone(),true)}
                 super::surface_controls::SurfaceControls{selected,inspected,fresh,onedit:move|edit|send(Action::AuthoringEdit{edit,expected:surface_source.clone()},surface_host.clone(),view,draft,status,image,busy,inspected,surface_buffer.clone(),true)}
+                if let Some(descriptor) = data.rig.clone() {
+                    label { "Rig HMC filename" input { value:"{rig_filename}", oninput:move|e|{rig_filename.set(e.value());rig_ready_source.set(None);} } }
+                    label { "Inspected HMC SHA256" input { value:"{rig_package_digest}", oninput:move|e|{rig_package_digest.set(e.value());rig_ready_source.set(None);} } }
+                    p { "Select this exact rig part in the viewport; inspect and save the matching current source and HMC before applying. The viewport supports manual pose preview and stepping." }
+                    {let transfer_key=descriptor.resource_key.clone(); let transfer_digest=descriptor.resource_sha256.clone(); let transfer_part=descriptor.part_id.clone(); let transfer_source=data.source.clone(); rsx! {
+                        button { disabled:!fresh || busy() || selected()!=transfer_part, onclick:move |_| {
+                            if view().source != transfer_source || selected()!=transfer_part || !view().publication_is_current() {
+                                status.set("Inspect the current source and select its bound part before transferring the rig resource.".into());
+                            } else {
+                                rig_resource_key.set(transfer_key.clone()); rig_resource_digest.set(transfer_digest.clone()); rig_ready_source.set(None);
+                                status.set("Rig resource copied to the viewport controls. Confirm the package and resource for this source before preview.".into());
+                            }
+                        }, "Use inspected rig in viewport" }
+                    }}
+                    {let rig_key = descriptor.resource_key.clone(); let rig_digest = descriptor.resource_sha256.clone(); let enabled = fresh && !busy() && selected() == descriptor.part_id; rsx! {
+                        crate::graphical::rig_binding::RigControls { descriptor, busy: !enabled, on_control: move |control| {
+                            let request = (|| -> Result<crate::graphical::checkpoints::ResourceInspectionRequest,String> {
+                                Ok(crate::graphical::checkpoints::ResourceInspectionRequest { filename: rig_filename(), package_digest: parse_digest(rig_package_digest().trim())?, key: rig_key.clone(), resource_digest: parse_digest(&rig_digest)? })
+                            })();
+                            match request { Ok(resource) => send(Action::AuthoringEdit { edit: AuthoringEdit::Rig { resource, control }, expected: rig_source.clone() }, rig_host.clone(), view,draft,status,image,busy,inspected,rig_buffer.clone(),true), Err(error)=>status.set(error) }
+                        } }
+                    }}
+                } else {
+                    label { "Rig HMC filename" input { value:"{rig_filename}", oninput:move|e|{rig_filename.set(e.value());rig_ready_source.set(None);} } }
+                    label { "Inspected HMC SHA256" input { value:"{rig_package_digest}", oninput:move|e|{rig_package_digest.set(e.value());rig_ready_source.set(None);} } }
+                    label { "Selected .10d resource key" input { value:"{rig_resource_key}", oninput:move|e|{rig_resource_key.set(e.value());rig_ready_source.set(None);} } }
+                    label { "Inspected resource SHA256" input { value:"{rig_resource_digest}", oninput:move|e|{rig_resource_digest.set(e.value());rig_ready_source.set(None);} } }
+                    label { "Local rig binding identifier" input { value:"{rig_bind_id}", oninput:move|e|rig_bind_id.set(e.value()) } }
+                    p { "Select the same part in the viewport and assembly list. Adoption requires an exact bind mesh and uses the first available clip; it preserves an existing binding and refuses unsupported geometry." }
+                    button { disabled: !fresh || busy() || selected().is_empty(), onclick: move |_| {
+                        let request = (|| -> Result<crate::graphical::checkpoints::ResourceInspectionRequest,String> {
+                            let resource = crate::graphical::checkpoints::ResourceInspectionRequest { filename:rig_filename(), package_digest:parse_digest(rig_package_digest().trim())?, key:rig_resource_key(), resource_digest:parse_digest(rig_resource_digest().trim())? };
+                            resource.validate_bounds()?;
+                            Ok(resource)
+                        })();
+                        match request {
+                            Ok(resource) => send(Action::AuthoringEdit { edit:AuthoringEdit::Rig { resource, control:crate::graphical::rig_binding::RigControl::Adopt { part_id:selected(), bind_id:rig_bind_id() } }, expected:rig_source.clone() },rig_host.clone(),view,draft,status,image,busy,inspected,rig_buffer.clone(),true),
+                            Err(error) => status.set(error),
+                        }
+                    }, "Adopt selected rig binding" }
+                }
                 super::botanical::BotanicalControls {
                     accepted: data.botanical.clone(), selected_part: selected(), source: botanical_source.clone(),
-                    fresh: fresh && !busy(),
+                    fresh: fresh && !busy(), live_view: view, live_selected: selected,
                     onedit: move |edit| send(Action::AuthoringEdit {edit:AuthoringEdit::Botanical {edit}, expected:botanical_source.clone()}, botanical_host.clone(),view,draft,status,image,busy,inspected,botanical_buffer.clone(),true),
                 }
                 super::material_motion_controls::MaterialMotionControls{selected,inspected,fresh,onedit:move|edit|send(Action::AuthoringEdit{edit,expected:motion_source.clone()},motion_host.clone(),view,draft,status,image,busy,inspected,motion_buffer.clone(),true)}

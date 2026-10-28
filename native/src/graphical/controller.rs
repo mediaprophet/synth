@@ -149,6 +149,60 @@ impl Drop for CanonicalEditorHost {
 }
 
 impl EditorHost for CanonicalEditorHost {
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { self.preview.retire_retained_viewport() }
+    fn edit_rig_from_selected_resource(&mut self, resource_key: &str, bytes: &[u8], control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled before source work".into()); }
+        self.expected(&expected)?;
+        if self.reconciliation_required || !self.execution_epoch.is_current() || !self.session.is_mutable("poet_parts") {
+            return Err("A current mutable parts source is required; source preserved".into());
+        }
+        let adopting = matches!(&control, crate::graphical::rig_binding::RigControl::Adopt { .. });
+        let current = self.session.value("poet_rig");
+        let descriptor = if let crate::graphical::rig_binding::RigControl::Adopt { part_id, bind_id } = &control {
+            if current.is_some() { return Err("Rig binding already exists; source preserved".into()); }
+            crate::graphical::rig_binding::RigSourceDescriptor {
+                schema: "poet.bound-rig/v1".into(), source_artifact_id: expected.artifact_id.clone(),
+                part_id: part_id.clone(), bind_id: bind_id.clone(), resource_key: resource_key.into(),
+                resource_sha256: String::new(), bind_mesh_sha256: String::new(), normal_uv_sha256: String::new(),
+                joint_ids: Vec::new(), clip_ids: Vec::new(), selected_clip_id: 0, seek_seconds: 0.0,
+                joint_deltas: Vec::new(), vertex_lineage: Vec::new(),
+            }
+        } else {
+            if !self.session.is_mutable("poet_rig") { return Err("A current mutable rig source is required; source preserved".into()); }
+            crate::graphical::authoring::rig_source::read_binding(current, &expected)?
+                .ok_or("No authored rig binding")?
+        };
+        if descriptor.resource_key != resource_key { return Err("Selected resource does not match authored rig".into()); }
+        let candidate = self.preview.stage_rig_control(expected.clone(), descriptor, bytes, control, cancelled)?;
+        let cell = if adopting {
+            crate::graphical::authoring::rig_source::adopt_source(self.session.value("poet_rig"), &expected, &candidate)?
+        } else {
+            crate::graphical::authoring::rig_source::edit_source(self.session.value("poet_rig"), true, &expected, &candidate)?
+        };
+        if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled; accepted source preserved".into()); }
+        self.expected(&expected)?;
+        self.submit(&cell, expected)
+    }
+    fn preview_rig_from_selected_resource(&mut self, resource_key: &str, bytes: &[u8], expected: SourceRef, delta_seconds: f64, cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
+        self.expected(&expected)?;
+        if self.reconciliation_required || !self.execution_epoch.is_current() || cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rebuild current execution before interacting with the viewport".into()); }
+        let descriptor = crate::graphical::authoring::rig_source::read_binding(self.session.value("poet_rig"), &expected)?.ok_or("No authored rig binding")?;
+        if descriptor.resource_key != resource_key { return Err("Selected resource does not match authored rig".into()); }
+        let mut output = self.preview.preview_selected_rig(expected.clone(), descriptor, bytes, delta_seconds, cancelled)?;
+        let publication_check = self.expected(&expected).and_then(|()| {
+            if output.frame.source != expected || output.state.source != expected || !self.execution_epoch.is_current() || cancelled.load(std::sync::atomic::Ordering::Acquire) {
+                Err("Viewport result changed context; derived output withheld".to_string())
+            } else { Ok(()) }
+        });
+        if let Err(error) = publication_check {
+            self.preview.invalidate_rig_preview();
+            return Err(error);
+        }
+        output.frame.session_revision = Some(self.session.revision());
+        output.frame.execution_epoch = Some(self.execution_epoch.clone());
+        output.state.execution_epoch = Some(self.execution_epoch.clone());
+        Ok(output)
+    }
     fn viewport_action(
         &mut self,
         request: crate::graphical::viewport::ViewportCommand,
@@ -239,6 +293,20 @@ impl EditorHost for CanonicalEditorHost {
         Ok(())
     }
 
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> {
+        self.expected(&expected)?;
+        if self.reconciliation_required || !self.execution_epoch.is_current() { return Err("Rebuild accepted execution before sheet inspection".into()); }
+        let grid = self.session.value("poet_sheet").ok_or("Source has no poet_sheet binding")?;
+        let view = crate::graphical::numeric_sheet::admit(expected.clone(), self.execution_epoch.clone(), grid)?;
+        expected.check_current()?; Ok(view)
+    }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> {
+        let view = self.numeric_sheet_view(expected.clone())?;
+        if edit.execution_epoch != self.execution_epoch || !edit.execution_epoch.is_current() { return Err("Sheet execution epoch changed; inspect again".into()); }
+        if !self.session.is_mutable("poet_sheet") { return Err("Sheet source binding is immutable".into()); }
+        let source = crate::graphical::numeric_sheet::source(&edit, &view)?;
+        self.submit(&source, expected)
+    }
     fn authoring_view(
         &self,
         e: SourceRef,
@@ -250,6 +318,7 @@ impl EditorHost for CanonicalEditorHost {
         a: crate::graphical::authoring::AuthoringEdit,
         e: SourceRef,
     ) -> Result<EditorOutcome, String> {
+        if matches!(&a, crate::graphical::authoring::AuthoringEdit::Rig { .. }) { return Err("Rig edit requires the cancellation-aware checkpoint route".into()); }
         self.edit_assembly(a, e)
     }
     fn compiled_assets(
@@ -516,3 +585,7 @@ mod tests;
 #[cfg(test)]
 #[path = "material_admission_tests.rs"]
 mod material_admission_tests;
+
+#[cfg(test)]
+#[path = "numeric_sheet_host_tests.rs"]
+mod numeric_sheet_host_tests;

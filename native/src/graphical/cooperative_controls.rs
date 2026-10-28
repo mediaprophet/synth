@@ -6,7 +6,9 @@ use super::{
     package::hex_digest,
 };
 use dioxus::prelude::*;
-use qualia_cooperative_core::authoring::{ReviewDecision, WorkStatus};
+use qualia_cooperative_core::authoring::{
+    HumanAuthorityStatus, PrincipalKind, ReviewDecision, WorkStatus,
+};
 
 #[derive(Clone)]
 struct Inspected {
@@ -104,16 +106,36 @@ pub(super) fn CooperativeControls(
     let mut review_evidence = use_signal(String::new);
     let dirty = draft() != current.latest_source;
     let view = current_view(inspected, &current);
+    let authority_capacity = view
+        .as_ref()
+        .map(|v| match v.evidence.human_authority.acting_kind {
+            PrincipalKind::Human => "Human (project-admitted)",
+            PrincipalKind::SoftwareAgent => "Software agent",
+            PrincipalKind::Organization => "Organization",
+        })
+        .unwrap_or("");
+    let authority_route = view
+        .as_ref()
+        .map(|v| match v.evidence.human_authority.status {
+            HumanAuthorityStatus::UnverifiedLegacyAdmission => {
+                "Direct project/controller admission"
+            }
+        })
+        .unwrap_or("");
+    let requests = view
+        .as_ref()
+        .map(|v| {
+            super::cooperation_selection::source_requests(&v.evidence.target, &v.evidence.requests)
+        })
+        .unwrap_or_default();
+    let selected = super::cooperation_selection::current_selection(&requests, &selected_request());
     let can_contribute =
         !busy() && !dirty && view.as_ref().is_some_and(|v| v.evidence.can_contribute);
     let can_review = !busy()
         && !dirty
-        && view.as_ref().is_some_and(|v| {
-            v.evidence.can_review
-                && v.evidence.requests.iter().any(|request| {
-                    request.id == selected_request() && request.target == v.evidence.target
-                })
-        });
+        && view
+            .as_ref()
+            .is_some_and(|v| v.evidence.can_review && selected.is_some());
     let inspect = {
         let host = host.clone();
         let current = current.clone();
@@ -196,6 +218,16 @@ pub(super) fn CooperativeControls(
                 return;
             }
             if let Some(view) = current_view(inspected, &current) {
+                let choices = super::cooperation_selection::source_requests(
+                    &view.evidence.target,
+                    &view.evidence.requests,
+                );
+                if super::cooperation_selection::current_selection(&choices, &selected_request())
+                    .is_none()
+                {
+                    status.set("Choose a request for the displayed source revision; refresh after source or session changes.".into());
+                    return;
+                }
                 command(
                     WorkflowAction::Review {
                         target: view.evidence.target,
@@ -224,6 +256,22 @@ pub(super) fn CooperativeControls(
             if dirty { p { "Unsubmitted draft preserved. Workflow records bind the admitted source only; submit before requesting or deciding review." } }
             if let Some(view) = view {
                 super::cooperative_workbench::CooperativeWorkbench { projection:super::cooperative_workbench::project(&view.evidence), status:status() }
+                section { style:"padding:10px;border:1px solid #486173;overflow-wrap:anywhere;",
+                    h3 { "Contributor authority" }
+                    p { "Signed-in subject {view.evidence.human_authority.acting_subject} · project-admitted capacity: {authority_capacity}" }
+                    p { "{authority_route}" }
+                    if let Some(human)=&view.evidence.human_authority.human_principal_subject {
+                        p { "Human principal: {human}" }
+                    }
+                    if view.evidence.human_authority.delegation_path.is_empty() {
+                        p { "This session uses direct project admission; no delegated-agent chain is attached." }
+                    } else {
+                        for (depth, delegation) in view.evidence.human_authority.delegation_path.iter().enumerate() {
+                            p { "Delegation {depth + 1} · SHA256 {hex_digest(delegation)}" }
+                        }
+                    }
+                    p { "A source review decision is separate from domain acceptance." }
+                }
                 details { summary { "Actual source, predecessor comparison and retained history" }
                     p { "Difference from the existing undo predecessor. Its historical revision number is not retained. Package resources are outside this source comparison." }
                     pre { style:"max-height:240px;overflow:auto;white-space:pre-wrap;", "{cooperative_workflow::source_difference(view.previous_source_json.as_deref(), &view.current_source_json)}" }
@@ -256,13 +304,31 @@ pub(super) fn CooperativeControls(
                 input { value:"{request_id}", aria_label:"Source review request identifier", placeholder:"Request identifier", disabled:busy(), oninput:move |e|request_id.set(e.value()) }
                 input { value:"{request_evidence}", aria_label:"Source review request evidence", placeholder:"Request evidence reference", disabled:busy(), oninput:move |e|request_evidence.set(e.value()) }
                 button { disabled:!can_contribute, onclick:request, "Request review of displayed source revision" }
-                h3 { "Distinct reviewer decision" }
-                p { "Inspect the exact source and evidence first. Current review authority and a different reviewer subject are checked at commit. Software-agent decisions remain software review." }
+                h3 { "Source reviewer decision" }
+                p { "Inspect the exact source and request evidence first. Native authority is checked at commit. Different subject identifiers alone do not establish independent human control. Actor capacity and actual human/domain acceptance remain separate." }
                 select { value:"{selected_request}", aria_label:"Exact source review request", disabled:busy(), onchange:move |e|selected_request.set(e.value()),
-                    option { value:"", "Choose an exact current source request" }
-                    for request in view.evidence.requests.iter().filter(|r|r.target == view.evidence.target) {
-                        option { value:"{request.id}", "{request.id} · {request.requester_subject} · revision {request.target.revision}" }
+                    option { value:"", "Choose a current source request" }
+                    for request in &requests {
+                        option { value:"{request.id}", "{request.id} · requested by {request.actor_subject} · decisions {request.decision_ids:?}" }
                     }
+                }
+                if let Some(request) = selected {
+                    p { style:"overflow-wrap:anywhere;", "Selected request {request.id} · actor {request.actor_subject} · evidence {request.evidence_ref}" }
+                    if request.decision_ids.is_empty() {
+                        p { "No decisions are recorded for this request." }
+                    }
+                    for (decision_id, decision) in super::cooperation_selection::source_request_decisions(
+                        &view.evidence.target, request, &view.evidence.reviews
+                    ) {
+                        if let Some(decision) = decision {
+                            p { style:"overflow-wrap:anywhere;", "Decision {decision_id} · {decision.decision:?} · reviewer {decision.reviewer_subject} · admitted capacity {decision.principal_kind:?}" }
+                            p { style:"overflow-wrap:anywhere;", "{decision.rationale} · evidence {decision.decision_evidence_ref}" }
+                        } else {
+                            p { style:"overflow-wrap:anywhere;", "Decision {decision_id} is referenced but unavailable for this exact source; inspect before relying on it." }
+                        }
+                    }
+                } else {
+                    p { "No current request selected. Inspect again after a source/session change; prior decisions remain visible in the workbench." }
                 }
                 input { value:"{review_id}", aria_label:"Source review decision identifier", placeholder:"Decision identifier", disabled:busy(), oninput:move |e|review_id.set(e.value()) }
                 textarea { value:"{rationale}", aria_label:"Source review rationale", placeholder:"Observed findings and rationale", disabled:busy(), oninput:move |e|rationale.set(e.value()) }

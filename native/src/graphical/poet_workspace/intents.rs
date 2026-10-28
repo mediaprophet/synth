@@ -65,6 +65,12 @@ fn rejection(
         reply,
     }
 }
+/// Typed source-grid commands use the same actor and receipt owner as native intents.
+#[derive(Clone)]
+pub enum NumericSheetIntent {
+    Inspect,
+    Edit(crate::graphical::numeric_sheet::SheetEdit),
+}
 impl NativeIntentBus {
     pub fn new(host: HostHandle, origin: Context) -> Result<Self, String> {
         if origin.source.artifact_id.is_empty() || origin.source.artifact_id.len() > 4096 {
@@ -243,6 +249,23 @@ impl NativeIntentBus {
             Ok(action) => action,
             Err(e) => return Ok(rejection(id, e, None, None)),
         };
+        self.dispatch_action(id, scope, action).await
+    }
+    /// Shared typed native/agent entry point; no new serialized payload.
+    pub async fn dispatch_numeric_sheet(&self, intent: NumericSheetIntent) -> Result<NativeDispatch, String> {
+        let id = NEXT_DISPATCH.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1)).map_err(|_| "Poet dispatch counter exhausted")?;
+        let (scope, action) = match intent {
+            NumericSheetIntent::Inspect => ("Studio.inspect", Action::NumericSheetInspect(self.origin.source.clone())),
+            NumericSheetIntent::Edit(edit) => {
+                if edit.row >= 32 || edit.col >= 32 || !edit.value.is_finite() {
+                    return Ok(rejection(id, "Numeric sheet edit exceeds typed bounds", None, None));
+                }
+                ("Studio.edit", Action::NumericSheetEdit { edit, expected: self.origin.source.clone() })
+            }
+        };
+        self.dispatch_action(id, scope, action).await
+    }
+    async fn dispatch_action(&self, id: u64, scope: &str, action: Action) -> Result<NativeDispatch, String> {
         if matches!(&action, Action::Refresh) {
             return self.refresh(id, scope).await;
         }

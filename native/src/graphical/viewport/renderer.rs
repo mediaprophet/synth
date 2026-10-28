@@ -53,8 +53,21 @@ pub struct RetainedViewport {
     counters: ViewportCounters,
     frame_id: u64,
     frame_valid: bool,
+    rig_preview: Option<crate::graphical::animated_rig_preview::AnimatedRigPreview>,
 }
 impl RetainedViewport {
+    /// Seed retained CPU state for source/selection validation only. This test
+    /// helper does not create or exercise a GPU, rendering or human operation.
+    #[cfg(test)]
+    pub(crate) fn rig_test_seed(source: SourceRef, scene: CompiledAssembly, selected: PartSelection) -> Self {
+        let mut viewport = Self::new(PreviewLimits::default(), ViewportBudget::default()).unwrap();
+        viewport.frame_id = selected.frame_id;
+        viewport.source = Some(source);
+        viewport.scene = Some(scene);
+        viewport.selected = Some(selected);
+        viewport.frame_valid = true;
+        viewport
+    }
     /// GPU creation is lazy and remains on the native worker that owns this provider.
     pub fn new(limits: PreviewLimits, budget: ViewportBudget) -> Result<Self, String> {
         super::camera::extent(limits.side, limits.side)?;
@@ -79,8 +92,154 @@ impl RetainedViewport {
             counters: ViewportCounters::default(),
             frame_id: 0,
             frame_valid: false,
+            rig_preview: None,
         })
     }
+
+    /// Admit only the currently displayed selection and its exact compiled bind
+    /// geometry. The caller must resolve resource bytes under existing project
+    /// read authority; this method is not a resource or permission provider.
+    pub fn admit_selected_rig(
+        &self,
+        source: SourceRef,
+        descriptor: crate::graphical::rig_binding::RigSourceDescriptor,
+        selected_resource_key: &str,
+        resource_bytes: &[u8],
+        bind: crate::graphical::rig_binding::BindMesh<'_>,
+        resident_budget: usize,
+        cancelled: &AtomicBool,
+    ) -> Result<crate::graphical::rig_binding::BoundRig, String> {
+        check(&source, cancelled)?;
+        if self.source.as_ref() != Some(&source) || !self.frame_valid {
+            return Err("rig viewport source/frame retired".into());
+        }
+        let selection = self.selected.as_ref().ok_or("select a rig part first")?;
+        if selection.source != source || selection.frame_id != self.frame_id
+            || selection.part_key != descriptor.part_id
+        { return Err("selected rig part/source/frame changed".into()); }
+        let scene = self.scene.as_ref().ok_or("rig assembly viewport unavailable")?;
+        let span = selected_rig_span(scene, selection, &bind)?;
+        let rig = crate::graphical::rig_binding::admit_bound_rig(
+            source.clone(), descriptor, selected_resource_key, resource_bytes, bind, span, resident_budget,
+        )?;
+        check(&source, cancelled)?;
+        Ok(rig)
+    }
+
+    /// Stage against the currently selected retained geometry. No GPU mutation occurs.
+    fn prepare_selected_rig(&self, source: SourceRef, mut descriptor: crate::graphical::rig_binding::RigSourceDescriptor, resource_bytes: &[u8], action: crate::graphical::rig_binding::RigControl, cancelled: &AtomicBool) -> Result<(crate::graphical::rig_binding::BoundRig, crate::graphical::rig_binding::RigControl),String> {
+        use qualia_core_db::container_10d::{self, SectionType, Container10dHeader};
+        check(&source, cancelled)?;
+        let header = Container10dHeader::parse(resource_bytes).map_err(|e| format!("rig header refused: {e:?}"))?;
+        let table = container_10d::parse_section_table(resource_bytes, &header).map_err(|e| format!("rig table refused: {e:?}"))?;
+        let mesh = table.iter().find(|s| s.typ() == Some(SectionType::QuantizedMesh)).ok_or("rig lacks mesh")?;
+        let start = mesh.byte_offset as usize;
+        let end = start.checked_add(mesh.byte_length as usize).ok_or("rig mesh range overflow")?;
+        let mesh_bytes = resource_bytes.get(start..end).ok_or("rig mesh outside resource")?;
+        let (mesh_header, needed) = container_10d::parse_mesh_header(mesh_bytes).map_err(|e| format!("rig mesh header refused: {e:?}"))?;
+        if needed != mesh_bytes.len() || mesh_header.vertex_count as usize > self.limits.vertices || (mesh_header.triangle_count as usize).checked_mul(3).is_none_or(|n| n > self.limits.indices) { return Err("Selected rig mesh exceeds viewport limits".into()); }
+        let decoded = container_10d::decode_mesh_section(mesh_bytes).map_err(|e| format!("rig mesh refused: {e:?}"))?;
+        let indices: Vec<u32> = decoded.triangles.iter().flatten().copied().collect();
+        let scene = self.scene.as_ref().ok_or("rig viewport scene unavailable")?;
+        let selected = self.selected.as_ref().ok_or("select the rig part in the viewport")?;
+        let part = scene.parts.iter().find(|p| p.key == selected.part_key).ok_or("selected rig part absent")?;
+        let tri = scene.mesh.triangles.get(part.first_index as usize / 3).ok_or("selected rig has no triangles")?;
+        let first = tri[0].checked_sub(*indices.first().ok_or("rig has no indices")?).ok_or("rig offset is negative")? as usize;
+        let end = first.checked_add(decoded.positions.len()).ok_or("rig vertex overflow")?;
+        let normals = scene.normals.get(first..end).ok_or("selected rig normals unavailable")?;
+        let uv0 = scene.uv0.get(first..end).ok_or("selected rig UVs unavailable")?;
+        if let crate::graphical::rig_binding::RigControl::Adopt { part_id, bind_id } = &action {
+            if part_id != &selected.part_key || bind_id.is_empty() || bind_id.len() > 128 || bind_id.contains('\0') {
+                return Err("Rig adoption requires the selected viewport part and a bounded bind identifier".into());
+            }
+            let section = container_10d::skeletal_container::read_skeletal_section(resource_bytes)
+                .map_err(|e| format!("sealed SKL1 resource refused: {e:?}"))?;
+            let counts = section.counts();
+            if counts.vertices != decoded.positions.len() || counts.joints == 0 || counts.clips == 0 {
+                return Err("Rig adoption requires compatible vertices, joints and a clip".into());
+            }
+            let joint_ids = (0..counts.joints).map(|i| section.joint_id(i).ok_or("Missing rig joint identifier"))
+                .collect::<Result<Vec<_>, _>>()?;
+            let clip_ids = (0..counts.clips).map(|i| section.clip(i).map(|clip| clip.id).ok_or("Missing rig clip identifier"))
+                .collect::<Result<Vec<_>, _>>()?;
+            let selected_clip_id = *clip_ids.first().ok_or("Rig has no clips")?;
+            let vertex_lineage = (0..counts.vertices).map(|i| u32::try_from(i).map_err(|_| "Rig lineage overflow"))
+                .collect::<Result<Vec<_>, _>>()?;
+            descriptor = crate::graphical::rig_binding::RigSourceDescriptor {
+                schema: "poet.bound-rig/v1".into(), source_artifact_id: source.artifact_id.clone(),
+                part_id: part_id.clone(), bind_id: bind_id.clone(), resource_key: descriptor.resource_key.clone(),
+                resource_sha256: crate::graphical::rig_binding::resource_sha256(resource_bytes),
+                bind_mesh_sha256: crate::graphical::rig_binding::bind_mesh_sha256(&decoded.positions, &indices),
+                normal_uv_sha256: crate::graphical::rig_binding::normal_uv_sha256(normals, uv0),
+                joint_ids, clip_ids, selected_clip_id, seek_seconds: 0.0,
+                joint_deltas: Vec::new(), vertex_lineage,
+            };
+        }
+        let bind = crate::graphical::rig_binding::BindMesh { positions: &decoded.positions, normals, uv0, indices: &indices };
+        let key = descriptor.resource_key.clone();
+        let rig = self.admit_selected_rig(source.clone(), descriptor, &key, resource_bytes, bind, 42 * 1024 * 1024, cancelled)?;
+        check(&source, cancelled)?;
+        let action = match action {
+            crate::graphical::rig_binding::RigControl::Adopt { .. } => crate::graphical::rig_binding::RigControl::Seek { seconds: 0.0 },
+            other => other,
+        };
+        Ok((rig, action))
+    }
+
+    pub(crate) fn stage_selected_rig(&self, source: SourceRef, descriptor: crate::graphical::rig_binding::RigSourceDescriptor, resource_bytes: &[u8], action: crate::graphical::rig_binding::RigControl, cancelled: &AtomicBool) -> Result<crate::graphical::rig_binding::rig_candidate::StagedRigControl,String> {
+        let (rig, action) = self.prepare_selected_rig(source.clone(), descriptor, resource_bytes, action, cancelled)?;
+        let candidate = crate::graphical::rig_binding::rig_candidate::stage_admitted(rig, action)?;
+        check(&source, cancelled)?;
+        Ok(candidate)
+    }
+
+    /// Render an authorized, selected rig pose without changing authored source.
+    /// Runtime time is a disposable viewport state; reset reloads source geometry.
+    pub(crate) fn preview_selected_rig(
+        &mut self, source: SourceRef, descriptor: crate::graphical::rig_binding::RigSourceDescriptor,
+        resource_bytes: &[u8], delta_seconds: f64, cancelled: &AtomicBool,
+    ) -> Result<PreviewFrame, String> {
+        use crate::graphical::{animated_rig_preview::AnimatedRigPreview, rig_binding::{RigControl, resource_sha256}};
+        check(&source, cancelled)?;
+        if !delta_seconds.is_finite() || !(0.0..=1.0).contains(&delta_seconds) { return Err("Rig preview step must be finite and between 0 and 1 second".into()); }
+        let selected = self.selection().ok_or("Select the current rig part in the viewport")?;
+        if selected.source != source || selected.part_key != descriptor.part_id || self.source.as_ref() != Some(&source) {
+            return Err("Rig preview selection/source retired".into());
+        }
+        if resource_sha256(resource_bytes) != descriptor.resource_sha256 { return Err("Rig preview resource changed".into()); }
+        let mut preview = if let Some(existing) = self.rig_preview.take() {
+            if existing.rig().source() != &source || existing.rig().descriptor() != &descriptor {
+                self.rig_preview = Some(existing);
+                return Err("Restore source geometry before previewing a different rig".into());
+            }
+            existing
+        } else {
+            let seek = descriptor.seek_seconds;
+            let (rig, _) = self.prepare_selected_rig(source.clone(), descriptor, resource_bytes, RigControl::Seek { seconds: seek }, cancelled)?;
+            AnimatedRigPreview::new(rig)
+        };
+        // Once a player has advanced, a failure may have changed CPU or GPU
+        // buffers; retire the complete viewport rather than publishing stale state.
+        let result = (|| {
+            let frame = preview.advance(delta_seconds, false)?;
+            let scene = self.scene.as_mut().ok_or("rig viewport scene unavailable")?;
+            validate_rig_pose(scene, frame.span, frame.positions, frame.normals, frame.tangents)?;
+            check(&source, cancelled)?;
+            let renderer = self.renderer.as_mut().ok_or("native viewport not uploaded")?;
+            if !renderer.write_mesh_animated_frames(frame.span.first_vertex, frame.positions, frame.normals, frame.tangents) {
+                return Err("native rig frame upload refused".into());
+            }
+            apply_rig_pose(scene, frame.span, frame.positions, frame.normals);
+            check(&source, cancelled)?;
+            let camera = self.camera.ok_or("native viewport camera unavailable")?;
+            self.render(source.clone(), camera, cancelled)
+        })();
+        match result {
+            Ok(frame) => { self.rig_preview = Some(preview); Ok(frame) }
+            Err(error) => { self.invalidate(); Err(error) }
+        }
+    }
+
     pub fn counters(&self) -> ViewportCounters {
         self.counters
     }
@@ -108,6 +267,7 @@ impl RetainedViewport {
     /// Call on session/authority retirement even when the Studio stamp is unchanged.
     /// Device survives; derived scene/frame/selection cannot publish afterward.
     pub fn invalidate(&mut self) {
+        self.rig_preview = None;
         self.scene = None;
         self.bare_mesh = None;
         self.source = None;
@@ -479,4 +639,75 @@ impl RetainedViewport {
         self.selected = selected.clone();
         Ok(selected)
     }
+}
+
+/// Verify the selected part has the exact contiguous bind layout expected by a
+/// rig, and that no other rendered triangle shares the animated vertices.
+/// Transformed, expanded, reordered or shared geometry is refused until a
+/// qualified correspondence/remap is supplied by the geometry owner.
+pub(super) fn selected_rig_span(
+    scene: &CompiledAssembly,
+    selected: &PartSelection,
+    bind: &crate::graphical::rig_binding::BindMesh<'_>,
+) -> Result<crate::graphical::rig_binding::ViewportSpan, String> {
+    use crate::graphical::rig_binding::ViewportSpan;
+    let part = scene.parts.iter().find(|p| p.key == selected.part_key && p.semantic_id == selected.semantic_id)
+        .ok_or("selected rig part is absent from compiled scene")?;
+    if part.first_index % 3 != 0 || part.index_count == 0 || part.index_count % 3 != 0
+        || bind.indices.len() != part.index_count as usize || bind.positions.is_empty()
+        || bind.normals.len() != bind.positions.len() || bind.uv0.len() != bind.positions.len()
+    { return Err("selected rig topology or stream count differs from compiled part".into()); }
+    let start = (part.first_index / 3) as usize;
+    let end = start.checked_add((part.index_count / 3) as usize).ok_or("selected rig range overflow")?;
+    let triangles = scene.mesh.triangles.get(start..end).ok_or("selected rig part range outside scene")?;
+    if !(start..end).contains(&selected.triangle_index) {
+        return Err("selected rig triangle no longer belongs to part".into());
+    }
+    let first = triangles.first().ok_or("selected rig has no triangles")?[0]
+        .checked_sub(*bind.indices.first().ok_or("selected rig has no indices")?)
+        .ok_or("selected rig bind offset is negative")?;
+    let first_usize = first as usize;
+    let limit = first_usize.checked_add(bind.positions.len()).ok_or("selected rig vertex range overflow")?;
+    if limit > scene.mesh.positions.len() || limit > scene.normals.len() || limit > scene.uv0.len()
+        || bind.indices.iter().any(|v| *v as usize >= bind.positions.len())
+        || triangles.iter().flatten().zip(bind.indices.iter()).any(|(actual, local)| {
+            local.checked_add(first) != Some(*actual)
+        })
+    { return Err("selected rig requires exact contiguous vertex correspondence".into()); }
+    let bits_equal = |a: &[f32], b: &[f32]| a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits());
+    for i in 0..bind.positions.len() {
+        if !bits_equal(&scene.mesh.positions[first_usize + i], &bind.positions[i])
+            || !bits_equal(&scene.normals[first_usize + i], &bind.normals[i])
+            || !bits_equal(&scene.uv0[first_usize + i], &bind.uv0[i])
+        { return Err("selected rig bind position, normal or UV differs from viewport".into()); }
+    }
+    for (i, tri) in scene.mesh.triangles.iter().enumerate() {
+        if !(start..end).contains(&i) && tri.iter().any(|v| (*v as usize) >= first_usize && (*v as usize) < limit) {
+            return Err("selected rig vertices are shared by other rendered triangles".into());
+        }
+    }
+    u32::try_from(limit).map_err(|_| "selected rig vertex range exceeds GPU address space")?;
+    Ok(ViewportSpan { first_vertex: first, vertex_count: bind.positions.len() })
+}
+
+/// Validate the CPU mirror before the GPU changes; no allocation or mutation.
+pub(super) fn validate_rig_pose(scene: &CompiledAssembly, span: crate::graphical::rig_binding::ViewportSpan, positions: &[[f32;3]], normals: &[[f32;3]], tangents: &[[f32;4]]) -> Result<(), String> {
+    let first = span.first_vertex as usize;
+    let end = first.checked_add(span.vertex_count).ok_or("rig pose span overflow")?;
+    if span.vertex_count == 0 || positions.len() != span.vertex_count || normals.len() != span.vertex_count || tangents.len() != span.vertex_count || end > scene.mesh.positions.len() || end > scene.normals.len() || positions.iter().flatten().chain(normals.iter().flatten()).chain(tangents.iter().flatten()).any(|x| !x.is_finite()) {
+        return Err("invalid native rig pose or viewport span".into());
+    }
+    Ok(())
+}
+
+/// Called only after validation and GPU admission succeed.
+pub(super) fn apply_rig_pose(scene: &mut CompiledAssembly, span: crate::graphical::rig_binding::ViewportSpan, positions: &[[f32;3]], normals: &[[f32;3]]) {
+    let first = span.first_vertex as usize;
+    let end = first + span.vertex_count;
+    scene.mesh.positions[first..end].copy_from_slice(positions);
+    scene.normals[first..end].copy_from_slice(normals);
+    let mut min = [f32::INFINITY;3];
+    let mut max = [f32::NEG_INFINITY;3];
+    for position in &scene.mesh.positions { for axis in 0..3 { min[axis] = min[axis].min(position[axis]); max[axis] = max[axis].max(position[axis]); } }
+    scene.mesh.min = min; scene.mesh.max = max;
 }

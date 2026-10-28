@@ -65,6 +65,8 @@ struct SelectionProbe {
     observed_locked: Arc<std::sync::atomic::AtomicBool>,
 }
 impl PreviewProvider for SelectionProbe {
+    // This fixture does not retain a viewport or rendered frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate(&self, value: &Value) -> Result<(), String> {
         self.observed_locked.store(
             self.selection.try_lock().is_err(),

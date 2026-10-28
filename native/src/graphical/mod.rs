@@ -1,11 +1,13 @@
 //! Additive native Poet Tool-Chest/Manifold source authoring surface.
 pub mod animated_rig_preview;
 pub mod assembly;
+pub mod numeric_sheet;
 pub mod authoring;
 pub mod botanical_graph_host;
 pub mod checkpoints;
 pub mod controller;
 pub mod cooperation;
+mod cooperation_selection;
 mod cooperative_controls;
 pub mod cooperative_workbench;
 pub mod cooperative_workflow;
@@ -72,3 +74,28 @@ mod reference_authoring_tests;
 mod biological_reference_tests;
 
 mod lookdev_controls;
+
+mod numeric_sheet_controls;
+#[cfg(test)]
+mod sheet_formula_host_tests;
+#[cfg(test)]
+mod sheet_set_cell_host_tests;
+#[cfg(test)]
+#[path = "hard_cap_sweep_public_tests.rs"]
+mod hard_cap_sweep_public_tests;
+
+#[cfg(test)]
+#[path = "polygon_soup_public_tests.rs"]
+mod polygon_soup_public_tests;
+
+#[cfg(test)]
+#[path = "indexed_tetra_public_tests.rs"]
+mod indexed_tetra_public_tests;
+
+#[cfg(test)]
+#[path = "surface_topology_public_tests.rs"]
+mod surface_topology_public_tests;
+
+#[cfg(test)]
+#[path = "tapered_branch_field_public_tests.rs"]
+mod tapered_branch_field_public_tests;

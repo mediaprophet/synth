@@ -51,6 +51,8 @@ fn block_on<F: std::future::Future>(future: F) -> F::Output {
 }
 struct NoPixels;
 impl PreviewProvider for NoPixels {
+    // This headless fixture does not retain a viewport or frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn preview(&mut self, _: SourceRef, _: &Value) -> Result<PreviewFrame, String> {
         Err("No GUI/GPU claimed by native intent tests".into())
     }
@@ -71,7 +73,9 @@ impl Drop for Fixture {
         let _ = self.owner.disconnect(&self.session);
     }
 }
-fn fixture() -> Fixture {
+fn fixture() -> Fixture { fixture_with_grid(false) }
+fn fixture_with_grid(with_grid: bool) -> Fixture { fixture_with_role(with_grid, ProjectRole::Contributor) }
+fn fixture_with_role(with_grid: bool, role: ProjectRole) -> Fixture {
     let temp = tempfile::tempdir().unwrap();
     let journal = temp.path().join("journal");
     let packages = temp.path().join("packages");
@@ -127,7 +131,7 @@ fn fixture() -> Fixture {
                 id: "fixture-membership".into(),
                 project_id: scope.project_id.clone(),
                 member_did: "urn:fixture:agent".into(),
-                role: ProjectRole::Contributor,
+                role,
                 agreed_at_unix: 1,
                 agreed_at_instant: None,
             },
@@ -192,7 +196,7 @@ fn fixture() -> Fixture {
                 import_library: None,
                 session_limits: Default::default(),
                 gateway_limits: GatewayLimits::default(),
-                geometry_grants: Vec::new(),
+                geometry_grants: if with_grid { vec!["capability.invoke".into(), "Sheet.set_cell".into()] } else { Vec::new() },
                 max_vertices: 1000,
             },
             owner.clone(),
@@ -202,7 +206,11 @@ fn fixture() -> Fixture {
         )
         .unwrap(),
     );
-    let host = SessionEditorHost::new(project, Arc::new(Mutex::new(Some(session.clone()))));
+    let mut host = SessionEditorHost::new(project, Arc::new(Mutex::new(Some(session.clone()))));
+    if with_grid {
+        let expected = host.snapshot().unwrap().source;
+        host.submit("let mut poet_sheet=[[1,2],[3,4]]; poet_sheet;", expected).unwrap();
+    }
     let origin = jobs::Context::from_snapshot(&host.snapshot().unwrap());
     let (worker, handle) = jobs::Worker::start(Box::new(host)).unwrap();
     let bus = NativeIntentBus::new(handle, origin).unwrap();
@@ -353,4 +361,41 @@ fn read_only_refresh_recovers_same_actor_source_successor_without_rebinding_acto
         result.receipt.provenance.unwrap().emitter_did,
         "fixture-software-agent"
     );
+}
+
+#[test]
+fn typed_numeric_sheet_intent_uses_actor_receipt_and_refuses_stale_or_revoked_session() {
+    let f = fixture_with_grid(true);
+    let inspect = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Inspect)).unwrap();
+    assert_eq!(inspect.receipt.status, IntentStatus::Accepted);
+    assert_eq!(inspect.receipt.provenance.unwrap().emitter_did, "fixture-software-agent");
+    let view = inspect.reply.unwrap().numeric_sheet.unwrap();
+    let edit = crate::graphical::numeric_sheet::SheetEdit { row: 0, col: 1, value: 7.0, execution_epoch: view.execution_epoch };
+    let edited = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Edit(edit))).unwrap();
+    assert_eq!(edited.receipt.status, IntentStatus::Accepted);
+    assert_eq!(edited.receipt.provenance.unwrap().emitter_did, "fixture-software-agent");
+    assert!(edited.reply.unwrap().operation_succeeded);
+    let stale = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Inspect)).unwrap();
+    assert!(matches!(stale.receipt.status, IntentStatus::Rejected(_)));
+    let f = fixture_with_grid(true);
+    f.owner.disconnect(&f.session).unwrap();
+    let revoked = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Inspect)).unwrap();
+    assert!(matches!(revoked.receipt.status, IntentStatus::Rejected(_)));
+    assert!(revoked.reply.is_none());
+}
+
+#[test]
+fn typed_numeric_sheet_observer_read_is_admitted_but_execute_is_denied() {
+    // No binding is installed by this observer. A missing-binding diagnostic
+    // demonstrates the read reached the inner owner after ReadSource admission.
+    let f = fixture_with_role(false, ProjectRole::Observer);
+    let inspect = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Inspect)).unwrap();
+    assert!(matches!(inspect.receipt.status, IntentStatus::Rejected(_)));
+    let reply = inspect.reply.expect("read reached inner owner");
+    assert!(reply.message.contains("no poet_sheet binding"));
+    let epoch = reply.snapshot.unwrap().execution_epoch;
+    let edit = crate::graphical::numeric_sheet::SheetEdit { row: 0, col: 0, value: 7.0, execution_epoch: epoch };
+    let denied = block_on(f.bus.dispatch_numeric_sheet(NumericSheetIntent::Edit(edit))).unwrap();
+    assert!(matches!(denied.receipt.status, IntentStatus::Rejected(_)));
+    assert!(denied.reply.unwrap().message.contains("RoleDenied"));
 }

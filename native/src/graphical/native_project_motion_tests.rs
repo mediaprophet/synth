@@ -17,6 +17,8 @@ const CHILD_CASE: &str = "POET_MATERIAL_MOTION_CASE_ROOT";
 
 struct MotionNoPixels;
 impl PreviewProvider for MotionNoPixels {
+    // This fixture does not retain a viewport or rendered frame.
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { Ok(()) }
     fn validate(&self, value: &Value) -> Result<(), String> {
         crate::graphical::assembly::admit_assembly(value, PreviewLimits::default()).map(|_| ())
     }
@@ -484,7 +486,7 @@ fn signed_material_motion_rejects_stale_observer_revoked_and_malformed_edits() {
     drop(ui);
     drop(mcp);
     let author = login(&authority, "fixture-author", &AUTHOR);
-    let mut ui = project.connect(author.clone()).unwrap();
+    let ui = project.connect(author.clone()).unwrap();
     let mut mcp = project.mcp_backend(author).unwrap();
     let read = mcp.call("poet_source_read", json!({})).unwrap();
     admission.sequence = 3;

@@ -87,6 +87,26 @@ pub(crate) fn PackageReviewControls(
                 && p.view.evidence.target.package_id == package_id()
         })
         .map(|p| p.view);
+    let contributions = view
+        .as_ref()
+        .map(|v| {
+            super::cooperation_selection::package_contributions(
+                &v.evidence.target,
+                &v.evidence.principal_subject,
+                &v.evidence.contributions,
+            )
+        })
+        .unwrap_or_default();
+    let requests = view
+        .as_ref()
+        .map(|v| {
+            super::cooperation_selection::package_requests(&v.evidence.target, &v.evidence.requests)
+        })
+        .unwrap_or_default();
+    let selected_request =
+        super::cooperation_selection::current_selection(&requests, &request_id());
+    let contribution_selected = contributions.iter().any(|row| row.id == contribution_id());
+    let record_ready = !record_id().trim().is_empty() && !evidence().trim().is_empty();
     let scan = {
         let h = host.clone();
         let c = current.clone();
@@ -114,7 +134,8 @@ pub(crate) fn PackageReviewControls(
             input{value:"{package_id}",aria_label:"Project-scoped package release identifier",placeholder:"Project-scoped package release identifier",disabled:busy(),oninput:move|e|{package_id.set(e.value());panel.set(None);}}
             button{disabled:busy()||package_id().trim().is_empty(),onclick:scan,"Inspect saved package workflow"}
             if let Some(view)=view {
-                p{"Current actor {view.evidence.principal_subject} | {view.evidence.principal_kind:?}"}
+                p{"Acting subject {view.evidence.principal_subject} | admitted capacity {view.evidence.principal_kind:?}"}
+                p{"An admitted capacity label does not establish an adopted human principal or delegation chain. Actual human/domain acceptance remains separate from this recorded decision."}
                 p{"Package producer {view.evidence.target.producer_subject}; source author {view.evidence.target.source.author_subject:?}."}
                 p{"Known destination overwrite lineage complete: {view.evidence.known_destination_lineage_complete}."}
                 p{"{view.evidence.contribution_rights_scope}"}
@@ -141,21 +162,50 @@ pub(crate) fn PackageReviewControls(
                         submit(h.clone(),c.clone(),PackageWorkflowAction::Contribution{target:t.clone(),generation,id:record_id(),description:description(),minutes:count,status:status_value},panel,busy,status);
                     },"Record package contribution"}}
                 }
-                input{value:"{contribution_id}",aria_label:"Exact package contribution identifier",placeholder:"Existing exact-package contribution identifier",disabled:busy(),oninput:move|e|contribution_id.set(e.value())}
-                {let h=host.clone();let c=current.clone();let t=view.evidence.target.clone();let generation=view.evidence.authority_generation;
-                    rsx!{button{disabled:busy()||!view.evidence.can_contribute,onclick:move |_|submit(h.clone(),c.clone(),PackageWorkflowAction::Request{target:t.clone(),generation,contribution_id:contribution_id(),id:record_id(),evidence:evidence()},panel,busy,status),"Request review of this package"}}
+                h4{"Request review of your recorded contribution"}
+                select{value:"{contribution_id}",aria_label:"Exact package contribution identifier",disabled:busy(),onchange:move|e|contribution_id.set(e.value()),
+                    option{value:"","Choose your contribution to this exact saved package"}
+                    for contribution in &contributions {
+                        option{value:"{contribution.id}","{contribution.id} · {contribution.actor_subject}"}
+                    }
                 }
-                input{value:"{request_id}",aria_label:"Exact package review request identifier",placeholder:"Existing package review request identifier",disabled:busy(),oninput:move|e|request_id.set(e.value())}
+                if contributions.is_empty(){p{"No contribution by this acting subject is recorded for these exact package bytes. Record the contribution, then select it to request review."}}
+                {let h=host.clone();let c=current.clone();let t=view.evidence.target.clone();let generation=view.evidence.authority_generation;
+                    rsx!{button{disabled:busy()||!view.evidence.can_contribute||!contribution_selected||!record_ready,onclick:move |_|submit(h.clone(),c.clone(),PackageWorkflowAction::Request{target:t.clone(),generation,contribution_id:contribution_id(),id:record_id(),evidence:evidence()},panel,busy,status),"Request review of this package"}}
+                }
+                h4{"Review an exact-package request"}
+                select{value:"{request_id}",aria_label:"Exact package review request identifier",disabled:busy(),onchange:move|e|request_id.set(e.value()),
+                    option{value:"","Choose a request for these exact package bytes"}
+                    for request in &requests {
+                        option{value:"{request.id}","{request.id} · requested by {request.actor_subject} · decisions {request.decision_ids:?}"}
+                    }
+                }
+                if let Some(request)=selected_request {
+                    p{style:"overflow-wrap:anywhere;","Selected request {request.id} · actor {request.actor_subject} · contribution {request.contribution_id:?} · evidence {request.evidence_ref}"}
+                    if request.decision_ids.is_empty() {
+                        p { "No decisions are recorded for this request." }
+                    }
+                    for (decision_id, decision) in super::cooperation_selection::package_request_decisions(
+                        &view.evidence.target, request, &view.evidence.reviews
+                    ) {
+                        if let Some(decision) = decision {
+                            p { style:"overflow-wrap:anywhere;", "Decision {decision_id} · {decision.decision:?} · reviewer {decision.actor.subject} · admitted capacity {decision.actor.principal_kind:?}" }
+                            p { style:"overflow-wrap:anywhere;", "{decision.rationale} · evidence {decision.decision_evidence_ref}" }
+                        } else {
+                            p { style:"overflow-wrap:anywhere;", "Decision {decision_id} is referenced but unavailable for this exact request and package; inspect before relying on it." }
+                        }
+                    }
+                }else{p{"Select a current request after inspecting package evidence. Prior decisions remain visible below."}}
                 for (label,decision) in [("Accept scoped package review",ReviewDecision::Accepted),("Request package changes",ReviewDecision::ChangesRequested),("Reject package review",ReviewDecision::Rejected)] {
                     {let h=host.clone();let c=current.clone();let t=view.evidence.target.clone();let generation=view.evidence.authority_generation;
-                        rsx!{button{disabled:busy()||!view.evidence.can_review,onclick:move |_|submit(h.clone(),c.clone(),PackageWorkflowAction::Decide{target:t.clone(),generation,request_id:request_id(),id:record_id(),decision,rationale:description(),evidence:evidence()},panel,busy,status),"{label}"}}
+                        rsx!{button{disabled:busy()||!view.evidence.can_review||selected_request.is_none()||!record_ready||description().trim().is_empty(),onclick:move |_|submit(h.clone(),c.clone(),PackageWorkflowAction::Decide{target:t.clone(),generation,request_id:request_id(),id:record_id(),decision,rationale:description(),evidence:evidence()},panel,busy,status),"{label}"}}
                     }
                 }
                 for contribution in view.evidence.contributions.iter().filter(|r|r.target==view.evidence.target) {
                     p{style:"overflow-wrap:anywhere;","Contribution {contribution.contribution.id} | {contribution.actor.subject} | {contribution.work_status:?}"}
                 }
-                for request in view.evidence.requests.iter().filter(|r|r.target==view.evidence.target) {
-                    p{style:"overflow-wrap:anywhere;","Request {request.id} | contribution {request.contribution_id} | decisions {request.decision_ids:?}"}
+                for request in &requests {
+                    p{style:"overflow-wrap:anywhere;","Request {request.id} | actor {request.actor_subject} | contribution {request.contribution_id:?} | evidence {request.evidence_ref} | decisions {request.decision_ids:?}"}
                 }
                 if !view.evidence.prior_contributions.is_empty() {
                     h4 { "Other recorded package contributions" }
@@ -165,7 +215,8 @@ pub(crate) fn PackageReviewControls(
                     }
                 }
                 for review in view.evidence.reviews.iter().filter(|r|r.target==view.evidence.target) {
-                    p{style:"overflow-wrap:anywhere;","Decision {review.id} | {review.actor.subject} | {review.actor.principal_kind:?} | {review.decision:?}: {review.rationale}"}
+                    p{style:"overflow-wrap:anywhere;","Decision {review.id} | request {review.request_id} | acting subject {review.actor.subject} | admitted capacity {review.actor.principal_kind:?} | {review.decision:?}: {review.rationale}"}
+                    p{style:"overflow-wrap:anywhere;","Evidence {review.decision_evidence_ref} | grant {review.review_grant_id} | review admission {review.review_admission_ref}. Scoped package decision; complete model and actual human/domain acceptance remain separate."}
                 }
             }
         }

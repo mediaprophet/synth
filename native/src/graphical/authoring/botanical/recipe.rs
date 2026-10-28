@@ -5,6 +5,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use vibe::Value;
 
 pub const SCHEMA: &str = "poet.botanical/v1";
+/// Opt-in continuous unbranched-chain sweep; fork surfaces remain separate.
+pub const CHAIN_SCHEMA: &str = "poet.botanical/v2";
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -65,7 +67,7 @@ pub(crate) fn key_valid(s: &str) -> bool {
 
 impl BotanicalRecipe {
     pub fn validate(&self, limits: BotanicalLimits) -> Result<(), String> {
-        if self.version != 1 || !key_valid(&self.part_id) {
+        if !matches!(self.version, 1 | 2) || !key_valid(&self.part_id) {
             return Err("Unsupported botanical recipe version or part key".into());
         }
         if self.organs.len() < 2
@@ -143,8 +145,21 @@ impl BotanicalRecipe {
         let triangles = edges
             .checked_mul(self.ring_slices * 4)
             .ok_or("Botanical triangle budget overflow")?;
-        if vertices > limits.max_vertices || triangles > limits.max_triangles {
-            return Err("Botanical mesh exceeds host-selected working set".into());
+        // Version 2 additionally scans and retains parent/child chain metadata.
+        // Charge two extra vertex-work units per organ against the existing
+        // work/scratch-derived limit before allocating those arrays. The old
+        // per-edge bound remains a conservative bound for chain mesh output.
+        let charged_vertices = if self.version == 2 {
+            self.organs
+                .len()
+                .checked_mul(2)
+                .and_then(|n| vertices.checked_add(n))
+                .ok_or("Botanical chain work overflow")?
+        } else {
+            vertices
+        };
+        if charged_vertices > limits.max_vertices || triangles > limits.max_triangles {
+            return Err("Botanical mesh and chain work exceed host-selected working set".into());
         }
         Ok(())
     }
@@ -233,8 +248,10 @@ pub fn read_recipe(
             "ring_slices",
         ],
     )?;
-    if string(get(r, "schema")?)? != SCHEMA {
-        return Err("Unsupported botanical source schema".into());
+    let schema = string(get(r, "schema")?)?;
+    let version = usize_value(get(r, "version")?)?;
+    if !matches!((schema, version), (SCHEMA, 1) | (CHAIN_SCHEMA, 2)) {
+        return Err("Unsupported botanical source schema/version pair".into());
     }
     let organs = list(get(r, "organs")?)?
         .iter()

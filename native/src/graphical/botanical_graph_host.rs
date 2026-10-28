@@ -104,49 +104,136 @@ pub fn evaluate(
         })
         .collect::<Vec<_>>();
     let zero = cg::Point3::default();
-    for i in 1..n {
-        let p = parents[i] as usize;
-        let axis = [nodes[p], nodes[i]];
-        let stations = [
-            cg::ExtrusionStation {
-                scale_x: radii[p],
-                scale_y: radii[p],
-                twist_rad: 0.0,
-            },
-            cg::ExtrusionStation {
-                scale_x: radii[i],
-                scale_y: radii[i],
-                twist_rad: 0.0,
-            },
-        ];
-        let mut frames = [cg::AffineFrame3 {
-            origin: zero,
-            e0: zero,
-            e1: zero,
-            e2: zero,
-        }; 2];
-        let mut edge_vertices = vec![zero; 2 * recipe.ring_slices + 2];
-        let mut edge_triangles = vec![[0u32; 3]; 4 * recipe.ring_slices];
-        let (nv, nt) = cg::extrude_profile_along_path(
-            &axis,
-            &section,
-            Some(&stations),
-            true,
-            true,
-            &mut frames,
-            &mut edge_vertices,
-            &mut edge_triangles,
-        )
-        .map_err(|e| format!("Core branch sweep refused: {e:?}"))?;
-        let offset =
-            u32::try_from(vertices.len()).map_err(|_| "Botanical vertex index overflow")?;
-        vertices.extend(edge_vertices[..nv].iter().map(|p| [p.x, p.y, p.z]));
-        for tri in &edge_triangles[..nt] {
-            triangles.push([
-                tri[0].checked_add(offset).ok_or("Index overflow")?,
-                tri[1].checked_add(offset).ok_or("Index overflow")?,
-                tri[2].checked_add(offset).ok_or("Index overflow")?,
-            ]);
+    if recipe.version == 1 {
+        for i in 1..n {
+            let p = parents[i] as usize;
+            let axis = [nodes[p], nodes[i]];
+            let stations = [
+                cg::ExtrusionStation {
+                    scale_x: radii[p],
+                    scale_y: radii[p],
+                    twist_rad: 0.0,
+                },
+                cg::ExtrusionStation {
+                    scale_x: radii[i],
+                    scale_y: radii[i],
+                    twist_rad: 0.0,
+                },
+            ];
+            let mut frames = [cg::AffineFrame3 {
+                origin: zero,
+                e0: zero,
+                e1: zero,
+                e2: zero,
+            }; 2];
+            let mut edge_vertices = vec![zero; 2 * recipe.ring_slices + 2];
+            let mut edge_triangles = vec![[0u32; 3]; 4 * recipe.ring_slices];
+            let (nv, nt) = cg::extrude_profile_along_path(
+                &axis,
+                &section,
+                Some(&stations),
+                true,
+                true,
+                &mut frames,
+                &mut edge_vertices,
+                &mut edge_triangles,
+            )
+            .map_err(|e| format!("Core branch sweep refused: {e:?}"))?;
+            let offset =
+                u32::try_from(vertices.len()).map_err(|_| "Botanical vertex index overflow")?;
+            vertices.extend(edge_vertices[..nv].iter().map(|p| [p.x, p.y, p.z]));
+            for tri in &edge_triangles[..nt] {
+                triangles.push([
+                    tri[0].checked_add(offset).ok_or("Index overflow")?,
+                    tri[1].checked_add(offset).ok_or("Index overflow")?,
+                    tri[2].checked_add(offset).ok_or("Index overflow")?,
+                ]);
+            }
+        }
+    } else {
+        // Each edge occurs once. A chain starts at the root or a fork, then
+        // continues through nodes having exactly one child. Forks remain hard,
+        // capped boundaries: this is NOT a joined branching surface.
+        let mut child_count = vec![0usize; n];
+        let mut only_child = vec![0usize; n];
+        for child in 1..n {
+            let parent = parents[child] as usize;
+            child_count[parent] += 1;
+            only_child[parent] = child;
+        }
+        for child in 1..n {
+            let parent = parents[child] as usize;
+            if parent != 0 && child_count[parent] == 1 {
+                continue;
+            }
+            let mut chain = vec![parent, child];
+            while child_count[*chain.last().unwrap()] == 1 {
+                chain.push(only_child[*chain.last().unwrap()]);
+            }
+            let axis = chain.iter().map(|&i| nodes[i]).collect::<Vec<_>>();
+            let stations = chain
+                .iter()
+                .map(|&i| cg::ExtrusionStation {
+                    scale_x: radii[i],
+                    scale_y: radii[i],
+                    twist_rad: 0.0,
+                })
+                .collect::<Vec<_>>();
+            let required_vertices = chain
+                .len()
+                .checked_mul(recipe.ring_slices)
+                .and_then(|x| x.checked_add(2))
+                .ok_or("Botanical chain vertex overflow")?;
+            let required_triangles = chain
+                .len()
+                .checked_mul(recipe.ring_slices)
+                .and_then(|x| x.checked_mul(2))
+                .ok_or("Botanical chain triangle overflow")?;
+            if vertices
+                .len()
+                .checked_add(required_vertices)
+                .filter(|&x| x <= limits.max_vertices)
+                .is_none()
+                || triangles
+                    .len()
+                    .checked_add(required_triangles)
+                    .filter(|&x| x <= limits.max_triangles)
+                    .is_none()
+            {
+                return Err("Botanical chain exceeds host-selected working set".into());
+            }
+            let mut frames = vec![
+                cg::AffineFrame3 {
+                    origin: zero,
+                    e0: zero,
+                    e1: zero,
+                    e2: zero
+                };
+                chain.len()
+            ];
+            let mut chain_vertices = vec![zero; required_vertices];
+            let mut chain_triangles = vec![[0u32; 3]; required_triangles];
+            let (nv, nt) = cg::extrude_profile_along_path(
+                &axis,
+                &section,
+                Some(&stations),
+                true,
+                true,
+                &mut frames,
+                &mut chain_vertices,
+                &mut chain_triangles,
+            )
+            .map_err(|e| format!("Core chain sweep refused: {e:?}"))?;
+            let offset =
+                u32::try_from(vertices.len()).map_err(|_| "Botanical vertex index overflow")?;
+            vertices.extend(chain_vertices[..nv].iter().map(|p| [p.x, p.y, p.z]));
+            for tri in &chain_triangles[..nt] {
+                triangles.push([
+                    tri[0].checked_add(offset).ok_or("Index overflow")?,
+                    tri[1].checked_add(offset).ok_or("Index overflow")?,
+                    tri[2].checked_add(offset).ok_or("Index overflow")?,
+                ]);
+            }
         }
     }
     if vertices.len() > limits.max_vertices
@@ -180,4 +267,9 @@ pub fn evaluate(
         vertices,
         triangles,
     })
+}
+
+#[cfg(test)]
+pub(crate) mod legacy_v1_snapshot {
+    include!("botanical_v1_compat_snapshot.rs");
 }

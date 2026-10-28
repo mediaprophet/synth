@@ -1,7 +1,7 @@
 //! Selected-organ inspector for the admitted native Poet authoring surface.
 //! Dispatch is typed; the parent controller still owns actor, revision and source.
 use super::{BotanicalEdit, BotanicalLimits, BotanicalRecipe};
-use crate::graphical::preview::SourceRef;
+use crate::graphical::{controller::EditorSnapshot, preview::SourceRef};
 use dioxus::prelude::*;
 
 const MAX_ADOPTION_JSON_BYTES: usize = 64 * 1024;
@@ -91,6 +91,8 @@ pub fn BotanicalControls(
     selected_part: String,
     source: SourceRef,
     fresh: bool,
+    live_view: Signal<EditorSnapshot>,
+    live_selected: Signal<String>,
     onedit: EventHandler<BotanicalEdit>,
 ) -> Element {
     let mut form = use_signal(|| None::<Form>);
@@ -108,6 +110,7 @@ pub fn BotanicalControls(
     let rebind_part = selected_part.clone();
     let rebind_source = source.clone();
     let inspector_part = selected_part.clone();
+    let has_graph = accepted.as_ref().is_some_and(|r| r.part_id == selected_part);
     let can_load = fresh
         && accepted
             .as_ref()
@@ -119,6 +122,10 @@ pub fn BotanicalControls(
     rsx! {
         fieldset { style:"margin-top:10px;border:1px solid #405264;",
             legend { "Botanical adopted graph" }
+            super::typed_controls::TypedBotanicalControls {
+                selected_part: selected_part.clone(), source: source.clone(), fresh, has_graph, live_view, live_selected,
+                onedit: move |edit| onedit.call(edit),
+            }
             p { "Advanced graph entry. Adopt an explicit source recipe for the selected part, then select its organ keys below. No organ is created until you apply a recipe." }
             button { disabled:!fresh || selected_part.is_empty(), onclick:move |_| {
                 let json = adoption_accepted.as_ref().filter(|r| r.part_id == adoption_part)
@@ -167,6 +174,24 @@ pub fn BotanicalControls(
             }
             if let Some(f) = current {
                 p { "{f.recipe.organs.len()} adopted organs · selected part {f.recipe.part_id}" }
+                if f.recipe.version == 1 {
+                    p { "Continuous linear chains remove caps between nonbranching segments. Forks remain separately capped; this changes mesh topology. Attached atlas or authored streams may prevent the edit." }
+                    button { disabled:!ready, onclick:move |_| {
+                        let snapshot = live_view();
+                        let selected_now = live_selected();
+                        if let Some(draft) = form().as_ref() {
+                            if snapshot.reconciliation_required || !snapshot.publication_is_current()
+                                || snapshot.source != draft.source || selected_now != draft.recipe.part_id
+                                || draft.recipe.version != 1 {
+                                message.set("Source or selected part changed; profile was not upgraded.".into());
+                                return;
+                            }
+                            let mut recipe = draft.recipe.clone();
+                            recipe.version = 2;
+                            onedit.call(BotanicalEdit::SetRecipe { recipe });
+                        }
+                    }, "Explicitly adopt continuous linear chains (v2)" }
+                }
                 label { "Organ key"
                     select { disabled:!ready, value:"{f.organ_key}",
                         onchange:move |e| if let Some(f) = form.write().as_mut() { f.select(&e.value()); },

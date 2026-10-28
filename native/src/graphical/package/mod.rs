@@ -48,6 +48,7 @@ impl ResourceImportHost {
     }
 }
 impl EditorHost for ResourceImportHost {
+    fn retire_retained_viewport(&mut self) -> Result<(), String> { self.inner.retire_retained_viewport() }
     fn viewport_action(&mut self, request: crate::graphical::viewport::ViewportCommand,
         expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool,
     ) -> Result<crate::graphical::viewport_contract::ViewportOutput, String> {
@@ -86,6 +87,16 @@ impl EditorHost for ResourceImportHost {
     ) -> Result<(), String> {
         request.validate()?;
         self.inner.bind_surface_package(request, expected)
+    }
+
+    fn bind_surface_package_transaction(
+        &mut self,
+        request: crate::graphical::surface_host::SurfacePackageRequest,
+        expected: SourceRef,
+    ) -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+        use crate::graphical::surface_host::SurfaceBindingFailure;
+        request.validate().map_err(SurfaceBindingFailure::BeforeMutation)?;
+        self.inner.bind_surface_package_transaction(request, expected)
     }
 
     fn inspect_typed_10d(
@@ -141,11 +152,16 @@ impl EditorHost for ResourceImportHost {
         self.inner
             .inspect_package_resource(request, expected, limits, scratch)
     }
+    fn numeric_sheet_view(&self, expected: SourceRef) -> Result<crate::graphical::numeric_sheet::SheetView, String> { self.inner.numeric_sheet_view(expected) }
+    fn numeric_sheet_edit(&mut self, edit: crate::graphical::numeric_sheet::SheetEdit, expected: SourceRef) -> Result<EditorOutcome, String> { self.inner.numeric_sheet_edit(edit, expected) }
     fn authoring_view(
         &self,
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.inner.authoring_view(e)
+    }
+    fn rig_authoring_edit(&mut self, resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
+        self.inner.rig_authoring_edit(resource, control, expected, cancelled)
     }
     fn authoring_edit(
         &mut self,

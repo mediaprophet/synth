@@ -66,6 +66,24 @@ impl Typed10dEditRequest {
     }
 }
 
+/// SKL1 is assessed independently of unrelated material editing. A failed
+/// verification is not silently reported as an absent rig.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SkeletalInspection {
+    Absent,
+    Present(qualia_core_db::container_10d::skeletal_section::Counts),
+    Unassessed(String),
+}
+impl SkeletalInspection {
+    pub fn summary(&self) -> String {
+        match self {
+            Self::Absent => "No skeletal animation section".into(),
+            Self::Present(c) => format!("Skeletal data: {} joints, {} skinned vertices, {} clips, {} tracks, {} keys", c.joints, c.vertices, c.clips, c.tracks, c.keys),
+            Self::Unassessed(reason) => format!("Skeletal data not assessed: {reason}"),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Typed10dInspection {
     pub request: ResourceInspectionRequest,
@@ -78,6 +96,7 @@ pub struct Typed10dInspection {
     pub ranges: Vec<SubmeshRange>,
     pub fields: Vec<TypedFieldRecord>,
     pub frames: Option<MeshFrameLayout>,
+    pub skeletal: SkeletalInspection,
     pub edit_blocker: Option<String>,
 }
 impl Typed10dInspection {

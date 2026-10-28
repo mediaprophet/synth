@@ -5,7 +5,7 @@
 pub mod core;
 mod intents;
 mod model;
-pub use intents::{NativeDispatch, NativeIntentBus};
+pub use intents::{NativeDispatch, NativeIntentBus, NumericSheetIntent};
 pub use model::WorkspaceProjection;
 #[cfg(test)]
 mod tests;

@@ -20,6 +20,14 @@ impl SurfacePackageRequest {
         Ok(())
     }
 }
+/// Trusted raw-host classification for binding; unknown failures must be treated
+/// as possibly mutated. BeforeMutation is valid only before resources or execution
+/// context have been installed or changed.
+#[derive(Debug)]
+pub enum SurfaceBindingFailure {
+    BeforeMutation(String),
+    MayHaveMutated(String),
+}
 pub fn validate_value(value: &Value, resources: Option<&TextureResources>) -> Result<(), String> {
     if let Value::Record(record) = value {
         if let Some(Value::List(parts)) = record.get("parts") {

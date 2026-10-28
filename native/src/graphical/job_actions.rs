@@ -10,10 +10,20 @@ pub(super) fn perform(
     typed_10d: &mut Option<crate::graphical::checkpoints::typed_10d::Typed10dInspection>,
     surface: &mut Option<crate::graphical::surfaces::inspection::SurfaceInspection>,
     viewport: &mut Option<crate::graphical::viewport_contract::ViewportState>,
+    numeric_sheet: &mut Option<crate::graphical::numeric_sheet::SheetView>,
     cancelled: &std::sync::atomic::AtomicBool,
 ) -> Result<(String, Option<BoundImage>), String> {
     let image_uri = None;
     let message = match action {
+        Action::NumericSheetInspect(expected) => {
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Sheet inspection cancelled".into()); }
+            *numeric_sheet = Some(host.numeric_sheet_view(expected)?);
+            "Inspected existing numeric source grid".into()
+        }
+        Action::NumericSheetEdit { edit, expected } => {
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Sheet edit cancelled before admission".into()); }
+            return outcome_image(host.numeric_sheet_edit(edit, expected)?);
+        }
         Action::Viewport {request,expected} => {
             let output = host.viewport_action(request, expected, cancelled)?;
             let snapshot = host.snapshot()?;
@@ -43,12 +53,19 @@ pub(super) fn perform(
         }
 
         Action::InspectTyped10d { request, expected } => {
-            *typed_10d = Some(host.inspect_typed_10d(
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) {
+                return Err("Selected .10d inspection cancelled before read".into());
+            }
+            let result = host.inspect_typed_10d(
                 request,
                 expected,
                 crate::graphical::checkpoints::typed_10d::Typed10dLimits::default(),
-            )?);
-            "Inspected selected .10d material/frame/field snapshot; structural inspection is separate from model acceptance.".into()
+            )?;
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) {
+                return Err("Selected .10d inspection cancelled; result withheld".into());
+            }
+            *typed_10d = Some(result);
+            "Inspected selected .10d material/frame/skeletal/field snapshot; structural inspection is separate from model acceptance.".into()
         }
         Action::EditTyped10d { request, expected } => {
             let name = request.resource.filename.clone();
@@ -112,7 +129,10 @@ pub(super) fn perform(
             "Current accepted assembly inspected".into()
         }
         Action::AuthoringEdit { edit, expected } => {
-            let result = host.authoring_edit(edit, expected)?;
+            let result = match edit {
+                crate::graphical::authoring::AuthoringEdit::Rig { resource, control } => host.rig_authoring_edit(resource, control, expected, cancelled)?,
+                other => host.authoring_edit(other, expected)?,
+            };
             *authoring = host.authoring_view(result.snapshot.source.clone()).ok();
             return outcome_image(result);
         }

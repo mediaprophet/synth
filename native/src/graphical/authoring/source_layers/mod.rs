@@ -21,7 +21,9 @@ mod snapshot;
 mod validation;
 use super::source::{identifier, record};
 pub(crate) use envelope::validate_render_envelope;
-pub(crate) use snapshot::{validation_snapshot, validation_snapshot_with_budget};
+#[cfg(test)]
+pub(crate) use snapshot::validation_snapshot;
+pub(crate) use snapshot::validation_snapshot_with_budget;
 use std::collections::BTreeMap;
 pub(crate) use validation::validate_result;
 use vibe::Value;

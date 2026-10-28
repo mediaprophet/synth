@@ -13,13 +13,14 @@ impl CanonicalEditorHost {
             .value("poet_parts")
             .ok_or("Source has no poet_parts authoring binding")?;
         let mut view = crate::graphical::authoring::source::view(
-            expected,
+            expected.clone(),
             parts,
             self.session.value("poet_parameters"),
         )?;
         view.material_motion = crate::graphical::authoring::material_motion::read_tracks(
             self.session.value("poet_material_motion"),
         )?;
+        view.rig = crate::graphical::authoring::rig_source::read_binding(self.session.value("poet_rig"), &expected)?;
         view.botanical =
             super::super::authoring::botanical_session::validate(&self.session, &self.host)?;
         Ok(view)
@@ -76,7 +77,12 @@ impl CanonicalEditorHost {
             {
                 return Err("Botanical binding is immutable; accepted source preserved".into());
             }
-            let limits = self.host.botanical_limits()?;
+            let target = match edit {
+                crate::graphical::authoring::botanical::BotanicalEdit::SetRecipe { recipe } => &recipe.part_id,
+                crate::graphical::authoring::botanical::BotanicalEdit::SetTipRadius { part_id, .. }
+                | crate::graphical::authoring::botanical::BotanicalEdit::SetOrganPosition { part_id, .. } => part_id,
+            };
+            let limits = self.host.botanical_limits(crate::graphical::authoring::botanical_session::requires_uv_budget(parts, target))?;
             crate::graphical::authoring::botanical::edit_source(
                 parts,
                 self.session.value("poet_botanical"),
