@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod assembly;
 mod frames;
+pub mod geo_studio;
 pub mod geometry;
 pub mod profile;
 pub use assembly::{
