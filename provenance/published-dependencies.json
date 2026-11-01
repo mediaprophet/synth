@@ -1,0 +1,63 @@
+{
+  "repositories": [
+    {
+      "name": "qualiaDB",
+      "local_repository": "C:\\github\\qualiaDB",
+      "url": "https://github.com/mediaprophet/qualiaDB",
+      "base_commit": "b64e82cae26ae47a3263fb5d51a5c0d1b3aa60fd",
+      "commit": "392e53343a3b3f5b4cade28c4816e4e17a0aef6f",
+      "branch": "codex/synth-engine-publication-2026-11-02",
+      "local_source_branch": "codex/synth-engine-publication-2026-11-02",
+      "files": 176,
+      "original_engine_index_preserved": true,
+      "new_checkout_index_initialized": false,
+      "pushed": false,
+      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+    },
+    {
+      "name": "ecopunk",
+      "local_repository": "C:\\github\\ecopunk",
+      "url": "https://github.com/mediaprophet/ecopunk",
+      "base_commit": "f28235135f98df7d6b81a2f12ba341cc9e13a403",
+      "commit": "c65d76df9ee47cc33133fdeb90f5dab5f0aa383d",
+      "branch": "codex/synth-engine-publication-2026-11-02",
+      "local_source_branch": "codex/synth-engine-publication-2026-11-02",
+      "files": 243,
+      "original_engine_index_preserved": true,
+      "new_checkout_index_initialized": false,
+      "pushed": false,
+      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+    },
+    {
+      "name": "rust-app-framework",
+      "local_repository": "C:\\github\\rust-app-framework",
+      "url": "https://github.com/mediaprophet/rust-app-framework",
+      "base_commit": "60123a1932f2018ea777502b33ef9006f8f926ea",
+      "commit": "ed61a567396552fc2076835885ded7ce56a797bb",
+      "branch": "codex/synth-engine-publication-2026-11-02",
+      "local_source_branch": "codex/synth-engine-publication-2026-11-02",
+      "files": 1,
+      "original_engine_index_preserved": true,
+      "new_checkout_index_initialized": false,
+      "pushed": false,
+      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+    },
+    {
+      "name": "hypermedia-production",
+      "local_repository": "C:\\github\\hypermedia-production",
+      "url": "https://github.com/mediaprophet/hypermedia-production",
+      "base_commit": "f6e0c8690476ac14e2e0f1f7ff275d4725cb809a",
+      "commit": "55925b09af4b3b174b0df77cc2a8427e04bc3822",
+      "branch": "main",
+      "local_source_branch": "codex/synth-engine-publication-2026-11-02",
+      "files": 550,
+      "original_engine_index_preserved": false,
+      "new_checkout_index_initialized": true,
+      "pushed": true,
+      "remote_head_verified": true,
+      "push_output": "To https://github.com/mediaprophet/hypermedia-production.git\n \trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/main\tf6e0c86..55925b0\nDone"
+    }
+  ],
+  "etalon_git_revision": "072b4d9ceeebd423234359dff1dee8fbe9e62b6e",
+  "qualification": "Source refs, not a standalone compilation or runtime acceptance"
+}

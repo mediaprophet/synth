@@ -1,0 +1,65 @@
+{
+  "scope": "Static Rust source byte parity and TOML parsing only; no standalone compile/test",
+  "files": [
+    {
+      "path": "src/agent.rs",
+      "sha256": "27da8e56220421f3371e045f4e03502917f8f06e7fce1a5248b688846eaa5a97",
+      "bytes": 15425
+    },
+    {
+      "path": "src/audio/mod.rs",
+      "sha256": "9239a68d13dad999ccb838c26d856eb466ac8dbb25d6e8586ef58707ca9a28cb",
+      "bytes": 48
+    },
+    {
+      "path": "src/corpus_policy.rs",
+      "sha256": "8e8d528842600e042087aefd0b8ee934023d8c987d5655e411223bb802ac4f31",
+      "bytes": 2548
+    },
+    {
+      "path": "src/host.rs",
+      "sha256": "ddc46bf6dc5193b188350aacb3ab6e3062517a76f987149b1c0a4b661dca8a4b",
+      "bytes": 15685
+    },
+    {
+      "path": "src/host_audio.rs",
+      "sha256": "7af4fc29ddca82df13d577a72d8fdc08fb6e4da231fca07383ea6527a38277b0",
+      "bytes": 11996
+    },
+    {
+      "path": "src/host_package.rs",
+      "sha256": "6061c2fe3ddd9748c59515b337a84f594ddead069e74a36513cac5fce55d9b0e",
+      "bytes": 7856
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "092fcb41f476a463067f25f25f988db885a5d8014b32913b9dbd5d724b6683c7",
+      "bytes": 336
+    },
+    {
+      "path": "src/main.rs",
+      "sha256": "5b8d95895bb9b5d6121441dfccf704fe32181ce183a90221bacabc5078bc6546",
+      "bytes": 733
+    },
+    {
+      "path": "src/native_preview.rs",
+      "sha256": "a342f5e23883864855d8bb12b7c62ce2b561276b2c2bfa032bb48f87ee7b965a",
+      "bytes": 4957
+    },
+    {
+      "path": "src/native_ui.rs",
+      "sha256": "6cc50c8374fedd7604db371695afc4547b2ce7b9ba569ceb4a02a1e46c6dd786",
+      "bytes": 6445
+    },
+    {
+      "path": "src/produce.rs",
+      "sha256": "85ee16db317a8818d8e2ba494757217c4280d1784bbc7d1a8c458ced27dab56d",
+      "bytes": 10556
+    },
+    {
+      "path": "src/review_export.rs",
+      "sha256": "9298b9359a13f20414019bb712d481190682770f8e0e3c497ea8731aeaaa517c",
+      "bytes": 12644
+    }
+  ]
+}

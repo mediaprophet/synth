@@ -1,0 +1,29 @@
+[package]
+name = "synth"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Agent-driven Ecopunk embodiment production over QualiaDB"
+
+[[bin]]
+name = "synth"
+path = "src/main.rs"
+
+[dependencies]
+ecopunk-terrain = { path = "../../crates/ecopunk-terrain" }
+qualia-core-db = { workspace = true }
+webizen-render = { workspace = true }
+qualia-cooperative-core = { path = "../../../qualiaDB/crates/qualia-cooperative-core" }
+qualia-mcp = { path = "../../../qualiaDB/crates/qualia-mcp", default-features = false, features = ["authoring"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+pcm-device-output = { path = "../../../hypermedia-libraries/crates/pcm-device-output", optional = true }
+dioxus = { path = "../../../rust-app-framework/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { path = "../../../rust-app-framework/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
+futures-timer = { version = "=3.0.4", optional = true }
+
+[features]
+default = []
+audio-device = ["dep:pcm-device-output"]
+native-ui = ["dep:dioxus", "dep:dioxus-native", "dep:futures-timer"]

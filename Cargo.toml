@@ -1,0 +1,80 @@
+[package]
+name = "synth"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Agent-driven Ecopunk embodiment production over QualiaDB"
+
+[[bin]]
+name = "synth"
+path = "src/main.rs"
+
+[dependencies]
+ecopunk-terrain = { path = "../ecopunk/crates/ecopunk-terrain" }
+qualia-core-db = { workspace = true }
+webizen-render = { workspace = true }
+qualia-cooperative-core = { path = "../qualiaDB/crates/qualia-cooperative-core" }
+qualia-mcp = { path = "../qualiaDB/crates/qualia-mcp", default-features = false, features = ["authoring"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+pcm-device-output = { path = "../hypermedia-libraries/crates/pcm-device-output", optional = true }
+dioxus = { path = "../rust-app-framework/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { path = "../rust-app-framework/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
+futures-timer = { version = "=3.0.4", optional = true }
+
+[features]
+default = []
+audio-device = ["dep:pcm-device-output"]
+native-ui = ["dep:dioxus", "dep:dioxus-native", "dep:futures-timer"]
+
+[workspace]
+resolver = "2"
+members = ["."]
+
+[workspace.dependencies]
+bytemuck = { version = "1.16", features = ["derive"] }
+crc32c = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
+qualia-geospatial = { path = "../qualiaDB/crates/qualia-geospatial" }
+qualia-sim = { path = "../qualiaDB/crates/qualia-sim" }
+vibe = { path = "../qualiaDB/crates/vibe" }
+vibe-wasm = { path = "../qualiaDB/crates/vibe-wasm" }
+webizen-render = { path = "../qualiaDB/crates/webizen-render" }
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
+js-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["console", "Window", "Document", "Element", "HtmlCanvasElement", "Performance"] }
+wgpu = { version = "30.0.0", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e", default-features = false }
+naga = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e", features = ["wgsl-in", "spv-out", "msl-out", "hlsl-out"] }
+etalon = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e", default-features = false }
+etalon-agent = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+etalon-wgsl-forge = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+etalon-nquin = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+etalon-tensor = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+etalon-render = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+etalon-wasm = { version = "0.0.2", git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+rio_api = "0.8"
+rio_turtle = "0.8"
+sha2 = "0.10"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[patch.crates-io]
+wgpu = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+naga = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+
+[profile.dev]
+debug = 0
+incremental = false
+
+[profile.release]
+debug = 0
+lto = false
+codegen-units = 16
+opt-level = "s"
+incremental = false
+
+
