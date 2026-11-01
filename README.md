@@ -29,9 +29,9 @@ The original detailed host/MCP/audio contracts and limitations remain in `proven
 
 ## Dependency commits
 
-The source handoff is pinned in [published-dependencies.json](provenance/published-dependencies.json). Existing engine commits are prepared locally but await explicit publication authorization; they are not yet available on GitHub. Clone `hypermedia-production` into a directory named `hypermedia-libraries`. A fresh-clone build remains unqualified.
+The source handoff is pinned in [published-dependencies.json](provenance/published-dependencies.json). Existing engine commits are now published on the review branches listed below; their default branches do not include these updates. Clone `hypermedia-production` into a directory named `hypermedia-libraries`. A fresh-clone build remains unqualified.
 
-- qualiaDB: `392e53343a3b3f5b4cade28c4816e4e17a0aef6f` — prepared locally, publication pending.
-- ecopunk: `c65d76df9ee47cc33133fdeb90f5dab5f0aa383d` — prepared locally, publication pending.
-- rust-app-framework: `ed61a567396552fc2076835885ded7ce56a797bb` — prepared locally, publication pending.
+- [qualiaDB 392e53343a3b](https://github.com/mediaprophet/qualiaDB/commit/392e53343a3b3f5b4cade28c4816e4e17a0aef6f) — published review commit.
+- [ecopunk c65d76df9ee4](https://github.com/mediaprophet/ecopunk/commit/c65d76df9ee47cc33133fdeb90f5dab5f0aa383d) — published review commit.
+- [rust-app-framework ed61a5673965](https://github.com/mediaprophet/rust-app-framework/commit/ed61a567396552fc2076835885ded7ce56a797bb) — published review commit.
 - [hypermedia-production 55925b09af4b](https://github.com/mediaprophet/hypermedia-production/commit/55925b09af4b3b174b0df77cc2a8427e04bc3822)

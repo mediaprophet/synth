@@ -14,15 +14,15 @@ Synth is the separate agent-driven production application; Poet is preserved sep
 
 ## Preserved source and remaining qualification
 
-Original Ecopunk app and library working trees remain intact. Existing engine indexes are unchanged; engine updates are committed on local review branches but their publication was blocked by automatic approval review pending explicit authorization for those additional destinations. Snapshots include existing/concurrent source work and do not assert exclusive authorship. Hypermedia's workspace member checks/consumer-smoke and original codec/migration records are retained. Source notices are preserved and the standard Apache2 text accompanies Synth's existing package declaration.
+Original Ecopunk app and library working trees remain intact. Existing engine indexes are unchanged. Automatic approval review initially paused the additional destinations; the user explicitly authorized them on 2 November 2026 and all three review-branch pushes were verified. They were not merged into the engine main branches. Snapshots include existing/concurrent source work and do not assert exclusive authorship. Hypermedia's workspace member checks/consumer-smoke and original codec/migration records are retained. Source notices are preserved and the standard Apache2 text accompanies Synth's existing package declaration.
 
-The dependency table below distinguishes published and local-only source commits. The existing engines' changes are not yet available remotely. Sibling checkout paths remain required: clone hypermedia-production as hypermedia-libraries. Additional transitive local dependencies and a clean-room build must be qualified before claiming fresh-clone reproducibility. Do not run the historical source recipes as proof of accepted geometry or regenerate production artifacts without a qualified build/resource policy.
+The dependency table below distinguishes published and local-only source commits. The existing engines' changes are now available at the pinned review commits. Sibling checkout paths remain required: clone hypermedia-production as hypermedia-libraries. Additional transitive local dependencies and a clean-room build must be qualified before claiming fresh-clone reproducibility. Do not run the historical source recipes as proof of accepted geometry or regenerate production artifacts without a qualified build/resource policy.
 
 Generated executables, target caches, SDK binaries, research images and HMC/model outputs were not included in these source pushes. Existing local evidence and failed attempts remain preserved under Ecopunk tools/cinema-production-2026-11-02/wallaby-r7. The full catalogue/dossier is not closed by this handoff.
 
 ## Published dependencies
 
-- qualiaDB: `392e53343a3b3f5b4cade28c4816e4e17a0aef6f` — local commit; publication pending authorization.
-- ecopunk: `c65d76df9ee47cc33133fdeb90f5dab5f0aa383d` — local commit; publication pending authorization.
-- rust-app-framework: `ed61a567396552fc2076835885ded7ce56a797bb` — local commit; publication pending authorization.
+- [qualiaDB 392e53343a3b](https://github.com/mediaprophet/qualiaDB/commit/392e53343a3b3f5b4cade28c4816e4e17a0aef6f) — published review commit.
+- [ecopunk c65d76df9ee4](https://github.com/mediaprophet/ecopunk/commit/c65d76df9ee47cc33133fdeb90f5dab5f0aa383d) — published review commit.
+- [rust-app-framework ed61a5673965](https://github.com/mediaprophet/rust-app-framework/commit/ed61a567396552fc2076835885ded7ce56a797bb) — published review commit.
 - [hypermedia-production 55925b09af4b](https://github.com/mediaprophet/hypermedia-production/commit/55925b09af4b3b174b0df77cc2a8427e04bc3822)

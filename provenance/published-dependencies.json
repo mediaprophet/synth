@@ -11,8 +11,11 @@
       "files": 176,
       "original_engine_index_preserved": true,
       "new_checkout_index_initialized": false,
-      "pushed": false,
-      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+      "pushed": true,
+      "publication_status": "Published to the review branch after explicit user authorization; not merged to main.",
+      "push_output": "To https://github.com/mediaprophet/qualiaDB.git\n*\trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/codex/synth-engine-publication-2026-11-02\t[new branch]\nDone",
+      "prior_publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection.",
+      "remote_head_verified": true
     },
     {
       "name": "ecopunk",
@@ -25,8 +28,11 @@
       "files": 243,
       "original_engine_index_preserved": true,
       "new_checkout_index_initialized": false,
-      "pushed": false,
-      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+      "pushed": true,
+      "publication_status": "Published to the review branch after explicit user authorization; not merged to main.",
+      "push_output": "To https://github.com/mediaprophet/ecopunk.git\n*\trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/codex/synth-engine-publication-2026-11-02\t[new branch]\nDone",
+      "prior_publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection.",
+      "remote_head_verified": true
     },
     {
       "name": "rust-app-framework",
@@ -39,8 +45,11 @@
       "files": 1,
       "original_engine_index_preserved": true,
       "new_checkout_index_initialized": false,
-      "pushed": false,
-      "publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection."
+      "pushed": true,
+      "publication_status": "Published to the review branch after explicit user authorization; not merged to main.",
+      "push_output": "To https://github.com/mediaprophet/rust-app-framework.git\n*\trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/codex/synth-engine-publication-2026-11-02\t[new branch]\nDone",
+      "prior_publication_status": "Prepared local commit only; additional repository publication awaits explicit authorization after automatic approval rejection.",
+      "remote_head_verified": true
     },
     {
       "name": "hypermedia-production",
@@ -55,7 +64,8 @@
       "new_checkout_index_initialized": true,
       "pushed": true,
       "remote_head_verified": true,
-      "push_output": "To https://github.com/mediaprophet/hypermedia-production.git\n \trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/main\tf6e0c86..55925b0\nDone"
+      "push_output": "To https://github.com/mediaprophet/hypermedia-production.git\n \trefs/heads/codex/synth-engine-publication-2026-11-02:refs/heads/main\tf6e0c86..55925b0\nDone",
+      "current_remote_head": "601a417918bf5549bf6f0489dc610b1fabb2db96"
     }
   ],
   "etalon_git_revision": "072b4d9ceeebd423234359dff1dee8fbe9e62b6e",
