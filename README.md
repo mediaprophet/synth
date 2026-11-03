@@ -12,7 +12,7 @@ The current wallaby is **not cinema-grade or accepted**. Film/game/cartoon packa
 
 ## Checkout layout
 
-Clone/recover these sibling directories under the same parent: `synth`, `ecopunk`, `qualiaDB`, `hypermedia-libraries`, and `rust-app-framework`. Etalon remains the pinned dependency in the workspace manifest. The accompanying per-repository packets identify exact base commits and uncommitted source dependencies; repository HEAD alone does not include those changes. Apply/review and publish engine changes in their owning repositories before declaring a fresh-clone build reproducible.
+Clone/recover these sibling directories under the same parent: `synth`, `ecopunk`, `qualiaDB`, `hypermedia-libraries`, and `aether`. Etalon remains the pinned dependency in the workspace manifest. The accompanying per-repository packets identify exact base commits and uncommitted source dependencies; repository HEAD alone does not include those changes. Apply/review and publish engine changes in their owning repositories before declaring a fresh-clone build reproducible.
 
 No QualiaDB/Etalon/hypermedia engine is copied into Synth. `ecopunk-terrain` remains in Ecopunk and is consumed as a sibling dependency. `native-ui` uses the controlled Aether fork; `audio-device` uses `pcm-device-output`.
 
@@ -33,5 +33,5 @@ The source handoff is pinned in [published-dependencies.json](provenance/publish
 
 - [qualiaDB 392e53343a3b](https://github.com/mediaprophet/qualiaDB/commit/392e53343a3b3f5b4cade28c4816e4e17a0aef6f) — published review commit.
 - [ecopunk c65d76df9ee4](https://github.com/mediaprophet/ecopunk/commit/c65d76df9ee47cc33133fdeb90f5dab5f0aa383d) — published review commit.
-- [rust-app-framework ed61a5673965](https://github.com/mediaprophet/rust-app-framework/commit/ed61a567396552fc2076835885ded7ce56a797bb) — published review commit.
+- [aether ed61a5673965](https://github.com/mediaprophet/Aether/commit/ed61a567396552fc2076835885ded7ce56a797bb) — published review commit.
 - [hypermedia-production 55925b09af4b](https://github.com/mediaprophet/hypermedia-production/commit/55925b09af4b3b174b0df77cc2a8427e04bc3822)
