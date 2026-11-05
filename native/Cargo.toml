@@ -5,29 +5,29 @@ edition = "2021"
 
 [dependencies]
 vibe = { workspace = true }
-video-h264-preview = { path = "../../hypermedia-libraries/crates/video-h264-preview", optional = true }
+video-h264-preview = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
 futures-timer = { version = "=3.0.4", optional = true }
 image = { version = "=0.25.10", default-features = false, features = ["gif"], optional = true }
-dioxus = { path = "C:/github/aether/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
-dioxus-native = { path = "C:/github/aether/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "data-uri", "clipboard", "accessibility"], optional = true }
-qualia-core-db = { path = "C:/github/qualiaDB/crates/qualia-core-db", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"], optional = true }
-raster-layer-mask-adapter = { path = "../../hypermedia-libraries/crates/raster-layer-mask-adapter", optional = true }
-raster-selection-morphology = { path = "../../hypermedia-libraries/crates/raster-selection-morphology", optional = true }
-qualia-geospatial = { path = "C:/github/qualiaDB/crates/qualia-geospatial", optional = true }
-webizen-render = { path = "C:/github/qualiaDB/crates/webizen-render", optional = true }
+dioxus = { git = "https://github.com/mediaprophet/Aether.git", branch = "0.0.40.8.1", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { git = "https://github.com/mediaprophet/Aether.git", branch = "0.0.40.8.1", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "data-uri", "clipboard", "accessibility"], optional = true }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"], optional = true }
+raster-layer-mask-adapter = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+raster-selection-morphology = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+qualia-geospatial = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", optional = true }
+webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", optional = true }
 poet-spatial-authoring = { path = "../crates/spatial-authoring", optional = true }
-timeline-editing = { path = "../../hypermedia-libraries/crates/timeline-editing", optional = true }
-qualia-audio = { path = "../../qualiaDB/crates/qualia-audio", default-features = false, optional = true }
-audio-aac-codec = { path = "../../hypermedia-libraries/crates/audio-aac-codec", default-features = false, optional = true }
-media-isobmff = { path = "../../hypermedia-libraries/crates/media-isobmff", optional = true }
-media-ogg = { path = "../../hypermedia-libraries/crates/media-ogg", optional = true }
-audio-opus-codec = { path = "../../hypermedia-libraries/crates/audio-opus-codec", optional = true }
+timeline-editing = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+qualia-audio = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false, optional = true }
+audio-aac-codec = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", default-features = false, optional = true }
+media-isobmff = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+media-ogg = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+audio-opus-codec = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
 cpal = { version = "=0.15.3", optional = true }
 base64 = { version = "=0.22.1", optional = true }
 futures-channel = { version = "=0.3.34", optional = true }
 
-qualia-cooperative-core = { path = "C:/github/qualiaDB/crates/qualia-cooperative-core", optional = true }
-qualia-mcp = { path = "C:/github/qualiaDB/crates/qualia-mcp", default-features = false, features = ["authoring"], optional = true }
+qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", optional = true }
+qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false, features = ["authoring"], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
 serde_json = { workspace = true, optional = true }
 sha2 = { version = "0.10", optional = true }

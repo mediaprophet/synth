@@ -20,7 +20,7 @@ wasm-bindgen = "=0.2.129"
 wasm-bindgen-futures = "=0.4.79"
 js-sys = "=0.3.106"
 web-sys = "=0.3.106"
-vibe = { path = "../qualiaDB/crates/vibe" }
+vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
 
 [profile.wasm-release]
 inherits = "release"
@@ -30,6 +30,6 @@ codegen-units = 1
 strip = "symbols"
 
 [patch.crates-io]
-cpal = { path = "../hypermedia-libraries/crates/audio-device-cpal" }
+cpal = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1" }
 wgpu = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
 naga = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
