@@ -10,17 +10,17 @@ name = "synth"
 path = "src/main.rs"
 
 [dependencies]
-ecopunk-terrain = { path = "../ecopunk/crates/ecopunk-terrain" }
+ecopunk-terrain = { git = "https://github.com/mediaprophet/ecopunk.git", branch = "0.0.40.8.1" }
 qualia-core-db = { workspace = true }
 webizen-render = { workspace = true }
-qualia-cooperative-core = { path = "../qualiaDB/crates/qualia-cooperative-core" }
-qualia-mcp = { path = "../qualiaDB/crates/qualia-mcp", default-features = false, features = ["authoring"] }
+qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false, features = ["authoring"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
-pcm-device-output = { path = "../hypermedia-libraries/crates/pcm-device-output", optional = true }
-dioxus = { path = "../aether/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
-dioxus-native = { path = "../aether/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
+pcm-device-output = { git = "https://github.com/mediaprophet/hypermedia-production.git", branch = "0.0.40.8.1", optional = true }
+dioxus = { git = "https://github.com/mediaprophet/Aether.git", branch = "0.0.40.8.1", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { git = "https://github.com/mediaprophet/Aether.git", branch = "0.0.40.8.1", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
 futures-timer = { version = "=3.0.4", optional = true }
 
 [features]
@@ -37,12 +37,12 @@ bytemuck = { version = "1.16", features = ["derive"] }
 crc32c = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db", default-features = false }
-qualia-geospatial = { path = "../qualiaDB/crates/qualia-geospatial" }
-qualia-sim = { path = "../qualiaDB/crates/qualia-sim" }
-vibe = { path = "../qualiaDB/crates/vibe" }
-vibe-wasm = { path = "../qualiaDB/crates/vibe-wasm" }
-webizen-render = { path = "../qualiaDB/crates/webizen-render" }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration", default-features = false }
+qualia-geospatial = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+qualia-sim = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+vibe-wasm = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
+webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", branch = "0.0.40.12-etalon-migration" }
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"
 js-sys = "0.3"
