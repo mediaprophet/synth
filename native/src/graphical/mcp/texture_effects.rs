@@ -31,6 +31,8 @@ pub(super) fn tools() -> Vec<AuthoringTool> {
     vec![
         tool("poet_texture_layers_edit", "Replace editable paint layers including blend modes, signed pixel offsets and rectangle/HMC masks through the same native authority and source-history owner",
             json!({"type":"object","properties":{"context":{"type":"string","maxLength":128},"material_id":{"type":"integer","minimum":1},"layers":{"type":"array","maxItems":8,"items":layer}},"required":["context","material_id","layers"],"additionalProperties":false})),
+        tool("poet_texture_mask_morphology", "Expand, contract, or border one existing editable layer mask; derive a new PNG in the current HMC source through native authorization and source history",
+            json!({"type":"object","properties":{"context":{"type":"string","maxLength":128},"material_id":{"type":"integer","minimum":1},"layer_index":{"type":"integer","minimum":0,"maximum":7},"operation":{"enum":["expand","contract","border"]},"radius":{"type":"number","minimum":0,"maximum":1024}},"required":["context","material_id","layer_index","operation","radius"],"additionalProperties":false})),
         tool("poet_texture_effects_inspect", "Inspect the selected accepted detail recipe and actual resolved base-colour resource digest; no human or scientific acceptance inferred",
             json!({"type":"object","properties":{"context":{"type":"string","maxLength":128},"part_id":{"type":"string","minLength":1,"maxLength":128}},"required":["context","part_id"],"additionalProperties":false})),
         tool("poet_texture_effects_edit", "Replace only the ordered post-composite effects of an existing imported Paint recipe; preserve source layers and immutable base through the native authority/history operation",
@@ -58,6 +60,15 @@ struct EditLayers {
     context: String,
     material_id: u64,
     layers: Vec<PaintLayer>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MorphMask {
+    context: String,
+    material_id: u64,
+    layer_index: usize,
+    operation: String,
+    radius: f32,
 }
 enum Patch {
     Effects(Vec<TextureEffectStep>),
@@ -106,6 +117,45 @@ pub(super) fn call(
             "working_space":"encoded sRGB RGBA8; opaque imported square base",
             "human_review":"unassessed"
         }));
+    }
+    if name == "poet_texture_mask_morphology" {
+        let request: MorphMask = args(arguments)?;
+        if request.context.len() > 128
+            || request.material_id == 0
+            || request.layer_index >= 8
+            || !request.radius.is_finite()
+            || !(0.0..=1024.0).contains(&request.radius)
+        {
+            return Err(failure(
+                "invalid_arguments",
+                "Mask morphology arguments exceed native bounds",
+            ));
+        }
+        let operation = match request.operation.as_str() {
+            "expand" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Expand,
+            "contract" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Contract,
+            "border" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Border,
+            _ => return Err(failure("invalid_arguments", "Unknown mask morphology operation")),
+        };
+        let expected_result = backend.expected(&request.context);
+        // A valid-shaped mutation consumes its connection-local source context,
+        // even if source, authority, target or budget admission later refuses.
+        backend.context = None;
+        let expected = expected_result?;
+        let authorisation = expected.authorisation_stamp.clone();
+        let result = backend
+            .host()?
+            .authoring_edit(
+                AuthoringEdit::TextureMaskMorphology {
+                    material_id: request.material_id,
+                    layer_index: request.layer_index,
+                    operation,
+                    radius: request.radius,
+                },
+                expected.source,
+            )
+            .map_err(editor_error)?;
+        return outcome(result, &authorisation);
     }
     let (context, material_id, patch) = if name == "poet_texture_layers_edit" {
         let request: EditLayers = args(arguments)?;

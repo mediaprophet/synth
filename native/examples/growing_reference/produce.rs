@@ -1,16 +1,50 @@
 use crate::*;
 use poet_cli::graphical::{
     authoring::{AuthoringEdit, AuthoringView},
+    checkpoints::{
+        ui_georaster_edit_limits, GeoRasterCreateRequest, SourceDeclaration, SourceStatus,
+    },
     controller::EditorHost,
     cooperative_workflow::WorkflowAction,
     native_project::NativeProject,
     session_host::SessionEditorHost,
 };
-use qualia_core_db::poet_host::invoke::studio_store::checkpoint::{
-    ExpectedFile, ResourceData, ResourceEdit,
+use qualia_core_db::{
+    poet_host::invoke::studio_store::checkpoint::{ExpectedFile, ResourceData, ResourceEdit},
+    q42::m64_matter::{M64GeoRasterMetadata, M64RasterEdges, M64RasterRows},
 };
 use serde_json::json;
-use std::sync::{Arc, Mutex};
+use std::sync::{atomic::AtomicBool, Arc, Mutex};
+
+pub fn site_m64_metadata(origin_lat_deg: f64, origin_lon_deg: f64, origin_elevation_mm: i32) -> M64GeoRasterMetadata {
+    M64GeoRasterMetadata {
+        width: 64,
+        height: 64,
+        origin_lat_deg,
+        origin_lon_deg,
+        origin_elevation_mm,
+        cell_size_mm: 250,
+        epoch_year: 2026.8,
+        srid: 7844,
+        vertical_datum: 5711,
+        rows: M64RasterRows::North,
+        edges: M64RasterEdges::RejectPartial,
+        nodata_sentinel_mm: Some(-999_999),
+    }
+}
+
+pub fn site_m64_samples(base_mm: i32) -> Vec<i32> {
+    let mut samples = Vec::with_capacity(64 * 64);
+    for y in 0..64i32 {
+        for x in 0..64i32 {
+            let dx = x - 32;
+            let dy = y - 32;
+            let radial = ((dx * dx + dy * dy) / 16).min(60);
+            samples.push(base_mm + (x - y) * 2 - radial);
+        }
+    }
+    samples
+}
 
 pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), String> {
     let started = std::time::Instant::now();
@@ -45,6 +79,11 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
     let source = host.snapshot()?.source;
     host.submit(preset_text, source)
         .map_err(|e| format!("preset submission: {e}"))?;
+    // Qualify existing procedural recipe into poet_parameter_parts before parameter regeneration.
+    host.authoring_edit(
+        AuthoringEdit::EnableSourceLayers,
+        host.snapshot()?.source,
+    )?;
     let initial = host.authoring_view(host.snapshot()?.source)?;
     let lower = initial
         .parameters
@@ -59,7 +98,6 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
         },
         host.snapshot()?.source,
     )?;
-    // Rebuild precedes material/transform editing so it cannot reset those edits.
     let after_parameter = host.authoring_view(host.snapshot()?.source)?;
     let frame = after_parameter
         .parts
@@ -114,7 +152,8 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
         "catalogue_sha256":"c0cb76151bf5d0776afaae4d59d7427efb65633bf359d3f4c2bda83c361c91cb",
         "profile":profile,"style_lod_target_distinct":true,"master_sha256":files::hash(&master),
         "preset_sha256":files::hash(&preset),"accepted_source_sha256":files::hash(&accepted),
-        "operations":["Parameter lower_level +0.01m","Material 9001 roughness +0.02","Transform cabinet/front-hatch local z -0.002m"],
+        "operations":["EnableSourceLayers","Parameter lower_level +0.01m","Material 9001 roughness +0.02","Transform cabinet/front-hatch local z -0.002m"],
+        "containers":["growing-station.hmc","growing-station.10d","growing-station.q42","growing-station.m64"],
         "consumer_candidate":"rc:asset/hydroponic-channel-frame","consumer_mapping":"candidate only; no equivalence, adoption or compatibility verified",
         "plants":"none; biological dependencies remain separate","rights":"design rights and adoption unassessed",
         "film":"incomplete/unaccepted","open_world_game":"incomplete/unaccepted","cartoon":"incomplete/unaccepted"});
@@ -144,6 +183,26 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
             .collect(),
         current.source.clone(),
     )?;
+    // Produce and embed the canonical Matter-64 (.m64) v3 site container inside HMC.
+    let m64_saved = host.create_georaster(
+        GeoRasterCreateRequest {
+            filename: HMC.into(),
+            package_digest: package.digest,
+            key: M64_ASSET.into(),
+            metadata: site_m64_metadata(-35.2809, 149.1300, 580_000),
+            lut_bank_epoch: 1,
+            samples_mm: site_m64_samples(580_000),
+            source: SourceDeclaration {
+                status: SourceStatus::Synthetic,
+                description: "Synthetic Matter-64 v3 site elevation pad for Community Grounds Growing Station".into(),
+                evidence_ref: None,
+                observation_claim: false,
+            },
+        },
+        current.source.clone(),
+        ui_georaster_edit_limits(),
+        &AtomicBool::new(false),
+    )?;
     files::json(&root.join("lineage.json"), &lineage)?;
     let before = host.workflow(WorkflowAction::Inspect)?;
     if before.evidence.principal_subject != authority::AUTHOR_SUBJECT || before.evidence.can_review
@@ -152,7 +211,7 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
     }
     host.workflow(WorkflowAction::Contribution {
         target: before.evidence.target.clone(), id: "software-native-production/1".into(),
-        description: "Controlled SoftwareAgent native source evaluation, parameter/material/transform editing and source/compiled HMC persistence. Effort is measured producer wall minutes rounded down, excludes prior source authorship; payment status unknown, no valuation or rights adoption.".into(),
+        description: "Controlled SoftwareAgent native source evaluation, parameter/material/transform editing and HMC/.10d/.q42/.m64 persistence. Effort is measured producer wall minutes rounded down, excludes prior source authorship; payment status unknown, no valuation or rights adoption.".into(),
         minutes: u32::try_from(started.elapsed().as_secs()/60).map_err(|_|"execution time overflow")?,
         work_status: qualia_cooperative_core::authoring::WorkStatus::Unknown,
     })?;
@@ -170,7 +229,23 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
         .ok_or("compiled .10d missing from HMC")?
         .bytes
         .clone();
+    let q42_bytes = detached
+        .resources()
+        .iter()
+        .find(|r| r.key == Q42_KEY && r.kind == "q42")
+        .ok_or("compiled .q42 missing from HMC")?
+        .bytes
+        .clone();
+    let m64_bytes = detached
+        .resources()
+        .iter()
+        .find(|r| r.key == M64_ASSET && r.kind == "m64")
+        .ok_or("compiled .m64 missing from HMC")?
+        .bytes
+        .clone();
     files::write(&root.join(ASSET), &bytes)?;
+    files::write(&root.join(Q42_ASSET), &q42_bytes)?;
+    files::write(&root.join(M64_ASSET), &m64_bytes)?;
     let info = RunInfo {
         schema: "poet-growing-reference/software-fixture/1".into(),
         fixture_only: true,
@@ -183,6 +258,8 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
         accepted_source_sha256: files::hash(&accepted),
         hmc_sha256: files::hash(&hmc),
         compiled_sha256: files::hash(&bytes),
+        q42_sha256: files::hash(&q42_bytes),
+        m64_sha256: files::hash(&m64_bytes),
         target: requested.evidence.target.clone(),
     };
     files::write(
@@ -199,14 +276,15 @@ pub fn produce(root: &Path, profile: &str, source_root: &Path) -> Result<(), Str
         "source_cells":cells.len(),"parts":view.parts.len(),"vertex_budget":MAX_VERTICES,"index_budget":MAX_INDICES,
         "session_retained_value_accounting_bytes":128*1024*1024,"native_dispatch_budget":256,
         "hmc_sha256":info.hmc_sha256,"compiled_sha256":info.compiled_sha256,
-        "checkpoint_durability_warnings":[saved.durability_warning,compiled.durability_warning,package.durability_warning],
+        "q42_sha256":info.q42_sha256,"m64_sha256":info.m64_sha256,
+        "checkpoint_durability_warnings":[saved.durability_warning,compiled.durability_warning,package.durability_warning,m64_saved.durability_warning],
         "qualification":"public fixture seeds; technical execution only; no real host adoption, OS credentials, human enrollment, quality approval or complete embodiment"}),
     )?;
     println!(
-        "Saved actual native source/HMC with {} identified parts; review pending",
+        "Saved actual native source/HMC/.10d/.q42/.m64 with {} identified parts; review pending",
         view.parts.len()
     );
-    Ok(()) // all host snapshots and journal ownership drop before child launch
+    Ok(())
 }
 
 pub fn view_json(view: &AuthoringView) -> serde_json::Value {

@@ -2,6 +2,7 @@
 pub mod animated_rig_preview;
 pub mod assembly;
 pub mod numeric_sheet;
+pub mod terrain_brush;
 pub mod authoring;
 pub mod botanical_graph_host;
 pub mod checkpoints;
@@ -26,6 +27,15 @@ pub mod native_project;
 pub mod package;
 mod package_batch_controls;
 mod package_controls;
+mod timeline_image_preview;
+mod timeline_gif_preview;
+mod timeline_audio_preview;
+mod timeline_audio_output;
+mod timeline_opus_output;
+mod timeline_audio_mix;
+mod timeline_sound_field;
+mod timeline_wav_device;
+pub(crate) mod timeline_resource_selection;
 mod package_review_controls;
 pub mod package_workflow;
 pub mod poet_workspace;
@@ -99,3 +109,9 @@ mod surface_topology_public_tests;
 #[cfg(test)]
 #[path = "tapered_branch_field_public_tests.rs"]
 mod tapered_branch_field_public_tests;
+
+pub(crate) mod fork_adopted_adapter;
+
+pub(crate) mod junction_generate;
+
+pub(crate) mod junction_budget;

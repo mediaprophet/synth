@@ -101,6 +101,6 @@ pub(super) fn SurfaceTools(
         button{disabled:!fresh,onclick:move |_|oninspect.call(()),"Inspect current selected UV and texture pixels"}
         if let Some(data)=shown.clone(){p{"{data.summary}"}img{src:"{data.uv_image}",alt:"Current part UV triangle layout, clipped to unit tile",style:"width:256px;height:256px;image-rendering:pixelated;"}}
         super::uv_atlas_controls::UvAtlasControls{atlas,context_token:token.clone(),fresh,inspection:shown.clone(),onapply:move|atlas|onedit.call(AuthoringEdit::UvAtlas{id:atlas_id.clone(),atlas})}
-        super::detail_controls::DetailControls{detail,context_token:token,fresh,preview_uri:shown.as_ref().and_then(|s|s.texture_image.clone()),onapply:move|detail|onedit.call(AuthoringEdit::TextureDetail{material_id,detail}),oninspect}
+        super::detail_controls::DetailControls{detail,context_token:token,fresh,preview_uri:shown.as_ref().and_then(|s|s.texture_image.clone()),onapply:move|detail|onedit.call(AuthoringEdit::TextureDetail{material_id,detail}),onmorphology:move|(layer_index,operation,radius)|onedit.call(AuthoringEdit::TextureMaskMorphology{material_id,layer_index,operation,radius}),oninspect}
     }}
 }

@@ -113,7 +113,7 @@ fn native_project_profile_includes_bounded_sheet_capability() {
     assert_eq!(grants.iter().filter(|g| *g == "Sheet.sum_range").count(), 1);
 }
 pub(super) fn botanical_profile_enabled() -> bool {
-    std::env::var("POET_NATIVE_BOTANICAL_PROFILE").as_deref() == Ok("1")
+    std::env::var("POET_NATIVE_BOTANICAL_PROFILE").as_deref() != Ok("0")
 }
 
 pub(super) fn project_config(
@@ -132,7 +132,7 @@ pub(super) fn project_config(
         session_limits: native_authoring_profile::selected().session_limits(),
         gateway_limits: GatewayLimits::default(),
         geometry_grants: native_geometry_grants(
-            std::env::var("POET_NATIVE_REVOLVE_PROFILE").as_deref() == Ok("1"),
+            std::env::var("POET_NATIVE_REVOLVE_PROFILE").as_deref() != Ok("0"),
             botanical_profile_enabled(),
         ),
         max_vertices: native_authoring_profile::selected().max_vertices(),
@@ -240,7 +240,7 @@ pub(super) fn create_project(
         session.clone(),
         None,
         preview(),
-        native_authoring_profile::selected().rebuild_limits(),
+        native_authoring_profile::startup_rebuild_limits(native_authoring_profile::selected()),
     )?);
     let mut host = project.connect(session.clone())?;
     let snapshot = host.snapshot()?;

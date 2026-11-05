@@ -221,15 +221,24 @@ impl RetainedViewport {
         // Once a player has advanced, a failure may have changed CPU or GPU
         // buffers; retire the complete viewport rather than publishing stale state.
         let result = (|| {
+            self.admit_bytes(self.scene.as_ref().ok_or("rig viewport scene unavailable")?)?;
             let frame = preview.advance(delta_seconds, false)?;
             let scene = self.scene.as_mut().ok_or("rig viewport scene unavailable")?;
+            // Stage a complete strict mirror before GPU mutation. Undefined UV
+            // data cannot be promoted from renderer fallback into saved frames.
+            let pending_tangents = if scene.tangents.is_none() {
+                Some(poet_spatial_authoring::assembly::derive_tangent_frames(
+                    &scene.mesh, &scene.normals, &scene.uv0, self.budget.working_bytes)
+                    .map_err(|e| format!("Rig tangent mirror requires complete valid UVs: {e:?}"))?)
+            } else { None };
             validate_rig_pose(scene, frame.span, frame.positions, frame.normals, frame.tangents)?;
             check(&source, cancelled)?;
             let renderer = self.renderer.as_mut().ok_or("native viewport not uploaded")?;
             if !renderer.write_mesh_animated_frames(frame.span.first_vertex, frame.positions, frame.normals, frame.tangents) {
                 return Err("native rig frame upload refused".into());
             }
-            apply_rig_pose(scene, frame.span, frame.positions, frame.normals);
+            if let Some(tangents) = pending_tangents { scene.tangents = Some(tangents); }
+            apply_rig_pose(scene, frame.span, frame.positions, frame.normals, frame.tangents)?;
             check(&source, cancelled)?;
             let camera = self.camera.ok_or("native viewport camera unavailable")?;
             self.render(source.clone(), camera, cancelled)
@@ -314,9 +323,9 @@ impl RetainedViewport {
                 .and_then(|n| sum.checked_add(n))
                 .ok_or("viewport working byte overflow")
         };
-        // Positions + normals + UV + upload colours + conservative Core normal/tangent scratch.
-        let mut n = add(0, scene.mesh.positions.len(), 160)?;
-        n = add(n, scene.mesh.triangles.len(), 24)?;
+        // Resident frames, upload scratch and worst strict tangent mirror stage.
+        let mut n = add(0, scene.mesh.positions.len(), 256)?;
+        n = add(n, scene.mesh.triangles.len(), 36)?;
         n = add(
             n,
             scene.materials.len(),
@@ -492,7 +501,7 @@ impl RetainedViewport {
             &scene.mesh.positions,
             &colours,
             Some(&scene.normals),
-            None,
+            scene.tangents.as_deref(),
             Some(&scene.uv0),
             &indices,
             &scene.materials,
@@ -697,17 +706,26 @@ pub(super) fn validate_rig_pose(scene: &CompiledAssembly, span: crate::graphical
     if span.vertex_count == 0 || positions.len() != span.vertex_count || normals.len() != span.vertex_count || tangents.len() != span.vertex_count || end > scene.mesh.positions.len() || end > scene.normals.len() || positions.iter().flatten().chain(normals.iter().flatten()).chain(tangents.iter().flatten()).any(|x| !x.is_finite()) {
         return Err("invalid native rig pose or viewport span".into());
     }
+    if scene.tangents.as_ref().is_some_and(|t| t.len() != scene.mesh.positions.len()) {
+        return Err("rig scene tangent mirror is incomplete".into());
+    }
+    poet_spatial_authoring::assembly::validate_tangent_frames(normals,tangents)
+        .map_err(|e| format!("invalid rig tangent frames: {e:?}"))?;
     Ok(())
 }
 
 /// Called only after validation and GPU admission succeed.
-pub(super) fn apply_rig_pose(scene: &mut CompiledAssembly, span: crate::graphical::rig_binding::ViewportSpan, positions: &[[f32;3]], normals: &[[f32;3]]) {
+pub(super) fn apply_rig_pose(scene: &mut CompiledAssembly, span: crate::graphical::rig_binding::ViewportSpan, positions: &[[f32;3]], normals: &[[f32;3]], tangents: &[[f32;4]]) -> Result<(), String> {
+    validate_rig_pose(scene,span,positions,normals,tangents)?;
+    let frames = scene.tangents.as_mut().ok_or("Complete tangent mirror must be staged before applying a rig pose")?;
     let first = span.first_vertex as usize;
     let end = first + span.vertex_count;
+    frames[first..end].copy_from_slice(tangents);
     scene.mesh.positions[first..end].copy_from_slice(positions);
     scene.normals[first..end].copy_from_slice(normals);
     let mut min = [f32::INFINITY;3];
     let mut max = [f32::NEG_INFINITY;3];
     for position in &scene.mesh.positions { for axis in 0..3 { min[axis] = min[axis].min(position[axis]); max[axis] = max[axis].max(position[axis]); } }
     scene.mesh.min = min; scene.mesh.max = max;
+    Ok(())
 }

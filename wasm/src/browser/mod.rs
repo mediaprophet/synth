@@ -68,6 +68,7 @@ pub mod mail_composer;
 pub mod manifest;
 pub mod manifold_authoring;
 pub mod manifold_social;
+pub mod material_upload;
 pub mod media_codecs;
 pub mod native_daemon;
 pub mod ontology_views;

@@ -17,7 +17,7 @@ pub fn compile_assembly(assembly: &CompiledAssembly) -> Result<Vec<u8>, String> 
             indices: u32::MAX as usize,
         },
     )?;
-    let geometry = compile_mesh_to_10d_with_frames(&assembly.mesh, Some(&assembly.normals), None)
+    let geometry = compile_mesh_to_10d_with_frames(&assembly.mesh, Some(&assembly.normals), assembly.tangents.as_deref())
         .map_err(|e| format!("native assembly geometry compile: {e}"))?;
     let geometry = attach_texture_coordinate_section(&geometry, &assembly.uv0)
         .map_err(|e| format!("native assembly UV compile: {e:?}"))?;

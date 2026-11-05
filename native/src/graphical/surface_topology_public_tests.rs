@@ -73,6 +73,13 @@ mod tests {
         let mut v=vec![Point3::default();bound.vertices];let mut t=vec![[0;3];bound.triangles];let mut provenance=vec![[0usize;2];bound.vertices];let mut slots=vec![TetraEdgeSlot::default();bound.edge_slots];
         let (nv,nt)=indexed_tetra_surface_into(&grid,dims,origin,spacing,0.0,100_000,10_000_000,1e-28,&mut v,&mut t,&mut provenance,&mut slots).unwrap();
         assert!(nv>0 && nt>0);let receipt=qualify(nv as u32,&t[..nt]).unwrap();assert_eq!(receipt.component_count,1);
+        let qb=surface_qualification_bounds(nv as u32,nt).unwrap();
+        let mut he=vec![HalfEdge::default();qb.half_edges]; let mut es=vec![EdgeSlot::default();qb.edge_slots];
+        let mut starts=vec![0;qb.vertex_starts];let mut visited=vec![false;qb.visited_half_edges];let mut labels=vec![0;qb.face_labels];let mut queue=vec![0;qb.face_queue];
+        let mut remaining=2_000_000usize;
+        let actual=qualify_surface_topology_budgeted_into(nv as u32,&t[..nt],&mut remaining,&mut he,&mut es,&mut starts,&mut visited,&mut labels,&mut queue).unwrap();
+        assert_eq!(actual,receipt);assert!(remaining<2_000_000);assert!(qb.work>2_000_000);
+
     }
 }
 
@@ -123,4 +130,26 @@ mod triangle_ordered_connectivity_tests {
         assert_eq!(label_components_triangle_ordered(1,&edges,triangle_ordered_component_work(1).unwrap(),&mut labels,&mut queue),Err(OrderedConnectivityError::InvalidLayout{index:0}));
         assert_eq!(labels,[77]);assert_eq!(queue,[88]);
     }
+}
+
+#[cfg(test)]
+mod budgeted_topology_public_tests {
+ use qualia_core_db::specialized_libs::computational_geometry::{build_triangle_half_edges_budgeted,required_edge_slots,EdgeSlot,HalfEdge,BudgetedTopologyError};
+ use qualia_core_db::specialized_libs::computational_geometry::surface_topology_qualification::*;
+ const TET:[[u32;3];4]=[[0,2,1],[0,1,3],[1,2,3],[2,0,3]];
+ fn hash(key:u64)->usize {let mut x=key;x^=x>>30;x=x.wrapping_mul(0xbf58_476d_1ce4_e5b9);x^=x>>27;x=x.wrapping_mul(0x94d0_49bb_1331_11eb);(x^(x>>31)) as usize}
+ #[test] fn adversarial_collisions_consume_budget_and_refuse() {
+   let mask=required_edge_slots(16)-1;
+   let bs:Vec<u32>=(1..10_000).filter(|i|hash(*i as u64)&mask==0).take(16).collect();assert_eq!(bs.len(),16);
+   let tris:Vec<[u32;3]>=bs.iter().map(|&i|[0,i,i+10_000]).collect();
+   let mut edges=vec![HalfEdge::default();48];let mut slots=vec![EdgeSlot::default();mask+1];
+   let mut budget=96;assert_eq!(build_triangle_half_edges_budgeted(20_000,&tris,&mut edges,&mut slots,&mut budget),Err(BudgetedTopologyError::WorkLimitExceeded));assert_eq!(budget,0);
+   let mut budget=100_000;let result=build_triangle_half_edges_budgeted(20_000,&tris,&mut edges,&mut slots,&mut budget).unwrap();assert_eq!(result.face_count,16);assert!(100_000-budget>96);
+ }
+ #[test] fn qualification_preflight_and_late_probe_exhaustion_fail_closed() {
+  let b=surface_qualification_bounds(4,4).unwrap();let fixed=b.work-b.half_edges*2*b.edge_slots;let s=HalfEdge{origin:9,twin:9,next:9,face:9};
+  let mut edges=vec![s;b.half_edges];let mut slots=vec![EdgeSlot{key:9,half_edge:9,_reserved:9};b.edge_slots];let mut starts=vec![9;b.vertex_starts];let mut vis=vec![true;b.visited_half_edges];let mut labels=vec![9;b.face_labels];let mut queue=vec![9;b.face_queue];
+  let mut budget=fixed;assert_eq!(qualify_surface_topology_budgeted_into(4,&TET,&mut budget,&mut edges,&mut slots,&mut starts,&mut vis,&mut labels,&mut queue),Err(BudgetedSurfaceQualificationError::Qualification(SurfaceQualificationError::WorkLimitExceeded{required:fixed+1})));assert_eq!(budget,fixed);assert!(edges.iter().all(|e|*e==s));assert!(slots.iter().all(|e|e.key==9));
+  let mut budget=fixed+1;assert_eq!(qualify_surface_topology_budgeted_into(4,&TET,&mut budget,&mut edges,&mut slots,&mut starts,&mut vis,&mut labels,&mut queue),Err(BudgetedSurfaceQualificationError::TopologyBuild(BudgetedTopologyError::WorkLimitExceeded)));assert_eq!(budget,0);
+ }
 }

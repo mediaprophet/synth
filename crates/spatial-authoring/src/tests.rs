@@ -19,6 +19,7 @@ fn part(key: &str, id: u64) -> AssemblyPart {
         material,
         trs: Transform::default(),
         normals: None,
+        tangents: None,
         uv0: None,
     }
 }
@@ -127,6 +128,48 @@ fn authored_normals_use_full_world_inverse_transpose_and_uvs_survive() {
         assert!(dot.abs() < 1e-6);
     }
     assert_eq!(compiled.uv0[1], [0.7, 0.3]);
+}
+
+fn framed_part(key: &str, id: u64) -> AssemblyPart {
+    let mut p = part(key,id);
+    p.normals = Some(vec![[0.0,0.0,1.0];3]);
+    p.uv0 = Some(vec![[0.0,0.0],[1.0,0.0],[0.0,1.0]]);
+    p.tangents = Some(vec![[1.0,0.0,0.0,1.0];3]); p
+}
+#[test]
+fn retained_tangents_use_linear_world_transform_and_keep_handedness() {
+    let mut p = framed_part("surface",1);
+    let diagonal = 0.5f32.sqrt();
+    p.tangents = Some(vec![[diagonal,diagonal,0.0,-1.0];3]);
+    p.trs.scale = [2.0,1.0,0.5];
+    let result = compile_assembly(&[p],AssemblyLimits::default()).unwrap();
+    for t in result.tangents.unwrap() {
+        assert!((t[0]-2.0/5.0f32.sqrt()).abs()<1e-6);
+        assert!((t[1]-1.0/5.0f32.sqrt()).abs()<1e-6);
+        assert_eq!(t[2],0.0); assert_eq!(t[3],-1.0);
+    }
+}
+#[test]
+fn mixed_parts_derive_missing_frames_only_from_valid_existing_uvs() {
+    let a = framed_part("framed",1); let mut b = part("legacy",2);
+    b.uv0 = a.uv0.clone();
+    let result = compile_assembly(&[a.clone(),b.clone()],AssemblyLimits::default()).unwrap();
+    assert_eq!(result.tangents.unwrap(),vec![[1.0,0.0,0.0,1.0];6]);
+    b.uv0 = None;
+    assert!(compile_assembly(&[a.clone(),b.clone()],AssemblyLimits::default()).is_err());
+    b.uv0 = Some(vec![[0.0,0.0];3]);
+    assert!(compile_assembly(&[a,b],AssemblyLimits::default()).is_err());
+}
+#[test]
+fn explicit_invalid_frames_and_derivation_budget_refuse() {
+    for tangent in [[0.0,0.0,0.0,1.0],[0.0,0.0,1.0,1.0],[1.0,0.0,0.0,0.0],[f32::NAN,0.0,0.0,1.0]] {
+        let mut p=framed_part("surface",1); p.tangents=Some(vec![tangent;3]);
+        assert!(compile_assembly(&[p],AssemblyLimits::default()).is_err());
+    }
+    let p=framed_part("surface",1);
+    assert!(assembly::derive_tangent_frames(&p.mesh,p.normals.as_ref().unwrap(),p.uv0.as_ref().unwrap(),1).is_err());
+    let legacy = compile_assembly(&[part("legacy",1)],AssemblyLimits::default()).unwrap();
+    assert!(legacy.tangents.is_none());
 }
 #[test]
 fn invalid_assemblies_and_expanded_output_budget_fail_without_mutating_inputs() {

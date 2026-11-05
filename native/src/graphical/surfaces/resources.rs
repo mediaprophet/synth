@@ -85,6 +85,62 @@ fn mip_bytes(mut w: u32, mut h: u32) -> Result<usize, String> {
     }
 }
 impl TextureResources {
+    /// On the first bind after reopening, source history belongs to the
+    /// checkpoint service's verified carrier even though no surface snapshot
+    /// has yet been installed in the editor.
+    pub(crate) fn require_retained_images(
+        &self,
+        retained: &[qualia_core_db::poet_host::invoke::studio_store::checkpoint::ResourceData],
+    ) -> Result<(), String> {
+        let mut size = self.bytes.len();
+        for item in retained.iter().filter(|r| r.kind.starts_with("image/")) {
+            size = size.checked_add(item.bytes.len()).ok_or("Retained image size overflow")?;
+        }
+        if size.checked_mul(4).is_none_or(|n| n > self.limits.working_bytes) {
+            return Err("Retained image continuity exceeds working admission".into());
+        }
+        let reader = BundleReader::parse(&self.bytes).map_err(|e| e.to_string())?;
+        if reader.flags() != 0 { return Err("Unsupported HMC flags during image continuity check".into()); }
+        for item in retained.iter().filter(|r| r.kind.starts_with("image/")) {
+            let entry = reader.entry(&item.key).ok_or(
+                "Selected package omits an image retained by source history; bind the admitted checkpoint"
+            )?;
+            if entry.kind != item.kind || entry.meta != item.meta || !reader.verify_entry(&item.key)
+                || reader.get(&item.key) != Some(item.bytes.as_slice()) {
+                return Err("Selected package changes a retained image or its metadata".into());
+            }
+        }
+        Ok(())
+    }
+    /// Rebinding must not discard image bytes or metadata which may still be
+    /// referenced by source undo/redo history, including after fresh reopen.
+    /// Both package snapshots are immutable and already size-limited; compare
+    /// borrowed payloads directly and refuse rather than silently copying data.
+    pub(crate) fn require_image_continuity(&self, next: &Self) -> Result<(), String> {
+        let peak = self.bytes.len().checked_add(next.bytes.len())
+            .and_then(|n| n.checked_mul(4))
+            .ok_or("Surface rebind working admission overflow")?;
+        if peak > self.limits.working_bytes.min(next.limits.working_bytes) {
+            return Err("Surface rebind exceeds working admission".into());
+        }
+        let old = BundleReader::parse(&self.bytes).map_err(|e| e.to_string())?;
+        let new = BundleReader::parse(&next.bytes).map_err(|e| e.to_string())?;
+        if old.flags() != 0 || new.flags() != 0 {
+            return Err("Unsupported HMC flags during image continuity check".into());
+        }
+        for entry in old.entries().iter().filter(|entry| entry.kind.starts_with("image/")) {
+            let replacement = new.entry(&entry.key).ok_or(
+                "Selected package omits an image needed by current source or history; save and bind the current checkpoint"
+            )?;
+            if entry.kind != replacement.kind || entry.meta != replacement.meta
+                || !old.verify_entry(&entry.key) || !new.verify_entry(&entry.key)
+                || old.get(&entry.key) != new.get(&entry.key)
+            {
+                return Err("Selected package changes retained image bytes or metadata; previous binding preserved".into());
+            }
+        }
+        Ok(())
+    }
     pub(crate) fn snapshot_bytes(&self) -> usize {
         self.bytes.len()
     }
@@ -123,11 +179,39 @@ impl TextureResources {
         digest: [u8; 32],
         side: u32,
     ) -> Result<super::texture_inputs::DetailInput, String> {
-        super::texture_inputs::decode_mask(&self.bytes, self.limits, digest, side)
+        self.mask_input_with_budget(digest, side, self.limits.working_bytes)
+    }
+    /// Decode a mask while reserving part of the host's logical working budget
+    /// for a caller's downstream operation. The immutable HMC snapshot is not
+    /// changed and all normal codec/encoded/decoded checks remain active.
+    pub(crate) fn mask_input_with_budget(
+        &self,
+        digest: [u8; 32],
+        side: u32,
+        available_working_bytes: usize,
+    ) -> Result<super::texture_inputs::DetailInput, String> {
+        let limits = SurfaceTextureLimits {
+            working_bytes: self.limits.working_bytes.min(available_working_bytes),
+            ..self.limits
+        };
+        super::texture_inputs::decode_mask(&self.bytes, limits, digest, side)
     }
     pub(crate) fn with_dependencies(&self, deps: &[TextureDependency]) -> Result<Self, String> {
-        let bytes = super::texture_inputs::merge(&self.bytes, self.limits, deps)?;
-        Self::from_hmc_bytes(&bytes, self.limits)
+        self.with_dependencies_with_budget(deps, self.limits.working_bytes)
+    }
+    /// Merge generated immutable resources under a caller-selected working
+    /// cap, retaining the existing package/encoded/metadata bounds.
+    pub(crate) fn with_dependencies_with_budget(
+        &self,
+        deps: &[TextureDependency],
+        available_working_bytes: usize,
+    ) -> Result<Self, String> {
+        let limits = SurfaceTextureLimits {
+            working_bytes: self.limits.working_bytes.min(available_working_bytes),
+            ..self.limits
+        };
+        let bytes = super::texture_inputs::merge(&self.bytes, limits, deps)?;
+        Self::from_hmc_bytes(&bytes, limits)
     }
     pub(crate) fn source_dependency(&self, digest: [u8; 32]) -> Result<TextureDependency, String> {
         super::texture_inputs::dependency(&self.bytes, self.limits, digest)

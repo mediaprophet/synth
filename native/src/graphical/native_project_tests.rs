@@ -398,6 +398,8 @@ mod uv_detail_workflow_tests;
 
 #[path = "native_project_motion_tests.rs"]
 mod motion_workflow_tests;
+#[path = "native_project_timeline_media_tests.rs"]
+mod timeline_media_tests;
 
 #[path = "native_project_texture_effect_tests.rs"]
 mod texture_effect_workflow_tests;
@@ -412,3 +414,5 @@ mod rig_composed_tests;
 
 #[path = "native_project_numeric_sheet_tests.rs"]
 mod numeric_sheet_tests;
+#[path = "native_project_sound_field_tests.rs"]
+mod sound_field_host_tests;

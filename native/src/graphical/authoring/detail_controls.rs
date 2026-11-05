@@ -1,6 +1,7 @@
 //! Native texture controls emit a source recipe through the existing intent owner.
 use crate::graphical::surfaces::detail::{
     required_paint_version, DetailLimits, DetailRecipe, LayerBlendMode, LayerMask, MaskChannel,
+    MaskMorphologyOperation,
     PaintLayer, PaintRecipe, PaintStroke, ProceduralRecipe, TextureEffect, TextureEffectStep,
 };
 use dioxus::prelude::*;
@@ -557,6 +558,34 @@ fn detail_draft_ready(
 ) -> bool {
     fresh && loaded && loaded_base == accepted && loaded_context == context
 }
+// Morphology edits the accepted layer by index, not the local draft. A pending
+// reorder or field edit must not silently change which accepted layer is hit.
+fn morphology_draft_clean(
+    draft: &DetailRecipe,
+    accepted: &Option<DetailRecipe>,
+    fields: &PaintFieldDraft,
+    base: &str,
+    side: &str,
+) -> bool {
+    let DetailRecipe::Paint(paint) = draft else { return false };
+    if accepted.as_ref() != Some(draft) || paint_origin_fields(paint, base, side).is_err()
+        || fields.stroke_forms.len() != paint.layers.len() {
+        return false;
+    }
+    let mut expected = PaintFieldDraft::from_recipe(paint);
+    for (index, form) in fields.stroke_forms.iter().enumerate() {
+        let layer = &paint.layers[index];
+        let values = if layer.strokes.is_empty() {
+            if form.selected != 0 { return false; }
+            default_stroke_fields(paint.side)
+        } else {
+            let Some(stroke) = layer.strokes.get(form.selected) else { return false; };
+            stroke_fields(stroke)
+        };
+        expected.stroke_forms[index] = StrokeFieldDraft { selected: form.selected, values };
+    }
+    fields == &expected
+}
 fn paint_origin_fields(p: &PaintRecipe, base: &str, side: &str) -> Result<(), String> {
     let side = side
         .trim()
@@ -642,6 +671,7 @@ pub(super) fn DetailControls(
     fresh: bool,
     preview_uri: Option<String>,
     onapply: EventHandler<Option<DetailRecipe>>,
+    onmorphology: EventHandler<(usize, MaskMorphologyOperation, f32)>,
     oninspect: EventHandler<()>,
 ) -> Element {
     let mut loaded = use_signal(|| false);
@@ -650,6 +680,8 @@ pub(super) fn DetailControls(
     let mut draft = use_signal(|| None::<DetailRecipe>);
     let mut paint_fields = use_signal(PaintFieldDraft::default);
     let mut add_effect_kind = use_signal(|| "grayscale".to_owned());
+    let mut mask_morphology_operation = use_signal(|| "expand".to_owned());
+    let mut mask_morphology_radius = use_signal(|| "1.0".to_owned());
     let mut layer_index = use_signal(|| 0usize);
     let mut stroke_index = use_signal(|| 0usize);
     let mut base_digest = use_signal(String::new);
@@ -715,6 +747,9 @@ pub(super) fn DetailControls(
             },"Start procedural detail recipe"}
             if loaded() && !ready {p {"Source or selection changed. Your local draft is retained; reload the current accepted recipe before applying."}}
             if let Some(DetailRecipe::Paint(p))=draft() {
+                if !morphology_draft_clean(&DetailRecipe::Paint(p.clone()), &loaded_base(), &paint_fields(), &base_digest(), &side()) {
+                    p {"Apply or reload the local recipe before editing an accepted layer mask."}
+                }
                 p {"{p.layers.len()} ordered paint layers; original base remains immutable."}
                 button {disabled:!ready||p.layers.len()>=8,onclick:move |_|{
                     if let Some(DetailRecipe::Paint(p))=draft.write().as_mut() {
@@ -756,6 +791,21 @@ pub(super) fn DetailControls(
                             label {"Mask resource channel" select {disabled:!ready,value:"{paint_fields().layers[i].resource_channel}",aria_label:"Layer {i} mask resource channel",onchange:move |e|paint_fields.write().layers[i].resource_channel=e.value(),option {value:"red","Red"} option {value:"alpha","Alpha"}}}
                             p {"Use an existing immutable HMC texture with this recipe's square extent. Resource resolution and authority are checked by the shared source owner."}
                         }
+                        label {"Mask morphology" select {disabled:!ready,value:"{mask_morphology_operation}",aria_label:"Mask morphology operation",onchange:move |e|mask_morphology_operation.set(e.value()),option {value:"expand","Expand"} option {value:"contract","Contract"} option {value:"border","Border"}}}
+                        label {"Radius in pixels" input {disabled:!ready,value:"{mask_morphology_radius}",maxlength:16,aria_label:"Mask morphology radius",oninput:move |e|mask_morphology_radius.set(e.value())}}
+                        button {disabled:!ready || !morphology_draft_clean(&DetailRecipe::Paint(p.clone()), &loaded_base(), &paint_fields(), &base_digest(), &side()),onclick:move |_|{
+                            let operation=match mask_morphology_operation().as_str(){
+                                "expand"=>Some(MaskMorphologyOperation::Expand),
+                                "contract"=>Some(MaskMorphologyOperation::Contract),
+                                "border"=>Some(MaskMorphologyOperation::Border),
+                                _=>None,
+                            };
+                            let radius=mask_morphology_radius().parse::<f32>().ok().filter(|r|r.is_finite()&&(0.0..=1024.0).contains(r));
+                            match (operation,radius){
+                                (Some(operation),Some(radius))=>{onmorphology.call((i,operation,radius));message.set("Mask edit submitted to the current native source owner; reload the accepted recipe after the source revision advances.".into());},
+                                _=>message.set("Choose expand, contract, or border and a finite radius from 0 to 1024 pixels.".into()),
+                            }
+                        },"Apply morphology to this layer mask"}
                         button {disabled:!ready||i==0,onclick:move |_|if let Some(DetailRecipe::Paint(p))=draft.write().as_mut(){
                             p.layers.swap(i,i-1);
                             let mut raw_fields=paint_fields.write();raw_fields.opacities.swap(i,i-1);raw_fields.layers.swap(i,i-1);raw_fields.stroke_forms.swap(i,i-1);
@@ -910,6 +960,35 @@ mod tests {
                 ..Default::default()
             }],
         }
+    }
+    #[test]
+    fn morphology_refuses_pending_local_recipe_or_form_changes() {
+        let paint = texture_effect_paint();
+        let accepted = Some(DetailRecipe::Paint(paint.clone()));
+        let mut draft = accepted.clone().unwrap();
+        let mut fields = PaintFieldDraft::from_recipe(&paint);
+        assert!(morphology_draft_clean(&draft, &accepted, &fields, &paint.base_sha256, "64"));
+        fields.layers[0].mask_kind = "rectangle".into();
+        assert!(!morphology_draft_clean(&draft, &accepted, &fields, &paint.base_sha256, "64"));
+        fields = PaintFieldDraft::from_recipe(&paint);
+        if let DetailRecipe::Paint(p) = &mut draft { p.layers[0].name = "unsaved".into(); }
+        assert!(!morphology_draft_clean(&draft, &accepted, &fields, &paint.base_sha256, "64"));
+        assert!(!morphology_draft_clean(accepted.as_ref().unwrap(), &accepted, &fields, &paint.base_sha256, "32"));
+    }
+    #[test]
+    fn morphology_allows_selecting_an_unchanged_nonfirst_stroke() {
+        let mut paint = texture_effect_paint();
+        let mut second = paint.layers[0].strokes[0].clone();
+        second.size = 3.0;
+        paint.layers[0].strokes.push(second.clone());
+        let accepted = Some(DetailRecipe::Paint(paint.clone()));
+        let mut fields = PaintFieldDraft::from_recipe(&paint);
+        fields.stroke_forms[0] = StrokeFieldDraft { selected: 1, values: stroke_fields(&second) };
+        assert!(morphology_draft_clean(accepted.as_ref().unwrap(), &accepted, &fields, &paint.base_sha256, "64"));
+        fields.stroke_forms[0].values[0] = "7".into();
+        assert!(!morphology_draft_clean(accepted.as_ref().unwrap(), &accepted, &fields, &paint.base_sha256, "64"));
+        fields.stroke_forms[0].selected = 2;
+        assert!(!morphology_draft_clean(accepted.as_ref().unwrap(), &accepted, &fields, &paint.base_sha256, "64"));
     }
     #[test]
     fn image_completed_controls_four_filters_roundtrip_fields_and_preserve_paint() {

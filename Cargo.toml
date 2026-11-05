@@ -30,5 +30,6 @@ codegen-units = 1
 strip = "symbols"
 
 [patch.crates-io]
-wgpu = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualia-main" }
-naga = { git = "https://github.com/mediaprophet/etalon.git", branch = "qualia-main" }
+cpal = { path = "../hypermedia-libraries/crates/audio-device-cpal" }
+wgpu = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }
+naga = { git = "https://github.com/mediaprophet/etalon.git", rev = "072b4d9ceeebd423234359dff1dee8fbe9e62b6e" }

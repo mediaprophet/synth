@@ -1,4 +1,11 @@
 //! Native package selection; content hashes do not grant authority.
+#[path = "device_lease.rs"]
+pub mod device_lease;
+pub use device_lease::{
+    DeviceCapabilityReport, DeviceLeaseError, DeviceLeaseState, SharedDeviceLease,
+    SurfaceExtent16x9,
+};
+
 use crate::graphical::surfaces::TextureResources;
 use qualia_core_db::{container_10d::MaterialRecord, render::assets::TextureDependency};
 use vibe::Value;

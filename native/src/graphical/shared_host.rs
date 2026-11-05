@@ -145,6 +145,18 @@ impl EditorHost for SharedEditorHost {
         self.current()?
             .edit_georaster(request, expected, limits, cancelled)
     }
+
+    fn brush_georaster(
+        &mut self,
+        request: crate::graphical::checkpoints::GeoRasterBrushRequest,
+        expected: SourceRef,
+        limits: crate::graphical::checkpoints::GeoRasterEditLimits,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<qualia_core_db::poet_host::invoke::studio_store::checkpoint::SaveReceipt, String>
+    {
+        self.current()?
+            .brush_georaster(request, expected, limits, cancelled)
+    }
     fn create_georaster(
         &mut self,
         request: crate::graphical::checkpoints::GeoRasterCreateRequest,
@@ -174,6 +186,9 @@ impl EditorHost for SharedEditorHost {
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.current()?.authoring_view(e)
+    }
+    fn timeline_media(&self, request: crate::graphical::checkpoints::TimelineMediaRequest, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::checkpoints::TimelineMediaSelection, String> {
+        self.current()?.timeline_media(request, expected, cancelled)
     }
     fn rig_authoring_edit(&mut self, resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
         self.current()?.rig_authoring_edit(resource, control, expected, cancelled)

@@ -132,8 +132,12 @@ pub(crate) fn view(
         }
     }
     Ok(AuthoringView {
+        sound_field: None,
+        timeline: None,
+        timeline_media: Vec::new(),
         material_motion: Vec::new(),
         botanical: None,
+        junction: None,
         rig: None,
         source,
         parts: result,
@@ -318,6 +322,9 @@ fn edit_source_impl(
                     .unwrap_or_else(|| "null".into()),
             )]),
         )?,
+        AuthoringEdit::TextureMaskMorphology { .. } => {
+            return Err("Mask morphology is a host-owned resource/source transaction".into());
+        }
         AuthoringEdit::Surface {
             material_id,
             surface,

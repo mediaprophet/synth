@@ -49,7 +49,7 @@ fn atlas_recipe_is_strict_and_unsupported_versions_refuse_without_input_mutation
     json["extra"] = true.into();
     assert!(serde_json::from_value::<AtlasDraft>(json).is_err());
     let mut bad = draft.clone();
-    bad.version = 2;
+    bad.version = 3;
     assert!(source(&bad).is_err());
     let mut record = std::collections::BTreeMap::new();
     record.insert("unknown".into(), Value::I64(1));
@@ -101,4 +101,89 @@ fn exact_recipe_survives_actual_persistent_vibe_source_evaluation() {
         .unwrap()
         .value;
     assert_eq!(from_value(&evaluated).unwrap(), next);
+}
+
+#[test]
+fn v2_uv_cut_keeps_shared_source_normal_and_defines_tangent_frames() {
+    let mesh = Mesh {
+        positions: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
+        triangles: vec![[0, 1, 2], [0, 3, 1]],
+        min: [0.; 3],
+        max: [1.; 3],
+    };
+    let original = mesh.clone();
+    let draft = AtlasDraft {
+        version: 2,
+        seams: vec![[0, 1]],
+        ..AtlasDraft::default()
+    };
+    let result = apply(&draft, &mesh, None, AtlasLimits::default(), &|| false).unwrap();
+    assert_eq!(mesh, original);
+    let normals = result.normals.as_ref().unwrap();
+    let frames = result.tangents.as_ref().unwrap();
+    assert_eq!(frames.len(), result.mesh.positions.len());
+    let copies: Vec<_> = result
+        .source_vertices
+        .iter()
+        .enumerate()
+        .filter(|(_, source)| **source == 0)
+        .map(|(i, _)| i)
+        .collect();
+    assert_eq!(copies.len(), 2);
+    assert_eq!(normals[copies[0]], normals[copies[1]]);
+    assert!(normals[copies[0]][1] > 0.0 && normals[copies[0]][2] > 0.0);
+    for (n, t) in normals.iter().zip(frames) {
+        assert!(t.iter().all(|v| v.is_finite()));
+        assert!((n[0] * t[0] + n[1] * t[1] + n[2] * t[2]).abs() < 1e-5);
+        assert!(t[3] == 1.0 || t[3] == -1.0);
+    }
+}
+
+#[test]
+fn v2_recipe_roundtrip_preserves_explicit_policy_and_legacy_remains_flat() {
+    let draft = AtlasDraft {
+        version: 2,
+        seams: vec![[0, 2]],
+        ..AtlasDraft::default()
+    };
+    let mut session = vibe::session::SourceSession::default();
+    let value = session
+        .submit(
+            &format!("({});", source(&draft).unwrap()),
+            &mut vibe::LocalHost::default(),
+            vibe::Budget::default(),
+        )
+        .unwrap()
+        .value;
+    assert_eq!(from_value(&value).unwrap(), draft);
+    let mesh = Mesh {
+        positions: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        triangles: vec![[0, 1, 2]],
+        min: [0.; 3],
+        max: [1., 1., 0.],
+    };
+    let legacy = apply(
+        &AtlasDraft::default(),
+        &mesh,
+        None,
+        AtlasLimits::default(),
+        &|| false,
+    )
+    .unwrap();
+    assert!(legacy.normals.is_none() && legacy.tangents.is_none());
+    let supplied = [[0., 0., 1.]; 3];
+    let smooth = apply(
+        &AtlasDraft {
+            version: 2,
+            ..AtlasDraft::default()
+        },
+        &mesh,
+        Some(&supplied),
+        AtlasLimits::default(),
+        &|| false,
+    )
+    .unwrap();
+    for (i, &source) in smooth.source_vertices.iter().enumerate() {
+        assert_eq!(smooth.normals.as_ref().unwrap()[i], supplied[source as usize]);
+    }
 }

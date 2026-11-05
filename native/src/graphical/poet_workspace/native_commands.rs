@@ -3,6 +3,8 @@ use super::*;
 #[derive(Deserialize)]
 #[serde(tag = "command", deny_unknown_fields)]
 pub(super) enum Command {
+    #[serde(rename = "authoring.terrain_brush")]
+    TerrainBrush { draft: crate::graphical::terrain_brush::TerrainBrushDraft },
     #[serde(rename = "authoring.rig")]
     Rig { resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl },
     #[serde(rename = "authoring.botanical")]
@@ -13,6 +15,10 @@ pub(super) enum Command {
     MaterialMotion {
         edit: crate::graphical::authoring::material_motion::MaterialMotionEdit,
     },
+    #[serde(rename = "authoring.timeline")]
+    Timeline { edit: crate::graphical::authoring::timeline::TimelineEdit },
+    #[serde(rename = "authoring.sound_field")]
+    SoundField { edit: crate::graphical::authoring::sound_field::SoundFieldEdit },
     #[serde(rename = "viewport.navigate")]
     Viewport {
         request: crate::graphical::viewport::ViewportCommand,
@@ -30,6 +36,13 @@ pub(super) enum Command {
     TextureDetail {
         material_id: u64,
         detail: Option<crate::graphical::surfaces::detail::DetailRecipe>,
+    },
+    #[serde(rename = "authoring.texture_mask_morphology")]
+    TextureMaskMorphology {
+        material_id: u64,
+        layer_index: usize,
+        operation: String,
+        radius: f32,
     },
     #[serde(rename = "authoring.surface")]
     Surface {
@@ -122,13 +135,16 @@ impl Command {
     }
     pub(super) fn scope(&self) -> &'static str {
         match self {
+            Self::TerrainBrush { .. } => "Studio.checkpoint",
             Self::InspectSurface { .. } | Self::BindSurface { .. } => "Studio.inspect",
-            Self::UvAtlas { .. } | Self::TextureDetail { .. } => "Studio.edit",
+            Self::UvAtlas { .. }
+            | Self::TextureDetail { .. }
+            | Self::TextureMaskMorphology { .. } => "Studio.edit",
             Self::Surface { .. } | Self::UvTransform { .. } | Self::UvProjection { .. } => {
                 "Studio.edit"
             }
             Self::Viewport { .. } => "Studio.inspect",
-            Self::Rig { .. } | Self::Botanical { .. } | Self::EnableSourceLayers | Self::MaterialMotion { .. } => {
+            Self::Rig { .. } | Self::Botanical { .. } | Self::EnableSourceLayers | Self::MaterialMotion { .. } | Self::Timeline { .. } | Self::SoundField { .. } => {
                 "Studio.edit"
             }
             Self::Inspect => "Studio.inspect",
@@ -160,6 +176,7 @@ impl Command {
             }
         };
         Ok(match self {
+            Self::TerrainBrush { draft } => { draft.validate()?; Action::BrushGeoRaster { draft, expected } },
             Self::Viewport { request } => {
                 crate::graphical::viewport_contract::validate_command(&request)?;
                 Action::Viewport { request, expected }
@@ -178,6 +195,14 @@ impl Command {
                     edit: AuthoringEdit::MaterialMotion { edit },
                     expected,
                 }
+            }
+            Self::Timeline { edit } => {
+                edit.validate()?;
+                Action::AuthoringEdit { edit: AuthoringEdit::Timeline { edit }, expected }
+            }
+            Self::SoundField { edit } => {
+                edit.validate()?;
+                Action::AuthoringEdit { edit: AuthoringEdit::SoundField { edit }, expected }
             }
             Self::EnableSourceLayers => Action::AuthoringEdit {
                 edit: AuthoringEdit::EnableSourceLayers,
@@ -211,6 +236,31 @@ impl Command {
                     edit: AuthoringEdit::TextureDetail {
                         material_id,
                         detail,
+                    },
+                    expected,
+                }
+            }
+            Self::TextureMaskMorphology {
+                material_id,
+                layer_index,
+                operation,
+                radius,
+            } => {
+                if material_id == 0 || !radius.is_finite() {
+                    return Err("Mask morphology requires a nonzero material and finite radius".into());
+                }
+                let operation = match operation.as_str() {
+                    "expand" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Expand,
+                    "contract" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Contract,
+                    "border" => crate::graphical::surfaces::detail::MaskMorphologyOperation::Border,
+                    _ => return Err("Unknown mask morphology operation".into()),
+                };
+                Action::AuthoringEdit {
+                    edit: AuthoringEdit::TextureMaskMorphology {
+                        material_id,
+                        layer_index,
+                        operation,
+                        radius,
                     },
                     expected,
                 }
@@ -406,5 +456,25 @@ impl Command {
                 }
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod sound_field_command_tests {
+    use super::*;
+    #[test]
+    fn field_payload_uses_existing_edit_scope_and_rejects_unknown_or_lossy_fields() {
+        let good=serde_json::json!({"command":"authoring.sound_field","edit":{"operation":"set_clip","clip_id":"bird","entity_identifier":"urn:bird:1","position_m":[1.0,0.0,-2.0],"radius_m":25.0,"gain":0.4,"priority":2}});
+        let command:Command=serde_json::from_value(good.clone()).unwrap();
+        assert_eq!(command.scope(),"Studio.edit");
+        assert!(matches!(command.action_type(),ActionType::Invoke));
+        let Command::SoundField {edit}=command else {panic!("typed field command absent")};edit.validate().unwrap();
+        let mut unknown=good.clone();unknown["edit"]["authority_grant"]=serde_json::json!(true);
+        assert!(serde_json::from_value::<Command>(unknown).is_err());
+        let mut lossy=good.clone();lossy["edit"]["priority"]=serde_json::json!(0.5);
+        assert!(serde_json::from_value::<Command>(lossy).is_err());
+        let mut invalid=good;invalid["edit"]["gain"]=serde_json::json!(2.0);
+        let Command::SoundField {edit}=serde_json::from_value::<Command>(invalid).unwrap() else {unreachable!()};
+        assert!(edit.validate().is_err());
     }
 }

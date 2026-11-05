@@ -185,6 +185,12 @@ impl PreviewProvider for MeshPreviewProvider {
 }
 
 pub trait EditorHost: Send {
+    /// Resolve a caller-selected HMC resource for an admitted timeline clip.
+    /// Checks the selected key/digest against the current source-owned clip
+    /// association. That assertion is not proof of rights or universal identity.
+    fn timeline_media(&self, _request: crate::graphical::checkpoints::TimelineMediaRequest, _expected: SourceRef, _cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::checkpoints::TimelineMediaSelection, String> {
+        Err("Timeline media inspection is unavailable for this host".into())
+    }
     /// Trusted capability to acquire the same shared owner after authority admission.
     fn shared_viewport_host(&self) -> Option<crate::graphical::shared_host::SharedEditorHost> { None }
     /// Retire tentative derived state, or fail so the shared viewport can be quarantined.
@@ -264,6 +270,16 @@ pub trait EditorHost: Send {
     ) -> Result<(), String> {
         Err("Raw surface resource owner unavailable".into())
     }
+    /// Raw owners may prove that validation failed before changing resources.
+    /// Unknown implementations remain conservatively classified as mutated.
+    fn install_surface_resources_transaction(
+        &mut self,
+        resources: crate::graphical::surfaces::TextureResources,
+        expected: SourceRef,
+    ) -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+        self.install_surface_resources(resources, expected)
+            .map_err(crate::graphical::surface_host::SurfaceBindingFailure::MayHaveMutated)
+    }
 
     fn inspect_typed_10d(
         &self,
@@ -297,6 +313,18 @@ pub trait EditorHost: Send {
     fn edit_georaster(
         &mut self,
         request: crate::graphical::checkpoints::GeoRasterEditRequest,
+        expected: SourceRef,
+        limits: crate::graphical::checkpoints::GeoRasterEditLimits,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<qualia_core_db::poet_host::invoke::studio_store::checkpoint::SaveReceipt, String>
+    {
+        let _ = (request, expected, limits, cancelled);
+        Err("Native georaster authoring is unavailable for this host".into())
+    }
+
+    fn brush_georaster(
+        &mut self,
+        request: crate::graphical::checkpoints::GeoRasterBrushRequest,
         expected: SourceRef,
         limits: crate::graphical::checkpoints::GeoRasterEditLimits,
         cancelled: &std::sync::atomic::AtomicBool,

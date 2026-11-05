@@ -73,6 +73,7 @@ pub(crate) fn scene() -> CompiledAssembly {
             })
             .collect(),
         normals: vec![[0.0, 0.0, 1.0]; 6],
+        tangents: None,
         uv0: vec![[0.0, 0.0]; 6],
     }
 }
@@ -443,14 +444,16 @@ fn selected_rig_adoption_derives_binding_and_refuses_mismatches() {
 #[test]
 fn rig_pose_updates_cpu_picking_geometry_and_bounds() {
     let mut assembly = scene();
+    assembly.tangents = Some(vec![[1.0,0.0,0.0,1.0]; 6]);
     let span = crate::graphical::rig_binding::ViewportSpan { first_vertex: 3, vertex_count: 3 };
     let positions = [[2.0, 0.0, 2.0], [3.0, 0.0, 2.0], [2.0, 2.0, 2.0]];
     let normals = [[0.0, 1.0, 0.0]; 3];
     let tangents = [[1.0, 0.0, 0.0, 1.0]; 3];
     super::renderer::validate_rig_pose(&assembly, span, &positions, &normals, &tangents).unwrap();
-    super::renderer::apply_rig_pose(&mut assembly, span, &positions, &normals);
+    super::renderer::apply_rig_pose(&mut assembly, span, &positions, &normals, &tangents).unwrap();
     assert_eq!(&assembly.mesh.positions[3..], &positions);
     assert_eq!(&assembly.normals[3..], &normals);
+    assert_eq!(&assembly.tangents.as_ref().unwrap()[3..], &tangents);
     assert_eq!(assembly.mesh.min, [-1.0, -1.0, 0.0]);
     assert_eq!(assembly.mesh.max, [3.0, 2.0, 2.0]);
 }
@@ -464,4 +467,20 @@ fn invalid_rig_pose_is_rejected_before_cpu_mutation() {
     assert!(super::renderer::validate_rig_pose(&assembly, span, &positions, &[[0.0, 0.0, 1.0]; 3], &[[1.0, 0.0, 0.0, 1.0]; 3]).is_err());
     assert!(super::renderer::validate_rig_pose(&assembly, span, &positions[..2], &[[0.0, 0.0, 1.0]; 3], &[[1.0, 0.0, 0.0, 1.0]; 3]).is_err());
     assert_eq!(assembly.mesh.max, [1.0, 1.0, 1.0]);
+}
+
+#[test]
+fn rig_tangent_rejection_preserves_the_entire_cpu_pose() {
+    let mut assembly=scene();
+    assembly.tangents=Some(vec![[1.0,0.0,0.0,1.0];6]);
+    let before=assembly.clone();
+    let span=crate::graphical::rig_binding::ViewportSpan {first_vertex:3,vertex_count:3};
+    let positions=[[1.0,0.0,0.0];3]; let normals=[[0.0,0.0,1.0];3];
+    let invalid=[[0.0,0.0,1.0,1.0];3];
+    assert!(super::renderer::apply_rig_pose(&mut assembly,span,&positions,&normals,&invalid).is_err());
+    assert_eq!(assembly.mesh.positions,before.mesh.positions);
+    assert_eq!(assembly.normals,before.normals); assert_eq!(assembly.tangents,before.tangents);
+    assembly.tangents=None;
+    assert!(super::renderer::apply_rig_pose(&mut assembly,span,&positions,&normals,&[[1.0,0.0,0.0,1.0];3]).is_err());
+    assert_eq!(assembly.mesh.positions,before.mesh.positions);
 }

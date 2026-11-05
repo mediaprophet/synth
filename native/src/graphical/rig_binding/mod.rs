@@ -5,14 +5,30 @@
 //! The current profile admits exact vertex correspondence only. A changed
 //! topology, including flat-normal or atlas seam expansion, requires an
 //! explicit qualified weight/normal/UV remap before it can be admitted.
+pub mod arthropod_articulation;
+pub mod ik_contact;
 pub mod rig_candidate;
+pub mod skl1_admission;
 mod controls;
 mod native_controls;
 #[cfg(test)]
 mod tests;
 
+pub use arthropod_articulation::{
+    evaluate_arthropod_gait_zero_heap, ArthropodBodyPlan, ArthropodGaitError, CuticleOpticalError,
+    CuticleOpticalProfile, ExoskeletonJointKind, ExoskeletonJointLimit, ExoskeletonSegment,
+};
 pub use controls::{apply_control, descriptor_source_literal, parse_descriptor_source_literal, RigControl};
+pub use ik_contact::{
+    solve_terrain_foot_contact_zero_heap, FootContactTarget, IkContactError, IkContactResult,
+    LimbChainSpec,
+};
 pub use native_controls::RigControls;
+pub use skl1_admission::{
+    normalize_skin_weights_checked, validate_skin_weights, AdmittedSkl1Rig, JointLimitSpec,
+    LimitEnforcementMode, MorphCategory, MorphTargetDescriptor, SkinWeight4, Skl1AdmissionError,
+    Skl1HierarchyValidator,
+};
 
 use super::preview::SourceRef;
 use qualia_core_db::container_10d::{

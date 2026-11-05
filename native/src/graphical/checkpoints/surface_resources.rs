@@ -43,6 +43,15 @@ impl CheckpointService {
         self.check_release_input(&request.filename, request.digest)?;
         drop(checkpoint);
         let resources = TextureResources::from_hmc_bytes(&bytes, limits)?;
+        // A reopened source history can reference masks absent from its current
+        // recipe. Compare before even the first surface bind so those inputs
+        // cannot disappear before undo/redo has been reconstructed.
+        {
+            let retained = self.retained.lock().map_err(|_| "checkpoint resource carrier poisoned")?;
+            if let Some(carrier) = retained.as_ref() {
+                resources.require_retained_images(carrier.checkpoint().resources())?;
+            }
+        }
         expected.check_current()?;
         Ok(resources)
     }

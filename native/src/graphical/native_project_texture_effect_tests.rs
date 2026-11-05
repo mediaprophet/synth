@@ -774,6 +774,11 @@ fn signed_texture_effect_refusals_preserve_source_history_and_context_rules() {
             json!({"context":read["context"],"material_id":1,"effects":valid})
         )
         .is_err());
+    let read = observer_mcp.call("poet_source_read", json!({})).unwrap();
+    assert!(observer_mcp.call("poet_texture_mask_morphology", json!({
+        "context":read["context"],"material_id":1,"layer_index":0,
+        "operation":"expand","radius":1.0
+    })).is_err());
     let mut observer_ui = project.connect(observer).unwrap();
     let source = observer_ui.snapshot().unwrap().source;
     assert!(observer_ui
@@ -795,8 +800,10 @@ fn signed_texture_effect_refusals_preserve_source_history_and_context_rules() {
     drop(mcp);
     let author = login(&authority, "fixture-author", &AUTHOR);
     let ui = project.connect(author.clone()).unwrap();
-    let mut mcp = project.mcp_backend(author).unwrap();
+    let mut mcp = project.mcp_backend(author.clone()).unwrap();
+    let mut revoked_morphology = project.mcp_backend(author).unwrap();
     let read = mcp.call("poet_source_read", json!({})).unwrap();
+    let morphology_read = revoked_morphology.call("poet_source_read", json!({})).unwrap();
     admission.sequence = 3;
     admission.subjects[0].revoked = true;
     authority.replace_admission(signed(admission)).unwrap();
@@ -813,11 +820,172 @@ fn signed_texture_effect_refusals_preserve_source_history_and_context_rules() {
             json!({"context":read["context"],"material_id":1,"effects":valid})
         )
         .is_err());
+    assert!(revoked_morphology.call("poet_texture_mask_morphology", json!({
+        "context":morphology_read["context"],"material_id":1,"layer_index":0,
+        "operation":"expand","radius":1.0
+    })).is_err());
     assert_eq!(
         studio_store::get_artifact_stamped(&scope.source_id).unwrap(),
         retained,
         "refusals preserve exact source artifact, stamp and history"
     );
+}
+
+const MASK_MORPHOLOGY_CHILD: &str = "POET_MASK_MORPHOLOGY_CASE_ROOT";
+
+fn mask_digest(recipe: &DetailRecipe) -> [u8; 32] {
+    use crate::graphical::surfaces::detail::LayerMask;
+    let DetailRecipe::Paint(paint) = recipe else { panic!("expected paint") };
+    let Some(LayerMask::Resource { sha256, .. }) = &paint.layers[0].mask else {
+        panic!("expected generated mask resource")
+    };
+    crate::graphical::surfaces::binding::parse_digest(sha256).unwrap()
+}
+
+fn mask_recipe(host: &dyn EditorHost) -> DetailRecipe {
+    let source = host.snapshot().unwrap().source;
+    host.authoring_view(source).unwrap().parts.into_iter()
+        .find(|part| part.id == "root").unwrap().detail.unwrap()
+}
+
+fn morphology_reopen(root: &Path) {
+    let witness: serde_json::Value = serde_json::from_slice(&std::fs::read(root.join("mask-witness.json")).unwrap()).unwrap();
+    let scope = Scope {
+        project_id: witness["project_id"].as_str().unwrap().into(),
+        document_id: witness["document_id"].as_str().unwrap().into(),
+        source_id: witness["source_id"].as_str().unwrap().into(),
+        domain: "Geometry".into(),
+    };
+    assert!(studio_store::get_artifact_stamped(&scope.source_id).is_none());
+    let authority = Arc::new(NativeAuthority::open_retained_current(
+        &root.join("authority"), TrustedProject {
+            project_id: scope.project_id.clone(), issuer_identifier: "fixture-issuer".into(),
+            public_key: ed25519::public_from_seed(&AUTHORITY),
+        }, 1024 * 1024, 256).unwrap());
+    let author = login(&authority, "fixture-author", &AUTHOR);
+    let project = NativeProject::open(config(scope, &root.join("hmc"), &root.join("library")),
+        authority, author.clone(), Some("mask-saved.hmc"), Box::new(TextureEffectNoGpu)).unwrap();
+    let mut ui = project.connect(author).unwrap();
+    let held = ui.snapshot().unwrap();
+    let bytes = std::fs::read(root.join("hmc/mask-saved.hmc")).unwrap();
+    let final_recipe: DetailRecipe = serde_json::from_value(witness["final_recipe"].clone()).unwrap();
+    let prior_recipe: DetailRecipe = serde_json::from_value(witness["prior_recipe"].clone()).unwrap();
+    let generated = mask_digest(&final_recipe);
+    let reader = qualia_core_db::bundle::BundleReader::parse(&bytes).unwrap();
+    let png = reader.get(&texture_hmc_key(&generated)).unwrap();
+    assert_eq!(<[u8; 32]>::from(Sha256::digest(png)), generated);
+    let prior_digest = mask_digest(&prior_recipe);
+    assert_ne!(prior_digest, generated);
+    // A package containing the current mask but omitting the earlier one can
+    // resolve today's source, but cannot safely serve the retained undo state.
+    let mut reduced = qualia_core_db::bundle::BundleWriter::new();
+    for entry in reader.entries() {
+        if entry.key != texture_hmc_key(&prior_digest) {
+            reduced.add_file(&entry.key, &entry.kind, reader.get(&entry.key).unwrap().to_vec(), entry.meta.clone()).unwrap();
+        }
+    }
+    let reduced = reduced.build().unwrap();
+    std::fs::write(root.join("hmc/mask-missing-history.hmc"), &reduced).unwrap();
+    // The carrier protects the first bind before an editor snapshot exists.
+    assert!(ui.bind_surface_package(SurfacePackageRequest {
+        filename:"mask-missing-history.hmc".into(), digest:Sha256::digest(&reduced).into(),
+    }, held.source.clone()).is_err());
+    ui.bind_surface_package(SurfacePackageRequest {
+        filename: "mask-saved.hmc".into(), digest: Sha256::digest(&bytes).into(),
+    }, held.source.clone()).unwrap();
+    ui.rebuild_execution(held.source).unwrap();
+    assert_eq!(mask_recipe(&ui), final_recipe);
+    let current = ui.snapshot().unwrap().source;
+    assert!(ui.bind_surface_package(SurfacePackageRequest {
+        filename:"mask-missing-history.hmc".into(), digest:Sha256::digest(&reduced).into(),
+    }, current).is_err());
+    let source = ui.snapshot().unwrap().source;
+    let undone = ui.undo(source).unwrap();
+    ui.rebuild_execution(undone.source).unwrap();
+    assert_eq!(mask_recipe(&ui), prior_recipe);
+    let source = ui.snapshot().unwrap().source;
+    let redone = ui.redo(source).unwrap();
+    ui.rebuild_execution(redone.source).unwrap();
+    assert_eq!(mask_recipe(&ui), final_recipe);
+    texture_effect_digest(&ui);
+}
+
+#[test]
+fn signed_mask_morphology_history_rebind_checkpoint_and_fresh_reopen() {
+    use crate::graphical::surfaces::detail::{LayerMask, MaskMorphologyOperation};
+    if let Some(root) = std::env::var_os(MASK_MORPHOLOGY_CHILD) {
+        morphology_reopen(Path::new(&root));
+        return;
+    }
+    let temp = tempfile::tempdir().unwrap();
+    for name in ["authority", "hmc", "library"] { std::fs::create_dir(temp.path().join(name)).unwrap(); }
+    {
+        let (scope, _, authority) = fixture(&temp.path().join("authority"));
+        let author = login(&authority, "fixture-author", &AUTHOR);
+        let project = NativeProject::open(config(scope.clone(), &temp.path().join("hmc"), &temp.path().join("library")),
+            authority, author.clone(), None, Box::new(TextureEffectNoGpu)).unwrap();
+        let mut ui = project.connect(author.clone()).unwrap();
+        let png = texture_effect_png();
+        let base: [u8; 32] = Sha256::digest(&png).into();
+        texture_effect_seed(&mut ui, base, png);
+        let mut prior = texture_effect_recipe(base, vec![]);
+        let DetailRecipe::Paint(paint) = &mut prior else { unreachable!() };
+        paint.version = 3;
+        paint.layers[0].mask = Some(LayerMask::Rectangle { x: 2, y: 2, width: 3, height: 3, coverage: 255 });
+        let source = ui.snapshot().unwrap().source;
+        ui.authoring_edit(AuthoringEdit::TextureDetail { material_id: 1, detail: Some(prior.clone()) }, source).unwrap();
+        let source = ui.snapshot().unwrap().source;
+        let old = ui.save_checkpoint("before-mask.hmc", ExpectedFile::Absent, source).unwrap();
+        let mut mcp = project.mcp_backend(author).unwrap();
+        let stale = mcp.call("poet_source_read", json!({})).unwrap();
+        let before = ui.snapshot().unwrap().source;
+        ui.authoring_edit(AuthoringEdit::TextureMaskMorphology {
+            material_id: 1, layer_index: 0, operation: MaskMorphologyOperation::Expand, radius: 1.0,
+        }, before).unwrap();
+        let final_recipe = mask_recipe(&ui);
+        let generated = mask_digest(&final_recipe);
+        let retained = studio_store::get_artifact_stamped(&scope.source_id).unwrap();
+        assert!(mcp.call("poet_texture_mask_morphology", json!({"context":stale["context"],
+            "material_id":1,"layer_index":0,"operation":"expand","radius":1.0})).is_err());
+        assert_eq!(studio_store::get_artifact_stamped(&scope.source_id).unwrap(), retained);
+
+        // Undo does not permit a package switch to drop bytes required by redo.
+        let source = ui.snapshot().unwrap().source;
+        let undone = ui.undo(source).unwrap();
+        ui.rebuild_execution(undone.source.clone()).unwrap();
+        assert_eq!(mask_recipe(&ui), prior);
+        assert!(ui.bind_surface_package(SurfacePackageRequest { filename: "before-mask.hmc".into(), digest: old.digest }, undone.source).is_err());
+        let source = ui.snapshot().unwrap().source;
+        let redone = ui.redo(source).unwrap();
+        ui.rebuild_execution(redone.source).unwrap();
+        assert_eq!(mask_recipe(&ui), final_recipe);
+
+        // The MCP route makes the same source-owned operation available to
+        // authorized agents and consumes its own connection-local context.
+        let read = mcp.call("poet_source_read", json!({})).unwrap();
+        mcp.call("poet_texture_mask_morphology", json!({"context":read["context"],
+            "material_id":1,"layer_index":0,"operation":"contract","radius":1.0})).unwrap();
+        let prior = final_recipe;
+        let final_recipe = mask_recipe(&ui);
+        let final_generated = mask_digest(&final_recipe);
+
+        let source = ui.snapshot().unwrap().source;
+        let saved = ui.save_checkpoint("mask-saved.hmc", ExpectedFile::Absent, source.clone()).unwrap();
+        let loaded = checkpoint::load(&saved.path, CheckpointLimits::default()).unwrap();
+        assert!(loaded.resources().iter().any(|r| r.key == texture_hmc_key(&generated)));
+        assert!(loaded.resources().iter().any(|r| r.key == texture_hmc_key(&final_generated)));
+        ui.bind_surface_package(SurfacePackageRequest { filename: "mask-saved.hmc".into(), digest: saved.digest }, source).unwrap();
+        std::fs::write(temp.path().join("mask-witness.json"), serde_json::to_vec(&json!({
+            "project_id":scope.project_id,"document_id":scope.document_id,"source_id":scope.source_id,
+            "prior_recipe":prior,"final_recipe":final_recipe,
+        })).unwrap()).unwrap();
+    }
+    let current = std::thread::current();
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", current.name().unwrap(), "--nocapture", "--test-threads=1"])
+        .env(MASK_MORPHOLOGY_CHILD, temp.path()).output().unwrap();
+    assert!(output.status.success(), "fresh-process mask reopen failed: {}\nstdout:\n{}\nstderr:\n{}",
+        output.status, String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
 }
 
 #[path = "native_project_texture_effect_gpu_tests.rs"]

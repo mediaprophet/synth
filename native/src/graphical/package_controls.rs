@@ -12,12 +12,18 @@ use inspection_view::M64InspectionView;
 #[path = "package_georaster_edit_view.rs"]
 mod georaster_edit_view;
 use georaster_edit_view::GeoRasterEditView;
+#[path = "package_terrain_brush_view.rs"]
+mod terrain_brush_view;
+use terrain_brush_view::TerrainBrushView;
 #[path = "package_georaster_create_view.rs"]
 mod georaster_create_view;
 use georaster_create_view::GeoRasterCreateView;
 #[path = "package_typed_10d_view.rs"]
 mod typed_10d_view;
 use typed_10d_view::Typed10dControls;
+#[path = "package_timeline_media_view.rs"]
+mod timeline_media_view;
+use timeline_media_view::TimelineMediaView;
 #[derive(Clone)]
 struct InspectedResource {
     context: Context,
@@ -63,6 +69,7 @@ pub(super) fn PackageControls(
     current: EditorSnapshot,
     busy: Signal<bool>,
     status: Signal<String>,
+    selection: Signal<Option<super::timeline_resource_selection::TimelineResourceSelection>>,
 ) -> Element {
     let mut name = use_signal(|| "poet-checkpoint.hmc".to_string());
     let mut filename = use_signal(String::new);
@@ -152,8 +159,12 @@ pub(super) fn PackageControls(
                     M64InspectionView{view:view.result.clone()}
                     {let key=format!("{}:{}:{}:{}",view.result.request.filename,view.result.request.key,
                         hex_digest(&view.result.request.package_digest),hex_digest(&view.result.request.resource_digest));
-                        rsx!{GeoRasterEditView{key:"{key}",view:view.result,host:host.clone(),current:current.clone(),busy,status,
-                            on_saved:move |_|{inventory.set(None);inspection.set(None);}}}}
+                        rsx!{
+                            GeoRasterEditView{key:"{key}",view:view.result.clone(),host:host.clone(),current:current.clone(),busy,status,
+                                on_saved:move |_|{inventory.set(None);inspection.set(None);}}
+                            TerrainBrushView{key:"terrain-{key}",view:view.result,host:host.clone(),current:current.clone(),busy,status,
+                                on_saved:move |_|{inventory.set(None);inspection.set(None);}}
+                        }}
 
 
                 }
@@ -169,10 +180,25 @@ pub(super) fn PackageControls(
                 for resource in package.resources {
                     {let host=host.clone();let current=current.clone();let remove_key=resource.key.clone();let digest=resource.digest;let file_digest=package.digest;
                     let inspect_host=host.clone();let inspect_current=current.clone();let inspect_key=resource.key.clone();
+                    let file_name=name();
+                    let playback_key=format!("{}:{}{}:{}:{}:{}",file_name.len(),file_name,resource.key.len(),resource.key,hex_digest(&file_digest),hex_digest(&digest));
                     rsx!{div{style:"padding:8px;background:#0c141c;overflow-wrap:anywhere;",
                         strong{"{resource.key}"}
                         p{"{resource.kind} | {resource.bytes} bytes | {resource.metadata_bytes} metadata bytes"}
                         p{"SHA256 {hex_digest(&digest)}"}
+                        super::timeline_resource_selection::TimelineResourceSelect {
+                            current:current.clone(), busy, selection,
+                            request:super::checkpoints::ResourceInspectionRequest {filename:name(),package_digest:file_digest,key:resource.key.clone(),resource_digest:digest}
+                        }
+                        if resource.kind.starts_with("image/") || resource.kind.starts_with("audio/") || resource.kind.starts_with("video/") {
+                            TimelineMediaView { key:"{playback_key}", host:host.clone(), current:current.clone(), busy, status,
+                                can_preview:matches!(resource.kind.as_str(), "image/png" | "image/jpeg" | "image/jpg" | "image/gif"),
+                                can_play_gif:resource.kind == "image/gif",
+                                can_play_mp4:resource.kind == "video/mp4",
+                                can_analyze_audio:matches!(resource.kind.as_str(), "audio/wav" | "audio/x-wav" | "audio/wave"),
+                                can_play_aac:matches!(resource.kind.as_str(), "audio/aac" | "audio/aac-adts" | "audio/mp4" | "video/mp4" | "audio/ogg" | "audio/opus"),
+                                resource:super::checkpoints::ResourceInspectionRequest {filename:name(),package_digest:file_digest,key:resource.key.clone(),resource_digest:digest} }
+                        }
                         {let key=format!("{}:{}:{}",name(),resource.key,hex_digest(&package.digest));
                             rsx!{Typed10dControls{key:"{key}",host:host.clone(),current:current.clone(),
                                 request:super::checkpoints::ResourceInspectionRequest{filename:name(),package_digest:file_digest,key:resource.key.clone(),resource_digest:digest},

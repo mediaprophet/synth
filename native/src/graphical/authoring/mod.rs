@@ -4,6 +4,8 @@ mod assembly_source;
 #[cfg(test)]
 mod atlas_detail_tests;
 pub mod botanical;
+pub(crate) mod junction_session;
+mod junction_controls;
 pub(crate) mod botanical_session;
 mod cad_controls;
 mod cad_recipe;
@@ -14,6 +16,18 @@ mod detail_controls;
 mod geometry_source;
 pub(crate) mod rig_source;
 pub(crate) mod material_motion;
+pub(crate) mod timeline;
+pub(crate) mod timeline_associations;
+#[cfg(test)]
+mod timeline_associations_tests;
+mod timeline_controls;
+mod timeline_frame_entry;
+mod timeline_create_controls;
+pub(crate) mod timeline_media;
+pub(crate) mod sound_field;
+mod sound_field_controls;
+#[cfg(test)]
+mod timeline_tests;
 mod material_motion_controls;
 #[cfg(test)]
 mod material_motion_tests;
@@ -67,7 +81,11 @@ pub struct PartView {
 
 #[derive(Clone, Debug)]
 pub struct AuthoringView {
+    pub sound_field: Option<sound_field::SoundField>,
+    pub timeline: Option<timeline::Timeline>,
+    pub timeline_media: Vec<timeline_associations::Association>,
     pub botanical: Option<botanical::BotanicalRecipe>,
+    pub junction: Option<botanical::JunctionSource>,
     pub rig: Option<crate::graphical::rig_binding::RigSourceDescriptor>,
     pub material_motion: Vec<material_motion::MaterialMotionTrack>,
     pub source: SourceRef,
@@ -77,7 +95,12 @@ pub struct AuthoringView {
 
 #[derive(Clone, Debug)]
 pub enum AuthoringEdit {
+    SoundField { edit: sound_field::SoundFieldEdit },
+    Timeline { edit: timeline::TimelineEdit },
     Rig { resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl },
+    BotanicalJunctionAdopt { source: vibe::Value },
+    BotanicalJunctionPosition { target: String, organ: String, position_m: [f64; 3] },
+    BotanicalJunctionSettings { target: String, settings: botanical::JunctionSettings },
     Botanical {
         edit: botanical::BotanicalEdit,
     },
@@ -93,6 +116,13 @@ pub enum AuthoringEdit {
     TextureDetail {
         material_id: u64,
         detail: Option<crate::graphical::surfaces::detail::DetailRecipe>,
+    },
+    /// Morph one existing PaintLayer mask through the same authorized native source owner.
+    TextureMaskMorphology {
+        material_id: u64,
+        layer_index: usize,
+        operation: crate::graphical::surfaces::detail::MaskMorphologyOperation,
+        radius: f32,
     },
     Surface {
         material_id: u64,

@@ -2,6 +2,12 @@
 use super::*;
 use qualia_core_db::render::compile_10d::CompiledAsset;
 
+#[path = "resource_verifier.rs"]
+pub mod resource_verifier;
+pub use resource_verifier::{
+    verify_atomic_resource_batch, AtomicResourceVerificationReport,
+};
+
 /// Selected by trusted host configuration, never inferred from incoming HMC.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PackageWritePolicy {
@@ -93,6 +99,14 @@ impl CheckpointService {
             digest,
             resources: checkpoint.inventory(),
         })
+    }
+
+    /// Pre-commit validation of an edit batch against caller limits without disk or carrier mutation.
+    pub fn verify_resource_edits(
+        &self,
+        edits: &[ResourceEdit],
+    ) -> Result<AtomicResourceVerificationReport, String> {
+        verify_atomic_resource_batch(edits, self.limits.file_bytes)
     }
 
     pub fn save(
@@ -221,6 +235,7 @@ impl CheckpointService {
             return Err("resource edits require the expected existing package digest".into());
         }
         self.check_writable_target(filename, expected_file)?;
+        verify_atomic_resource_batch(&edits, self.limits.file_bytes)?;
         let mut retained = self
             .retained
             .lock()

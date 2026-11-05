@@ -21,6 +21,7 @@ pub(crate) async fn run(
         | Action::InspectTyped10d { expected, .. }
         | Action::EditTyped10d { expected, .. }
         | Action::PackageWorkflow { expected, .. }
+        | Action::BrushGeoRaster { expected, .. }
         | Action::EditGeoRaster { expected, .. }
         | Action::CreateGeoRaster { expected, .. }
         | Action::InspectResource { expected, .. }
@@ -68,6 +69,10 @@ pub(crate) async fn run(
             ActionType::Query,
             json!({"command":"viewport.navigate","request":request}),
         ),
+        Action::BrushGeoRaster { draft, .. } => (
+            ActionType::Invoke,
+            json!({"command":"authoring.terrain_brush","draft":draft}),
+        ),
         Action::InspectSurface { id, .. } => (
             ActionType::Query,
             json!({"command":"authoring.inspect_surface","id":id}),
@@ -79,12 +84,23 @@ pub(crate) async fn run(
         Action::AuthoringInspect(_) => (ActionType::Query, json!({"command":"authoring.inspect"})),
         Action::AuthoringEdit { edit, .. } => {
             let p = match edit {
+                AuthoringEdit::BotanicalJunctionAdopt { .. }
+                | AuthoringEdit::BotanicalJunctionPosition { .. }
+                | AuthoringEdit::BotanicalJunctionSettings { .. } => {
+                    return jobs::run(host, action, origin).await;
+                }
                 AuthoringEdit::Rig { resource, control } => json!({"command":"authoring.rig","resource":resource,"control":control}),
                 AuthoringEdit::Botanical { edit } => {
                     json!({"command":"authoring.botanical","edit":edit})
                 }
                 AuthoringEdit::MaterialMotion { edit } => {
                     json!({"command":"authoring.material_motion","edit":edit})
+                }
+                AuthoringEdit::Timeline { edit } => {
+                    json!({"command":"authoring.timeline","edit":edit})
+                }
+                AuthoringEdit::SoundField { edit } => {
+                    json!({"command":"authoring.sound_field","edit":edit})
                 }
                 AuthoringEdit::EnableSourceLayers => {
                     json!({"command":"authoring.enable_source_layers"})
@@ -97,6 +113,19 @@ pub(crate) async fn run(
                     detail,
                 } => {
                     json!({"command":"authoring.texture_detail","material_id":material_id,"detail":detail})
+                }
+                AuthoringEdit::TextureMaskMorphology {
+                    material_id,
+                    layer_index,
+                    operation,
+                    radius,
+                } => {
+                    let operation = match operation {
+                        crate::graphical::surfaces::detail::MaskMorphologyOperation::Expand => "expand",
+                        crate::graphical::surfaces::detail::MaskMorphologyOperation::Contract => "contract",
+                        crate::graphical::surfaces::detail::MaskMorphologyOperation::Border => "border",
+                    };
+                    json!({"command":"authoring.texture_mask_morphology","material_id":material_id,"layer_index":layer_index,"operation":operation,"radius":radius})
                 }
                 AuthoringEdit::Transform {
                     id,

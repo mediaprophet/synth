@@ -20,6 +20,26 @@ pub fn selected() -> NativeAuthoringProfile {
         }
     })
 }
+
+/// Read the named botanical replay selection only from trusted process startup.
+/// Existing public profile enum and default `RebuildLimits` remain unchanged.
+pub(crate) fn startup_rebuild_limits(profile: NativeAuthoringProfile) -> RebuildLimits {
+    static BOTANICAL: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let enabled = *BOTANICAL.get_or_init(||
+        std::env::var("POET_NATIVE_BOTANICAL_PROFILE").as_deref() != Ok("0"));
+    botanical_rebuild_limits(profile, enabled)
+}
+
+fn botanical_rebuild_limits(profile: NativeAuthoringProfile, enabled: bool) -> RebuildLimits {
+    let mut limits = profile.rebuild_limits();
+    if enabled {
+        // One junction replay scope shares the aggregate limits. Values are
+        // diagnostic working caps, not guarantees about cost or asset quality.
+        limits.total_geometry_work = limits.total_geometry_work.saturating_add(64_000_000);
+        limits.total_kernel_dispatches = limits.total_kernel_dispatches.saturating_add(256);
+    }
+    limits
+}
 impl NativeAuthoringProfile {
     /// Core's retained-value representation allowance, not measured allocator/RSS bytes.
     pub fn session_limits(self) -> SessionLimits {
@@ -133,5 +153,10 @@ mod tests {
         );
         // This comparison needs no process environment mutation or authority objects.
         assert_ne!(legacy.label(), equipment.label());
+        assert_eq!(botanical_rebuild_limits(legacy, false).total_geometry_work,
+            legacy.rebuild_limits().total_geometry_work);
+        assert_eq!(botanical_rebuild_limits(legacy, true).total_geometry_work, 66_000_000);
+        assert_eq!(botanical_rebuild_limits(legacy, true).total_kernel_dispatches, 512);
+        assert_eq!(botanical_rebuild_limits(equipment, true).total_geometry_work, 72_000_000);
     }
 }

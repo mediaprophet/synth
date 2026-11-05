@@ -1,34 +1,35 @@
-//! Actual native PortalGpu views of the decoded, sealed .10d derivative.
+//! Actual native PortalGpu 16:9 (1280x720) views of the decoded, sealed .10d derivative.
 use crate::*;
 use poet_cli::graphical::{
     assembly::{AssemblyRenderSettings, CompiledAssembly, CompiledPart},
     authoring::AuthoringView,
     controller::EditorHost,
-    preview::PreviewCamera,
+    preview::{PreviewCamera, SourceRef},
 };
 use qualia_core_db::{
     container_10d::{self, MaterialRecord, SubmeshRange},
     render::{
         compile_10d::{decode_10d_mesh, decode_10d_mesh_frames},
+        gpu::PortalGpu,
         lighting::environment_lighting::{
             EnvironmentProbe, EnvironmentProbeSet, ENVIRONMENT_SPECULAR_LEVELS,
         },
-        surface_authoring::encode_surface_png_into,
+        telemetry::SystemTelemetry,
     },
 };
 use serde_json::json;
 
 pub fn decode(bytes: &[u8], view: &AuthoringView) -> Result<CompiledAssembly, String> {
-    // Input bytes are already bounded by canonical checkpoint limits and bound
-    // to the source-reconstructed exact .10d before this native decode.
     let mesh = decode_10d_mesh(bytes).map_err(|e| format!("native mesh decode: {e:?}"))?;
     if mesh.positions.len() > MAX_VERTICES || mesh.triangles.len() > MAX_INDICES / 3 {
         return Err("decoded geometry budget exceeded".into());
     }
-    let normals = decode_10d_mesh_frames(bytes, mesh.positions.len())
+    let frames = decode_10d_mesh_frames(bytes, mesh.positions.len())
         .map_err(|e| format!("native frames: {e:?}"))?
-        .and_then(|f| f.normals)
+        .ok_or("compiled authored frames absent")?;
+    let normals = frames.normals
         .ok_or("compiled authored normal stream absent")?;
+    let tangents = frames.tangents;
     let (materials_count, ranges_count) = container_10d::material_container_counts(bytes)
         .map_err(|e| format!("native materials: {e:?}"))?;
     if ranges_count != view.parts.len() || ranges_count > 256 || materials_count > 256 {
@@ -88,10 +89,140 @@ pub fn decode(bytes: &[u8], view: &AuthoringView) -> Result<CompiledAssembly, St
         ranges,
         parts,
         normals,
+        tangents,
         uv0,
     };
     assembly::validate_compiled(&scene, limits())?;
     Ok(scene)
+}
+
+pub fn render_16_9_png(
+    source: SourceRef,
+    scene: &CompiledAssembly,
+    settings: AssemblyRenderSettings,
+    probes: Option<&EnvironmentProbeSet>,
+) -> Result<(Vec<u8>, Vec<u8>), String> {
+    source.check_current()?;
+    assembly::validate_compiled(scene, limits())?;
+    let s = settings;
+    let indices: Vec<u32> = scene.mesh.triangles.iter().flatten().copied().collect();
+    let colors = vec![[1.0; 4]; scene.mesh.positions.len()];
+    let mut renderer = PortalGpu::new_offscreen(RENDER_WIDTH, RENDER_HEIGHT, 1)?;
+    renderer.set_ambient_enabled(false);
+    renderer.set_tensor_projection_enabled(false);
+    renderer.set_clear_color(
+        s.clear_color[0],
+        s.clear_color[1],
+        s.clear_color[2],
+        s.clear_color[3],
+    );
+    renderer.set_camera_target(
+        s.camera.yaw,
+        s.camera.pitch,
+        s.camera.distance,
+        s.camera.target[0],
+        s.camera.target[1],
+        s.camera.target[2],
+    );
+    renderer.set_lighting(
+        s.sun_direction[0],
+        s.sun_direction[1],
+        s.sun_direction[2],
+        s.sun_intensity,
+        s.ambient_intensity,
+    );
+    renderer.set_shadows_enabled(s.shadows);
+    renderer.set_screen_space_ao_enabled(s.screen_space_ao);
+    renderer.upload_mesh_colored_with_frames_and_materials_and_uv0(
+        &scene.mesh.positions,
+        &colors,
+        Some(&scene.normals),
+        scene.tangents.as_deref(),
+        Some(&scene.uv0),
+        &indices,
+        &scene.materials,
+        &scene.ranges,
+    )?;
+    renderer.set_environment_probes(probes, [0.0; 3]);
+    if !renderer.set_exposure_compensation(s.exposure_ev) {
+        return Err("native output exposure capability unavailable; image withheld".into());
+    }
+    renderer.render(0.0, &SystemTelemetry::default())?;
+    let mut rgba8 = vec![0; renderer.required_rgba8_bytes()];
+    renderer.read_rgba8_into(&mut rgba8)?;
+    source.check_current()?;
+    let png = encode_png_rgba8(RENDER_WIDTH, RENDER_HEIGHT, &rgba8)?;
+    Ok((rgba8, png))
+}
+
+fn crc32_ieee(bytes: &[u8]) -> u32 {
+    let mut crc = 0xffff_ffffu32;
+    for &b in bytes {
+        crc ^= u32::from(b);
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 {
+                (crc >> 1) ^ 0xedb8_8320
+            } else {
+                crc >> 1
+            };
+        }
+    }
+    !crc
+}
+
+fn adler32(bytes: &[u8]) -> u32 {
+    let mut a = 1u32;
+    let mut b = 0u32;
+    for &byte in bytes {
+        a = (a + u32::from(byte)) % 65_521;
+        b = (b + a) % 65_521;
+    }
+    (b << 16) | a
+}
+
+fn push_png_chunk(out: &mut Vec<u8>, tag: &[u8; 4], data: &[u8]) {
+    out.extend_from_slice(&(data.len() as u32).to_be_bytes());
+    let start = out.len();
+    out.extend_from_slice(tag);
+    out.extend_from_slice(data);
+    let crc = crc32_ieee(&out[start..]);
+    out.extend_from_slice(&crc.to_be_bytes());
+}
+
+pub fn encode_png_rgba8(width: u32, height: u32, rgba: &[u8]) -> Result<Vec<u8>, String> {
+    let row_bytes = width as usize * 4;
+    if rgba.len() != row_bytes * height as usize {
+        return Err("RGBA8 buffer size mismatch for PNG encode".into());
+    }
+    let mut raw = Vec::with_capacity((row_bytes + 1) * height as usize);
+    for row in rgba.chunks_exact(row_bytes) {
+        raw.push(0); // filter type 0 (None)
+        raw.extend_from_slice(row);
+    }
+    let mut zlib = Vec::with_capacity(raw.len() + (raw.len() / 65_535 + 1) * 5 + 6);
+    zlib.extend_from_slice(&[0x78, 0x01]);
+    let chunks: Vec<&[u8]> = raw.chunks(65_535).collect();
+    for (i, block) in chunks.iter().enumerate() {
+        let last = u8::from(i + 1 == chunks.len());
+        let len = block.len() as u16;
+        let nlen = !len;
+        zlib.push(last);
+        zlib.extend_from_slice(&len.to_le_bytes());
+        zlib.extend_from_slice(&nlen.to_le_bytes());
+        zlib.extend_from_slice(block);
+    }
+    zlib.extend_from_slice(&adler32(&raw).to_be_bytes());
+
+    let mut png = Vec::with_capacity(zlib.len() + 64);
+    png.extend_from_slice(b"\x89PNG\r\n\x1a\n");
+    let mut ihdr = Vec::with_capacity(13);
+    ihdr.extend_from_slice(&width.to_be_bytes());
+    ihdr.extend_from_slice(&height.to_be_bytes());
+    ihdr.extend_from_slice(&[8, 6, 0, 0, 0]);
+    push_png_chunk(&mut png, b"IHDR", &ihdr);
+    push_png_chunk(&mut png, b"IDAT", &zlib);
+    push_png_chunk(&mut png, b"IEND", &[]);
+    Ok(png)
 }
 
 pub fn images(
@@ -160,34 +291,21 @@ pub fn images(
         settings.sun_intensity = 2.2;
         settings.ambient_intensity = 0.13;
         settings.exposure_ev = 0.0;
-        let mut frame = assembly::render_assembly_with_settings(
+        let (rgba8, png) = render_16_9_png(
             snapshot.source.clone(),
             scene,
             settings,
-            limits(),
             Some(&probes),
         )?;
-        frame.session_revision = Some(snapshot.session_revision);
-        frame.execution_epoch = Some(snapshot.execution_epoch.clone());
-        if !snapshot.publication_is_current()
-            || frame.source != snapshot.source
-            || !frame
-                .execution_epoch
-                .as_ref()
-                .is_some_and(|e| e.is_current())
-        {
+        if !snapshot.publication_is_current() || !snapshot.execution_epoch.is_current() {
             return Err("render publication retired".into());
         }
-        let mut png = vec![0; frame.rgba8.len() + frame.side as usize + 4096];
-        let written = encode_surface_png_into(frame.side, &frame.rgba8, &mut png)
-            .map_err(|e| format!("native PNG: {e:?}"))?;
-        png.truncate(written);
         let filename = format!("{name}.png");
         files::write(&root.join("images").join(&filename), &png)?;
         receipts.push(json!({"file":format!("images/{filename}"),"sha256":files::hash(&png),
-            "rgba_sha256":files::hash(&frame.rgba8),"width":frame.side,"height":frame.side,
+            "rgba_sha256":files::hash(&rgba8),"width":RENDER_WIDTH,"height":RENDER_HEIGHT,"aspect_ratio":"16:9",
             "camera":{"yaw":camera.yaw,"pitch":camera.pitch,"distance":camera.distance,"target":camera.target},
-            "native_pipeline":"PortalGpu offscreen/material ranges/authored normals/UV0/native PNG",
+            "native_pipeline":"PortalGpu offscreen 1280x720 (16:9)/material ranges/authored normals/UV0/native PNG",
             "sun":{"direction":settings.sun_direction,"intensity":settings.sun_intensity},
             "ambient":settings.ambient_intensity,"exposure_ev":settings.exposure_ev,"shadows":settings.shadows,
             "screen_space_ao":settings.screen_space_ao,"floor_geometry":"none","acceptance":"unassessed"}));

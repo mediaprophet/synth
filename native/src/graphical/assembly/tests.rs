@@ -216,3 +216,41 @@ fn native_container_roundtrip_preserves_semantic_ranges_normal_and_uv_streams() 
     invalid.ranges[0].semantic_id = 999;
     assert!(compile_assembly(&invalid).is_err());
 }
+
+fn smooth_atlas() -> Value {
+    rec([("version",Value::I64(2)),("seams",Value::List(vec![])),
+        ("atlas_size",Value::I64(1024)),("gutter_pixels",Value::I64(4)),
+        ("texels_per_metre",Value::F64(64.0)),("iterations",Value::I64(64))])
+}
+#[test]
+fn atlas_frames_reach_native_container_with_complete_mixed_part_correspondence() {
+    let mut value = fixture();
+    record_mut(&mut parts_mut(&mut value)[0]).insert("uv_atlas".into(),smooth_atlas());
+    let before=value.clone();
+    let assembly=admit_assembly(&value,PreviewLimits::default()).unwrap();
+    let tangents=assembly.tangents.as_ref().unwrap();
+    assert_eq!(tangents.len(),assembly.mesh.positions.len());
+    poet_spatial_authoring::assembly::validate_tangent_frames(&assembly.normals,tangents).unwrap();
+    let bytes=compile_assembly(&assembly).unwrap();
+    let decoded=qualia_core_db::render::compile_10d::decode_10d_mesh_frames(&bytes,assembly.mesh.positions.len()).unwrap().unwrap();
+    assert_eq!(decoded.tangents.as_ref(),Some(tangents));
+    assert_eq!(value,before);
+}
+#[test]
+fn mixed_atlas_and_uvless_part_refuses_without_touching_source() {
+    let mut value=fixture();
+    let parts=parts_mut(&mut value);
+    record_mut(&mut parts[0]).insert("uv_atlas".into(),smooth_atlas());
+    record_mut(record_mut(&mut parts[1]).get_mut("geometry").unwrap()).remove("uv0");
+    let before=value.clone();
+    assert!(admit_assembly(&value,PreviewLimits::default()).unwrap_err().contains("real UV0"));
+    assert_eq!(value,before);
+}
+#[test]
+fn malformed_compiled_frame_never_reaches_native_container() {
+    let mut a=admit_assembly(&fixture(),PreviewLimits::default()).unwrap();
+    a.tangents=Some(vec![[1.0,0.0,0.0,0.0];a.mesh.positions.len()]);
+    assert!(compile_assembly(&a).is_err());
+    a.tangents=Some(vec![[1.0,0.0,0.0,1.0];1]);
+    assert!(compile_assembly(&a).is_err());
+}

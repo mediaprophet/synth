@@ -107,7 +107,7 @@ pub fn render_assembly_with_resources(
         &assembly.mesh.positions,
         &colors,
         Some(&assembly.normals),
-        None,
+        assembly.tangents.as_deref(),
         Some(&assembly.uv0),
         &indices,
         &assembly.materials,

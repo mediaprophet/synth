@@ -19,6 +19,11 @@ The planning branch is `0.0.40.8-dev` in Poet and QualiaDB. Other repositories r
 
 The original NLP/product notes below are retained historical context; their Webizen Desktop UI destination does not supersede the current ST programme.
 
+### Separation of **Poet** vs **`ecopunk-forge`** (3D Asset Authoring Studio)
+
+- **Poet** (`poet` — see `wasm/`, `old/`, and `../qualiaDB/crates/poet/`) is Timothy's Hypermedia, NLP, Knowledge Document, Context Markup Language, and Tool-Chest & Manifolds application.
+- **`ecopunk-forge`** (`cargo run --manifest-path native/Cargo.toml --bin ecopunk-forge --features native-graphical`) is the standalone 3D / CAD / botanical / zoological `.10d` & `.hmc` asset-production and verification harness added inside `native/`. Naming its binary `ecopunk-forge` keeps the 3D asset-production tool available for Ecopunk and `dev.civics.au` without colliding with or undermining Poet.
+
 **Copyright © 2026 Timothy Charles Holborn.** All rights reserved.  
 **Principal / inventor:** Timothy Charles Holborn &lt;timothy.holborn@gmail.com&gt;  
 See [`COPYRIGHT.md`](COPYRIGHT.md) and [`LICENSE`](LICENSE) (CC BY-NC-ND 4.0).

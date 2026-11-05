@@ -96,8 +96,13 @@ pub(super) fn prepare(
     }
     let mut session = SourceSession::new(profile.actual_grants().to_vec(), limits.clone());
     let mut host = profile.for_rebuild(bound.total_geometry_work, bound.total_kernel_dispatches);
+    // One shared replay ledger for every cell and tentative validation. This
+    // local host is dropped on errors; on success end the scope before return.
+    host.begin_junction_rebuild()?;
     for cell in cells {
         source.check_current()?;
+        let had_junction = session.value("poet_botanical_junction")
+            .is_some_and(crate::graphical::authoring::junction_session::is_junction_binding);
         let (layer_parts, layer_base) = if cell.contains("_poet_source_layer") {
             crate::graphical::authoring::source_layers::validation_snapshot_with_budget(
                 session.value("poet_parts"),
@@ -108,14 +113,18 @@ pub(super) fn prepare(
             (None, None)
         };
         session
-            .submit_validated(
+            .submit_validated_bindings(
                 cell,
                 &mut host,
                 Budget {
                     steps_left: per_cell_steps,
                     workspace_left: (limits.retained_value_bytes as u64).min(vibe::SENTINEL_BYTES),
                 },
-                |value| {
+                |value, bindings, _actual_host| {
+                    crate::graphical::authoring::timeline_associations::validate_pair(bindings.value("poet_timeline"),bindings.value("poet_timeline_media"))
+                        .map_err(|message|vibe::Diagnostic::new(vibe::DiagCode::E701,vibe::Span::point(0),message))?;
+                    crate::graphical::authoring::sound_field::validate_pair(bindings.value("poet_timeline"), bindings.value("poet_sound_field"))
+                        .map_err(|message|vibe::Diagnostic::new(vibe::DiagCode::E701,vibe::Span::point(0),message))?;
                     crate::graphical::authoring::source_layers::validate_result(
                         value,
                         layer_parts.as_ref(),
@@ -132,7 +141,13 @@ pub(super) fn prepare(
                                 vibe::Span::point(0),
                                 message,
                             )
-                        })
+                        })?;
+                    if had_junction && !bindings.value("poet_botanical_junction")
+                        .is_some_and(crate::graphical::authoring::junction_session::is_junction_binding) {
+                        return Err(vibe::Diagnostic::new(vibe::DiagCode::E701,
+                            vibe::Span::point(0), "Junction binding removal requires explicit migration"));
+                    }
+                    Ok(())
                 },
             )
             .map_err(|error| {
@@ -142,8 +157,12 @@ pub(super) fn prepare(
                 )
             })?;
     }
+    // Reconstruct bounded inline source first; qualify the final junction once.
+    // This does not certify each historical intermediate geometry.
+    crate::graphical::authoring::junction_session::validate_tentative(session.bindings(), &mut host)?;
     crate::graphical::authoring::botanical_session::validate(&session, &host)?;
     source.check_current()?;
+    host.end_junction_operation();
     Ok(PreparedRebuild {
         source,
         artifact,

@@ -399,3 +399,26 @@ fn typed_numeric_sheet_observer_read_is_admitted_but_execute_is_denied() {
     assert!(matches!(denied.receipt.status, IntentStatus::Rejected(_)));
     assert!(denied.reply.unwrap().message.contains("RoleDenied"));
 }
+
+#[test]
+fn terrain_vibe_payload_uses_existing_actor_and_cannot_bypass_observer_write_authority() {
+    let f=fixture_with_role(false,ProjectRole::Observer);
+    let parameters=serde_json::json!({"command":"authoring.terrain_brush","draft":{
+        "resource":{"filename":"terrain.hmc","package_digest":vec![1u8;32],"key":"height.m64","resource_digest":vec![2u8;32]},
+        "window_x":0,"window_y":0,"window_side":1,
+        "strokes":[{"operation":"raise","falloff":"linear","center_m":[0.0,0.0],"radius_m":1.0,"strength":1.0}]
+    }});
+    let denied=block_on(f.bus.dispatch_with_reply(payload(&f.source,ActionType::Invoke,parameters))).unwrap();
+    assert!(matches!(denied.receipt.status,IntentStatus::Rejected(_)));
+    assert_eq!(denied.receipt.provenance.unwrap().capability_scope.as_deref(),Some("Studio.checkpoint"));
+    assert!(denied.reply.unwrap().message.contains("RoleDenied"));
+    // A revoked native session is rejected before any domain operation.
+    f.owner.disconnect(&f.session).unwrap();
+    let revoked=block_on(f.bus.dispatch_with_reply(payload(&f.source,ActionType::Invoke,serde_json::json!({"command":"authoring.terrain_brush","draft":{
+        "resource":{"filename":"terrain.hmc","package_digest":vec![1u8;32],"key":"height.m64","resource_digest":vec![2u8;32]},
+        "window_x":0,"window_y":0,"window_side":1,
+        "strokes":[{"operation":"raise","falloff":"linear","center_m":[0.0,0.0],"radius_m":1.0,"strength":1.0}]
+    }})))).unwrap();
+    assert!(matches!(revoked.receipt.status,IntentStatus::Rejected(_)));
+    assert!(revoked.reply.is_none());
+}

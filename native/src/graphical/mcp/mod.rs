@@ -260,6 +260,7 @@ impl AuthoringBackend for NativeAuthoringBackend {
             "poet_texture_effects_inspect"
                 | "poet_texture_effects_edit"
                 | "poet_texture_layers_edit"
+                | "poet_texture_mask_morphology"
         ) {
             return texture_effects::call(self, name, arguments);
         }

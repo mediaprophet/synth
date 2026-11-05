@@ -5,7 +5,9 @@
 #![forbid(unsafe_code)]
 
 pub mod cartography_layout_cvd;
-pub mod cow_delta_undo;
+pub mod cow_delta_undo {
+    pub use terrain_brushes::*;
+}
 pub mod shared_vertex_ruler_camera;
 pub mod terrain_graph_studio;
 

@@ -16,5 +16,8 @@ too_many_arguments = "allow"
 type_complexity = "allow"
 
 [dependencies]
-poet-geometry = { path = "../geometry" }
+poet-geometry = { package = "drafting-geometry", path = "../../../hypermedia-libraries/crates/drafting-geometry" }
+profile-authoring = { path = "../../../hypermedia-libraries/crates/profile-authoring" }
 qualia-core-db = { path = "C:/github/qualiaDB/crates/qualia-core-db", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"] }
+
+terrain-brushes = { path = "../../../hypermedia-libraries/crates/terrain-brushes" }

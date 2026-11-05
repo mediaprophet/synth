@@ -289,6 +289,7 @@ pub(crate) fn admit_assembly_with_materials(
             .get("uv0")
             .map(|v| stream::<2>(v, mesh.positions.len()))
             .transpose()?;
+        let mut tangents = None;
         if let Some(v) = p.get("uv_atlas").filter(|v| !matches!(v, Value::Null)) {
             let d = crate::graphical::surfaces::uv_atlas::from_value(v)?;
             let applied = crate::graphical::surfaces::uv_atlas::apply(
@@ -301,6 +302,7 @@ pub(crate) fn admit_assembly_with_materials(
             mesh = applied.mesh;
             normals = applied.normals;
             uv0 = Some(applied.uv0);
+            tangents = applied.tangents;
         }
         if let Some(v) = p.get("uv_projection").filter(|v| !matches!(v, Value::Null)) {
             uv0 = Some(crate::graphical::surfaces::uv::project(
@@ -344,12 +346,13 @@ pub(crate) fn admit_assembly_with_materials(
                 scale: vector(get(p, "scale")?)?,
             },
             normals,
+            tangents,
             uv0,
         });
     }
     let scratch_bytes = limits
         .vertices
-        .checked_mul(160)
+        .checked_mul(256)
         .and_then(|v| {
             limits
                 .indices
@@ -417,6 +420,10 @@ pub fn validate_compiled(a: &CompiledAssembly, limits: PreviewLimits) -> Result<
             .any(|i| *i as usize >= vertices)
     {
         return Err("invalid/oversized compiled native assembly".into());
+    }
+    if let Some(tangents) = &a.tangents {
+        poet_spatial_authoring::assembly::validate_tangent_frames(&a.normals,tangents)
+            .map_err(|e| format!("invalid compiled tangent frames: {e:?}"))?;
     }
     let mut end = 0u32;
     let mut ids = BTreeSet::new();

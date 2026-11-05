@@ -50,6 +50,9 @@ pub struct AssemblyPart {
     pub material: MaterialRecord,
     pub trs: Transform,
     pub normals: Option<Vec<[f32; 3]>>,
+    /// Explicit part-local frames, paired with normals and real UV0. No fallback
+    /// frames are admitted as authored/atlas tangents.
+    pub tangents: Option<Vec<[f32; 4]>>,
     pub uv0: Option<Vec<[f32; 2]>>,
 }
 #[derive(Clone, Copy, Debug)]
@@ -84,6 +87,9 @@ pub struct CompiledAssembly {
     pub ranges: Vec<SubmeshRange>,
     pub parts: Vec<CompiledPart>,
     pub normals: Vec<[f32; 3]>,
+    /// Complete derivative stream or absent. Mixed UV-less parts refuse when
+    /// another part requests retained frames; no sentinel or fabricated UVs.
+    pub tangents: Option<Vec<[f32; 4]>>,
     pub uv0: Vec<[f32; 2]>,
 }
 
@@ -131,14 +137,15 @@ fn preflight(
             .checked_add(part.key.len() + part.parent.as_ref().map_or(0, String::len))
             .ok_or(AuthoringError::Budget("assembly identifier bytes overflow"))?;
     }
+    let with_frames = parts.iter().any(|p| p.tangents.is_some());
     let scratch = vertices
-        .checked_mul(64)
+        .checked_mul(if with_frames { 160 } else { 64 })
         .and_then(|v| {
             input_vertices
                 .checked_mul(32)
                 .and_then(|i| v.checked_add(i))
         })
-        .and_then(|v| triangles.checked_mul(32).and_then(|t| v.checked_add(t)))
+        .and_then(|v| triangles.checked_mul(if with_frames { 48 } else { 32 }).and_then(|t| v.checked_add(t)))
         .and_then(|v| parts.len().checked_mul(512).and_then(|p| v.checked_add(p)))
         .and_then(|v| text.checked_mul(4).and_then(|t| v.checked_add(t)));
     if vertices == 0
@@ -160,10 +167,21 @@ pub fn compile_assembly(
     limits: AssemblyLimits,
 ) -> Result<CompiledAssembly, AuthoringError> {
     let (nv, nt) = preflight(parts, limits)?;
+    let with_frames = parts.iter().any(|p| p.tangents.is_some());
     let mut keys = BTreeMap::new();
     let mut semantics = BTreeSet::new();
     let mut materials = BTreeMap::new();
     for (index, part) in parts.iter().enumerate() {
+        if with_frames && part.uv0.is_none() {
+            return Err(AuthoringError::Invalid("complete tangent delivery requires real UV0 on every part; mixed UV-less assembly is unsupported"));
+        }
+        if let Some(tangents) = &part.tangents {
+            let normals = part.normals.as_deref().ok_or(AuthoringError::Invalid("explicit tangents require aligned source normals"))?;
+            if normals.len() != part.mesh.positions.len() || tangents.len() != part.mesh.positions.len() {
+                return Err(AuthoringError::Invalid("explicit tangent/normal count differs from source vertices"));
+            }
+            validate_tangent_frames(normals, tangents)?;
+        }
         if keys.insert(part.key.as_str(), index).is_some() || !semantics.insert(part.semantic_id) {
             return Err(AuthoringError::Invalid(
                 "duplicate part key or semantic identifier",
@@ -312,20 +330,81 @@ pub fn compile_assembly(
             max[a] = max[a].max(p[a]);
         }
     }
+    let mesh = Mesh { positions, triangles, min, max };
+    let tangents = if with_frames {
+        // Strict Core derivation validates actual transformed geometry/UVs and
+        // fills only unspecified part frames. Never use fallback UV frames.
+        let mut output = derive_tangent_frames(&mesh, &normals, &uv0, limits.scratch_bytes)?;
+        let mut first_vertex = 0usize;
+        for (index, part) in parts.iter().enumerate() {
+            if let Some(input) = &part.tangents {
+                let matrix = world[index].ok_or(AuthoringError::Invalid("unresolved tangent world transform"))?;
+                for (i, &t) in input.iter().enumerate() {
+                    output[first_vertex + i] = frames::tangent(&matrix, normals[first_vertex + i], t)?;
+                }
+            }
+            first_vertex += if part.normals.is_some() { part.mesh.positions.len() } else { part.mesh.triangles.len() * 3 };
+        }
+        validate_tangent_frames(&normals, &output)?;
+        Some(output)
+    } else { None };
     let materials: Vec<_> = materials.into_values().collect();
-    validate_material_bindings(&materials, &ranges, (triangles.len() * 3) as u32)
+    validate_material_bindings(&materials, &ranges, (mesh.triangles.len() * 3) as u32)
         .map_err(|e| AuthoringError::Kernel(format!("Core material bindings: {e:?}")))?;
     Ok(CompiledAssembly {
-        mesh: Mesh {
-            positions,
-            triangles,
-            min,
-            max,
-        },
+        mesh,
         materials,
         ranges,
         parts: compiled,
         normals,
+        tangents,
         uv0,
     })
+}
+
+/// Typed frame admission shared by assembly, decoded .10d and retained poses.
+/// This proves finite unit/perpendicular tangent and signed handedness; it does
+/// not infer whether an explicitly authored orientation matches texture intent.
+pub fn validate_tangent_frames(normals: &[[f32; 3]], tangents: &[[f32; 4]]) -> Result<(), AuthoringError> {
+    if tangents.len() != normals.len() { return Err(AuthoringError::Invalid("tangents are not normal-aligned")); }
+    for (normal, t) in normals.iter().zip(tangents) {
+        let n = frames::unit(normal.map(f64::from))?;
+        let length: f64 = t[..3].iter().map(|v| f64::from(*v).powi(2)).sum();
+        let dot: f64 = (0..3).map(|i| f64::from(n[i]) * f64::from(t[i])).sum();
+        if t.iter().any(|v| !v.is_finite()) || (length - 1.0).abs() > 1e-3
+            || dot.abs() > 1e-3 || !matches!(t[3], -1.0 | 1.0) {
+            return Err(AuthoringError::Invalid("tangent must be finite unit perpendicular with handedness +/-1"));
+        }
+    }
+    Ok(())
+}
+
+/// Explicit strict derivative: undefined/degenerate UVs refuse instead of
+/// creating arbitrary rendering fallback tangents. Caller bounds scene counts
+/// and reserves the returned logical scratch envelope in its own operation.
+pub fn tangent_scratch_bytes(vertices: usize, triangles: usize) -> Result<usize, AuthoringError> {
+    vertices.checked_mul(56).and_then(|n| triangles.checked_mul(12).and_then(|t| n.checked_add(t)))
+        .ok_or(AuthoringError::Budget("tangent scratch overflow"))
+}
+pub fn derive_tangent_frames(mesh: &Mesh, normals: &[[f32; 3]], uv0: &[[f32; 2]],
+    max_scratch_bytes: usize) -> Result<Vec<[f32; 4]>, AuthoringError> {
+    let n = mesh.positions.len(); let f = mesh.triangles.len();
+    if tangent_scratch_bytes(n,f)? > max_scratch_bytes { return Err(AuthoringError::Budget("strict tangent scratch exceeds caller budget")); }
+    fn filled<T: Clone>(count: usize, value: T) -> Result<Vec<T>, AuthoringError> {
+        let mut v = Vec::new(); v.try_reserve_exact(count).map_err(|_| AuthoringError::Budget("tangent allocation refused"))?;
+        v.resize(count,value); Ok(v)
+    }
+    let mut output = filled(n,[0.0f32;4])?;
+    let mut temporary = filled(n,[0.0f32;4])?;
+    let mut scratch = filled(n,[0.0f32;6])?;
+    let count = f.checked_mul(3).ok_or(AuthoringError::Budget("tangent index overflow"))?;
+    let mut indices = Vec::new(); indices.try_reserve_exact(count).map_err(|_| AuthoringError::Budget("tangent index allocation refused"))?;
+    for t in &mesh.triangles { indices.extend_from_slice(t); }
+    let work = u64::try_from(n).ok().and_then(|n| u64::try_from(f).ok().and_then(|f| n.checked_add(f)))
+        .and_then(|n| n.checked_mul(100)).ok_or(AuthoringError::Budget("tangent work overflow"))?;
+    qualia_core_db::render::mesh_tangent_frames::tangents_from_uvs_strict_into(
+        &mesh.positions, uv0, normals, &indices, work, &mut output, &mut temporary, &mut scratch)
+        .map_err(|e| AuthoringError::Kernel(format!("strict assembly tangents refused; retain previous source: {e:?}")))?;
+    validate_tangent_frames(normals,&output)?;
+    Ok(output)
 }

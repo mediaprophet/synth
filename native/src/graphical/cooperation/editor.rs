@@ -181,6 +181,22 @@ impl EditorHost for AuthorizedEditorHost {
             inner.edit_georaster(request, expected.clone(), limits, cancelled)
         })
     }
+
+    fn brush_georaster(
+        &mut self,
+        request: crate::graphical::checkpoints::GeoRasterBrushRequest,
+        expected: SourceRef,
+        limits: crate::graphical::checkpoints::GeoRasterEditLimits,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<qualia_core_db::poet_host::invoke::studio_store::checkpoint::SaveReceipt, String>
+    {
+        request.validate_bounds()?;
+        let name = request.resource.filename.clone();
+        let file = studio_store::checkpoint::ExpectedFile::Sha256(request.resource.package_digest);
+        self.write_package(&name, file, &expected, |inner| {
+            inner.brush_georaster(request, expected.clone(), limits, cancelled)
+        })
+    }
     fn create_georaster(
         &mut self,
         request: crate::graphical::checkpoints::GeoRasterCreateRequest,
@@ -237,6 +253,10 @@ impl EditorHost for AuthorizedEditorHost {
             self.limits,
             |_, _| self.inner.authoring_view(e.clone()),
         )
+    }
+    fn timeline_media(&self, request: crate::graphical::checkpoints::TimelineMediaRequest, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::checkpoints::TimelineMediaSelection, String> {
+        with_authorized(self.owner.as_ref(), &self.scope, Some(&expected), AuthoringAction::ReadSource, self.limits,
+            |_, _| self.inner.timeline_media(request, expected.clone(), cancelled))
     }
     fn rig_authoring_edit(&mut self, resource: crate::graphical::checkpoints::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
         if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled before authorization".into()); }

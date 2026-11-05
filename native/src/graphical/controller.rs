@@ -277,14 +277,28 @@ impl EditorHost for CanonicalEditorHost {
         resources: crate::graphical::surfaces::TextureResources,
         expected: SourceRef,
     ) -> Result<(), String> {
-        self.expected(&expected)?;
+        self.install_surface_resources_transaction(resources, expected).map_err(|error| match error {
+            crate::graphical::surface_host::SurfaceBindingFailure::BeforeMutation(e) |
+            crate::graphical::surface_host::SurfaceBindingFailure::MayHaveMutated(e) => e,
+        })
+    }
+    fn install_surface_resources_transaction(
+        &mut self,
+        resources: crate::graphical::surfaces::TextureResources,
+        expected: SourceRef,
+    ) -> Result<(), crate::graphical::surface_host::SurfaceBindingFailure> {
+        use crate::graphical::surface_host::SurfaceBindingFailure::BeforeMutation;
+        self.expected(&expected).map_err(BeforeMutation)?;
+        if let Some(previous) = self.surface_resources.as_ref() {
+            previous.require_image_continuity(&resources).map_err(BeforeMutation)?;
+        }
         if let Some(parts) = self.session.value("poet_parts") {
             let value = Value::Record(std::collections::BTreeMap::from([(
                 "parts".into(),
                 parts.clone(),
             )]));
             self.preview
-                .validate_with_resources(&value, Some(&resources))?;
+                .validate_with_resources(&value, Some(&resources)).map_err(BeforeMutation)?;
         }
         self.surface_resources = Some(resources);
         self.execution_epoch.retire();
@@ -318,6 +332,23 @@ impl EditorHost for CanonicalEditorHost {
         a: crate::graphical::authoring::AuthoringEdit,
         e: SourceRef,
     ) -> Result<EditorOutcome, String> {
+        let a = match a {
+            crate::graphical::authoring::AuthoringEdit::TextureMaskMorphology {
+                material_id,
+                layer_index,
+                operation,
+                radius,
+            } => {
+                return self.apply_texture_mask_morphology(
+                    material_id,
+                    layer_index,
+                    operation,
+                    radius,
+                    e,
+                );
+            }
+            other => other,
+        };
         if matches!(&a, crate::graphical::authoring::AuthoringEdit::Rig { .. }) { return Err("Rig edit requires the cancellation-aware checkpoint route".into()); }
         self.edit_assembly(a, e)
     }
@@ -409,12 +440,98 @@ impl EditorHost for CanonicalEditorHost {
     }
 
     fn submit(&mut self, source: &str, expected: SourceRef) -> Result<EditorOutcome, String> {
+        self.submit_with_junction_operation(source, expected)
+    }
+    fn undo(&mut self, expected: SourceRef) -> Result<EditorSnapshot, String> {
+        if expected.artifact_id != self.artifact_id {
+            return Err("foreign source reference".into());
+        }
+        let (_, stamp) = studio_store::undo_artifact_stamped(&self.artifact_id, &expected.stamp)?;
+        self.active_stamp = stamp;
+        // SourceSession has no reverse-effect/runtime rollback contract. Keep
+        // the restored editable source and require host reconciliation/reopen.
+        self.reconciliation_required = true;
+        self.snapshot()
+    }
+
+    fn redo(&mut self, expected: SourceRef) -> Result<EditorSnapshot, String> {
+        if expected.artifact_id != self.artifact_id {
+            return Err("foreign source reference".into());
+        }
+        let (_, stamp) = studio_store::redo_artifact_stamped(&self.artifact_id, &expected.stamp)?;
+        self.active_stamp = stamp;
+        self.reconciliation_required = true;
+        self.snapshot()
+    }
+
+    fn rebuild_execution(&mut self, expected: SourceRef) -> Result<EditorOutcome, String> {
+        if expected.artifact_id != self.artifact_id {
+            return Err("foreign rebuild source reference".into());
+        }
+        if !self.execution_epoch.is_current() {
+            return Err("execution epoch has retired".into());
+        }
+        let candidate = match execution::prepare(
+            expected,
+            &self.host,
+            &self.factory_limits,
+            &self.rebuild_limits,
+            self.preview.as_ref(),
+            self.surface_resources.as_ref(),
+        ) {
+            Ok(candidate) => candidate,
+            Err(error) => {
+                self.reconciliation_required = true;
+                return Err(error);
+            }
+        };
+        self.activate_rebuild(candidate)
+    }
+}
+
+#[cfg(test)]
+#[path = "controller_tests.rs"]
+mod tests;
+
+#[cfg(test)]
+#[path = "material_admission_tests.rs"]
+mod material_admission_tests;
+
+#[cfg(test)]
+#[path = "numeric_sheet_host_tests.rs"]
+mod numeric_sheet_host_tests;
+
+impl CanonicalEditorHost {
+    /// Typed candidate generation can begin the same operation before submission.
+    /// Only the outer owner clears its cumulative counters, including on panic.
+    pub(super) fn submit_with_junction_operation(
+        &mut self, source: &str, expected: SourceRef,
+    ) -> Result<EditorOutcome, String> {
+        let owner = self.host.begin_junction_operation()?;
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            self.submit_junction_inner(source, expected)
+        }));
+        if owner { self.host.end_junction_operation(); }
+        match result { Ok(value) => value, Err(payload) => { self.reconciliation_required = true; std::panic::resume_unwind(payload) } }
+    }
+    fn submit_junction_inner(&mut self, source: &str, expected: SourceRef) -> Result<EditorOutcome, String> {
         if self.reconciliation_required {
             return Err("source/session reconciliation required before further execution".into());
         }
         self.expected(&expected)?;
         if !self.execution_epoch.is_current() {
             return Err("execution epoch has retired".into());
+        }
+        // Refuse session source limits before cloning source-layer snapshots.
+        // This is not a bound on runtime values or aggregate operation memory.
+        if source.len() > self.factory_limits.submission_bytes
+            || self.session.revision() >= self.factory_limits.revisions {
+            return Err("session source/revision limit exceeded before source snapshot".into());
+        }
+        let retained = self.session.sources().iter().try_fold(0usize, |total, cell| total.checked_add(cell.len()))
+            .ok_or("Session retained source size overflow")?;
+        if retained.checked_add(source.len()).map_or(true, |n| n > self.factory_limits.retained_source_bytes) {
+            return Err("session source/revision limit exceeded before source snapshot".into());
         }
         let (layer_parts, layer_base) = if source.contains("_poet_source_layer") {
             crate::graphical::authoring::source_layers::validation_snapshot_with_budget(
@@ -427,14 +544,31 @@ impl EditorHost for CanonicalEditorHost {
         } else {
             (None, None)
         };
+        let had_junction = self.session.value("poet_botanical_junction").is_some_and(crate::graphical::authoring::junction_session::is_junction_binding);
         self.host.begin_submission();
         let provider = &self.preview;
         let resources = self.surface_resources.as_ref();
-        let result = match self.session.submit_validated(
+        let junction_replay_admitted = self.rebuild_limits.total_geometry_work >= 64_000_000
+            && self.rebuild_limits.total_kernel_dispatches >= 256;
+        let result = match self.session.submit_validated_bindings(
             source,
             &mut self.host,
             Budget::default(),
-            |value| {
+            |value, bindings, host| {
+                if had_junction && !bindings.value("poet_botanical_junction").is_some_and(crate::graphical::authoring::junction_session::is_junction_binding) {
+                    return Err(vibe::Diagnostic::new(vibe::DiagCode::E701, vibe::Span::point(0), "Junction removal requires explicit migration"));
+                }
+                if bindings.value("poet_botanical_junction").is_some_and(crate::graphical::authoring::junction_session::is_junction_binding)
+                    && !junction_replay_admitted {
+                    return Err(vibe::Diagnostic::new(vibe::DiagCode::E400, vibe::Span::point(0),
+                        "Junction requires an explicitly configured botanical replay profile"));
+                }
+                crate::graphical::authoring::junction_session::validate_tentative(bindings, host)
+                    .map_err(|message| vibe::Diagnostic::new(vibe::DiagCode::E701, vibe::Span::point(0), message))?;
+                crate::graphical::authoring::timeline_associations::validate_pair(bindings.value("poet_timeline"),bindings.value("poet_timeline_media"))
+                    .map_err(|message|vibe::Diagnostic::new(vibe::DiagCode::E701,vibe::Span::point(0),message))?;
+                crate::graphical::authoring::sound_field::validate_pair(bindings.value("poet_timeline"), bindings.value("poet_sound_field"))
+                    .map_err(|message|vibe::Diagnostic::new(vibe::DiagCode::E701,vibe::Span::point(0),message))?;
                 crate::graphical::authoring::source_layers::validate_result(
                     value,
                     layer_parts.as_ref(),
@@ -531,61 +665,4 @@ impl EditorHost for CanonicalEditorHost {
         })
     }
 
-    fn undo(&mut self, expected: SourceRef) -> Result<EditorSnapshot, String> {
-        if expected.artifact_id != self.artifact_id {
-            return Err("foreign source reference".into());
-        }
-        let (_, stamp) = studio_store::undo_artifact_stamped(&self.artifact_id, &expected.stamp)?;
-        self.active_stamp = stamp;
-        // SourceSession has no reverse-effect/runtime rollback contract. Keep
-        // the restored editable source and require host reconciliation/reopen.
-        self.reconciliation_required = true;
-        self.snapshot()
-    }
-
-    fn redo(&mut self, expected: SourceRef) -> Result<EditorSnapshot, String> {
-        if expected.artifact_id != self.artifact_id {
-            return Err("foreign source reference".into());
-        }
-        let (_, stamp) = studio_store::redo_artifact_stamped(&self.artifact_id, &expected.stamp)?;
-        self.active_stamp = stamp;
-        self.reconciliation_required = true;
-        self.snapshot()
-    }
-
-    fn rebuild_execution(&mut self, expected: SourceRef) -> Result<EditorOutcome, String> {
-        if expected.artifact_id != self.artifact_id {
-            return Err("foreign rebuild source reference".into());
-        }
-        if !self.execution_epoch.is_current() {
-            return Err("execution epoch has retired".into());
-        }
-        let candidate = match execution::prepare(
-            expected,
-            &self.host,
-            &self.factory_limits,
-            &self.rebuild_limits,
-            self.preview.as_ref(),
-            self.surface_resources.as_ref(),
-        ) {
-            Ok(candidate) => candidate,
-            Err(error) => {
-                self.reconciliation_required = true;
-                return Err(error);
-            }
-        };
-        self.activate_rebuild(candidate)
-    }
 }
-
-#[cfg(test)]
-#[path = "controller_tests.rs"]
-mod tests;
-
-#[cfg(test)]
-#[path = "material_admission_tests.rs"]
-mod material_admission_tests;
-
-#[cfg(test)]
-#[path = "numeric_sheet_host_tests.rs"]
-mod numeric_sheet_host_tests;

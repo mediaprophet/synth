@@ -233,7 +233,8 @@ impl Runtime {
                     session.clone(),
                     Some(filename),
                     super::create::preview(),
-                    crate::graphical::native_authoring_profile::selected().rebuild_limits(),
+                    crate::graphical::native_authoring_profile::startup_rebuild_limits(
+                        crate::graphical::native_authoring_profile::selected()),
                 )?;
                 self.project = Some(Arc::new(project));
                 self.active_filename = Some(filename.into());

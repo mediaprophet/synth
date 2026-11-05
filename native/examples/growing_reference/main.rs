@@ -1,6 +1,7 @@
 //! Controlled software-fixture reference production through Poet's public host.
 //! No human admission, production trust anchor, OS credentials or master acceptance.
 mod authority;
+mod botanical;
 mod files;
 mod package;
 mod produce;
@@ -20,12 +21,17 @@ use vibe::{session::SessionLimits, Value};
 
 const HMC: &str = "growing-station.hmc";
 const ASSET: &str = "growing-station.10d";
+const Q42_KEY: &str = "graphs/growing-station.10d.q42";
+const Q42_ASSET: &str = "growing-station.q42";
+const M64_ASSET: &str = "growing-station.m64";
 const REQUEST: &str = "software-source-review/1";
 const MAX_VERTICES: usize = 1_000_000;
 const MAX_INDICES: usize = 6_000_000;
 const MASTER_KEY: &str = "masters/growing-station/master.vibe";
 const PRESET_KEY: &str = "masters/growing-station/preset.vibe";
 const ACCEPTED_KEY: &str = "masters/growing-station/accepted-source.vibe";
+const RENDER_WIDTH: u32 = 1280;
+const RENDER_HEIGHT: u32 = 720;
 
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -41,6 +47,8 @@ struct RunInfo {
     accepted_source_sha256: String,
     hmc_sha256: String,
     compiled_sha256: String,
+    q42_sha256: String,
+    m64_sha256: String,
     target: qualia_cooperative_core::authoring::DocumentRevision,
 }
 impl RunInfo {
@@ -82,6 +90,9 @@ fn limits() -> PreviewLimits {
 }
 struct ValidateOnly;
 impl PreviewProvider for ValidateOnly {
+    fn retire_retained_viewport(&mut self) -> Result<(), String> {
+        Ok(())
+    }
     fn validate(&self, value: &Value) -> Result<(), String> {
         if assembly::is_assembly(value) {
             assembly::admit_assembly(value, limits())?;
@@ -105,9 +116,12 @@ fn config(scope: Scope, root: &Path) -> ProjectConfig {
         gateway_limits: GatewayLimits::default(),
         geometry_grants: [
             "capability.invoke",
+            "ComputationalGeometry.extrude_profile",
             "ComputationalGeometry.profile_sweep",
             "ComputationalGeometry.uv_sphere",
             "ComputationalGeometry.torus",
+            "ComputationalGeometry.space_colonize_3d",
+            "ComputationalGeometry.pipe_model_radii",
         ]
         .into_iter()
         .map(str::to_owned)
@@ -138,11 +152,23 @@ fn run() -> Result<(), String> {
             let root = files::existing_directory(Path::new(&args[2]), false)?;
             package::reopen(&root, true, None)
         }
+        Some("produce-botanical") if args.len() == 4 => {
+            let root = files::existing_directory(Path::new(&args[2]), true)?;
+            botanical::produce_botanical(&root, &args[3])?;
+            let status = std::process::Command::new(std::env::current_exe().map_err(|e| e.to_string())?)
+                .arg("reopen-render-botanical").arg(&root).status().map_err(|e| e.to_string())?;
+            if !status.success() { return Err(format!("fresh-process botanical reopen/render exited {status}")); }
+            Ok(())
+        }
+        Some("reopen-render-botanical") if args.len() == 3 => {
+            let root = files::existing_directory(Path::new(&args[2]), false)?;
+            botanical::reopen_botanical(&root)
+        }
         Some("review") if args.len() == 5 => {
             let root = files::existing_directory(Path::new(&args[2]), false)?;
             package::reopen(&root, false, Some((&args[3], &args[4])))
         }
-        _ => Err("usage: growing_reference produce EXISTING_EMPTY_OUTPUT {film|open_world_game|cartoon} ASSET_SOURCE_ROOT | reopen-render OUTPUT | review OUTPUT EVIDENCE_FILENAME {accepted|changes-requested|rejected}".into()),
+        _ => Err("usage: growing_reference produce EXISTING_EMPTY_OUTPUT {film|open_world_game|cartoon} ASSET_SOURCE_ROOT | produce-botanical EXISTING_EMPTY_OUTPUT {film|open_world_game|cartoon} | reopen-render OUTPUT | reopen-render-botanical OUTPUT | review OUTPUT EVIDENCE_FILENAME {accepted|changes-requested|rejected}".into()),
     }
 }
 

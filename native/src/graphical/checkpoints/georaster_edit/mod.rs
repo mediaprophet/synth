@@ -8,6 +8,8 @@ use qualia_geospatial::{
     ElevationRaster,
 };
 use std::sync::atomic::{AtomicBool, Ordering};
+mod terrain;
+pub use terrain::GeoRasterBrushRequest;
 mod producer;
 pub use producer::GeoRasterCreateRequest;
 mod source;
@@ -57,6 +59,7 @@ fn live(cancelled: &AtomicBool) -> Result<(), String> {
 
 /// Caller-owned scratch/output is used by each codec. Only this cold adapter
 /// allocates bounded, fallible sample/output buffers; no per-record heap work.
+/// Existing single-cell edit over the shared canonical payload mutation owner.
 pub(super) fn replace_payload(
     bytes: &[u8],
     request: &GeoRasterEditRequest,
@@ -65,6 +68,29 @@ pub(super) fn replace_payload(
     scratch: &mut [M64PayloadInterval],
 ) -> Result<Vec<u8>, String> {
     request.validate_bounds()?;
+    mutate_elevation_payload(bytes, limits, cancelled, scratch, |samples, frame, cell, meta| {
+        let shape = meta.shape().map_err(|e| format!("Raster shape refused: {e:?}"))?;
+        if request.sample_x >= shape.width || request.sample_y >= shape.height {
+            return Err("Raster edit coordinate lies outside persisted source extent; padding is not source".into());
+        }
+        samples[request.sample_y * shape.width + request.sample_x] = request.sample_mm;
+        frame.origin_elevation_mm = request.origin_elevation_mm;
+        *cell = request.cell_size_mm;
+        Ok(())
+    })
+}
+
+fn mutate_elevation_payload<F>(
+    bytes: &[u8],
+    limits: GeoRasterEditLimits,
+    cancelled: &AtomicBool,
+    scratch: &mut [M64PayloadInterval],
+    mutate: F,
+) -> Result<Vec<u8>, String>
+where
+    F: FnOnce(&mut [i32], &mut qualia_geospatial::GeodeticFrame, &mut u32,
+        &qualia_core_db::q42::m64_matter::M64GeoRasterMetadata) -> Result<(), String>,
+{
     live(cancelled)?;
     let reader = M64Reader::parse(bytes, limits.read, scratch)
         .map_err(|e| format!("Canonical M64 edit admission refused: {e}"))?;
@@ -72,12 +98,6 @@ pub(super) fn replace_payload(
     let shape = meta
         .shape()
         .map_err(|e| format!("Raster shape refused: {e:?}"))?;
-    if request.sample_x >= shape.width || request.sample_y >= shape.height {
-        return Err(
-            "Raster edit coordinate lies outside persisted source extent; padding is not source"
-                .into(),
-        );
-    }
     let count = shape
         .width
         .checked_mul(shape.height)
@@ -140,12 +160,12 @@ pub(super) fn replace_payload(
     if out[..written] != *bytes {
         return Err("Selected M64 contains fields/layout not preserved by the canonical elevation-only producer; edit refused without losing content".into());
     }
-    samples[request.sample_y * shape.width + request.sample_x] = request.sample_mm;
-    frame.origin_elevation_mm = request.origin_elevation_mm;
+    let mut cell_size_mm = meta.cell_size_mm;
+    mutate(&mut samples, &mut frame, &mut cell_size_mm, meta)?;
     let edited = ElevationRaster {
         width: shape.width,
         height: shape.height,
-        cell_size_mm: request.cell_size_mm,
+        cell_size_mm,
         elevations_mm: &samples,
     };
     let written = compile_raster_to_m64_v3(

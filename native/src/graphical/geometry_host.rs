@@ -29,8 +29,17 @@ pub struct GeometryHost {
     grants: Vec<String>,
     remaining_work: usize,
     remaining_dispatches: usize,
+    // Only the opt-in junction transaction uses this cumulative allocation
+    // allowance. Legacy submissions retain the existing behavior.
+    junction_remaining: Option<JunctionRemaining>,
     limits: GeometryHostLimits,
 }
+/// Separate host-selected structural budget, used only during junction work.
+/// Legacy geometry retains its existing independent allowance.
+#[derive(Debug, PartialEq, Eq)]
+struct JunctionRemaining { work: usize, dispatches: usize, bytes: usize, replay: bool }
+const JUNCTION_WORK: usize = 64_000_000;
+const JUNCTION_DISPATCHES: usize = 256;
 impl Default for GeometryHost {
     fn default() -> Self {
         Self::new(Vec::new(), 200_000)
@@ -70,6 +79,7 @@ impl GeometryHost {
             grants,
             remaining_work: limits.submission_work,
             remaining_dispatches: limits.dispatches,
+            junction_remaining: None,
             limits,
         }
     }
@@ -124,12 +134,94 @@ impl GeometryHost {
     pub(crate) fn vertex_limit(&self) -> usize {
         self.max_vertices
     }
+    /// A bounded opt-in diagnostic profile, never an authored quality ceiling.
+    /// Existing v1/v2 profiles keep their previous limits.
+    pub(crate) fn junction_limits(&self) -> Result<crate::graphical::junction_generate::JunctionLimits, String> {
+        let botanical = self.botanical_limits(false)?;
+        let max_cells = (self.max_vertices / 36).min(512);
+        let max_samples = max_cells.checked_mul(8).ok_or("Junction sample cap overflow")?.min(4096);
+        let probes = JUNCTION_WORK / 16;
+        let topology_work = JUNCTION_WORK / 8;
+        let max_payload_bytes = self.limits.scratch_bytes / 6;
+        if max_cells == 0 || max_samples == 0 || probes == 0 || topology_work == 0 || max_payload_bytes == 0 {
+            return Err("Junction working limits unavailable".into());
+        }
+        Ok(crate::graphical::junction_generate::JunctionLimits {
+            botanical, max_samples, max_cells,
+            max_grid_axis_checks: max_samples.checked_mul(3).ok_or("Junction axis cap overflow")?,
+            max_vertices: self.max_vertices,
+            max_triangles: self.max_vertices.checked_mul(2).ok_or("Junction triangle cap overflow")?,
+            max_field_evaluations: max_samples.checked_mul(3).ok_or("Junction field cap overflow")?,
+            max_extraction_probes: probes, topology_work, max_payload_bytes,
+        })
+    }
     pub(crate) fn actual_grants(&self) -> &[String] {
         &self.grants
     }
     pub(crate) fn begin_submission(&mut self) {
+        if self.junction_remaining.is_none() {
+            self.remaining_work = self.limits.submission_work;
+            self.remaining_dispatches = self.limits.dispatches;
+        }
+    }
+    /// Begin or join an opt-in transaction. Only the caller receiving `true`
+    /// owns its end; a nested submit shares the existing counters.
+    pub(crate) fn begin_junction_operation(&mut self) -> Result<bool, String> {
+        if self.junction_remaining.is_some() {
+            return Ok(false);
+        }
         self.remaining_work = self.limits.submission_work;
         self.remaining_dispatches = self.limits.dispatches;
+        self.junction_remaining = Some(JunctionRemaining {
+            work: JUNCTION_WORK, dispatches: JUNCTION_DISPATCHES, bytes: self.limits.scratch_bytes, replay: false,
+        });
+        Ok(true)
+    }
+    /// Rebuild already owns a host with total replay limits; do not reset them.
+    pub(crate) fn begin_junction_rebuild(&mut self) -> Result<(), String> {
+        if self.junction_remaining.is_some() {
+            return Err("Nested junction rebuild refused".into());
+        }
+        self.junction_remaining = Some(JunctionRemaining {
+            work: JUNCTION_WORK, dispatches: JUNCTION_DISPATCHES, bytes: self.limits.scratch_bytes, replay: true,
+        });
+        Ok(())
+    }
+    pub(crate) fn end_junction_operation(&mut self) {
+        self.junction_remaining = None;
+    }
+    /// Host-only callers use this scope so errors and unwinding cannot leave
+    /// a transaction active. Controller-level operations that also borrow the
+    /// editor need their own equivalent outer scope around begin/end.
+    pub(crate) fn with_junction_operation<T>(
+        &mut self, run: impl FnOnce(&mut Self) -> Result<T, String>,
+    ) -> Result<T, String> {
+        let owner = self.begin_junction_operation()?;
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| run(self)));
+        if owner { self.end_junction_operation(); }
+        match outcome { Ok(result) => result, Err(payload) => std::panic::resume_unwind(payload) }
+    }
+    /// Call before each expensive phase. All debit decisions are atomic; no
+    /// refund follows a failure. Values must be derived from owner bounds.
+    pub(crate) fn reserve_junction_work(&mut self, work: usize, dispatches: usize, bytes: usize)
+        -> Result<(), String> {
+        let available = self.junction_remaining.as_mut().ok_or("Junction operation is not active")?;
+        if work > available.work || dispatches > available.dispatches || bytes > available.bytes
+            || (available.replay && (work > self.remaining_work || dispatches > self.remaining_dispatches)) {
+            return Err("Junction operation work, dispatch or payload budget exhausted".into());
+        }
+        if available.replay {
+            self.remaining_work -= work;
+            self.remaining_dispatches -= dispatches;
+        }
+        available.work -= work;
+        available.dispatches -= dispatches;
+        available.bytes -= bytes;
+        Ok(())
+    }
+    /// Independent read-only inspection gets a fresh finite operation allowance.
+    pub(crate) fn for_inspection(&self) -> Self {
+        Self::configured(self.grants.clone(), self.limits)
     }
     pub(crate) fn for_rebuild(&self, total_work: usize, dispatches: usize) -> Self {
         let mut next = Self::configured(self.grants.clone(), self.limits);
@@ -190,6 +282,55 @@ fn denied(span: Span) -> Diagnostic {
         span,
         "operation is outside the admitted native geometry preview profile",
     )
+}
+
+#[cfg(test)]
+mod junction_transaction_budget_tests {
+    use super::*;
+    #[test]
+    fn nested_begin_and_submission_do_not_reset_active_work() {
+        let mut host = GeometryHost::new(Vec::new(), 1_000);
+        assert_eq!(host.begin_junction_operation().unwrap(), true);
+        host.reserve_junction_work(23, 1, 30).unwrap();
+        assert_eq!(host.begin_junction_operation().unwrap(), false);
+        host.begin_submission();
+        assert_eq!(host.junction_remaining.as_ref().unwrap().work, JUNCTION_WORK - 23);
+        assert_eq!(host.junction_remaining.as_ref().unwrap().bytes, host.limits.scratch_bytes - 30);
+        host.end_junction_operation();
+    }
+    #[test]
+    fn exhaustion_refuses_atomically() {
+        let mut host = GeometryHost::new(Vec::new(), 1_000);
+        host.begin_junction_operation().unwrap();
+        host.reserve_junction_work(JUNCTION_WORK, JUNCTION_DISPATCHES, host.limits.scratch_bytes).unwrap();
+        let before = host.junction_remaining.as_ref().unwrap();
+        assert_eq!((before.work, before.dispatches, before.bytes), (0, 0, 0));
+        assert!(host.reserve_junction_work(1, 0, 0).is_err());
+        let after = host.junction_remaining.as_ref().unwrap();
+        assert_eq!((after.work, after.dispatches, after.bytes), (0, 0, 0));
+    }
+    #[test]
+    fn replay_charges_both_operation_and_total_without_partial_debit() {
+        let mut host = GeometryHost::new(Vec::new(), 1_000).for_rebuild(20, 2);
+        host.begin_junction_rebuild().unwrap();
+        host.reserve_junction_work(12, 1, 0).unwrap();
+        assert_eq!((host.remaining_work, host.remaining_dispatches), (8, 1));
+        assert_eq!(host.junction_remaining.as_ref().unwrap().work, JUNCTION_WORK - 12);
+        assert!(host.reserve_junction_work(9, 1, 0).is_err());
+        assert_eq!((host.remaining_work, host.remaining_dispatches), (8, 1));
+        assert_eq!(host.junction_remaining.as_ref().unwrap().work, JUNCTION_WORK - 12);
+    }
+    #[test]
+    fn closure_cleans_up_on_error_and_can_restart() {
+        let mut host = GeometryHost::new(Vec::new(), 1_000);
+        let result: Result<(), String> = host.with_junction_operation(|host| {
+            host.reserve_junction_work(5, 1, 4)?;
+            Err("deliberate error".into())
+        });
+        assert!(result.is_err());
+        assert!(host.junction_remaining.is_none());
+        assert!(host.begin_junction_operation().unwrap());
+    }
 }
 
 impl Host for GeometryHost {

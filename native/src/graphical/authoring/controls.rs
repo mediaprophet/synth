@@ -156,6 +156,7 @@ pub(crate) fn AuthoringControls(
     mut rig_resource_key: Signal<String>,
     mut rig_resource_digest: Signal<String>,
     mut rig_ready_source: Signal<Option<(Context, String)>>,
+    timeline_resource_selection: Signal<Option<crate::graphical::timeline_resource_selection::TimelineResourceSelection>>,
     #[props(default)] buffer: Option<crate::graphical::draft_buffer::DraftBuffer>,
 ) -> Element {
     let inspected = use_signal(|| None::<AuthoringView>);
@@ -246,9 +247,15 @@ pub(crate) fn AuthoringControls(
     let motion_host = host.clone();
     let motion_buffer = buffer.clone();
     let motion_source = current.source.clone();
+    let timeline_host = host.clone();
+    let timeline_buffer = buffer.clone();
+    let timeline_source = current.source.clone();
     let rig_source = current.source.clone();
     let rig_host = host.clone();
     let rig_buffer = buffer.clone();
+    let junction_source = current.source.clone();
+    let junction_host = host.clone();
+    let junction_buffer = buffer.clone();
     let botanical_source = current.source.clone();
     let botanical_host = host.clone();
     let botanical_buffer = buffer.clone();
@@ -357,7 +364,13 @@ pub(crate) fn AuthoringControls(
                     fresh: fresh && !busy(), live_view: view, live_selected: selected,
                     onedit: move |edit| send(Action::AuthoringEdit {edit:AuthoringEdit::Botanical {edit}, expected:botanical_source.clone()}, botanical_host.clone(),view,draft,status,image,busy,inspected,botanical_buffer.clone(),true),
                 }
+                super::junction_controls::JunctionControls {
+                    accepted: data.junction.clone(), selected_part: selected(), source: junction_source.clone(),
+                    fresh: fresh && !busy(), live_view: view, live_selected: selected,
+                    onedit: move |edit| send(Action::AuthoringEdit {edit, expected:junction_source.clone()}, junction_host.clone(),view,draft,status,image,busy,inspected,junction_buffer.clone(),true),
+                }
                 super::material_motion_controls::MaterialMotionControls{selected,inspected,fresh,onedit:move|edit|send(Action::AuthoringEdit{edit,expected:motion_source.clone()},motion_host.clone(),view,draft,status,image,busy,inspected,motion_buffer.clone(),true)}
+                super::timeline_controls::TimelineControls{inspected,fresh,timeline_resource_selection,editor_view:view,onedit:move|edit|send(Action::AuthoringEdit{edit,expected:timeline_source.clone()},timeline_host.clone(),view,draft,status,image,busy,inspected,timeline_buffer.clone(),true)}
                 super::structure_controls::StructureControls {
                     selected, inspected, fresh,
                     onedit: move |edit| send(Action::AuthoringEdit { edit, expected: structure_source.clone() }, structure_host.clone(), view, draft, status, image, busy, inspected, structure_buffer.clone(), true),

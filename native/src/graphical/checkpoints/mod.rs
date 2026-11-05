@@ -12,12 +12,14 @@ pub use editor::CheckpointEditorHost;
 pub mod authorised_reopen;
 mod resources;
 mod surface_resources;
+mod timeline_media_resource;
+pub use timeline_media_resource::{SelectedMedia, TimelineMediaRequest, TimelineMediaSelection};
 pub use resources::{PackageInventory, PackageWritePolicy};
 mod georaster_edit;
 mod inspection;
 pub mod typed_10d;
 pub use georaster_edit::{
-    ui_georaster_edit_limits, GeoRasterCreateRequest, GeoRasterEditLimits, GeoRasterEditRequest,
+    ui_georaster_edit_limits, GeoRasterBrushRequest, GeoRasterCreateRequest, GeoRasterEditLimits, GeoRasterEditRequest,
     SourceAnnotation, SourceDeclaration, SourceQualification, SourceStatus,
 };
 pub use inspection::{

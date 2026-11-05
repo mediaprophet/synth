@@ -85,8 +85,7 @@ impl EditorHost for CheckpointEditorHost {
         // no host resource or epoch has changed before installation starts.
         let resources = self.service.surface_resources(&request, &expected)
             .map_err(SurfaceBindingFailure::BeforeMutation)?;
-        self.inner.install_surface_resources(resources, expected)
-            .map_err(SurfaceBindingFailure::MayHaveMutated)
+        self.inner.install_surface_resources_transaction(resources, expected)
     }
 
     fn inspect_typed_10d(
@@ -151,6 +150,23 @@ impl EditorHost for CheckpointEditorHost {
         self.service
             .edit_georaster(request, &expected.stamp, limits, cancelled, &mut scratch)
     }
+
+    fn brush_georaster(
+        &mut self,
+        request: super::GeoRasterBrushRequest,
+        expected: SourceRef,
+        limits: super::GeoRasterEditLimits,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<SaveReceipt, String> {
+        if self.inner.snapshot()?.source != expected {
+            return Err("Native raster edit source changed; no write".into());
+        }
+        expected.check_current()?;
+        let mut scratch = [qualia_core_db::q42::m64_matter::M64PayloadInterval::default();
+            super::UI_INSPECTION_CHUNKS];
+        self.service
+            .brush_georaster(request, &expected.stamp, limits, cancelled, &mut scratch)
+    }
     fn inspect_package_resource(
         &self,
         request: super::ResourceInspectionRequest,
@@ -176,6 +192,25 @@ impl EditorHost for CheckpointEditorHost {
         e: SourceRef,
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.inner.authoring_view(e)
+    }
+    fn timeline_media(&self, request: super::TimelineMediaRequest, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<super::TimelineMediaSelection, String> {
+        if self.inner.snapshot()?.source != expected { return Err("Timeline source changed; no media read".into()); }
+        let view = self.inner.authoring_view(expected.clone())?;
+        let timeline = view.timeline.as_ref().ok_or("No admitted timeline in current source")?;
+        let mapped = crate::graphical::authoring::timeline_media::map_clip_time(timeline, &request.clip_id, request.timeline_tick)?;
+        let association = view.timeline_media.iter().find(|entry| entry.clip_id == request.clip_id)
+            .ok_or("Clip has no source-owned media association")?;
+        if association.source_identifier != mapped.source_identifier
+            || association.resource_key != request.resource.key
+            || association.resource_digest != request.resource.resource_digest {
+            return Err("Selected resource differs from the current clip association".into());
+        }
+        let source_identifier = mapped.source_identifier.to_owned();
+        let media_tick = mapped.media_tick;
+        let remaining_ticks = mapped.remaining_ticks;
+        let selected = self.service.read_selected_media(request.resource, &expected, 16 * 1024 * 1024, cancelled)?;
+        expected.check_current()?;
+        Ok(super::TimelineMediaSelection { clip_source_identifier: source_identifier, media_tick, remaining_ticks, selected })
     }
     fn rig_authoring_edit(&mut self, resource: super::ResourceInspectionRequest, control: crate::graphical::rig_binding::RigControl, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<EditorOutcome,String> {
         if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err("Rig edit cancelled before resource read".into()); }

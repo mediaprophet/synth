@@ -15,6 +15,7 @@ pub(super) fn UvAtlasControls(
     let mut pair = use_signal(|| [String::new(), String::new()]);
     let mut page = use_signal(|| 0usize);
     let mut message = use_signal(String::new);
+    let mut smooth_frames = use_signal(|| false);
     let ready = fresh
         && loaded()
             .as_ref()
@@ -22,8 +23,9 @@ pub(super) fn UvAtlasControls(
     rsx! {fieldset{disabled:!fresh,style:"margin-top:8px;border:1px solid #405264;",
         legend{"UV unwrap and atlas · explicit seams"}
         p{"Seams must cut oriented manifold disk charts. Density uses part-local metres before TRS. Harmonic mapping can distort; packing may refuse at the chosen resolution/density. Reset planar projection and part UV affine explicitly before enabling an atlas."}
-        button{onclick:move |_|{let a=atlas.clone().unwrap_or_default();seams.set(a.seams.clone());fields.set(vec![a.atlas_size.to_string(),a.gutter_pixels.to_string(),a.texels_per_metre.to_string(),a.iterations.to_string()]);loaded.set(Some((context_token.clone(),atlas.clone())));message.set("Accepted atlas settings loaded; base geometry and stored UVs stay retained.".into());},"Load accepted atlas or defaults"}
+        button{onclick:move |_|{let a=atlas.clone().unwrap_or_default();smooth_frames.set(a.version == 2);seams.set(a.seams.clone());fields.set(vec![a.atlas_size.to_string(),a.gutter_pixels.to_string(),a.texels_per_metre.to_string(),a.iterations.to_string()]);loaded.set(Some((context_token.clone(),atlas.clone())));message.set("Accepted atlas settings loaded; base geometry and stored UVs stay retained.".into());},"Load accepted atlas or defaults"}
         for (i,name) in ["Atlas side pixels","Outer gutter pixels","Area texels per local metre","Harmonic iterations"].iter().enumerate(){label{"{name}" input{disabled:!ready,value:"{fields()[i]}",aria_label:"{name}",oninput:move|e|fields.write()[i]=e.value()}}}
+        label{input{r#type:"checkbox",disabled:!ready,checked:smooth_frames(),onchange:move|e|smooth_frames.set(e.checked())} "Keep smooth shading across UV seams; preserve supplied normals"}
         p{"{seams().len()} explicit seam edges"}
         label{"First source vertex" input{disabled:!ready,value:"{pair()[0]}",aria_label:"Seam first source vertex",oninput:move|e|pair.write()[0]=e.value()}}
         label{"Second source vertex" input{disabled:!ready,value:"{pair()[1]}",aria_label:"Seam second source vertex",oninput:move|e|pair.write()[1]=e.value()}}
@@ -35,7 +37,7 @@ pub(super) fn UvAtlasControls(
             button{disabled:!ready||(page()+1)*64>=data.edges.len(),onclick:move |_|page.set(page()+1),"Next edges"}
             for edge in data.edges.iter().skip(page()*64).take(64).copied(){label{style:"display:inline-block;margin:3px;",input{r#type:"checkbox",disabled:!ready,checked:seams().binary_search(&edge).is_ok(),aria_label:"Seam edge {edge[0]} to {edge[1]}",onchange:move|e|{let mut next=seams();match(next.binary_search(&edge),e.checked()){(Err(i),true)=>next.insert(i,edge),(Ok(i),false)=>{next.remove(i);},_=>{}}seams.set(next);}}"{edge[0]}–{edge[1]}"}}
         }
-        button{disabled:!ready,onclick:move |_|{let draft=(||{let f=fields();let a=AtlasDraft{version:1,seams:seams(),atlas_size:f[0].parse().map_err(|_|"Invalid atlas size")?,gutter_pixels:f[1].parse().map_err(|_|"Invalid gutter")?,texels_per_metre:f[2].parse().map_err(|_|"Invalid density")?,iterations:f[3].parse().map_err(|_|"Invalid iteration count")?};a.options()?;Ok::<_,String>(a)})();match draft{Ok(a)=>onapply.call(Some(a)),Err(e)=>message.set(e)}},"Apply source atlas recipe"}
+        button{disabled:!ready,onclick:move |_|{let draft=(||{let f=fields();let a=AtlasDraft{version:if smooth_frames(){2}else{1},seams:seams(),atlas_size:f[0].parse().map_err(|_|"Invalid atlas size")?,gutter_pixels:f[1].parse().map_err(|_|"Invalid gutter")?,texels_per_metre:f[2].parse().map_err(|_|"Invalid density")?,iterations:f[3].parse().map_err(|_|"Invalid iteration count")?};a.options()?;Ok::<_,String>(a)})();match draft{Ok(a)=>onapply.call(Some(a)),Err(e)=>message.set(e)}},"Apply source atlas recipe"}
         button{disabled:!ready,onclick:move |_|onapply.call(None),"Remove atlas; restore stored UV path"}
         p{role:"status","{message}"}
     }}

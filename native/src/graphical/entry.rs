@@ -16,7 +16,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use vibe::session::SourceSession;
 
 static NEXT_DIAGNOSTIC: AtomicU64 = AtomicU64::new(1);
-const USAGE: &str = "Usage: poet-native-authoring --diagnostic-source [--checkpoint-root EXISTING_DIRECTORY] [--reopen FILE.hmc] [--grant capability.invoke] [--grant Sheet.set_cell] [--grant Sheet.eval_formula] [--grant Sheet.stats] [--grant Sheet.sum_range] [--grant ComputationalGeometry.extrude_profile] [--grant ComputationalGeometry.swung_surface] [--check-source]. Legacy --diagnostic-new-source admits new source only.";
+const USAGE: &str = "Usage: poet-native-authoring --diagnostic-source [--checkpoint-root EXISTING_DIRECTORY] [--reopen FILE.hmc] [--grant capability.invoke] [--grant Sheet.set_cell] [--grant Sheet.eval_formula] [--grant Sheet.stats] [--grant Sheet.sum_range] [--grant ComputationalGeometry.extrude_profile] [--grant ComputationalGeometry.swung_surface] [--grant ComputationalGeometry.profile_sweep] [--grant ComputationalGeometry.uv_sphere] [--grant ComputationalGeometry.torus] [--grant ComputationalGeometry.revolve_profile] [--grant ComputationalGeometry.space_colonize_3d] [--grant ComputationalGeometry.pipe_model_radii] [--check-source]. Legacy --diagnostic-new-source admits new source only.";
 const DIAGNOSTIC: &str = "LOCAL DIAGNOSTIC · no production authentication or cooperative admission";
 
 #[derive(Default)]
@@ -66,6 +66,8 @@ fn options(args: &[String]) -> Result<Options, String> {
                                 | "ComputationalGeometry.uv_sphere"
                                 | "ComputationalGeometry.torus"
                                 | "ComputationalGeometry.revolve_profile"
+                                | "ComputationalGeometry.space_colonize_3d"
+                                | "ComputationalGeometry.pipe_model_radii"
                         ) =>
                     {
                         if !options.grants.contains(value) {
@@ -141,7 +143,7 @@ fn discover(root: &Path, name: &str) -> Result<(String, String), String> {
     }
     let path = directory.join(name);
     let metadata = std::fs::symlink_metadata(&path).map_err(|error| error.to_string())?;
-    if metadata.file_type().is_symlink() || !metadata.is_file() {
+    if metadata.file_type().is_symlink() || !metadata.file_type().is_file() {
         return Err("Diagnostic reopen requires a regular file, not a link or directory".into());
     }
     let checkpoint = core::load(&path, checkpoint_limits())?;
@@ -211,6 +213,14 @@ fn prepare_options(options: Options) -> Result<PreparedStudio, String> {
         },
         limits: profile.preview_limits(),
     };
+    let mut rebuild_limits = super::native_authoring_profile::startup_rebuild_limits(profile);
+    if options.grants.iter().any(|g| {
+        g == "ComputationalGeometry.space_colonize_3d"
+            || g == "ComputationalGeometry.pipe_model_radii"
+    }) {
+        rebuild_limits.total_geometry_work = rebuild_limits.total_geometry_work.max(66_000_000);
+        rebuild_limits.total_kernel_dispatches = rebuild_limits.total_kernel_dispatches.max(512);
+    }
     let canonical = CanonicalEditorHost::open_with_rebuild_limits(
         id,
         profile.session_limits(),
@@ -221,7 +231,7 @@ fn prepare_options(options: Options) -> Result<PreparedStudio, String> {
                 profile.viewport_budget(),
             )?,
         ),
-        profile.rebuild_limits(),
+        rebuild_limits,
     )?;
     let host: Box<dyn EditorHost> = if let Some(service) = service {
         Box::new(CheckpointEditorHost::new(Box::new(canonical), service)?)
@@ -330,6 +340,10 @@ impl EditorHost for DiagnosticEditor {
     ) -> Result<crate::graphical::authoring::AuthoringView, String> {
         self.ready()?;
         self.inner.authoring_view(e)
+    }
+    fn timeline_media(&self, request: crate::graphical::checkpoints::TimelineMediaRequest, expected: SourceRef, cancelled: &std::sync::atomic::AtomicBool) -> Result<crate::graphical::checkpoints::TimelineMediaSelection, String> {
+        self.ready()?;
+        self.inner.timeline_media(request, expected, cancelled)
     }
     fn authoring_edit(
         &mut self,

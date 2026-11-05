@@ -37,7 +37,7 @@ impl Default for AtlasDraft {
 }
 impl AtlasDraft {
     pub fn options(&self) -> Result<AtlasOptions, String> {
-        if self.version != 1 {
+        if !matches!(self.version, 1 | 2) {
             return Err("Unsupported UV atlas recipe version".into());
         }
         if self.seams.len() > 65_536
@@ -116,13 +116,14 @@ pub fn from_value(v: &Value) -> Result<AtlasDraft, String> {
 }
 pub fn source(draft: &AtlasDraft) -> Result<String, String> {
     draft.options()?;
-    Ok(format!("{{version:1,seams:{:?},atlas_size:{},gutter_pixels:{},texels_per_metre:{:?},iterations:{}}}",
-        draft.seams,draft.atlas_size,draft.gutter_pixels,draft.texels_per_metre,draft.iterations))
+    Ok(format!("{{version:{},seams:{:?},atlas_size:{},gutter_pixels:{},texels_per_metre:{:?},iterations:{}}}",
+        draft.version,draft.seams,draft.atlas_size,draft.gutter_pixels,draft.texels_per_metre,draft.iterations))
 }
 fn kernel_limits(
     vertices: usize,
     triangles: usize,
     limits: AtlasLimits,
+    smooth_frames: bool,
 ) -> Result<AtlasLimits, String> {
     // Includes caller outputs, converted Point3 input and remapped Mesh/normals.
     // Core independently charges its own complete construction workspace.
@@ -130,13 +131,84 @@ fn kernel_limits(
         .checked_mul(24)
         .and_then(|n| triangles.checked_mul(512).and_then(|t| n.checked_add(t)))
         .ok_or("UV wrapper budget overflow")?;
+    let frame_bytes = if smooth_frames {
+        vertices
+            .checked_mul(36)
+            .and_then(|v| triangles.checked_mul(204)?.checked_add(v))
+            .ok_or("UV frame budget overflow")?
+    } else {
+        0
+    };
+    let frame_work = if smooth_frames {
+        u64::try_from(vertices)
+            .ok()
+            .and_then(|v| v.checked_mul(8))
+            .and_then(|v| {
+                u64::try_from(triangles)
+                    .ok()
+                    .and_then(|t| t.checked_mul(432)?.checked_add(v))
+            })
+            .ok_or("UV frame work overflow")?
+    } else {
+        0
+    };
     Ok(AtlasLimits {
+        work_units: limits
+            .work_units
+            .checked_sub(frame_work)
+            .ok_or("UV frames exceed work budget")?,
         scratch_bytes: limits
             .scratch_bytes
-            .checked_sub(wrapper)
+            .checked_sub(
+                wrapper
+                    .checked_add(frame_bytes)
+                    .ok_or("UV frame budget overflow")?,
+            )
             .ok_or("UV wrapper exceeds scratch budget")?,
         ..limits
     })
+}
+
+fn frame_vec<T: Clone>(count: usize, value: T) -> Result<Vec<T>, String> {
+    let mut result = Vec::new();
+    result
+        .try_reserve_exact(count)
+        .map_err(|_| "UV frame allocation refused")?;
+    result.resize(count, value);
+    Ok(result)
+}
+
+/// Smooth on original source topology before UV cuts. Existing authored
+/// normals take precedence, including normals on intentional hard-edge splits.
+fn smooth_source_normals(points: &[Point3], triangles: &[[u32; 3]]) -> Result<Vec<[f32; 3]>, String> {
+    use qualia_core_db::specialized_libs::computational_geometry::ddg_operators::{
+        face_vector_areas, vertex_normals,
+    };
+    let zero = Point3::new(0.0, 0.0, 0.0);
+    let mut faces = frame_vec(triangles.len(), zero)?;
+    face_vector_areas(points, triangles, &mut faces)
+        .map_err(|e| format!("Smooth atlas face refused: {e:?}"))?;
+    if faces.iter().any(|n| {
+        !n.x.is_finite()
+            || !n.y.is_finite()
+            || !n.z.is_finite()
+            || !((n.x * n.x + n.y * n.y + n.z * n.z) > 0.0)
+    }) {
+        return Err("Smooth atlas has nonfinite or degenerate source face".into());
+    }
+    drop(faces);
+    let mut normals = frame_vec(points.len(), zero)?;
+    vertex_normals(points, triangles, &mut normals)
+        .map_err(|e| format!("Smooth atlas normals refused: {e:?}"))?;
+    let mut output = frame_vec(points.len(), [0.0f32; 3])?;
+    for (dst, n) in output.iter_mut().zip(normals) {
+        *dst = [n.x as f32, n.y as f32, n.z as f32];
+        let norm = dst.iter().map(|n| f64::from(*n).powi(2)).sum::<f64>();
+        if dst.iter().any(|v| !v.is_finite()) || !norm.is_finite() || norm <= f64::EPSILON {
+            return Err("Smooth atlas source vertex has no normal".into());
+        }
+    }
+    Ok(output)
 }
 /// Allocation-free count preflight for aggregate admission. The returned value
 /// is a conservative corner-split vertex ceiling, never a successful unwrap.
@@ -151,7 +223,7 @@ pub fn preflight(
         triangles,
         draft.seams.len(),
         draft.options()?,
-        kernel_limits(vertices, triangles, limits)?,
+        kernel_limits(vertices, triangles, limits, draft.version == 2)?,
     )
     .map_err(|e| format!("UV atlas preflight: {e:?}"))
 }
@@ -160,6 +232,8 @@ pub struct AtlasApplied {
     pub mesh: Mesh,
     pub normals: Option<Vec<[f32; 3]>>,
     pub uv0: Vec<[f32; 2]>,
+    /// v2-only strictly admitted derived frames, never authored master data.
+    pub tangents: Option<Vec<[f32; 4]>>,
     /// Each derived vertex identifies its retained raw source vertex; triangles
     /// keep source order. Never substitute this derivative for the raw master.
     pub source_vertices: Vec<u32>,
@@ -196,6 +270,12 @@ pub fn apply(
         .iter()
         .map(|p| Point3::new(p[0] as f64, p[1] as f64, p[2] as f64))
         .collect();
+    let generated_normals = if draft.version == 2 && normals.is_none() {
+        Some(smooth_source_normals(&points, &mesh.triangles)?)
+    } else {
+        None
+    };
+    let source_normals = normals.or(generated_normals.as_deref());
     let mut sources = vec![0u32; maximum];
     let mut triangles = vec![[0u32; 3]; mesh.triangles.len()];
     let mut ids = vec![0u32; mesh.triangles.len()];
@@ -206,7 +286,12 @@ pub fn apply(
         &mesh.triangles,
         &draft.seams,
         draft.options()?,
-        kernel_limits(mesh.positions.len(), mesh.triangles.len(), limits)?,
+        kernel_limits(
+            mesh.positions.len(),
+            mesh.triangles.len(),
+            limits,
+            draft.version == 2,
+        )?,
         cancelled,
         AtlasOutput {
             source_vertices: &mut sources,
@@ -224,7 +309,50 @@ pub fn apply(
         .iter()
         .map(|&v| mesh.positions[v as usize])
         .collect();
-    let normals = normals.map(|n| sources.iter().map(|&v| n[v as usize]).collect());
+    let normals: Option<Vec<[f32; 3]>> =
+        source_normals.map(|n| sources.iter().map(|&v| n[v as usize]).collect());
+    let tangents = if draft.version == 2 {
+        let aligned = normals
+            .as_deref()
+            .ok_or("Smooth atlas lost normal correspondence")?;
+        let mut output = frame_vec(sources.len(), [0.0f32; 4])?;
+        let mut temporary = frame_vec(sources.len(), [0.0f32; 4])?;
+        let mut scratch = frame_vec(sources.len(), [0.0f32; 6])?;
+        let index_count = triangles
+            .len()
+            .checked_mul(3)
+            .ok_or("Atlas tangent index overflow")?;
+        let mut indices = Vec::new();
+        indices
+            .try_reserve_exact(index_count)
+            .map_err(|_| "Atlas tangent index allocation refused")?;
+        for tri in &triangles {
+            indices.extend_from_slice(tri);
+        }
+        let work = u64::try_from(sources.len())
+            .ok()
+            .and_then(|v| v.checked_mul(100))
+            .and_then(|v| {
+                u64::try_from(triangles.len())
+                    .ok()
+                    .and_then(|t| t.checked_mul(100)?.checked_add(v))
+            })
+            .ok_or("Atlas tangent work overflow")?;
+        qualia_core_db::render::mesh_tangent_frames::tangents_from_uvs_strict_into(
+            &positions,
+            &uv0,
+            aligned,
+            &indices,
+            work,
+            &mut output,
+            &mut temporary,
+            &mut scratch,
+        )
+        .map_err(|e| format!("Atlas UV tangent correspondence refused: {e:?}"))?;
+        Some(output)
+    } else {
+        None
+    };
     let mut min = [f32::INFINITY; 3];
     let mut max = [f32::NEG_INFINITY; 3];
     for p in &positions {
@@ -245,6 +373,7 @@ pub fn apply(
         },
         normals,
         uv0,
+        tangents,
         source_vertices: sources,
         triangle_charts: ids,
         charts,

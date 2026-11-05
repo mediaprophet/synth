@@ -41,7 +41,7 @@ fn point(p: &[f64; 3]) -> Result<String, String> {
         number(p[2])?
     ))
 }
-fn recipe_source(r: &BotanicalRecipe) -> Result<String, String> {
+pub(crate) fn recipe_source(r: &BotanicalRecipe) -> Result<String, String> {
     let mut out = format!(
         "{{schema:{},version:{},part_id:{},organs:[",
         quoted(if r.version == 1 { SCHEMA } else { CHAIN_SCHEMA })?,

@@ -5,12 +5,24 @@ edition = "2021"
 
 [dependencies]
 vibe = { workspace = true }
-dioxus = { path = "C:/github/rust-app-framework/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
-dioxus-native = { path = "C:/github/rust-app-framework/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "data-uri", "clipboard", "accessibility"], optional = true }
+video-h264-preview = { path = "../../hypermedia-libraries/crates/video-h264-preview", optional = true }
+futures-timer = { version = "=3.0.4", optional = true }
+image = { version = "=0.25.10", default-features = false, features = ["gif"], optional = true }
+dioxus = { path = "C:/github/aether/packages/dioxus", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
+dioxus-native = { path = "C:/github/aether/packages/native", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "data-uri", "clipboard", "accessibility"], optional = true }
 qualia-core-db = { path = "C:/github/qualiaDB/crates/qualia-core-db", default-features = false, features = ["profile_target_1024", "zk-culling", "gpu-runtime", "gpu-native-portable", "gpu-native-dx12", "wgsl-forge", "privacy-he", "sanctuary-crypto"], optional = true }
+raster-layer-mask-adapter = { path = "../../hypermedia-libraries/crates/raster-layer-mask-adapter", optional = true }
+raster-selection-morphology = { path = "../../hypermedia-libraries/crates/raster-selection-morphology", optional = true }
 qualia-geospatial = { path = "C:/github/qualiaDB/crates/qualia-geospatial", optional = true }
 webizen-render = { path = "C:/github/qualiaDB/crates/webizen-render", optional = true }
 poet-spatial-authoring = { path = "../crates/spatial-authoring", optional = true }
+timeline-editing = { path = "../../hypermedia-libraries/crates/timeline-editing", optional = true }
+qualia-audio = { path = "../../qualiaDB/crates/qualia-audio", default-features = false, optional = true }
+audio-aac-codec = { path = "../../hypermedia-libraries/crates/audio-aac-codec", default-features = false, optional = true }
+media-isobmff = { path = "../../hypermedia-libraries/crates/media-isobmff", optional = true }
+media-ogg = { path = "../../hypermedia-libraries/crates/media-ogg", optional = true }
+audio-opus-codec = { path = "../../hypermedia-libraries/crates/audio-opus-codec", optional = true }
+cpal = { version = "=0.15.3", optional = true }
 base64 = { version = "=0.22.1", optional = true }
 futures-channel = { version = "=0.3.34", optional = true }
 
@@ -24,11 +36,16 @@ ciborium = { workspace = true, optional = true }
 [features]
 # Match the canonical integration test cfg to the already-required native crypto capability.
 sanctuary-crypto = ["qualia-core-db/sanctuary-crypto"]
-native-graphical = ["sanctuary-crypto","dep:dioxus", "dep:dioxus-native", "dep:qualia-core-db", "dep:webizen-render", "dep:base64", "dep:futures-channel", "dep:qualia-cooperative-core", "dep:qualia-mcp", "dep:serde", "dep:serde_json", "dep:sha2", "dep:poet-spatial-authoring", "dep:qualia-geospatial", "dep:ciborium"]
+native-graphical = ["sanctuary-crypto", "dep:video-h264-preview", "dep:futures-timer", "dep:image","dep:dioxus", "dep:dioxus-native", "dep:qualia-core-db", "dep:raster-layer-mask-adapter", "dep:raster-selection-morphology", "dep:webizen-render", "dep:base64", "dep:futures-channel", "dep:qualia-cooperative-core", "dep:qualia-mcp", "dep:serde", "dep:serde_json", "dep:sha2", "dep:poet-spatial-authoring", "dep:qualia-geospatial", "dep:ciborium", "dep:timeline-editing", "dep:qualia-audio", "dep:audio-aac-codec", "dep:media-isobmff", "dep:media-ogg", "dep:audio-opus-codec", "dep:cpal"]
 
 [[bin]]
 name = "poet"
 path = "src/main.rs"
+
+[[bin]]
+name = "ecopunk-forge"
+path = "examples/growing_reference/main.rs"
+required-features = ["native-graphical"]
 
 [[example]]
 name = "growing_reference"

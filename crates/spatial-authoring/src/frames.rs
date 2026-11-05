@@ -58,3 +58,14 @@ pub(crate) fn face(a: [f32; 3], b: [f32; 3], c: [f32; 3]) -> Result<[f32; 3], Au
     let n = (v(b) - v(a)).cross(v(c) - v(a));
     unit([n.x, n.y, n.z])
 }
+
+/// Tangent directions use the linear world matrix (not the normal matrix).
+/// Re-orthogonalize against the transformed normal after nonuniform scale.
+/// `record` has already refused reflections, so handedness is unchanged.
+pub(crate) fn tangent(world: &Mat4, normal: [f32; 3], value: [f32; 4]) -> Result<[f32; 4], AuthoringError> {
+    let direction: [f64; 3] = std::array::from_fn(|r|
+        (0..3).map(|c| world[c][r] * f64::from(value[c])).sum());
+    let along: f64 = (0..3).map(|i| direction[i] * f64::from(normal[i])).sum();
+    let t = unit(std::array::from_fn(|i| direction[i] - along * f64::from(normal[i])))?;
+    Ok([t[0], t[1], t[2], value[3]])
+}

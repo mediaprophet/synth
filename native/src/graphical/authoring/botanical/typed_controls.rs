@@ -151,7 +151,7 @@ impl GraphDraft {
 }
 
 #[component]
-pub(super) fn TypedBotanicalControls(
+pub(crate) fn TypedBotanicalControls(
     selected_part: String,
     source: SourceRef,
     fresh: bool,
