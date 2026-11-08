@@ -14,12 +14,12 @@ qualia-core-db = { workspace = true }
 webizen-render = { workspace = true, optional = true }
 vibe = { workspace = true }
 vibescript-abi = { workspace = true }
-qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
-qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2", default-features = false, features = ["authoring"] }
+qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
+qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0", default-features = false, features = ["authoring"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
-asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "28851a5b9abb820e4eac02f3bd37c1b774c5cc4f" }
+asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "af57e82120b30b47fca238edb21a839d2cdb4278" }
 
 aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
 aether-native = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
@@ -39,16 +39,16 @@ default-members = ["."]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
-qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2", default-features = false }
-vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
-vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
-webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0", default-features = false }
+vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
+vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
+webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
 
 [patch."https://github.com/mediaprophet/vibe-script.git"]
-vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
+vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
 
 [patch."https://github.com/mediaprophet/qualiaDB.git"]
-qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "a9d104c9bb69cbe8b37113a47f605d132dda56b2" }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "e2084243a5bc68d08e48d511c24c105b3b0d24b0" }
 
 [profile.dev]
 debug = 0

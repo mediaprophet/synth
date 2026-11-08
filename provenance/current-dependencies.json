@@ -4,18 +4,18 @@
     {
       "name": "hypermedia-production",
       "url": "https://github.com/mediaprophet/hypermedia-production.git",
-      "commit": "28851a5b9abb820e4eac02f3bd37c1b774c5cc4f",
+      "commit": "af57e82120b30b47fca238edb21a839d2cdb4278",
       "usage": "144 categorical ontology morphisms across 12 categories and modular domain crates"
     },
     {
       "name": "qualiaDB",
       "url": "https://github.com/mediaprophet/qualiaDB.git",
-      "commit": "a9d104c9bb69cbe8b37113a47f605d132dda56b2"
+      "commit": "e2084243a5bc68d08e48d511c24c105b3b0d24b0"
     },
     {
       "name": "etalon",
       "url": "https://github.com/mediaprophet/etalon.git",
-      "commit": "2cab42194c3969625b37e70eece38c46c08e81ba"
+      "commit": "6ace6cc6413a87ca10a1da58397ddc7c0b2fc41e"
     },
     {
       "name": "vibe-script",
