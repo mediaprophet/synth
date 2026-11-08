@@ -1,0 +1,181 @@
+{
+  "passed": true,
+  "scope": "Native .10d readback previews for generated general-purpose meshes",
+  "binary_sha256": "b824e928c6fcd68a7701894b081554da9cc387ad66e07bf29044be1d5bfd8075",
+  "view_count": 9,
+  "side_pixels": 2048,
+  "reviewed_views": "Three-quarter views of all three meshes",
+  "meshes": [
+    {
+      "asset": "extrusion",
+      "source_sha256": "fce7837e93709312f69a8a86dabec5d42d3024c20a7aad515668e4c0e0964082",
+      "vertices": 106,
+      "triangles": 208,
+      "views": [
+        {
+          "bytes": 1083629,
+          "camera_distance_applied": 307.1377868652344,
+          "camera_distance_requested": 307.1377868652344,
+          "camera_pitch": 0.2800000011920929,
+          "camera_target": [
+            0.0,
+            0.0,
+            12.0
+          ],
+          "camera_yaw": 0.7200000286102295,
+          "file": "three-quarter-view-assumed.png",
+          "height": 2048,
+          "sha256": "1c254e8fdf9ed137c922900ae08f525a3a3064647955e2c0bee67f88d4447582",
+          "width": 2048
+        },
+        {
+          "bytes": 335209,
+          "camera_distance_applied": 307.1377868652344,
+          "camera_distance_requested": 307.1377868652344,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            0.0,
+            12.0
+          ],
+          "camera_yaw": 1.5707963705062866,
+          "file": "side-view-assumed.png",
+          "height": 2048,
+          "sha256": "3807d856b4d323ed5af681258a20d75921b226e675845529029a87e89d906359",
+          "width": 2048
+        },
+        {
+          "bytes": 979681,
+          "camera_distance_applied": 307.1377868652344,
+          "camera_distance_requested": 307.1377868652344,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            0.0,
+            12.0
+          ],
+          "camera_yaw": 0.0,
+          "file": "front-view-assumed.png",
+          "height": 2048,
+          "sha256": "f6a87d4672de4eb86ab9ae709c49d64b0529eca53bad4a689ffff4a379897734",
+          "width": 2048
+        }
+      ],
+      "receipt": "target/production-tests/assets-20261107-r1/previews/extrusion/review-receipt.json"
+    },
+    {
+      "asset": "revolution",
+      "source_sha256": "30a6c5829296ad0d39582be974b64007f5361ae7c0832e19e97717a297d06de0",
+      "vertices": 96,
+      "triangles": 128,
+      "views": [
+        {
+          "bytes": 133187,
+          "camera_distance_applied": 97.47748565673828,
+          "camera_distance_requested": 97.47748565673828,
+          "camera_pitch": 0.2800000011920929,
+          "camera_target": [
+            0.0,
+            15.0,
+            0.0
+          ],
+          "camera_yaw": 0.7200000286102295,
+          "file": "three-quarter-view-assumed.png",
+          "height": 2048,
+          "sha256": "bda90cc94f55b72bc95c1967873a358da4e134701fe4d331fd1ba31c08a0455a",
+          "width": 2048
+        },
+        {
+          "bytes": 106131,
+          "camera_distance_applied": 97.47748565673828,
+          "camera_distance_requested": 97.47748565673828,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            15.0,
+            0.0
+          ],
+          "camera_yaw": 1.5707963705062866,
+          "file": "side-view-assumed.png",
+          "height": 2048,
+          "sha256": "587b23297fff2a3b75868b36c2a5e0b655879cfffa64a5798ccf670f65f10ef1",
+          "width": 2048
+        },
+        {
+          "bytes": 105793,
+          "camera_distance_applied": 97.47748565673828,
+          "camera_distance_requested": 97.47748565673828,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            15.0,
+            0.0
+          ],
+          "camera_yaw": 0.0,
+          "file": "front-view-assumed.png",
+          "height": 2048,
+          "sha256": "ffd605d7d7df36543ddd8ce3e5e015bbe17f85e984ff4e822c6e8efa5128e4ca",
+          "width": 2048
+        }
+      ],
+      "receipt": "target/production-tests/assets-20261107-r1/previews/revolution/review-receipt.json"
+    },
+    {
+      "asset": "loft",
+      "source_sha256": "428e42b85d7db6c17e539d521345c39a3a92a2adad3b8ba4981f82874ebc4be7",
+      "vertices": 6,
+      "triangles": 4,
+      "views": [
+        {
+          "bytes": 96696,
+          "camera_distance_applied": 68.02556610107422,
+          "camera_distance_requested": 68.02556610107422,
+          "camera_pitch": 0.2800000011920929,
+          "camera_target": [
+            0.0,
+            9.0,
+            10.0
+          ],
+          "camera_yaw": 0.7200000286102295,
+          "file": "three-quarter-view-assumed.png",
+          "height": 2048,
+          "sha256": "92d8291f05981f891902ad1fb42a89a48495c0e746a551f7799e7d76ae17c7eb",
+          "width": 2048
+        },
+        {
+          "bytes": 91691,
+          "camera_distance_applied": 68.02556610107422,
+          "camera_distance_requested": 68.02556610107422,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            9.0,
+            10.0
+          ],
+          "camera_yaw": 1.5707963705062866,
+          "file": "side-view-assumed.png",
+          "height": 2048,
+          "sha256": "083636423e7d2a7dea983d880f79c956a1e81797b9f49a14da2b38bb01db7fa2",
+          "width": 2048
+        },
+        {
+          "bytes": 98018,
+          "camera_distance_applied": 68.02556610107422,
+          "camera_distance_requested": 68.02556610107422,
+          "camera_pitch": 0.11999999731779099,
+          "camera_target": [
+            0.0,
+            9.0,
+            10.0
+          ],
+          "camera_yaw": 0.0,
+          "file": "front-view-assumed.png",
+          "height": 2048,
+          "sha256": "bc733cdee4c3df3a54a6fde79a807f26c69cd0ed6c4b1611becea849cd9f9191",
+          "width": 2048
+        }
+      ],
+      "receipt": "target/production-tests/assets-20261107-r1/previews/loft/review-receipt.json"
+    }
+  ]
+}

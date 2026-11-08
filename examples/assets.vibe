@@ -1,0 +1,9 @@
+import "vibe:0.3/nquin" as nquin;
+let checksum = nquin.wire.compute_wire_parity([1, 2, 4, 8, 16]);
+let mut asset = {
+    files: [
+        { key: "icon.svg", kind: "svg", text: "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"128\" height=\"128\" viewBox=\"0 0 128 128\"><rect width=\"128\" height=\"128\" rx=\"24\" fill=\"#153c37\"/><circle cx=\"64\" cy=\"64\" r=\"36\" fill=\"#8ce6ba\"/></svg>" },
+        { key: "palette.json", kind: "json", text: "{\"background\":\"#153c37\",\"foreground\":\"#8ce6ba\"}" },
+        { key: "signal.bin", kind: "bin", bytes: [0, checksum, 127, 255] }
+    ]
+};

@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "scope": "Shared-library VibeScript production: SVG, meshes, raster frames/effects/mask, PCM audio, retained PNG",
+  "candidate_sha256": "4090d399803e676f24c96eed743313b3e0e0e837e199998bf8c3c4a22337a130",
+  "binary_sha256": "451dcdd324fff32669ba0ad1daf6af2275832cd17a73e954c2392f5470ec1deb",
+  "cargo_lock_sha256": "66883f49aa9f0740c6d7ac9feffccc695e5484083b8b4fa3542a56dfc25ffd9c",
+  "exact_fresh_reopen": true,
+  "independent_generation_identical": true,
+  "png_import_replay": true,
+  "outputs": [
+    {
+      "key": "extrusion.10d",
+      "bytes": 2052,
+      "sha256": "fce7837e93709312f69a8a86dabec5d42d3024c20a7aad515668e4c0e0964082"
+    },
+    {
+      "key": "frames/0000.png",
+      "bytes": 6526,
+      "sha256": "76f6e06d63b218be39c4a929db5e8e24bb9a768cb3e34f8f6e66d046da20b54a"
+    },
+    {
+      "key": "frames/0001.png",
+      "bytes": 5127,
+      "sha256": "fae958a658e32ad7225a124e9b7868f508e6dddb709ac71b2dd016c7611f9f69"
+    },
+    {
+      "key": "loft.10d",
+      "bytes": 228,
+      "sha256": "428e42b85d7db6c17e539d521345c39a3a92a2adad3b8ba4981f82874ebc4be7"
+    },
+    {
+      "key": "mask.png",
+      "bytes": 9182,
+      "sha256": "5d60606d521e9fa308b192c8ec37e0efa55bcf90936d478a0d28df8bed2e21cb"
+    },
+    {
+      "key": "processed.png",
+      "bytes": 7101,
+      "sha256": "57ebdee1ce36c4f32615768fdbe405694ab242f7f701b956238d837365a0914e"
+    },
+    {
+      "key": "profile.svg",
+      "bytes": 1752,
+      "sha256": "8e75afd15566f78b7e92744fbc41432fd39f9b0a15c6e8a5e5c6edc6c3da67e9"
+    },
+    {
+      "key": "revolution.10d",
+      "bytes": 1512,
+      "sha256": "30a6c5829296ad0d39582be974b64007f5361ae7c0832e19e97717a297d06de0"
+    },
+    {
+      "key": "tone.wav",
+      "bytes": 24044,
+      "sha256": "af5f2aff63eb61c79d992f9655ad301a5b7074d0d4007aec593dea27ea3f3cf6"
+    }
+  ]
+}

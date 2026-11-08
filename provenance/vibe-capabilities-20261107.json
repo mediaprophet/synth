@@ -1,0 +1,397 @@
+{
+  "execution_mode": "standalone-developer-pure-compute",
+  "provider_count": 11,
+  "providers": [
+    {
+      "alias": "mech",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/mechanics/kinematics/verlet_step",
+          "max_output_bytes": 48,
+          "max_ticks": "64",
+          "output_elements": 6,
+          "path": "mech.kinematics.verlet_step"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/mechanics/kinematics/kinetic_energy",
+          "max_output_bytes": 8,
+          "max_ticks": "32",
+          "output_elements": 1,
+          "path": "mech.kinematics.kinetic_energy"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/mechanics/kinematics/spring_damper_force",
+          "max_output_bytes": 24,
+          "max_ticks": "48",
+          "output_elements": 3,
+          "path": "mech.kinematics.spring_damper_force"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/mechanics/geometry/aabb_volume",
+          "max_output_bytes": 16,
+          "max_ticks": "32",
+          "output_elements": 2,
+          "path": "mech.geometry.aabb_volume"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/mechanics/geometry/excavation_prism_volume",
+          "max_output_bytes": 8,
+          "max_ticks": "32",
+          "output_elements": 1,
+          "path": "mech.geometry.excavation_prism_volume"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/mechanics",
+      "ontology_records": 3,
+      "targets": 7
+    },
+    {
+      "alias": "gpu",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/gpu/compute/affine_f32",
+          "max_output_bytes": 16,
+          "max_ticks": "32",
+          "output_elements": 4,
+          "path": "gpu.compute.affine_f32"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/gpu/compute/gemv4_f32",
+          "max_output_bytes": 16,
+          "max_ticks": "64",
+          "output_elements": 4,
+          "path": "gpu.compute.gemv4_f32"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/gpu/compute/topk2_f32",
+          "max_output_bytes": 8,
+          "max_ticks": "64",
+          "output_elements": 2,
+          "path": "gpu.compute.topk2_f32"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/gpu/compute/rmsnorm_f32",
+          "max_output_bytes": 16,
+          "max_ticks": "64",
+          "output_elements": 4,
+          "path": "gpu.compute.rmsnorm_f32"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/gpu/compute/rope_f32",
+          "max_output_bytes": 16,
+          "max_ticks": "64",
+          "output_elements": 4,
+          "path": "gpu.compute.rope_f32"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/gpu",
+      "ontology_records": 3,
+      "targets": 11
+    },
+    {
+      "alias": "forge",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/forge/shader/tile_schedule_gemm",
+          "max_output_bytes": 16,
+          "max_ticks": "32",
+          "output_elements": 4,
+          "path": "forge.shader.tile_schedule_gemm"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/forge/shader/iq_power_reference",
+          "max_output_bytes": 4,
+          "max_ticks": "128",
+          "output_elements": 1,
+          "path": "forge.shader.iq_power_reference"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/forge/shader/coop_matrix_tile_ops",
+          "max_output_bytes": 16,
+          "max_ticks": "32",
+          "output_elements": 2,
+          "path": "forge.shader.coop_matrix_tile_ops"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/forge",
+      "ontology_records": 3,
+      "targets": 15
+    },
+    {
+      "alias": "render",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/render/spatial/project_10d_to_3d",
+          "max_output_bytes": 12,
+          "max_ticks": "64",
+          "output_elements": 3,
+          "path": "render.spatial.project_10d_to_3d"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/render/spatial/sdf_torus_eval",
+          "max_output_bytes": 4,
+          "max_ticks": "48",
+          "output_elements": 1,
+          "path": "render.spatial.sdf_torus_eval"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/render/spatial/skeletal_lerp_joint",
+          "max_output_bytes": 12,
+          "max_ticks": "32",
+          "output_elements": 3,
+          "path": "render.spatial.skeletal_lerp_joint"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/render/spatial/brep_euler_characteristic",
+          "max_output_bytes": 16,
+          "max_ticks": "24",
+          "output_elements": 2,
+          "path": "render.spatial.brep_euler_characteristic"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/render",
+      "ontology_records": 3,
+      "targets": 15
+    },
+    {
+      "alias": "signal",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/signal/dsp/signal_rms_peak",
+          "max_output_bytes": 8,
+          "max_ticks": "128",
+          "output_elements": 2,
+          "path": "signal.dsp.signal_rms_peak"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/signal/dsp/cfar_cell_average",
+          "max_output_bytes": 8,
+          "max_ticks": "64",
+          "output_elements": 2,
+          "path": "signal.dsp.cfar_cell_average"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/signal/dsp/biquad_df1_step",
+          "max_output_bytes": 4,
+          "max_ticks": "32",
+          "output_elements": 1,
+          "path": "signal.dsp.biquad_df1_step"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/signal/vision/region_mean_u8",
+          "max_output_bytes": 8,
+          "max_ticks": "64",
+          "output_elements": 2,
+          "path": "signal.vision.region_mean_u8"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/signal",
+      "ontology_records": 3,
+      "targets": 7
+    },
+    {
+      "alias": "sense",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/sense/telemetry/clock_stamp_drift_ns",
+          "max_output_bytes": 16,
+          "max_ticks": "32",
+          "output_elements": 2,
+          "path": "sense.telemetry.clock_stamp_drift_ns"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/sense/telemetry/spectrum_bin_hz",
+          "max_output_bytes": 8,
+          "max_ticks": "32",
+          "output_elements": 1,
+          "path": "sense.telemetry.spectrum_bin_hz"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/sense/telemetry/rssi_log_distance_m",
+          "max_output_bytes": 8,
+          "max_ticks": "48",
+          "output_elements": 1,
+          "path": "sense.telemetry.rssi_log_distance_m"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/sense",
+      "ontology_records": 3,
+      "targets": 7
+    },
+    {
+      "alias": "p64",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/model/runtime/p64_align_offset",
+          "max_output_bytes": 16,
+          "max_ticks": "24",
+          "output_elements": 2,
+          "path": "p64.runtime.p64_align_offset"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/model/runtime/moe_top2_softmax",
+          "max_output_bytes": 16,
+          "max_ticks": "64",
+          "output_elements": 4,
+          "path": "p64.runtime.moe_top2_softmax"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/model/runtime/residency_admit_check",
+          "max_output_bytes": 16,
+          "max_ticks": "24",
+          "output_elements": 2,
+          "path": "p64.runtime.residency_admit_check"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/model",
+      "ontology_records": 3,
+      "targets": 15
+    },
+    {
+      "alias": "nquin",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/nquin/wire/compute_wire_parity",
+          "max_output_bytes": 8,
+          "max_ticks": "16",
+          "output_elements": 1,
+          "path": "nquin.wire.compute_wire_parity"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/nquin/wire/verify_wire_words",
+          "max_output_bytes": 16,
+          "max_ticks": "16",
+          "output_elements": 2,
+          "path": "nquin.wire.verify_wire_words"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/etalon/nquin/wire/radix_bucket_byte",
+          "max_output_bytes": 4,
+          "max_ticks": "16",
+          "output_elements": 1,
+          "path": "nquin.wire.radix_bucket_byte"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/etalon/nquin",
+      "ontology_records": 3,
+      "targets": 15
+    },
+    {
+      "alias": "infer",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/qualia/inference/activations/rms_norm_f64",
+          "max_output_bytes": 32,
+          "max_ticks": "48",
+          "output_elements": 4,
+          "path": "infer.activations.rms_norm_f64"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/qualia/inference/activations/softmax_f64",
+          "max_output_bytes": 32,
+          "max_ticks": "48",
+          "output_elements": 4,
+          "path": "infer.activations.softmax_f64"
+        },
+        {
+          "effects": 6,
+          "iri": "https://qualiadb.org/ext/qualia/inference/decode/governed_token_step",
+          "max_output_bytes": 24,
+          "max_ticks": "64",
+          "output_elements": 3,
+          "path": "infer.decode.governed_token_step"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/qualia/inference",
+      "ontology_records": 3,
+      "targets": 15
+    },
+    {
+      "alias": "qgraph",
+      "functions": [
+        {
+          "effects": 2,
+          "iri": "https://qualiadb.org/ext/qualia/graph/staging/seal_quin",
+          "max_output_bytes": 48,
+          "max_ticks": "24",
+          "output_elements": 6,
+          "path": "qgraph.staging.seal_quin"
+        },
+        {
+          "effects": 1,
+          "iri": "https://qualiadb.org/ext/qualia/graph/staging/verify_quin_parity",
+          "max_output_bytes": 8,
+          "max_ticks": "16",
+          "output_elements": 1,
+          "path": "qgraph.staging.verify_quin_parity"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/qualia/graph",
+      "ontology_records": 3,
+      "targets": 7
+    },
+    {
+      "alias": "modality",
+      "functions": [
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/qualia/modality/allen/interval_relation",
+          "max_output_bytes": 8,
+          "max_ticks": "16",
+          "output_elements": 1,
+          "path": "modality.allen.interval_relation"
+        },
+        {
+          "effects": 0,
+          "iri": "https://qualiadb.org/ext/qualia/modality/deontic/pack_norm_predicate",
+          "max_output_bytes": 8,
+          "max_ticks": "12",
+          "output_elements": 1,
+          "path": "modality.deontic.pack_norm_predicate"
+        }
+      ],
+      "iri": "https://qualiadb.org/ext/qualia/modality",
+      "ontology_records": 3,
+      "targets": 7
+    }
+  ],
+  "qualification": "registry admission and SDK-to-Etalon parity dispatch",
+  "schema": "synth.vibe-capabilities/v1",
+  "sdk_parity_probe": {
+    "metadata": "16",
+    "passed": true,
+    "ticks": "4"
+  }
+}

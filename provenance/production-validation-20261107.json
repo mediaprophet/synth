@@ -1,0 +1,22 @@
+{
+  "run": "target/production-tests/sdk-20261107-r2",
+  "workflow_passed": true,
+  "unit_tests_passed": 3,
+  "candidate_bytes": 10472513,
+  "candidate_sha256": "a9e9ce84181f1ef9b477e53b6f4d6e37b319b01c3953a279b6dc40e5f74d46e4",
+  "binary_sha256": "9f2164ec85f4c46ed8e1baa780f75359555d2aaf76db4d364fc0ec7de28a0613",
+  "cargo_lock_sha256": "bdec2cbe78a838e4780406fb6dbc46094baf3271b9281da981a21e14b2ddb6f6",
+  "master_sha256": "1d83009c6136beaff77ef9caaffdb16b226b0478d88addf21f8bba25c0335ec1",
+  "provider_count": 11,
+  "operation_count": 37,
+  "motion_samples": 10,
+  "review_files_verified": 24,
+  "master_preview_views": 3,
+  "motion_preview_views": 3,
+  "exact_fresh_reopen": true,
+  "overwrite_rejected": true,
+  "truncated_package_rejected": true,
+  "independent_generation_byte_identity": false,
+  "cross_run_difference": "Only the embedded authored Q42 knowledge resource differs; the current QualiaDB writer records wall-clock assertion and Merkle-DAG timestamps. Q42 semantic equivalence was not independently decoded and checked.",
+  "scope": "Existing native headless wallaby workflow with retained Etalon provider expression; not asset-quality acceptance, UI, audio, authenticated host or WASM qualification"
+}

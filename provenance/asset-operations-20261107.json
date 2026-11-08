@@ -1,0 +1,117 @@
+{
+  "contract": "1",
+  "declaration": "requires [capability(\"capability.invoke\")];",
+  "export": "let asset = {files:[{key:\"output.ext\",resource:encodedHandle}]};",
+  "invocation": "capability.invoke",
+  "operations": [
+    {
+      "arguments": "shape: circle(radius=1,segments=32), rectangle(width=1,height=1,radius=0,segments=32), channel(width=1,height=1,wall=0.1,radius=0,segments=32), polygon(points:[[x,y],...])",
+      "id": "synth.profile.create",
+      "owner": "hypermedia/profile-authoring",
+      "summary": "Circle, rounded rectangle, channel or polygon -> profile"
+    },
+    {
+      "arguments": "profile: handle, matrix:[a,b,c,d,e,f]",
+      "id": "synth.profile.transform",
+      "owner": "hypermedia/drafting-geometry",
+      "summary": "Affine transform -> new profile"
+    },
+    {
+      "arguments": "profile: handle, fill:[r,g,b,a]=[40,120,220,255], padding=0",
+      "id": "synth.profile.svg",
+      "owner": "hypermedia/drafting-geometry + Synth SVG serialization",
+      "summary": "Profile -> SVG resource"
+    },
+    {
+      "arguments": "profile: handle, path:[[x,y,z],...], caps=true (convex only)",
+      "id": "synth.mesh.extrude",
+      "owner": "QualiaDB/computational_geometry",
+      "summary": "Profile and 3D path -> mesh, optional convex caps"
+    },
+    {
+      "arguments": "points:[[positive_radius,height],...], segments=32",
+      "id": "synth.mesh.revolve",
+      "owner": "QualiaDB/parametric_cad",
+      "summary": "Radial profile -> revolved surface mesh"
+    },
+    {
+      "arguments": "a:[[x,y,z],...], b:[[x,y,z],...] (corresponding counts)",
+      "id": "synth.mesh.loft",
+      "owner": "QualiaDB/parametric_cad",
+      "summary": "Two corresponding profiles -> open loft surface"
+    },
+    {
+      "arguments": "mesh: handle",
+      "id": "synth.mesh.encode",
+      "owner": "QualiaDB/render/compile_10d",
+      "summary": "Mesh -> sealed native .10d resource"
+    },
+    {
+      "arguments": "width=256, height=256, background:[r,g,b,255]=[255,255,255,255], layers:[{profile:handle,fill:[r,g,b,a],matrix:[a,b,c,d,e,f]=identity},...]",
+      "id": "synth.image.render",
+      "owner": "hypermedia/vector-cpu-render-adapter",
+      "summary": "Profile layers -> opaque RGB image"
+    },
+    {
+      "arguments": "image: handle",
+      "id": "synth.image.blur",
+      "owner": "QualiaDB/computer_vision",
+      "summary": "RGB image -> per-channel 3x3 Gaussian blur"
+    },
+    {
+      "arguments": "image: handle, source: image handle, mode: burn|dodge|vivid-light|hard-mix",
+      "id": "synth.image.blend",
+      "owner": "hypermedia/raster-blend-operators",
+      "summary": "Two images -> burn/dodge/vivid-light/hard-mix blend"
+    },
+    {
+      "arguments": "image: handle, stops=0 (-16..16)",
+      "id": "synth.image.exposure",
+      "owner": "hypermedia/color-transforms",
+      "summary": "sRGB -> linear exposure -> sRGB"
+    },
+    {
+      "arguments": "image: handle, mode: expand|contract|border, radius=1, threshold=0.5",
+      "id": "synth.image.mask",
+      "owner": "hypermedia/raster-selection-morphology",
+      "summary": "Thresholded luminance -> expanded/contracted/border mask image"
+    },
+    {
+      "arguments": "image: handle",
+      "id": "synth.image.png",
+      "owner": "QualiaDB/computer_vision/codecs",
+      "summary": "RGB image -> PNG resource"
+    },
+    {
+      "arguments": "input: retained resource key (opaque RGB8 PNG)",
+      "id": "synth.image.import_png",
+      "owner": "QualiaDB/computer_vision/codecs",
+      "summary": "Retained PNG input -> RGB image"
+    },
+    {
+      "arguments": "frequency=440, sample_rate=48000, frames=48000, amplitude=0.25",
+      "id": "synth.audio.tone",
+      "owner": "QualiaDB/qualia-audio",
+      "summary": "Synthetic mono sine tone -> audio buffer"
+    },
+    {
+      "arguments": "audio: handle, gain=1 (-16..16; hard clipping)",
+      "id": "synth.audio.gain",
+      "owner": "Synth audio buffer adapter",
+      "summary": "Finite gain with hard clipping -> new audio buffer"
+    },
+    {
+      "arguments": "audio: handle",
+      "id": "synth.audio.wav",
+      "owner": "QualiaDB/qualia-audio + Etalon/signal",
+      "summary": "Mono buffer -> PCM16 WAV resource"
+    },
+    {
+      "arguments": "numerator=24, denominator=1, count=1 (max 256)",
+      "id": "synth.timeline.frames",
+      "owner": "hypermedia/timeline-editing",
+      "summary": "Rational frame rate -> exact frame ticks and sample times"
+    }
+  ],
+  "schema": "synth.asset-operations/v1"
+}

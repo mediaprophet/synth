@@ -1,0 +1,32 @@
+{
+  "qualification": "General-purpose Synth integration pins; prior species validation is historical",
+  "repositories": [
+    {
+      "name": "hypermedia-production",
+      "url": "https://github.com/mediaprophet/hypermedia-production.git",
+      "commit": "28851a5b9abb820e4eac02f3bd37c1b774c5cc4f",
+      "usage": "144 categorical ontology morphisms across 12 categories and modular domain crates"
+    },
+    {
+      "name": "qualiaDB",
+      "url": "https://github.com/mediaprophet/qualiaDB.git",
+      "commit": "a9d104c9bb69cbe8b37113a47f605d132dda56b2"
+    },
+    {
+      "name": "etalon",
+      "url": "https://github.com/mediaprophet/etalon.git",
+      "commit": "2cab42194c3969625b37e70eece38c46c08e81ba"
+    },
+    {
+      "name": "vibe-script",
+      "commit": "b140a0ab72b891051c4fb19f7caabbb0a794640b",
+      "usage": "SDK distribution/tooling reference; compiled ABI is unified with QualiaDB's local vibescript-abi"
+    },
+    {
+      "name": "Aether",
+      "url": "https://github.com/mediaprophet/Aether.git",
+      "commit": "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27",
+      "usage": "optional native-ui"
+    }
+  ]
+}

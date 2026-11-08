@@ -1,0 +1,51 @@
+import "vibe:0.3/nquin" as nquin;
+requires [capability("capability.invoke")];
+let accent = nquin.wire.compute_wire_parity([1, 2, 4, 8, 16]);
+let panel = capability.invoke("synth.profile.create", {shape: "rectangle", width: 180, height: 120, radius: 18, segments: 12});
+let disc = capability.invoke("synth.profile.create", {shape: "circle", radius: 28, segments: 48});
+let moved = capability.invoke("synth.profile.transform", {profile: disc, matrix: [1, 0, 0, 1, 42, 0]});
+let svg = capability.invoke("synth.profile.svg", {profile: panel, fill: [36, 154, 180, 255], padding: 4});
+let solid = capability.invoke("synth.mesh.extrude", {profile: panel, path: [[0, 0, 0], [0, 0, 24]], caps: true});
+let model = capability.invoke("synth.mesh.encode", {mesh: solid});
+let turned = capability.invoke("synth.mesh.revolve", {points: [[14, 0], [22, 12], [16, 30]], segments: 32});
+let turnedFile = capability.invoke("synth.mesh.encode", {mesh: turned});
+let loft = capability.invoke("synth.mesh.loft", {a: [[-20, 0, 0], [0, 10, 0], [20, 0, 0]], b: [[-10, 0, 20], [0, 18, 20], [10, 0, 20]]});
+let loftFile = capability.invoke("synth.mesh.encode", {mesh: loft});
+let frames = capability.invoke("synth.timeline.frames", {numerator: 24, denominator: 1, count: 2});
+let picture = capability.invoke("synth.image.render", {
+    width: 256, height: 192, background: [18, 25, 36, 255],
+    layers: [
+        {profile: panel, fill: [36, 154, 180, 255], matrix: [1, 0, 0, 1, 128, 96]},
+        {profile: disc, fill: [248, 214, accent, 255], matrix: [1, 0, 0, 1, 88, 96]},
+        {profile: moved, fill: [234, 96, 102, 220], matrix: [1, 0, 0, 1, 128, 96]}
+    ]
+});
+let nextPicture = capability.invoke("synth.image.render", {
+    width: 256, height: 192, background: [18, 25, 36, 255],
+    layers: [
+        {profile: panel, fill: [36, 154, 180, 255], matrix: [1, 0, 0, 1, 128, 96]},
+        {profile: disc, fill: [248, 214, accent, 255], matrix: [1, 0, 0, 1, 88 + frames[1].seconds * 240, 96]}
+    ]
+});
+let png = capability.invoke("synth.image.png", {image: picture});
+let nextPng = capability.invoke("synth.image.png", {image: nextPicture});
+let blurred = capability.invoke("synth.image.blur", {image: picture});
+let bright = capability.invoke("synth.image.exposure", {image: blurred, stops: 0.5});
+let blended = capability.invoke("synth.image.blend", {image: picture, source: bright, mode: "dodge"});
+let processedPng = capability.invoke("synth.image.png", {image: blended});
+let mask = capability.invoke("synth.image.mask", {image: picture, mode: "border", radius: 3, threshold: 0.3});
+let maskPng = capability.invoke("synth.image.png", {image: mask});
+let tone = capability.invoke("synth.audio.tone", {frequency: 440, sample_rate: 48000, frames: 12000, amplitude: 0.4});
+let quiet = capability.invoke("synth.audio.gain", {audio: tone, gain: 0.5});
+let wav = capability.invoke("synth.audio.wav", {audio: quiet});
+let mut asset = {files: [
+    {key: "profile.svg", resource: svg},
+    {key: "extrusion.10d", resource: model},
+    {key: "revolution.10d", resource: turnedFile},
+    {key: "loft.10d", resource: loftFile},
+    {key: "frames/0000.png", resource: png},
+    {key: "frames/0001.png", resource: nextPng},
+    {key: "processed.png", resource: processedPng},
+    {key: "mask.png", resource: maskPng},
+    {key: "tone.wav", resource: wav}
+]};

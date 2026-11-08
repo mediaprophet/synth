@@ -1,6 +1,6 @@
 //! Optional native supervision of the same agent host. This is Synth, not Poet's UI.
-use crate::{NativeContext, SynthHost, TransportCommand};
-use dioxus::prelude::*;
+use crate::SynthHost;
+use aether::prelude::*;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
@@ -8,8 +8,7 @@ use std::sync::{
 
 #[derive(Clone, Default)]
 struct View {
-    context: Option<NativeContext>,
-    clips: Vec<String>,
+    resources: Vec<String>,
     status: String,
 }
 #[derive(Props, Clone)]
@@ -40,32 +39,16 @@ pub fn launch_with_cancellation(
     host.try_lock()
         .map_err(|_| "Synth host is busy")?
         .inspect()?;
-    let attributes = dioxus_native::WindowAttributes::default()
+    let attributes = aether_native::WindowAttributes::default()
         .with_title("Synth · Asset production")
-        .with_surface_size(dioxus_native::LogicalSize::new(1180, 760));
-    dioxus_native::launch_cfg_with_props(
+        .with_surface_size(aether_native::LogicalSize::new(1180, 760));
+    aether_native::launch_cfg_with_props(
         Monitor,
         MonitorProps { host, cancellation },
         Vec::new(),
         vec![Box::new(attributes)],
     );
     Ok(())
-}
-fn perform(
-    host: &Arc<Mutex<SynthHost>>,
-    context: &Option<NativeContext>,
-    command: TransportCommand,
-) -> String {
-    let Some(expected) = context else {
-        return "No current admitted Synth context".into();
-    };
-    match host.try_lock() {
-        Ok(mut h) => match h.control(expected, command) {
-            Ok(()) => "Control accepted; old sound epoch retired".into(),
-            Err(_) => "Control refused; refresh the admitted source/session".into(),
-        },
-        Err(_) => "Agent operation is running; control was not queued".into(),
-    }
 }
 #[allow(non_snake_case)]
 fn Monitor(props: MonitorProps) -> Element {
@@ -80,17 +63,18 @@ fn Monitor(props: MonitorProps) -> Element {
                     Ok(h) => match h.inspect() {
                         Ok(s) => View {
                             status: format!(
-                                "Session {} ({:?}) · source {} · projection {} · clip {} · {} · {}",
+                                "Session {} ({:?}) · revision {} · producer {}@{}",
                                 s.actor_subject,
                                 s.actor_kind,
                                 s.context.document.revision,
-                                s.context.source_generation,
-                                s.selected_clip.as_deref().unwrap_or("none"),
-                                if s.playing { "playing" } else { "paused" },
-                                s.audio_status
+                                s.producer,
+                                s.producer_version
                             ),
-                            context: Some(s.context),
-                            clips: s.clips,
+                            resources: s
+                                .resources
+                                .iter()
+                                .map(|(key, kind, bytes)| format!("{key} · {kind} · {bytes} bytes"))
+                                .collect(),
                         },
                         Err(_) => View {
                             status:
@@ -110,12 +94,6 @@ fn Monitor(props: MonitorProps) -> Element {
         }
     });
     let displayed = view.read().clone();
-    let play_host = props.host.clone();
-    let pause_host = props.host.clone();
-    let stop_host = props.host.clone();
-    let play_context = displayed.context.clone();
-    let pause_context = displayed.context.clone();
-    let stop_context = displayed.context.clone();
     let cancel_work = props.cancellation.clone();
     rsx! {
         main {style:"font-family:system-ui;background:#0e1715;color:#e5f1ea;min-height:100vh;padding:28px;",
@@ -126,21 +104,10 @@ fn Monitor(props: MonitorProps) -> Element {
                 button {disabled:props.cancellation.is_none(),onclick:move|_| {
                     if let Some(cancel)=&cancel_work {cancel.store(true,Ordering::Release);message.set("Cancellation requested for the current preparation".into());}
                 },"Cancel preparation"}
-                button {disabled:displayed.context.is_none(),onclick:move|_|message.set(perform(&play_host,&play_context,TransportCommand::Play)),"Enable motion clock"}
-                button {disabled:displayed.context.is_none(),onclick:move|_|message.set(perform(&pause_host,&pause_context,TransportCommand::Pause)),"Pause motion clock"}
-                button {disabled:displayed.context.is_none() || !cfg!(feature="audio-device"),onclick:move|_| {
-                    #[cfg(feature="audio-device")]
-                    if let Some(expected)=&stop_context {
-                        let result=stop_host.try_lock().map_err(|_|()).and_then(|h|h.stop_audio(expected).map_err(|_|()));
-                        message.set(if result.is_ok(){"Device stop/reset acknowledged"}else{"Device stop not acknowledged; inspect native output"}.into());
-                    }
-                },"Stop sound"}
             }
-            h2 {"Authored behaviours"}
-            p {"Only clips actually present in the admitted source are offered."}
-            for clip in displayed.clips {
-                {let host=props.host.clone();let context=displayed.context.clone();let name=clip.clone();
-                    rsx! {button {style:"margin:4px;padding:10px;",onclick:move|_|message.set(perform(&host,&context,TransportCommand::SelectClip(name.clone()))),"{clip}"}}}
+            h2 {"Produced resources"}
+            for resource in displayed.resources {
+                p {"{resource}"}
             }
             p {role:"status","{message}"}
         }

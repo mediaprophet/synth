@@ -97,12 +97,16 @@ impl SynthHost {
                     },
                 )
                 .map_err(|e| e.to_string())?;
-                let bytes = &self.playback.asset().ok_or("No admitted candidate")?.bundle;
+                let bytes = self
+                    .production
+                    .candidate()
+                    .ok_or("No admitted candidate")?
+                    .bundle();
                 let receipt = io::save_bundle(
                     &path,
                     bytes,
                     io::ExpectedFile::Absent,
-                    self.resources.package_bytes,
+                    self.production.limits().package_bytes,
                 )?;
                 let evidence = PackageWriteReceipt {
                     digest: receipt.digest,
@@ -129,7 +133,6 @@ impl SynthHost {
             }
             (Err(_), Some(saved)) => {
                 self.quarantined = true;
-                self.output_cancel.store(true, Ordering::Release);
                 Ok(saved)
             }
             (Err(error), None) => Err(error),
@@ -165,26 +168,15 @@ impl SynthHost {
             .as_ref()
             .ok_or("Native output destination not configured")?
             .destination(name)?;
-        let bytes = io::load_bundle_cancellable(&path, self.resources.package_bytes, cancel)?;
+        let bytes =
+            io::load_bundle_cancellable(&path, self.production.limits().package_bytes, cancel)?;
         let actual: [u8; 32] = Sha256::digest(&bytes).into();
         if actual != package_digest {
             return Err("Saved package digest changed".into());
         }
-        let next = self.corpus.with_options(|options| {
-            SpeciesPlaybackSession::reopen_at_generation(
-                &bytes,
-                self.resources,
-                self.motion,
-                options.knowledge,
-                reserve_projection()?,
-                cancel,
-            )
-        })?;
-        if digest(
-            next.vibe_source_sha256()
-                .ok_or("Reopened source history missing")?,
-        )? != expected.document.source_digest
-        {
+        let next = self.production.reopen(&bytes, cancel)?;
+        let generation = reserve_generation()?;
+        if next.document_digest()? != expected.document.source_digest {
             return Err("Saved source differs from the current native document".into());
         }
         let authority = self.authority.clone();
@@ -203,8 +195,8 @@ impl SynthHost {
                 if cancel.load(Ordering::Acquire) {
                     return Err("Reopen cancelled before activation".into());
                 }
-                self.output_cancel.store(true, Ordering::Release);
-                self.playback = next;
+                self.production = next;
+                self.source_generation = generation;
                 Ok(())
             })())
         })

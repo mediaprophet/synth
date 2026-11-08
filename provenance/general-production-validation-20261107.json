@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "scope": "General-purpose production CLI: SVG, JSON, Etalon-derived bytes and retained resources",
+  "candidate_sha256": "2e4cb8b1dc8c81c3f80679ed188fd30c746cf5a70ff45537dba8631945a670f9",
+  "binary_sha256": "b3ee63cb07008fbdaaa125efb71891b4c42e0e5933e5e88456d71965456f6188",
+  "cargo_lock_sha256": "890cd0191a09dd480ab264ef54d70028b8a2de9bee448ca42511938d66be66b7",
+  "output_files": 3,
+  "exact_fresh_reopen": true,
+  "independent_generation_identical": true,
+  "retained_input_identical": true,
+  "overwrite_rejected": true,
+  "truncated_package_rejected": true
+}
