@@ -37,7 +37,7 @@ impl Default for ProductionLimits {
         Self {
             source: vibe::session::SessionLimits::default(),
             evaluation: vibe::Budget::default(),
-            resources: 128,
+            resources: 512,
             resource_bytes: 16 * 1024 * 1024,
             total_resource_bytes: 64 * 1024 * 1024,
             package_bytes: 80 * 1024 * 1024,

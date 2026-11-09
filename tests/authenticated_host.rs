@@ -181,7 +181,7 @@ fn general_host_enforces_admission_edit_context_audit_reopen_and_revocation() {
     let shared = Arc::new(std::sync::Mutex::new(host));
     let mut agent = synth::agent::SynthAgentBackend::bound(shared.clone()).unwrap();
     use qualia_mcp::authoring::AuthoringBackend;
-    assert_eq!(agent.tools().len(), 7);
+    assert_eq!(agent.tools().len(), 8);
     let categories = agent
         .call("synth.ontology.categories", serde_json::json!({}))
         .unwrap();
@@ -228,6 +228,107 @@ fn general_host_enforces_admission_edit_context_audit_reopen_and_revocation() {
         shared.lock().unwrap().inspect().unwrap().resources[0].0,
         "agent.png"
     );
+    // Verify Antigravity Python SDK / FastMCP identifier-safe mode, HTML work presentation,
+    // and the unified QualiaDB 0.0.41 comprehensive MCP toolset.
+    let mut agy_agent = synth::agent::SynthAgentBackend::bound(shared.clone())
+        .unwrap()
+        .with_identifier_safe_tools()
+        .with_qualia_engine_tools();
+    assert_eq!(agy_agent.tools().len(), 8 + qualia_mcp::stable_mcp_tools().len());
+    for tool in agy_agent.tools() {
+        assert!(!tool.name.contains('.'), "Tool name must be a valid Python identifier: {}", tool.name);
+    }
+    let sdk_res = agy_agent
+        .call("etalon_vibe_sdk", serde_json::json!({"op": "list_families"}))
+        .unwrap();
+    assert_eq!(sdk_res["status"], "ok");
+    let anatomy_res = agy_agent
+        .call("living_world_anatomy", serde_json::json!({"op": "catalog"}))
+        .unwrap();
+    assert_eq!(anatomy_res["status"], "ok");
+    let cosmic_res = agy_agent
+        .call("cosmic_coordinates", serde_json::json!({"op": "celestial_profile", "body": "earth"}))
+        .unwrap();
+    assert_eq!(cosmic_res["status"], "ok");
+    let agy_inspect = agy_agent.call("synth_inspect", serde_json::json!({})).unwrap();
+    let agy_ctx = agy_inspect["context"].clone();
+    let presented = agy_agent
+        .call(
+            "synth_package_present",
+            serde_json::json!({"context": agy_ctx, "filename": "showcase.html"}),
+        )
+        .unwrap();
+    assert_eq!(presented["schema"], "synth.presentation-html/v1");
+    assert!(presented["antigravity_embed_hint"]
+        .as_str()
+        .unwrap()
+        .contains("<agent-embed"));
+    let html_bytes = std::fs::read_to_string(directory.join("showcase.html")).unwrap();
+    assert!(html_bytes.contains("--background: #080d0c"));
+    assert!(html_bytes.contains("data:image/png;base64,"));
+    assert!(agy_agent
+        .call(
+            "synth_package_present",
+            serde_json::json!({"context": agy_ctx, "filename": "showcase.html"}),
+        )
+        .is_err());
+    // Verify Synth self-hosted Tray & Studio environment bootstrap (`examples/tray_environment.vibe`)
+    let env = synth::tray_env::bootstrap_environment().unwrap();
+    assert_eq!(env.schema, "synth.tray-environment/v1");
+    assert_eq!(env.resources.len(), 72);
+    assert!(env
+        .resources
+        .iter()
+        .any(|r| r.key == "world_of_god/human_welfare_female_trimester_3.10d"));
+    assert!(env
+        .resources
+        .iter()
+        .any(|r| r.key == "world_of_god/eucalyptus_botanical_organ.10d"));
+    assert!(env.emblem_svg_data_uri.starts_with("data:image/svg+xml;base64,"));
+    assert!(env.banner_png_data_uri.starts_with("data:image/png;base64,"));
+    assert!(env.active_tray_icon_data_uri.starts_with("data:image/png;base64,"));
+    assert!(env.ready_wav_data_uri.starts_with("data:audio/wav;base64,"));
+    assert!(env.ecosystem.vibe_sdk_families > 0);
+    assert!(env.ecosystem.living_world_entries > 0);
+    // Verify the 5-tab full-capabilities HTML showcase includes all substantive capabilities
+    assert!(env.showcase_html.contains("id=\"tab-assets\""));
+    assert!(env.showcase_html.contains("id=\"tab-ontology\""));
+    assert!(env.showcase_html.contains("id=\"tab-mcp\""));
+    assert!(env.showcase_html.contains("id=\"tab-sdk-living\""));
+    assert!(env.showcase_html.contains("id=\"tab-llm-vault\""));
+    assert!(env.showcase_html.contains("runLiveVibeProduction"));
+    assert!(env.showcase_html.contains("invokeMcpToolLive"));
+    // Verify non-conflicting port policy and local HTTP Studio server (`src/web_server.rs`)
+    assert!(synth::web_server::is_reserved_webizen_port(8080));
+    assert!(synth::web_server::is_reserved_webizen_port(4242));
+    assert!(synth::web_server::is_reserved_webizen_port(9001));
+    assert!(!synth::web_server::is_reserved_webizen_port(8787));
+    assert!(synth::web_server::spawn_background_server(Some(8080)).is_err());
+    let server_url = synth::web_server::spawn_background_server(Some(0)).unwrap();
+    let server_port: u16 = server_url
+        .rsplit_once(':')
+        .unwrap()
+        .1
+        .parse()
+        .unwrap();
+    assert!(!synth::web_server::is_reserved_webizen_port(server_port));
+    {
+        use std::io::{Read, Write};
+        let mut stream = std::net::TcpStream::connect(("127.0.0.1", server_port)).unwrap();
+        stream
+            .write_all(b"GET /api/status HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n")
+            .unwrap();
+        let mut resp = String::new();
+        stream.read_to_string(&mut resp).unwrap();
+        assert!(resp.starts_with("HTTP/1.1 200 OK"));
+        assert!(resp.contains("\"schema\": \"synth.tray-environment/v1\""));
+    }
+    let mut standalone_mcp = synth::mcp_full::StandaloneSynthMcp::default();
+    let env_mcp = standalone_mcp
+        .call("synth_environment_bootstrap", serde_json::json!({}))
+        .unwrap();
+    assert_eq!(env_mcp["schema"], "synth.tray-environment/v1");
+    assert_eq!(env_mcp["resources"].as_array().unwrap().len(), 72);
     owner.disconnect(&session).unwrap();
     assert!(shared.lock().unwrap().inspect().is_err());
 }

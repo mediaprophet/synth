@@ -1,0 +1,460 @@
+{
+  "schema": "qualia.portable-anatomy-scaffold/v1",
+  "species_id": "wallabia-bicolor",
+  "scientific_name": "Wallabia bicolor",
+  "common_name": "Swamp Wallaby (Black-tailed Wallaby)",
+  "archetype": "macropod_saltatorial",
+  "palette": {
+    "bone_cortical": [0.92, 0.89, 0.82, 1.0],
+    "bone_cancellous": [0.86, 0.82, 0.74, 1.0],
+    "cartilage_costal": [0.80, 0.85, 0.86, 1.0],
+    "tooth_enamel": [0.96, 0.95, 0.90, 1.0],
+    "muscle_deep": [0.64, 0.16, 0.16, 1.0],
+    "muscle_striated": [0.72, 0.21, 0.20, 1.0],
+    "tendon_aponeurosis": [0.90, 0.87, 0.80, 1.0],
+    "viscera_organ": [0.54, 0.22, 0.26, 1.0],
+    "dorsal_sooty": [0.14, 0.12, 0.11, 1.0],
+    "dorsal_umber": [0.20, 0.16, 0.14, 1.0],
+    "flank_grizzled": [0.33, 0.25, 0.19, 1.0],
+    "flank_warm": [0.42, 0.29, 0.20, 1.0],
+    "ventral_rufous": [0.74, 0.42, 0.17, 1.0],
+    "ventral_ochre": [0.80, 0.50, 0.22, 1.0],
+    "pouch_amber": [0.66, 0.36, 0.16, 1.0],
+    "cheek_cream": [0.88, 0.80, 0.64, 1.0],
+    "brow_umber": [0.24, 0.19, 0.15, 1.0],
+    "ear_charcoal": [0.13, 0.11, 0.11, 1.0],
+    "ear_concha_pink": [0.76, 0.56, 0.50, 1.0],
+    "rhinarium_black": [0.08, 0.07, 0.08, 1.0],
+    "eye_obsidian": [0.05, 0.05, 0.06, 1.0],
+    "eye_spec": [0.92, 0.94, 0.96, 1.0],
+    "extremity_soot": [0.11, 0.10, 0.10, 1.0],
+    "claw_keratin": [0.16, 0.14, 0.13, 1.0]
+  },
+  "submeshes": [
+    {
+      "id": "ost_cranium_mandible",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0003129",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.38,
+      "lofts": [
+        {
+          "radial_segs": 14,
+          "cap_ends": true,
+          "joint1": "head",
+          "joint2": "neck",
+          "dorsal": "bone_cortical",
+          "flank": "bone_cortical",
+          "ventral": "bone_cancellous",
+          "stations": [
+            { "center": [0.0, 0.565, 0.155], "radii": [0.022, 0.020], "weight": 0.6 },
+            { "center": [0.0, 0.585, 0.185], "radii": [0.036, 0.032], "weight": 0.9 },
+            { "center": [0.0, 0.590, 0.220], "radii": [0.038, 0.033], "weight": 1.0 },
+            { "center": [0.0, 0.578, 0.258], "radii": [0.027, 0.024], "weight": 1.0 },
+            { "center": [0.0, 0.562, 0.292], "radii": [0.017, 0.016], "weight": 1.0 },
+            { "center": [0.0, 0.552, 0.315], "radii": [0.011, 0.011], "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "joint1": "jaw",
+          "joint2": "head",
+          "dorsal": "bone_cancellous",
+          "flank": "bone_cortical",
+          "ventral": "tooth_enamel",
+          "stations": [
+            { "center": [0.0, 0.545, 0.200], "radii": [0.026, 0.015], "weight": 0.8 },
+            { "center": [0.0, 0.535, 0.245], "radii": [0.020, 0.013], "weight": 0.95 },
+            { "center": [0.0, 0.534, 0.288], "radii": [0.012, 0.010], "weight": 1.0 },
+            { "center": [0.0, 0.540, 0.308], "radii": [0.007, 0.006], "weight": 1.0 }
+          ]
+        }
+      ],
+      "arches": [
+        {
+          "spine_p": [0.026, 0.580, 0.205],
+          "sternum_p": [0.022, 0.568, 0.255],
+          "span": 0.014,
+          "radius": 0.005,
+          "bone_color": "bone_cortical",
+          "cartilage_color": "bone_cortical",
+          "joint1": "head",
+          "joint2": "head",
+          "mirror_x": true
+        }
+      ]
+    },
+    {
+      "id": "ost_cervical_thoracic_spine",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0001130",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.40,
+      "lofts": [
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "dorsal": "bone_cortical",
+          "flank": "bone_cancellous",
+          "ventral": "bone_cancellous",
+          "stations": [
+            { "center": [0.0, 0.565, 0.165], "radii": [0.015, 0.016], "joint1": "neck", "joint2": "head", "weight": 0.85 },
+            { "center": [0.0, 0.520, 0.135], "radii": [0.017, 0.018], "joint1": "neck", "joint2": "chest", "weight": 0.75 },
+            { "center": [0.0, 0.470, 0.090], "radii": [0.019, 0.021], "joint1": "chest", "joint2": "spine", "weight": 0.85 },
+            { "center": [0.0, 0.435, 0.020], "radii": [0.021, 0.023], "joint1": "spine", "joint2": "chest", "weight": 0.85 },
+            { "center": [0.0, 0.395, -0.055], "radii": [0.023, 0.025], "joint1": "spine", "joint2": "pelvis", "weight": 0.80 },
+            { "center": [0.0, 0.340, -0.125], "radii": [0.024, 0.024], "joint1": "pelvis", "joint2": "spine", "weight": 0.90 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ost_ribcage_sternum",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002228",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.42,
+      "mirror_x": true,
+      "arches": [
+        { "spine_p": [0.012, 0.490, 0.110], "sternum_p": [0.008, 0.415, 0.115], "span": 0.036, "radius": 0.0045, "cartilage_color": "cartilage_costal", "joint1": "chest", "joint2": "neck" },
+        { "spine_p": [0.014, 0.478, 0.090], "sternum_p": [0.010, 0.388, 0.092], "span": 0.046, "radius": 0.0050, "cartilage_color": "cartilage_costal", "joint1": "chest", "joint2": "spine" },
+        { "spine_p": [0.015, 0.464, 0.068], "sternum_p": [0.011, 0.365, 0.068], "span": 0.056, "radius": 0.0052, "cartilage_color": "cartilage_costal", "joint1": "chest", "joint2": "spine" },
+        { "spine_p": [0.016, 0.450, 0.044], "sternum_p": [0.012, 0.348, 0.042], "span": 0.064, "radius": 0.0052, "cartilage_color": "cartilage_costal", "joint1": "spine", "joint2": "chest" },
+        { "spine_p": [0.016, 0.436, 0.018], "sternum_p": [0.012, 0.335, 0.016], "span": 0.068, "radius": 0.0050, "cartilage_color": "cartilage_costal", "joint1": "spine", "joint2": "chest" },
+        { "spine_p": [0.016, 0.422, -0.008], "sternum_p": [0.014, 0.328, -0.008], "span": 0.066, "radius": 0.0048, "cartilage_color": "cartilage_costal", "joint1": "spine", "joint2": "pelvis" },
+        { "spine_p": [0.015, 0.408, -0.034], "sternum_p": [0.018, 0.330, -0.030], "span": 0.060, "radius": 0.0045, "cartilage_color": "cartilage_costal", "joint1": "spine", "joint2": "pelvis" }
+      ],
+      "cylinders": [
+        { "p1": [0.0, 0.420, 0.120], "p2": [0.0, 0.328, -0.012], "r1": 0.009, "r2": 0.007, "radial_segs": 8, "height_segs": 4, "color": "cartilage_costal", "joint1": "chest", "joint2": "spine", "mirror_x": false }
+      ]
+    },
+    {
+      "id": "ost_pectoral_forelimb",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002102",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.40,
+      "mirror_x": true,
+      "ellipsoids": [
+        { "center": [0.048, 0.455, 0.095], "radii": [0.010, 0.032, 0.022], "u_segs": 10, "v_segs": 8, "joint1": "left_shoulder", "joint2": "chest" }
+      ],
+      "long_bones": [
+        { "prox": [0.052, 0.435, 0.102], "dist": [0.058, 0.362, 0.088], "shaft_r": 0.0075, "condyle_r": 0.011, "bow": [0.004, 0.0, -0.004], "joint1": "left_shoulder", "joint2": "left_elbow" },
+        { "prox": [0.058, 0.362, 0.088], "dist": [0.048, 0.320, 0.145], "shaft_r": 0.0065, "condyle_r": 0.0095, "bow": [0.003, -0.004, 0.004], "joint1": "left_elbow", "joint2": "left_wrist" }
+      ],
+      "cylinders": [
+        { "p1": [0.048, 0.320, 0.145], "p2": [0.042, 0.298, 0.168], "r1": 0.007, "r2": 0.005, "radial_segs": 8, "height_segs": 2, "joint1": "left_wrist", "joint2": "left_elbow" }
+      ]
+    },
+    {
+      "id": "ost_pelvic_girdle_epipubic",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0001271",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.40,
+      "mirror_x": true,
+      "long_bones": [
+        { "prox": [0.032, 0.382, -0.068], "dist": [0.066, 0.312, -0.148], "shaft_r": 0.015, "condyle_r": 0.022, "bow": [0.012, 0.008, 0.0], "joint1": "pelvis", "joint2": "spine" },
+        { "prox": [0.058, 0.328, -0.115], "dist": [0.032, 0.228, -0.042], "shaft_r": 0.006, "condyle_r": 0.009, "bow": [0.004, -0.006, 0.008], "joint1": "pelvis", "joint2": "spine" }
+      ]
+    },
+    {
+      "id": "ost_femur_tibia_fibula",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0000981",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.38,
+      "mirror_x": true,
+      "long_bones": [
+        { "prox": [0.068, 0.328, -0.115], "dist": [0.076, 0.225, -0.022], "shaft_r": 0.014, "condyle_r": 0.021, "bow": [0.008, 0.006, 0.008], "joint1": "left_hip", "joint2": "left_knee" },
+        { "prox": [0.076, 0.225, -0.022], "dist": [0.066, 0.088, -0.135], "shaft_r": 0.0115, "condyle_r": 0.017, "bow": [0.004, -0.004, -0.008], "joint1": "left_knee", "joint2": "left_ankle" }
+      ]
+    },
+    {
+      "id": "ost_pes_metatarsus",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002387",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.40,
+      "mirror_x": true,
+      "long_bones": [
+        { "prox": [0.066, 0.088, -0.135], "dist": [0.068, 0.016, 0.028], "shaft_r": 0.009, "condyle_r": 0.014, "bow": [0.0, -0.006, 0.005], "joint1": "left_ankle", "joint2": "left_knee" },
+        { "prox": [0.068, 0.016, 0.028], "dist": [0.068, 0.010, 0.082], "shaft_r": 0.0065, "condyle_r": 0.009, "bow": [0.0, -0.002, 0.0], "joint1": "left_ankle", "joint2": "left_ankle" }
+      ]
+    },
+    {
+      "id": "ost_caudal_vertebrae",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0001095",
+      "layer": "osteology",
+      "color": "bone_cortical",
+      "roughness": 0.42,
+      "lofts": [
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "dorsal": "bone_cortical",
+          "flank": "bone_cortical",
+          "ventral": "bone_cancellous",
+          "stations": [
+            { "center": [0.0, 0.320, -0.145], "radii": [0.022, 0.022], "joint1": "tail_base", "joint2": "pelvis", "weight": 0.85 },
+            { "center": [0.0, 0.220, -0.245], "radii": [0.018, 0.018], "joint1": "tail_base", "joint2": "tail_mid", "weight": 0.75 },
+            { "center": [0.0, 0.115, -0.355], "radii": [0.015, 0.015], "joint1": "tail_mid", "joint2": "tail_base", "weight": 0.85 },
+            { "center": [0.0, 0.048, -0.475], "radii": [0.012, 0.012], "joint1": "tail_mid", "joint2": "tail_tip", "weight": 0.75 },
+            { "center": [0.0, 0.022, -0.600], "radii": [0.009, 0.009], "joint1": "tail_tip", "joint2": "tail_mid", "weight": 0.90 },
+            { "center": [0.0, 0.016, -0.715], "radii": [0.005, 0.005], "joint1": "tail_tip", "joint2": "tail_tip", "weight": 1.0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "myo_masticatory_cervical",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0003662",
+      "layer": "myology",
+      "color": "muscle_striated",
+      "roughness": 0.52,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.026, 0.578, 0.205], "insertion": [0.022, 0.544, 0.235], "rx": 0.013, "ry": 0.015, "bow": [0.005, 0.0, 0.0], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "head", "joint2": "jaw" },
+        { "origin": [0.018, 0.570, 0.172], "insertion": [0.032, 0.468, 0.095], "rx": 0.019, "ry": 0.022, "bow": [0.007, 0.006, -0.005], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "neck", "joint2": "chest" }
+      ]
+    },
+    {
+      "id": "myo_epaxial_erector_spinae",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002255",
+      "layer": "myology",
+      "color": "muscle_deep",
+      "roughness": 0.54,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.024, 0.468, 0.085], "insertion": [0.034, 0.348, -0.115], "rx": 0.030, "ry": 0.034, "bow": [0.010, 0.018, 0.0], "muscle_color": "muscle_deep", "tendon_color": "tendon_aponeurosis", "joint1": "spine", "joint2": "pelvis" }
+      ]
+    },
+    {
+      "id": "myo_pectoral_intercostal",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002356",
+      "layer": "myology",
+      "color": "muscle_striated",
+      "roughness": 0.55,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.012, 0.415, 0.105], "insertion": [0.050, 0.425, 0.095], "rx": 0.019, "ry": 0.021, "bow": [0.006, -0.005, 0.008], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "chest", "joint2": "left_shoulder" },
+        { "origin": [0.022, 0.338, 0.045], "insertion": [0.038, 0.258, -0.095], "rx": 0.038, "ry": 0.042, "bow": [0.018, -0.018, 0.0], "muscle_color": "muscle_deep", "tendon_color": "tendon_aponeurosis", "joint1": "spine", "joint2": "pelvis" }
+      ]
+    },
+    {
+      "id": "myo_forelimb_flexors",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0003663",
+      "layer": "myology",
+      "color": "muscle_striated",
+      "roughness": 0.54,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.052, 0.438, 0.100], "insertion": [0.058, 0.362, 0.088], "rx": 0.014, "ry": 0.016, "bow": [0.005, 0.0, 0.004], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "left_shoulder", "joint2": "left_elbow" },
+        { "origin": [0.058, 0.362, 0.088], "insertion": [0.048, 0.320, 0.145], "rx": 0.011, "ry": 0.012, "bow": [0.004, -0.003, 0.003], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "left_elbow", "joint2": "left_wrist" }
+      ]
+    },
+    {
+      "id": "myo_gluteal_biceps_femoris",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0001377",
+      "layer": "myology",
+      "color": "muscle_striated",
+      "roughness": 0.52,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.044, 0.368, -0.075], "insertion": [0.076, 0.232, -0.032], "rx": 0.038, "ry": 0.048, "bow": [0.018, 0.010, -0.012], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "left_hip", "joint2": "left_knee" },
+        { "origin": [0.056, 0.308, -0.142], "insertion": [0.072, 0.195, -0.055], "rx": 0.034, "ry": 0.042, "bow": [0.014, -0.010, -0.014], "muscle_color": "muscle_deep", "tendon_color": "tendon_aponeurosis", "joint1": "left_hip", "joint2": "left_knee" }
+      ]
+    },
+    {
+      "id": "myo_gastrocnemius_achilles",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0001388",
+      "layer": "myology",
+      "color": "muscle_striated",
+      "roughness": 0.50,
+      "mirror_x": true,
+      "muscles": [
+        { "origin": [0.074, 0.225, -0.025], "insertion": [0.066, 0.088, -0.138], "rx": 0.022, "ry": 0.026, "bow": [0.008, 0.008, -0.014], "muscle_color": "muscle_striated", "tendon_color": "tendon_aponeurosis", "joint1": "left_knee", "joint2": "left_ankle" }
+      ]
+    },
+    {
+      "id": "myo_caudal_musculature",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0014796",
+      "layer": "myology",
+      "color": "muscle_deep",
+      "roughness": 0.54,
+      "lofts": [
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "dorsal": "muscle_striated",
+          "flank": "muscle_deep",
+          "ventral": "tendon_aponeurosis",
+          "stations": [
+            { "center": [0.0, 0.318, -0.140], "radii": [0.046, 0.048], "joint1": "tail_base", "joint2": "pelvis", "weight": 0.85 },
+            { "center": [0.0, 0.220, -0.245], "radii": [0.036, 0.038], "joint1": "tail_base", "joint2": "tail_mid", "weight": 0.75 },
+            { "center": [0.0, 0.115, -0.355], "radii": [0.028, 0.029], "joint1": "tail_mid", "joint2": "tail_base", "weight": 0.85 },
+            { "center": [0.0, 0.048, -0.475], "radii": [0.021, 0.022], "joint1": "tail_mid", "joint2": "tail_tip", "weight": 0.75 },
+            { "center": [0.0, 0.022, -0.600], "radii": [0.015, 0.015], "joint1": "tail_tip", "joint2": "tail_mid", "weight": 0.90 },
+            { "center": [0.0, 0.016, -0.715], "radii": [0.009, 0.009], "joint1": "tail_tip", "joint2": "tail_tip", "weight": 1.0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "myo_thoracoabdominal_viscera",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002075",
+      "layer": "myology",
+      "color": "viscera_organ",
+      "roughness": 0.45,
+      "ellipsoids": [
+        { "center": [0.0, 0.425, 0.055], "radii": [0.048, 0.045, 0.062], "u_segs": 12, "v_segs": 10, "color": "viscera_organ", "joint1": "chest", "joint2": "spine" },
+        { "center": [0.0, 0.340, -0.045], "radii": [0.064, 0.068, 0.082], "u_segs": 12, "v_segs": 10, "color": "viscera_organ", "joint1": "spine", "joint2": "pelvis" }
+      ]
+    },
+    {
+      "id": "int_wallabia_bicolor_pelage",
+      "semantic_iri": "http://purl.obolibrary.org/obo/UBERON_0002099",
+      "layer": "integument",
+      "color": "flank_grizzled",
+      "roughness": 0.84,
+      "lofts": [
+        {
+          "radial_segs": 20,
+          "cap_ends": true,
+          "dorsal": "dorsal_sooty",
+          "flank": "flank_grizzled",
+          "ventral": "ventral_rufous",
+          "stations": [
+            { "center": [0.0, 0.310, -0.175], "radii": [0.068, 0.072], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_rufous", "joint1": "pelvis", "joint2": "tail_base", "weight": 0.85 },
+            { "center": [0.0, 0.325, -0.130], "radii": [0.118, 0.128], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_rufous", "joint1": "pelvis", "joint2": "spine", "weight": 0.90 },
+            { "center": [0.0, 0.342, -0.072], "radii": [0.134, 0.148], "dorsal": "dorsal_sooty", "flank": "flank_warm", "ventral": "pouch_amber", "joint1": "pelvis", "joint2": "spine", "weight": 0.70 },
+            { "center": [0.0, 0.368, -0.010], "radii": [0.122, 0.138], "dorsal": "dorsal_umber", "flank": "flank_warm", "ventral": "ventral_rufous", "joint1": "spine", "joint2": "pelvis", "weight": 0.80 },
+            { "center": [0.0, 0.402, 0.052], "radii": [0.098, 0.112], "dorsal": "dorsal_umber", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "chest", "joint2": "spine", "weight": 0.80 },
+            { "center": [0.0, 0.442, 0.105], "radii": [0.076, 0.086], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "chest", "joint2": "neck", "weight": 0.85 },
+            { "center": [0.0, 0.495, 0.145], "radii": [0.056, 0.062], "dorsal": "dorsal_sooty", "flank": "flank_warm", "ventral": "ventral_ochre", "joint1": "neck", "joint2": "chest", "weight": 0.85 },
+            { "center": [0.0, 0.548, 0.172], "radii": [0.046, 0.050], "dorsal": "dorsal_sooty", "flank": "flank_warm", "ventral": "ventral_ochre", "joint1": "neck", "joint2": "head", "weight": 0.80 }
+          ]
+        },
+        {
+          "radial_segs": 18,
+          "cap_ends": true,
+          "dorsal": "dorsal_sooty",
+          "flank": "flank_grizzled",
+          "ventral": "cheek_cream",
+          "stations": [
+            { "center": [0.0, 0.558, 0.168], "radii": [0.044, 0.046], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "head", "joint2": "neck", "weight": 0.80 },
+            { "center": [0.0, 0.578, 0.205], "radii": [0.048, 0.048], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "cheek_cream", "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.0, 0.574, 0.242], "radii": [0.041, 0.042], "dorsal": "brow_umber", "flank": "cheek_cream", "ventral": "cheek_cream", "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.0, 0.562, 0.278], "radii": [0.029, 0.031], "dorsal": "dorsal_sooty", "flank": "cheek_cream", "ventral": "dorsal_umber", "joint1": "head", "joint2": "jaw", "weight": 0.90 },
+            { "center": [0.0, 0.552, 0.308], "radii": [0.020, 0.022], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "dorsal_sooty", "joint1": "head", "joint2": "jaw", "weight": 0.90 },
+            { "center": [0.0, 0.548, 0.326], "radii": [0.014, 0.015], "dorsal": "rhinarium_black", "flank": "rhinarium_black", "ventral": "rhinarium_black", "joint1": "head", "joint2": "head", "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "mirror_x": true,
+          "dorsal": "cheek_cream",
+          "flank": "cheek_cream",
+          "ventral": "cheek_cream",
+          "stations": [
+            { "center": [0.037, 0.556, 0.210], "radii": [0.008, 0.009], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.033, 0.553, 0.245], "radii": [0.009, 0.010], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.025, 0.549, 0.282], "radii": [0.007, 0.008], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.017, 0.547, 0.306], "radii": [0.005, 0.005], "joint1": "head", "joint2": "head", "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 14,
+          "cap_ends": true,
+          "mirror_x": true,
+          "dorsal": "ear_charcoal",
+          "flank": "ear_charcoal",
+          "ventral": "ear_concha_pink",
+          "stations": [
+            { "center": [0.032, 0.602, 0.192], "radii": [0.016, 0.012], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.044, 0.635, 0.184], "radii": [0.024, 0.012], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.054, 0.672, 0.176], "radii": [0.026, 0.010], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.060, 0.706, 0.170], "radii": [0.018, 0.008], "joint1": "head", "joint2": "head", "weight": 1.0 },
+            { "center": [0.063, 0.728, 0.166], "radii": [0.007, 0.004], "joint1": "head", "joint2": "head", "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 16,
+          "cap_ends": true,
+          "mirror_x": true,
+          "dorsal": "dorsal_sooty",
+          "flank": "flank_grizzled",
+          "ventral": "ventral_rufous",
+          "stations": [
+            { "center": [0.068, 0.335, -0.115], "radii": [0.062, 0.082], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_rufous", "joint1": "left_hip", "joint2": "pelvis", "weight": 0.80 },
+            { "center": [0.078, 0.278, -0.068], "radii": [0.058, 0.074], "dorsal": "dorsal_umber", "flank": "flank_warm", "ventral": "ventral_rufous", "joint1": "left_hip", "joint2": "left_knee", "weight": 0.75 },
+            { "center": [0.078, 0.222, -0.025], "radii": [0.042, 0.048], "dorsal": "dorsal_umber", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "left_knee", "joint2": "left_hip", "weight": 0.85 },
+            { "center": [0.072, 0.152, -0.082], "radii": [0.032, 0.038], "dorsal": "dorsal_sooty", "flank": "dorsal_umber", "ventral": "flank_grizzled", "joint1": "left_knee", "joint2": "left_ankle", "weight": 0.75 },
+            { "center": [0.066, 0.086, -0.136], "radii": [0.024, 0.028], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "dorsal_sooty", "joint1": "left_ankle", "joint2": "left_knee", "weight": 0.90 }
+          ]
+        },
+        {
+          "radial_segs": 14,
+          "cap_ends": true,
+          "mirror_x": true,
+          "dorsal": "extremity_soot",
+          "flank": "extremity_soot",
+          "ventral": "extremity_soot",
+          "stations": [
+            { "center": [0.066, 0.078, -0.142], "radii": [0.022, 0.024], "joint1": "left_ankle", "joint2": "left_knee", "weight": 0.90 },
+            { "center": [0.066, 0.036, -0.075], "radii": [0.020, 0.020], "joint1": "left_ankle", "joint2": "left_ankle", "weight": 1.0 },
+            { "center": [0.067, 0.022, -0.005], "radii": [0.021, 0.016], "joint1": "left_ankle", "joint2": "left_ankle", "weight": 1.0 },
+            { "center": [0.068, 0.016, 0.052], "radii": [0.018, 0.013], "joint1": "left_ankle", "joint2": "left_ankle", "weight": 1.0 },
+            { "center": [0.068, 0.012, 0.092], "radii": [0.012, 0.009], "joint1": "left_ankle", "joint2": "left_ankle", "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 12,
+          "cap_ends": true,
+          "mirror_x": true,
+          "dorsal": "dorsal_umber",
+          "flank": "flank_grizzled",
+          "ventral": "ventral_ochre",
+          "stations": [
+            { "center": [0.052, 0.438, 0.102], "radii": [0.028, 0.032], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "left_shoulder", "joint2": "chest", "weight": 0.85 },
+            { "center": [0.058, 0.365, 0.088], "radii": [0.021, 0.024], "dorsal": "dorsal_umber", "flank": "flank_grizzled", "ventral": "ventral_ochre", "joint1": "left_elbow", "joint2": "left_shoulder", "weight": 0.85 },
+            { "center": [0.050, 0.324, 0.142], "radii": [0.016, 0.017], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "dorsal_sooty", "joint1": "left_wrist", "joint2": "left_elbow", "weight": 0.90 },
+            { "center": [0.044, 0.302, 0.168], "radii": [0.013, 0.011], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "extremity_soot", "joint1": "left_wrist", "joint2": "left_wrist", "weight": 1.0 }
+          ]
+        },
+        {
+          "radial_segs": 16,
+          "cap_ends": true,
+          "dorsal": "dorsal_sooty",
+          "flank": "dorsal_umber",
+          "ventral": "flank_grizzled",
+          "stations": [
+            { "center": [0.0, 0.318, -0.140], "radii": [0.058, 0.062], "dorsal": "dorsal_sooty", "flank": "flank_grizzled", "ventral": "ventral_rufous", "joint1": "tail_base", "joint2": "pelvis", "weight": 0.85 },
+            { "center": [0.0, 0.220, -0.245], "radii": [0.046, 0.048], "dorsal": "dorsal_sooty", "flank": "dorsal_umber", "ventral": "flank_grizzled", "joint1": "tail_base", "joint2": "tail_mid", "weight": 0.80 },
+            { "center": [0.0, 0.115, -0.355], "radii": [0.036, 0.038], "dorsal": "extremity_soot", "flank": "dorsal_sooty", "ventral": "dorsal_umber", "joint1": "tail_mid", "joint2": "tail_base", "weight": 0.85 },
+            { "center": [0.0, 0.048, -0.475], "radii": [0.028, 0.029], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "dorsal_sooty", "joint1": "tail_mid", "joint2": "tail_tip", "weight": 0.80 },
+            { "center": [0.0, 0.022, -0.600], "radii": [0.021, 0.022], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "extremity_soot", "joint1": "tail_tip", "joint2": "tail_mid", "weight": 0.90 },
+            { "center": [0.0, 0.016, -0.730], "radii": [0.013, 0.014], "dorsal": "extremity_soot", "flank": "extremity_soot", "ventral": "extremity_soot", "joint1": "tail_tip", "joint2": "tail_tip", "weight": 1.0 }
+          ]
+        }
+      ],
+      "ellipsoids": [
+        { "center": [0.0, 0.265, -0.038], "radii": [0.056, 0.062, 0.052], "u_segs": 14, "v_segs": 10, "color": "pouch_amber", "joint1": "pelvis", "joint2": "spine" },
+        { "center": [0.029, 0.582, 0.246], "radii": [0.009, 0.009, 0.010], "u_segs": 12, "v_segs": 10, "color": "eye_obsidian", "joint1": "head", "joint2": "head", "mirror_x": true },
+        { "center": [0.033, 0.585, 0.251], "radii": [0.003, 0.003, 0.003], "u_segs": 8, "v_segs": 6, "color": "eye_spec", "joint1": "head", "joint2": "head", "mirror_x": true },
+        { "center": [0.028, 0.594, 0.244], "radii": [0.013, 0.005, 0.016], "u_segs": 10, "v_segs": 8, "color": "brow_umber", "joint1": "head", "joint2": "head", "mirror_x": true },
+        { "center": [0.0, 0.550, 0.328], "radii": [0.013, 0.011, 0.010], "u_segs": 10, "v_segs": 8, "color": "rhinarium_black", "joint1": "head", "joint2": "head" }
+      ],
+      "cylinders": [
+        { "p1": [0.068, 0.012, 0.088], "p2": [0.068, 0.005, 0.118], "r1": 0.007, "r2": 0.002, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_ankle", "joint2": "left_ankle", "mirror_x": true },
+        { "p1": [0.082, 0.012, 0.072], "p2": [0.085, 0.005, 0.098], "r1": 0.005, "r2": 0.002, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_ankle", "joint2": "left_ankle", "mirror_x": true },
+        { "p1": [0.054, 0.012, 0.068], "p2": [0.052, 0.006, 0.088], "r1": 0.0045, "r2": 0.002, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_ankle", "joint2": "left_ankle", "mirror_x": true },
+        { "p1": [0.044, 0.300, 0.166], "p2": [0.042, 0.286, 0.184], "r1": 0.004, "r2": 0.0015, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_wrist", "joint2": "left_wrist", "mirror_x": true },
+        { "p1": [0.051, 0.301, 0.164], "p2": [0.051, 0.288, 0.181], "r1": 0.0038, "r2": 0.0015, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_wrist", "joint2": "left_wrist", "mirror_x": true },
+        { "p1": [0.037, 0.301, 0.164], "p2": [0.035, 0.289, 0.180], "r1": 0.0035, "r2": 0.0015, "radial_segs": 8, "height_segs": 2, "color": "claw_keratin", "joint1": "left_wrist", "joint2": "left_wrist", "mirror_x": true }
+      ]
+    }
+  ]
+}

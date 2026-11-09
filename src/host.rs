@@ -17,7 +17,7 @@ pub use package_host::{NativeOutputRoot, SavedCandidate};
 static NEXT_GENERATION: AtomicU64 = AtomicU64::new(1);
 fn reserve_generation() -> Result<u64, String> {
     NEXT_GENERATION
-        .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+        .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
         .map_err(|_| "Production generation exhausted".into())
 }
 #[derive(Clone, Debug, PartialEq, Eq)]

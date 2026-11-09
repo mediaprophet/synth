@@ -15,6 +15,8 @@ pub struct SynthAgentBackend {
     connection: String,
     sequence: u64,
     cancel: Arc<AtomicBool>,
+    identifier_safe_tools: bool,
+    include_qualia_engine_tools: bool,
 }
 impl SynthAgentBackend {
     /// Native embedding injects an already admitted host. No stdio field or
@@ -37,7 +39,22 @@ impl SynthAgentBackend {
             connection,
             sequence: 0,
             cancel: Arc::new(AtomicBool::new(false)),
+            identifier_safe_tools: false,
+            include_qualia_engine_tools: false,
         })
+    }
+    /// Advertise Python-identifier-safe tool names (`synth_inspect`, etc.) required by
+    /// FastMCP and the Google Antigravity Python SDK (`vendor/antigravity-sdk-python`),
+    /// while `call()` continues to accept both dotted and underscore tool names.
+    pub fn with_identifier_safe_tools(mut self) -> Self {
+        self.identifier_safe_tools = true;
+        self
+    }
+    /// Include the full QualiaDB MCP engine tool catalogue (`qualia_mcp::stable_mcp_tools()`)
+    /// alongside Synth's authenticated authoring tools.
+    pub fn with_qualia_engine_tools(mut self) -> Self {
+        self.include_qualia_engine_tools = true;
+        self
     }
     /// Native supervision can cancel preparation without waiting for the host mutex.
     pub fn cancellation(&self) -> Arc<AtomicBool> {
@@ -90,6 +107,12 @@ struct SaveArg {
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+struct PresentArg {
+    context: String,
+    filename: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct ReopenArg {
     context: String,
     filename: String,
@@ -112,18 +135,30 @@ impl AuthoringBackend for SynthAgentBackend {
     fn tools(&self) -> Vec<AuthoringTool> {
         let object = |props: Value, required: Vec<&str>| json!({"type":"object","properties":props,"required":required,"additionalProperties":false});
         let token = json!({"type":"string","maxLength":128});
-        vec![
-            AuthoringTool {name:"synth.inspect".into(),description:"Inspect the admitted producer, resources, ontological categories, and source context".into(),input_schema:object(json!({}),vec![])},
-            AuthoringTool {name:"synth.ontology.categories".into(),description:"Inspect the category-theoretic ontology taxonomy (Objects, Morphism purposes, and NQuin48 counts)".into(),input_schema:object(json!({}),vec![])},
-            AuthoringTool {name:"synth.ontology.morphisms".into(),description:"Inspect admitted asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 ontological contracts".into(),input_schema:object(json!({"category":{"type":"string","maxLength":64}}),vec![])},
-            AuthoringTool {name:"synth.source.read".into(),description:"Read an authorized Vibe source cell in bounded UTF-8 chunks".into(),input_schema:object(json!({"context":token,"cell":{"type":"integer","minimum":0},"offset":{"type":"integer","minimum":0},"bytes":{"type":"integer","minimum":1,"maximum":16384}}),vec!["context","cell","offset","bytes"])},
-            AuthoringTool {name:"synth.source.submit".into(),description:"Prepare an asset edit with the admitted producer, then promote under native authority".into(),input_schema:object(json!({"context":token,"source":{"type":"string"}}),vec!["context","source"])},
-            AuthoringTool {name:"synth.package.save".into(),description:"Save an admitted asset HMC in the native-configured output directory".into(),input_schema:object(json!({"context":token,"filename":{"type":"string","maxLength":96}}),vec!["context","filename"])},
-            AuthoringTool {name:"synth.package.reopen".into(),description:"Verify the same admitted production binding from saved package bytes".into(),input_schema:object(json!({"context":token,"filename":{"type":"string","maxLength":96},"package_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}),vec!["context","filename","package_sha256"])},
-        ]
+        let tool_name = |dotted: &str| -> String {
+            if self.identifier_safe_tools {
+                dotted.replace('.', "_")
+            } else {
+                dotted.into()
+            }
+        };
+        let mut tools = vec![
+            AuthoringTool {name:tool_name("synth.inspect"),description:"Inspect the admitted producer, resources, ontological categories, and source context".into(),input_schema:object(json!({}),vec![])},
+            AuthoringTool {name:tool_name("synth.ontology.categories"),description:"Inspect the category-theoretic ontology taxonomy (Objects, Morphism purposes, and NQuin48 counts)".into(),input_schema:object(json!({}),vec![])},
+            AuthoringTool {name:tool_name("synth.ontology.morphisms"),description:"Inspect admitted asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 ontological contracts".into(),input_schema:object(json!({"category":{"type":"string","maxLength":64}}),vec![])},
+            AuthoringTool {name:tool_name("synth.source.read"),description:"Read an authorized Vibe source cell in bounded UTF-8 chunks".into(),input_schema:object(json!({"context":token,"cell":{"type":"integer","minimum":0},"offset":{"type":"integer","minimum":0},"bytes":{"type":"integer","minimum":1,"maximum":16384}}),vec!["context","cell","offset","bytes"])},
+            AuthoringTool {name:tool_name("synth.source.submit"),description:"Prepare an asset edit with the admitted producer, then promote under native authority".into(),input_schema:object(json!({"context":token,"source":{"type":"string"}}),vec!["context","source"])},
+            AuthoringTool {name:tool_name("synth.package.save"),description:"Save an admitted asset HMC in the native-configured output directory".into(),input_schema:object(json!({"context":token,"filename":{"type":"string","maxLength":96}}),vec!["context","filename"])},
+            AuthoringTool {name:tool_name("synth.package.reopen"),description:"Verify the same admitted production binding from saved package bytes".into(),input_schema:object(json!({"context":token,"filename":{"type":"string","maxLength":96},"package_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}),vec!["context","filename","package_sha256"])},
+            AuthoringTool {name:tool_name("synth.package.present"),description:"Generate a self-contained HTML work presentation (Antigravity Auxiliary Pane / <agent-embed> / Browser Preview) in the native output directory".into(),input_schema:object(json!({"context":token,"filename":{"type":"string","maxLength":96}}),vec!["context"])},
+        ];
+        if self.include_qualia_engine_tools {
+            tools.extend(crate::mcp_full::qualia_engine_authoring_tools());
+        }
+        tools
     }
     fn call(&mut self, name: &str, value: Value) -> Result<Value, ToolError> {
-        if name == "synth.ontology.categories" {
+        if matches!(name, "synth.ontology.categories" | "synth_ontology_categories") {
             if value.as_object().is_none_or(|v| !v.is_empty()) {
                 return Err(failure(
                     "invalid_arguments",
@@ -132,13 +167,13 @@ impl AuthoringBackend for SynthAgentBackend {
             }
             return Ok(crate::production::assets::ontology::categories_json());
         }
-        if name == "synth.ontology.morphisms" {
+        if matches!(name, "synth.ontology.morphisms" | "synth_ontology_morphisms") {
             let a: MorphismsArg = args(value)?;
             return Ok(crate::production::assets::ontology::morphisms_json(
                 a.category.as_deref(),
             ));
         }
-        if name == "synth.inspect" {
+        if matches!(name, "synth.inspect" | "synth_inspect") {
             if value.as_object().is_none_or(|v| !v.is_empty()) {
                 return Err(failure(
                     "invalid_arguments",
@@ -166,7 +201,7 @@ impl AuthoringBackend for SynthAgentBackend {
             return Ok(result);
         }
         match name {
-            "synth.package.save" => {
+            "synth.package.save" | "synth_package_save" => {
                 let a: SaveArg = args(value)?;
                 let expected = self.expected(&a.context)?;
                 let result = self
@@ -182,7 +217,18 @@ impl AuthoringBackend for SynthAgentBackend {
                     "review_required":true,"refresh_required":true}),
                 )
             }
-            "synth.package.reopen" => {
+            "synth.package.present" | "synth_package_present" => {
+                let a: PresentArg = args(value)?;
+                let expected = self.expected(&a.context)?;
+                let summary = self
+                    .host
+                    .try_lock()
+                    .map_err(|_| failure("busy", "Synth operation already running"))?
+                    .present_candidate(&expected, a.filename.as_deref())
+                    .map_err(native_error)?;
+                Ok(summary)
+            }
+            "synth.package.reopen" | "synth_package_reopen" => {
                 let a: ReopenArg = args(value)?;
                 let expected = self.expected(&a.context)?;
                 let sha = crate::host::digest(&a.package_sha256)
@@ -197,7 +243,7 @@ impl AuthoringBackend for SynthAgentBackend {
                 result.map_err(native_error)?;
                 Ok(json!({"reopened":true,"refresh_required":true}))
             }
-            "synth.source.read" => {
+            "synth.source.read" | "synth_source_read" => {
                 let a: ReadArg = args(value)?;
                 let expected = self.expected(&a.context)?;
                 let text = self
@@ -208,7 +254,7 @@ impl AuthoringBackend for SynthAgentBackend {
                     .map_err(native_error)?;
                 Ok(json!({"source":text,"offset":a.offset,"next_offset":a.offset+text.len()}))
             }
-            "synth.source.submit" => {
+            "synth.source.submit" | "synth_source_submit" => {
                 let a: SubmitArg = args(value)?;
                 let expected = self.expected(&a.context)?;
                 self.cancel.store(false, Ordering::Release);
@@ -227,10 +273,17 @@ impl AuthoringBackend for SynthAgentBackend {
                 result.map_err(native_error)?;
                 Ok(json!({"source_promoted":true,"refresh_required":true}))
             }
-            _ => Err(failure(
-                "unknown_tool",
-                "Synth operation is not implemented or enabled",
-            )),
+            _ => {
+                if self.include_qualia_engine_tools {
+                    if let Some(res) = crate::mcp_full::dispatch_qualia_engine_tool(name, &value) {
+                        return res;
+                    }
+                }
+                Err(failure(
+                    "unknown_tool",
+                    "Synth operation is not implemented or enabled",
+                ))
+            }
         }
     }
 }
@@ -239,5 +292,23 @@ impl AuthoringBackend for SynthAgentBackend {
 pub fn run_stdio(host: Arc<Mutex<SynthHost>>) -> Result<(), String> {
     let backend = SynthAgentBackend::bound(host)?;
     qualia_mcp::authoring::run_stdio(backend, Default::default())
+        .map_err(|_| "Synth agent transport ended or refused a protocol frame".into())
+}
+
+/// Native agent entry with Python-identifier-safe tool names (`synth_inspect`, etc.)
+/// for FastMCP / Antigravity Python SDK (`McpStdioServer`) clients.
+pub fn run_stdio_identifier_safe(host: Arc<Mutex<SynthHost>>) -> Result<(), String> {
+    let backend = SynthAgentBackend::bound(host)?.with_identifier_safe_tools();
+    qualia_mcp::authoring::run_stdio(backend, Default::default())
+        .map_err(|_| "Synth agent transport ended or refused a protocol frame".into())
+}
+
+/// Native agent entry exposing both authenticated Synth authoring tools and all 63
+/// QualiaDB MCP engine tools (`qualia_mcp::stable_mcp_tools()`).
+pub fn run_stdio_comprehensive(host: Arc<Mutex<SynthHost>>) -> Result<(), String> {
+    let backend = SynthAgentBackend::bound(host)?
+        .with_identifier_safe_tools()
+        .with_qualia_engine_tools();
+    qualia_mcp::authoring::run_stdio(backend, crate::mcp_full::comprehensive_protocol_limits())
         .map_err(|_| "Synth agent transport ended or refused a protocol frame".into())
 }

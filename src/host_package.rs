@@ -25,15 +25,21 @@ impl NativeOutputRoot {
         })
     }
     fn destination(&self, name: &str) -> Result<PathBuf, String> {
+        self.destination_with_ext(name, ".hmc", "Use a visible HMC filename without directory components")
+    }
+    fn destination_html(&self, name: &str) -> Result<PathBuf, String> {
+        self.destination_with_ext(name, ".html", "Use a visible HTML filename without directory components")
+    }
+    fn destination_with_ext(&self, name: &str, ext: &str, err_msg: &str) -> Result<PathBuf, String> {
         if name.len() > 96
             || name.starts_with('.')
-            || !name.ends_with(".hmc")
-            || name.len() <= 4
+            || !name.ends_with(ext)
+            || name.len() <= ext.len()
             || !name
                 .bytes()
                 .all(|c| c.is_ascii_alphanumeric() || matches!(c, b'-' | b'_' | b'.'))
         {
-            return Err("Use a visible HMC filename without directory components".into());
+            return Err(err_msg.into());
         }
         if self
             .configured
@@ -138,6 +144,51 @@ impl SynthHost {
             (Err(error), None) => Err(error),
             _ => Err("Native package transaction returned no receipt".into()),
         }
+    }
+    /// Export a self-contained HTML presentation for Antigravity IDE / Auxiliary Pane / Browser Preview.
+    pub fn present_candidate(
+        &self,
+        expected: &NativeContext,
+        name: Option<&str>,
+    ) -> Result<serde_json::Value, String> {
+        self.guard(expected)?;
+        let destination = match name {
+            Some(filename) => Some(
+                self.output_root
+                    .as_ref()
+                    .ok_or("Native output destination not configured")?
+                    .destination_html(filename)?,
+            ),
+            None => None,
+        };
+        self.authority.transact(&self.session, |v| {
+            transaction((|| {
+                authorize(
+                    v,
+                    &AuthoringRequest {
+                        action: AuthoringAction::ReadSource,
+                        target: &expected.document,
+                        expected_authority_generation: expected.authority_generation,
+                    },
+                )
+                .map_err(|e| e.to_string())?;
+                let saved_path = if let Some(path) = &destination {
+                    let html = crate::present::render_session_html(&self.production)?;
+                    crate::present::write_presentation_file(
+                        path,
+                        &html,
+                        self.production.limits().package_bytes,
+                    )?;
+                    Some(path.display().to_string())
+                } else {
+                    None
+                };
+                crate::present::session_presentation_summary(
+                    &self.production,
+                    saved_path.as_deref(),
+                )
+            })())
+        })
     }
     /// Fresh replay of the SAME admitted source from exact saved bytes. Older or
     /// unrelated sources require an explicit native source adoption, not a filename.

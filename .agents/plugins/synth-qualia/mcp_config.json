@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "synth-qualia": {
+      "command": "c:/github/synth/target/debug/synth.exe",
+      "args": ["mcp"],
+      "env": {
+        "QUALIA_LLM_VAULT": "C:\\LLM_files"
+      }
+    }
+  }
+}

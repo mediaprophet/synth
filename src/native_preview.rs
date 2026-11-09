@@ -112,8 +112,15 @@ pub fn run(args: &[String]) -> Result<(), String> {
         "views": records,
     });
     let receipt_bytes = serde_json::to_vec_pretty(&receipt).map_err(|e| e.to_string())?;
+    let named_views: Vec<(String, Vec<u8>)> = views
+        .iter()
+        .map(|(v, png)| (v.name.to_string(), png.clone()))
+        .collect();
+    let html_bytes = synth::present::render_10d_preview_html(&receipt, &named_views)?
+        .into_bytes();
     if total
         .checked_add(receipt_bytes.len())
+        .and_then(|sum| sum.checked_add(html_bytes.len()))
         .ok_or("output size overflow")?
         > MAX_TOTAL_OUTPUT_BYTES
     {
@@ -124,6 +131,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
         write_new(&destination.join(format!("{}.png", view.name)), &png)?;
     }
     write_new(&destination.join("review-receipt.json"), &receipt_bytes)?;
+    write_new(&destination.join("index.html"), &html_bytes)?;
     println!("Native review preview written: {}", destination.display());
     Ok(())
 }
