@@ -2,6 +2,7 @@
 //! (`engine-tools`) with Synth's categorical ontology, VibeScript production,
 //! and Antigravity HTML presentation (`synth.presentation-html/v1`).
 use crate::production::{ProducerRegistry, ProductionLimits};
+use crate::NativeOutputRoot;
 use qualia_mcp::{
     authoring::{AuthoringBackend, AuthoringTool, ProtocolLimits, ToolError},
     dispatch::enforce_fiduciary_tool_dispatch,
@@ -11,7 +12,7 @@ use qualia_mcp::{
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::{
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::atomic::AtomicBool,
 };
 
@@ -85,17 +86,47 @@ pub fn dispatch_qualia_engine_tool(name: &str, value: &Value) -> Option<Result<V
 /// tools plus Synth's standalone capabilities, ontology, and HTML presentation tools.
 pub struct StandaloneSynthMcp {
     intent: McpIntentFrame,
+    output_root: Option<NativeOutputRoot>,
 }
 
 impl Default for StandaloneSynthMcp {
     fn default() -> Self {
         Self {
             intent: McpIntentFrame::default(),
+            output_root: None,
         }
     }
 }
 
 impl StandaloneSynthMcp {
+    pub fn with_output_root(mut self, root: NativeOutputRoot) -> Self {
+        self.output_root = Some(root);
+        self
+    }
+
+    /// Operator-configured native directory (`SYNTH_OUTPUT_ROOT`). Unset means writes are refused.
+    pub fn from_process_env() -> Result<Self, String> {
+        let mut mcp = Self::default();
+        match std::env::var("SYNTH_OUTPUT_ROOT") {
+            Ok(raw) if !raw.trim().is_empty() => {
+                mcp.output_root = Some(NativeOutputRoot::admit(Path::new(raw.trim()))?);
+            }
+            _ => {}
+        }
+        Ok(mcp)
+    }
+
+    fn confined_destination(&self, name: &str, ext: &str, err_msg: &str) -> Result<PathBuf, ToolError> {
+        let root = self.output_root.as_ref().ok_or_else(|| {
+            ToolError::new(
+                "native_output_unconfigured",
+                "Native output destination not configured",
+            )
+        })?;
+        root.destination_with_ext(name, ext, err_msg)
+            .map_err(|e| ToolError::new("native_output_refused", e))
+    }
+
     pub fn synth_tools() -> Vec<AuthoringTool> {
         let object = |props: Value, required: Vec<&str>| {
             json!({
@@ -141,10 +172,21 @@ impl StandaloneSynthMcp {
                 description: "Evaluate VibeScript source in a bounded ProductionSession, verify strict replay, and optionally write create-only .hmc and Antigravity/Browser Preview .html showcase files".into(),
                 input_schema: object(
                     json!({
-                        "source": {"type": "string"},
+                        "source": {
+                            "type": "string",
+                            "maxLength": ProductionLimits::default().source.submission_bytes
+                        },
                         "profile": {"type": "string", "maxLength": 64},
-                        "out_hmc": {"type": "string", "maxLength": 256},
-                        "present_html": {"type": "string", "maxLength": 256}
+                        "out_hmc": {
+                            "type": "string",
+                            "maxLength": 96,
+                            "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.hmc$"
+                        },
+                        "present_html": {
+                            "type": "string",
+                            "maxLength": 96,
+                            "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.html$"
+                        }
                     }),
                     vec!["source"],
                 ),
@@ -211,7 +253,11 @@ impl AuthoringBackend for StandaloneSynthMcp {
                     .reopen(candidate.bundle(), limits.clone(), &cancel)
                     .map_err(|e| ToolError::new("replay_failed", e))?;
                 if let Some(hmc_str) = &parsed.out_hmc {
-                    let hmc_path = PathBuf::from(hmc_str);
+                    let hmc_path = self.confined_destination(
+                        hmc_str,
+                        ".hmc",
+                        "Use a visible HMC filename without directory components",
+                    )?;
                     qualia_core_db::poet_host::invoke::studio_store::checkpoint::save_bundle(
                         &hmc_path,
                         candidate.bundle(),
@@ -221,7 +267,11 @@ impl AuthoringBackend for StandaloneSynthMcp {
                     .map_err(|e| ToolError::new("hmc_save_failed", e))?;
                 }
                 if let Some(html_str) = &parsed.present_html {
-                    let html_path = PathBuf::from(html_str);
+                    let html_path = self.confined_destination(
+                        html_str,
+                        ".html",
+                        "Use a visible HTML filename without directory components",
+                    )?;
                     let html = crate::present::render_session_html(&session)
                         .map_err(|e| ToolError::new("present_render_failed", e))?;
                     crate::present::write_presentation_file(&html_path, &html, limits.package_bytes)
@@ -271,8 +321,11 @@ pub fn comprehensive_protocol_limits() -> ProtocolLimits {
 
 /// Run the standalone stdio MCP server (`synth mcp`) exposing all Synth + QualiaDB MCP tools.
 pub fn run_standalone_stdio() -> Result<(), String> {
-    qualia_mcp::authoring::run_stdio(StandaloneSynthMcp::default(), comprehensive_protocol_limits())
-        .map_err(|e| format!("Synth MCP transport ended: {e}"))
+    qualia_mcp::authoring::run_stdio(
+        StandaloneSynthMcp::from_process_env()?,
+        comprehensive_protocol_limits(),
+    )
+    .map_err(|e| format!("Synth MCP transport ended: {e}"))
 }
 
 /// Return the JSON catalogue of all tools exposed by `synth mcp`.
@@ -286,4 +339,99 @@ pub fn catalogue_json() -> Value {
         "identifier_safe_for_fastmcp": tools.iter().all(|t| !t.name.contains('.')),
         "tools": tools,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    const SOURCE: &str =
+        r#"let mut asset = { files: [{ key: "note.txt", kind: "txt", text: "native-root" }] };"#;
+
+    fn unique_dir() -> PathBuf {
+        let path = std::env::temp_dir().join(format!(
+            "synth-mcp-out-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&path).unwrap();
+        path
+    }
+
+    #[test]
+    fn produce_present_schema_caps_source_and_out_hmc_pattern() {
+        let tool = StandaloneSynthMcp::synth_tools()
+            .into_iter()
+            .find(|t| t.name == "synth_produce_present")
+            .unwrap();
+        let props = &tool.input_schema["properties"];
+        assert_eq!(
+            props["source"]["maxLength"],
+            ProductionLimits::default().source.submission_bytes
+        );
+        assert_eq!(props["out_hmc"]["maxLength"], 96);
+        let pattern = props["out_hmc"]["pattern"].as_str().unwrap();
+        assert!(pattern.contains("hmc"));
+        assert!(pattern.contains("A-Za-z0-9"));
+    }
+
+    #[test]
+    fn produce_present_refuses_writes_without_native_root() {
+        let mut mcp = StandaloneSynthMcp::default();
+        let err = mcp
+            .call(
+                "synth_produce_present",
+                json!({"source": SOURCE, "out_hmc": "note.hmc"}),
+            )
+            .unwrap_err();
+        assert_eq!(err.code, "native_output_unconfigured");
+        let ok = mcp
+            .call("synth_produce_present", json!({"source": SOURCE}))
+            .unwrap();
+        assert_eq!(ok["strict_replay_verified"], true);
+    }
+
+    #[test]
+    fn produce_present_writes_through_native_output_root_create_only() {
+        let dir = unique_dir();
+        let mut mcp = StandaloneSynthMcp::default()
+            .with_output_root(NativeOutputRoot::admit(&dir).unwrap());
+        let result = mcp
+            .call(
+                "synth_produce_present",
+                json!({
+                    "source": SOURCE,
+                    "out_hmc": "note.hmc",
+                    "present_html": "note.html"
+                }),
+            )
+            .unwrap();
+        assert_eq!(result["saved_hmc"], "note.hmc");
+        assert!(dir.join("note.hmc").is_file());
+        assert!(dir.join("note.html").is_file());
+        assert!(mcp
+            .call(
+                "synth_produce_present",
+                json!({"source": SOURCE, "out_hmc": "note.hmc"})
+            )
+            .is_err());
+        assert!(mcp
+            .call(
+                "synth_produce_present",
+                json!({"source": SOURCE, "out_hmc": "../escape.hmc"})
+            )
+            .is_err());
+        assert!(mcp
+            .call(
+                "synth_produce_present",
+                json!({"source": SOURCE, "out_hmc": "nested/dir.hmc"})
+            )
+            .is_err());
+        assert!(!dir.join("escape.hmc").exists());
+        let _ = std::fs::remove_dir_all(dir);
+    }
 }

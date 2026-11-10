@@ -30,7 +30,8 @@ impl NativeOutputRoot {
     fn destination_html(&self, name: &str) -> Result<PathBuf, String> {
         self.destination_with_ext(name, ".html", "Use a visible HTML filename without directory components")
     }
-    fn destination_with_ext(&self, name: &str, ext: &str, err_msg: &str) -> Result<PathBuf, String> {
+    /// Confine an agent-supplied filename to this native root. Never join caller paths.
+    pub fn destination_with_ext(&self, name: &str, ext: &str, err_msg: &str) -> Result<PathBuf, String> {
         if name.len() > 96
             || name.starts_with('.')
             || !name.ends_with(ext)
