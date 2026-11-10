@@ -230,7 +230,8 @@ fn write_ranged_bytes(
     range_header: Option<&str>,
 ) -> Result<(), String> {
     let total = body.len();
-    match range_header.map(str::trim).filter(|s| !s.is_empty()) {
+    // Present Range (including empty/whitespace) is fail-closed 416; only a missing header is 200.
+    match range_header {
         None => write_http_response_with(
             stream,
             "200 OK",
@@ -570,6 +571,9 @@ mod tests {
     use crate::production::{ProducerRegistry, ProductionLimits};
     use std::io::{Read, Write};
     use std::net::TcpListener;
+    use std::path::PathBuf;
+    use std::sync::atomic::{AtomicU64, Ordering};
+    use std::sync::OnceLock;
     use std::thread;
 
     fn exchange(request: &[u8], body: Vec<u8>, mime: &'static str) -> Vec<u8> {
@@ -713,5 +717,105 @@ mod tests {
         let (header, slice) = http_split(&resp);
         assert!(header.starts_with("HTTP/1.1 206 Partial Content"));
         assert_eq!(slice, b"6789");
+
+        let resp = exchange(
+            b"GET /project/file/working/file.bin HTTP/1.1\r\nRange:    \r\nConnection: close\r\n\r\n",
+            b"0123456789".to_vec(),
+            "application/octet-stream",
+        );
+        let (header, slice) = http_split(&resp);
+        assert!(
+            header.starts_with("HTTP/1.1 416 Range Not Satisfiable"),
+            "whitespace-only Range must be 416, got {header}"
+        );
+        assert!(header.contains("Content-Range: bytes */10"));
+        assert!(slice.is_empty());
+    }
+
+    fn range_http_working_dir() -> PathBuf {
+        static INIT: OnceLock<PathBuf> = OnceLock::new();
+        INIT.get_or_init(|| {
+            if crate::project::current().is_none() {
+                let path = std::env::temp_dir().join(format!(
+                    "synth-range-http-{}",
+                    std::process::id()
+                ));
+                std::fs::create_dir_all(&path).unwrap();
+                crate::project::attach(Some(path)).unwrap();
+            }
+            crate::project::current()
+                .expect("project attached for Range HTTP tests")
+                .working
+                .clone()
+        })
+        .clone()
+    }
+
+    fn unique_range_file(ext: &str) -> String {
+        static N: AtomicU64 = AtomicU64::new(0);
+        format!(
+            "range-{}-{}.{ext}",
+            std::process::id(),
+            N.fetch_add(1, Ordering::Relaxed)
+        )
+    }
+
+    fn exchange_handle_connection(file_name: &str, bytes: &[u8], extra_headers: &str) -> Vec<u8> {
+        let working = range_http_working_dir();
+        std::fs::write(working.join(file_name), bytes).unwrap();
+        let request = format!(
+            "GET /project/file/working/{file_name} HTTP/1.1\r\nHost: 127.0.0.1\r\n{extra_headers}Connection: close\r\n\r\n"
+        );
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            let (stream, _) = listener.accept().unwrap();
+            handle_connection(stream).unwrap();
+        });
+        let mut client = TcpStream::connect(addr).unwrap();
+        client.write_all(request.as_bytes()).unwrap();
+        let mut resp = Vec::new();
+        client.read_to_end(&mut resp).unwrap();
+        server.join().unwrap();
+        resp
+    }
+
+    #[test]
+    fn handle_connection_range_on_project_file_is_206_missing_is_200_blank_is_416() {
+        let (hmc, _) = produce_hmc();
+        let total = hmc.len();
+        assert!(total > 16, "produced HMC must be large enough to slice");
+
+        let ranged = exchange_handle_connection(
+            &unique_range_file("hmc"),
+            &hmc,
+            "Range: bytes=0-15\r\n",
+        );
+        let (header, body) = http_split(&ranged);
+        assert!(
+            header.starts_with("HTTP/1.1 206 Partial Content"),
+            "handle_connection Range must be 206, got {header}"
+        );
+        assert!(header.to_ascii_lowercase().contains("accept-ranges: bytes"));
+        assert!(header.contains(&format!("Content-Range: bytes 0-15/{total}")));
+        assert_eq!(body, &hmc[..16]);
+
+        let full = exchange_handle_connection(&unique_range_file("hmc"), &hmc, "");
+        let (header, body) = http_split(&full);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "missing Range through handle_connection must be 200, got {header}"
+        );
+        assert!(header.to_ascii_lowercase().contains("accept-ranges: bytes"));
+        assert_eq!(body, hmc.as_slice());
+
+        let blank = exchange_handle_connection(&unique_range_file("hmc"), &hmc, "Range:    \r\n");
+        let (header, body) = http_split(&blank);
+        assert!(
+            header.starts_with("HTTP/1.1 416 Range Not Satisfiable"),
+            "whitespace-only Range through handle_connection must be 416, got {header}"
+        );
+        assert!(header.contains(&format!("Content-Range: bytes */{total}")));
+        assert!(body.is_empty());
     }
 }

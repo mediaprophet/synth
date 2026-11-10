@@ -116,9 +116,10 @@ fn Monitor(props: MonitorProps) -> Element {
     let snap = use_hook(FullCapabilitiesSnapshot::collect);
     let mut view = use_signal(|| View {
         status: format!(
-            "Mode: {} · Web Portal: {} · 12 Ontology Cats (142 Morphisms) · {} MCP Tools · {} Vibe SDK Providers · {} Living-World Pins",
+            "Mode: {} · Web Portal: {} · 12 Ontology Cats ({} Morphisms) · {} MCP Tools · {} Vibe SDK Providers · {} Living-World Pins",
             props.environment.mode.label(),
             props.portal_url,
+            crate::production::assets::ontology::MORPHISMS.len(),
             props.environment.ecosystem.total_mcp_tools,
             props.environment.ecosystem.vibe_sdk_families,
             props.environment.ecosystem.living_world_entries,
@@ -213,6 +214,7 @@ fn Monitor(props: MonitorProps) -> Element {
         .as_array()
         .cloned()
         .unwrap_or_default();
+    let nquin_count = crate::production::assets::ontology::ONTOLOGY_NQUINS.len();
     let providers = snap.vibe_sdk["providers"]
         .as_array()
         .cloned()
@@ -283,7 +285,7 @@ fn Monitor(props: MonitorProps) -> Element {
                     style: "display: flex; gap: 10px; flex-wrap: wrap;",
                     div { style: "background: #12211e; border: 1px solid #233e38; border-radius: 8px; padding: 10px 14px;",
                         p { style: "margin: 0; font-size: 11px; color: #8fb5a7;", "CATEGORICAL ONTOLOGY" }
-                        p { style: "margin: 4px 0 0 0; font-size: 15px; font-weight: bold; color: #34d399;", "12 Cats · {morphisms.len()} Morphisms · 432 NQuins" }
+                        p { style: "margin: 4px 0 0 0; font-size: 15px; font-weight: bold; color: #34d399;", "12 Cats · {morphisms.len()} Morphisms · {nquin_count} NQuins" }
                     }
                     div { style: "background: #12211e; border: 1px solid #233e38; border-radius: 8px; padding: 10px 14px;",
                         p { style: "margin: 0; font-size: 11px; color: #8fb5a7;", "UNIFIED MCP SUITE" }
@@ -349,7 +351,7 @@ fn Monitor(props: MonitorProps) -> Element {
                 }
             } else if tab == "ontology" {
                 section {
-                    h2 { "Categorical Ontology · 12 Categories · {morphisms.len()} Morphisms · 432 NQuin48 Triples" }
+                    h2 { "Categorical Ontology · 12 Categories · {morphisms.len()} Morphisms · {nquin_count} NQuin48 Triples" }
                     div {
                         style: "display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;",
                         button {

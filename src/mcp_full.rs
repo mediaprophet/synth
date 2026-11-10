@@ -149,7 +149,10 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_ontology_morphisms".into(),
-                description: "Inspect the 114 asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 contracts".into(),
+                description: format!(
+                    "Inspect the {} asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 contracts",
+                    crate::production::assets::ontology::MORPHISMS.len()
+                ),
                 input_schema: object(json!({"category": {"type": "string", "maxLength": 64}}), vec![]),
             },
             AuthoringTool {
@@ -266,6 +269,7 @@ impl AuthoringBackend for StandaloneSynthMcp {
                     )
                     .map_err(|e| ToolError::new("hmc_save_failed", e))?;
                 }
+                let mut saved_html = None;
                 if let Some(html_str) = &parsed.present_html {
                     let html_path = self.confined_destination(
                         html_str,
@@ -276,10 +280,11 @@ impl AuthoringBackend for StandaloneSynthMcp {
                         .map_err(|e| ToolError::new("present_render_failed", e))?;
                     crate::present::write_presentation_file(&html_path, &html, limits.package_bytes)
                         .map_err(|e| ToolError::new("present_save_failed", e))?;
+                    saved_html = Some(html_path.display().to_string());
                 }
                 let mut summary = crate::present::session_presentation_summary(
                     &session,
-                    parsed.present_html.as_deref(),
+                    saved_html.as_deref(),
                 )
                 .map_err(|e| ToolError::new("summary_failed", e))?;
                 if let Some(obj) = summary.as_object_mut() {
@@ -413,25 +418,49 @@ mod tests {
         assert_eq!(result["saved_hmc"], "note.hmc");
         assert!(dir.join("note.hmc").is_file());
         assert!(dir.join("note.html").is_file());
-        assert!(mcp
+        let confined_html = dir
+            .join("note.html")
+            .canonicalize()
+            .unwrap()
+            .display()
+            .to_string();
+        assert_eq!(result["presentation_html"], confined_html);
+        let hint = result["antigravity_embed_hint"].as_str().unwrap();
+        let hint_path = confined_html.replace('\\', "/");
+        assert!(
+            hint.contains(&hint_path),
+            "embed hint must locate confined html_path, got {hint}"
+        );
+        let create_only = mcp
             .call(
                 "synth_produce_present",
-                json!({"source": SOURCE, "out_hmc": "note.hmc"})
+                json!({"source": SOURCE, "out_hmc": "note.hmc"}),
             )
-            .is_err());
-        assert!(mcp
+            .unwrap_err();
+        assert_eq!(create_only.code, "hmc_save_failed");
+        let traversal = mcp
             .call(
                 "synth_produce_present",
-                json!({"source": SOURCE, "out_hmc": "../escape.hmc"})
+                json!({"source": SOURCE, "out_hmc": "../escape.hmc"}),
             )
-            .is_err());
-        assert!(mcp
+            .unwrap_err();
+        assert_eq!(traversal.code, "native_output_refused");
+        let nested = mcp
             .call(
                 "synth_produce_present",
-                json!({"source": SOURCE, "out_hmc": "nested/dir.hmc"})
+                json!({"source": SOURCE, "out_hmc": "nested/dir.hmc"}),
             )
-            .is_err());
+            .unwrap_err();
+        assert_eq!(nested.code, "native_output_refused");
+        let win_slash = mcp
+            .call(
+                "synth_produce_present",
+                json!({"source": SOURCE, "out_hmc": r"..\escape.hmc"}),
+            )
+            .unwrap_err();
+        assert_eq!(win_slash.code, "native_output_refused");
         assert!(!dir.join("escape.hmc").exists());
+        assert!(!dir.parent().unwrap().join("escape.hmc").exists());
         let _ = std::fs::remove_dir_all(dir);
     }
 }
