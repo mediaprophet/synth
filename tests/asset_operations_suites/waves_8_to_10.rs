@@ -123,16 +123,7 @@ fn mixed_compiled_members_two_produces_match_sha256_and_kinds() {
     let limits = ProductionLimits::default();
     let reader = BundleReader::parse_with_limits(
         &bundle_a,
-        qualia_core_db::bundle::BundleReadLimits {
-            file_bytes: limits.package_bytes,
-            entries: limits
-                .resources
-                .checked_mul(2)
-                .and_then(|n| n.checked_add(1))
-                .expect("entry count"),
-            key_bytes: 1040,
-            ..qualia_core_db::bundle::BundleReadLimits::default()
-        },
+        bundle_read_limits(&limits).expect("entry count"),
     )
     .expect("HMC parses with production limits");
     let ten_d = reader

@@ -47,6 +47,13 @@ impl Default for ProductionLimits {
     }
 }
 
+/// HMC bag read limits derived from production budgets.
+pub fn bundle_read_limits(
+    limits: &ProductionLimits,
+) -> Result<qualia_core_db::bundle::BundleReadLimits, String> {
+    package::read_limits(limits)
+}
+
 pub struct ProductionContext<'a> {
     pub inputs: &'a [Resource],
     pub limits: &'a ProductionLimits,

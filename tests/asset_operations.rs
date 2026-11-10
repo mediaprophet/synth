@@ -3,7 +3,7 @@ pub use qualia_core_db::{
     specialized_libs::computer_vision::cv::codecs::png_decode::decode_png,
 };
 pub use std::sync::atomic::{AtomicBool, Ordering};
-pub use synth::production::{ProducerRegistry, ProductionLimits, Resource};
+pub use synth::production::{bundle_read_limits, ProducerRegistry, ProductionLimits, Resource};
 
 pub const EXAMPLE: &str = include_str!("../examples/production.vibe");
 pub const GRANT: &str = "requires [capability(\"capability.invoke\")];";

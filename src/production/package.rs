@@ -21,7 +21,7 @@ struct Entry {
     sha256: String,
 }
 
-fn read_limits(limits: &ProductionLimits) -> Result<BundleReadLimits, String> {
+pub(super) fn read_limits(limits: &ProductionLimits) -> Result<BundleReadLimits, String> {
     Ok(BundleReadLimits {
         file_bytes: limits.package_bytes,
         entries: limits
