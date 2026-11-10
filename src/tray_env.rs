@@ -288,6 +288,11 @@ pub fn bootstrap_environment() -> Result<ProducedEnvironment, String> {
     limits.resources = 512;
     limits.total_resource_bytes = 128 * 1024 * 1024;
     limits.package_bytes = 160 * 1024 * 1024;
+    // WHY: tray_environment.vibe is 65540 B; default SessionLimits.submission_bytes is 64 KiB.
+    limits.source.submission_bytes = limits
+        .source
+        .submission_bytes
+        .max(TRAY_ENVIRONMENT_SOURCE.len());
     let mut session = registry.session("files", vec![], limits)?;
     session.submit(TRAY_ENVIRONMENT_SOURCE, &cancel)?;
 

@@ -2,12 +2,23 @@ use super::*;
 
 #[test]
 fn wave12_living_world_botanical_vertebrate_anatomy_fauna_rig_ontology_pin_continuum_and_frustum() {
-    assert_eq!(synth::production::assets::OPERATIONS.len(), 144);
-    assert_eq!(synth::production::assets::ontology::MORPHISMS.len(), 144);
+    assert_eq!(synth::production::assets::OPERATIONS.len(), 145);
+    assert_eq!(synth::production::assets::ontology::MORPHISMS.len(), 145);
     assert_eq!(
         synth::production::assets::ontology::ONTOLOGY_NQUINS.len(),
-        432
+        435
     );
+    let catalog = synth::production::assets::OPERATIONS
+        .iter()
+        .flat_map(|(id, owner, summary)| [*id, *owner, *summary])
+        .collect::<Vec<_>>()
+        .join("\n");
+    for needle in ["CsiFrame", "interpolation=cubic", "UV01"] {
+        assert!(
+            catalog.contains(needle),
+            "host catalog must raise Wave C1 object {needle}"
+        );
+    }
 
     let registry = ProducerRegistry::with_builtins();
     let cancel = AtomicBool::new(false);

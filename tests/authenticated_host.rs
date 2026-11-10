@@ -264,7 +264,9 @@ fn general_host_enforces_admission_edit_context_audit_reopen_and_revocation() {
         .unwrap()
         .contains("<agent-embed"));
     let html_bytes = std::fs::read_to_string(directory.join("showcase.html")).unwrap();
-    assert!(html_bytes.contains("--background: #080d0c"));
+    assert!(html_bytes.contains("--background: #0a1014"));
+    assert!(html_bytes.contains("CsiFrame"));
+    assert!(html_bytes.contains("UV01"));
     assert!(html_bytes.contains("data:image/png;base64,"));
     assert!(agy_agent
         .call(
@@ -275,7 +277,7 @@ fn general_host_enforces_admission_edit_context_audit_reopen_and_revocation() {
     // Verify Synth self-hosted Tray & Studio environment bootstrap (`examples/tray_environment.vibe`)
     let env = synth::tray_env::bootstrap_environment().unwrap();
     assert_eq!(env.schema, "synth.tray-environment/v1");
-    assert_eq!(env.resources.len(), 72);
+    assert_eq!(env.resources.len(), 71);
     assert!(env
         .resources
         .iter()
@@ -328,7 +330,7 @@ fn general_host_enforces_admission_edit_context_audit_reopen_and_revocation() {
         .call("synth_environment_bootstrap", serde_json::json!({}))
         .unwrap();
     assert_eq!(env_mcp["schema"], "synth.tray-environment/v1");
-    assert_eq!(env_mcp["resources"].as_array().unwrap().len(), 72);
+    assert_eq!(env_mcp["resources"].as_array().unwrap().len(), 71);
     owner.disconnect(&session).unwrap();
     assert!(shared.lock().unwrap().inspect().is_err());
 }

@@ -133,6 +133,7 @@ pub fn render_capabilities_panels_html(snap: &FullCapabilitiesSnapshot) -> Strin
         .as_array()
         .cloned()
         .unwrap_or_default();
+    let nquin_count = crate::production::assets::ontology::ONTOLOGY_NQUINS.len();
 
     let _ = write!(
         &mut out,
@@ -140,14 +141,15 @@ pub fn render_capabilities_panels_html(snap: &FullCapabilitiesSnapshot) -> Strin
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <div class="text-xs font-mono uppercase text-[var(--muted-foreground)]">hypermedia.categorical-ontology/v1 · 432 NQuin48 Triples</div>
+        <div class="text-xs font-mono uppercase text-[var(--muted-foreground)]">hypermedia.categorical-ontology/v1 · {nquin_count} NQuin48 Triples</div>
         <h2 class="text-base font-semibold">12 Canonical Categories &amp; {morph_count} Admitted Morphisms</h2>
       </div>
       <input id="morph-search" oninput="filterMorphisms()" type="search" placeholder="Search morphisms, domains, codomains, IRIs..." class="px-3 py-1.5 rounded-lg text-xs font-mono bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] w-72" />
     </div>
     <div class="flex flex-wrap gap-1.5 pt-1">
       <button onclick="setMorphCategory('all')" class="morph-cat-btn px-2.5 py-1 rounded text-xs font-mono border border-emerald-500/60 bg-emerald-950/40" data-cat="all">All ({morph_count})</button>"#,
-        morph_count = morph_list.len()
+        morph_count = morph_list.len(),
+        nquin_count = nquin_count
     );
     for cat in &cat_list {
         let cid = esc(cat["id"].as_str().unwrap_or(""));
