@@ -426,10 +426,26 @@ mod tests {
             .to_string();
         assert_eq!(result["presentation_html"], confined_html);
         let hint = result["antigravity_embed_hint"].as_str().unwrap();
-        let hint_path = confined_html.replace('\\', "/");
+        let src = hint
+            .strip_prefix("<agent-embed src=\"")
+            .and_then(|s| s.strip_suffix("\"></agent-embed>"))
+            .unwrap_or(hint);
         assert!(
-            hint.contains(&hint_path),
-            "embed hint must locate confined html_path, got {hint}"
+            !src.contains("?/C:"),
+            "embed hint must not contain verbatim ?/C:, got {hint}"
+        );
+        #[cfg(windows)]
+        assert!(
+            src.starts_with("file:///C:"),
+            "Windows embed hint must start with file:///C:, got {hint}"
+        );
+        #[cfg(not(windows))]
+        assert!(
+            src.starts_with(&format!(
+                "file:///{}",
+                confined_html.trim_start_matches('/')
+            )),
+            "unix embed hint must be file:/// + abs path, got {hint}"
         );
         let create_only = mcp
             .call(

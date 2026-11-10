@@ -733,6 +733,16 @@ pub fn write_presentation_file(path: &Path, html: &str, max_bytes: usize) -> Res
     file.sync_all().map_err(|e| e.to_string())
 }
 
+/// Windows `canonicalize` prefixes `\\?\` / `\\.\`; those must not become `file:///?/C:`.
+fn file_url_from_fs_path(path: &str) -> String {
+    let normalized = path.replace('\\', "/");
+    let without_verbatim = normalized
+        .strip_prefix("//?/")
+        .or_else(|| normalized.strip_prefix("//./"))
+        .unwrap_or(&normalized);
+    format!("file:///{}", without_verbatim.trim_start_matches('/'))
+}
+
 /// Build a structured JSON summary for MCP agents presenting the current candidate.
 pub fn session_presentation_summary(
     session: &ProductionSession,
@@ -761,7 +771,41 @@ pub fn session_presentation_summary(
         "package_sha256": candidate.sha256(),
         "document_digest": hex(&session.document_digest()?),
         "presentation_html": saved_html_path,
-        "antigravity_embed_hint": saved_html_path.map(|p| format!("<agent-embed src=\"file:///{}\"></agent-embed>", p.replace('\\', "/").trim_start_matches('/'))),
+        "antigravity_embed_hint": saved_html_path.map(|p| format!("<agent-embed src=\"{}\"></agent-embed>", file_url_from_fs_path(p))),
         "resources": resources,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::file_url_from_fs_path;
+
+    #[test]
+    fn session_presentation_embed_hint_strips_windows_verbatim_prefix() {
+        assert_eq!(
+            file_url_from_fs_path(r"\\?\C:\Temp\note.html"),
+            "file:///C:/Temp/note.html"
+        );
+        assert_eq!(
+            file_url_from_fs_path(r"\\.\C:\Temp\note.html"),
+            "file:///C:/Temp/note.html"
+        );
+        assert_eq!(
+            file_url_from_fs_path("//?/C:/Temp/note.html"),
+            "file:///C:/Temp/note.html"
+        );
+        assert_eq!(
+            file_url_from_fs_path("/tmp/note.html"),
+            "file:///tmp/note.html"
+        );
+        for path in [
+            r"\\?\C:\Temp\note.html",
+            r"\\.\C:\Temp\note.html",
+            "//?/C:/Temp/note.html",
+        ] {
+            let url = file_url_from_fs_path(path);
+            assert!(url.starts_with("file:///C:"), "got {url}");
+            assert!(!url.contains("?/C:"), "verbatim prefix leaked: {url}");
+        }
+    }
 }
