@@ -1,5 +1,7 @@
 # Synth asset capabilities — current inventory, 7 November 2026
 
+> **SUPERSEDED 10 November 2026.** This file describes an 18-op host. The live catalog is **145** morphisms. Agents must read `C:\github\synth\AGENTS.md` and `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not use this inventory to claim tools are missing.
+
 This inventory describes Synth after the general-purpose library integration.
 It distinguishes executable product features from library functions and upstream
 code that has not been integrated. Test evidence: `production-validation.md`.
