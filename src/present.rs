@@ -46,7 +46,7 @@ fn base64_encode(bytes: &[u8]) -> String {
     out
 }
 
-fn escape_html(text: &str) -> String {
+pub(crate) fn escape_html(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     for ch in text.chars() {
         match ch {
@@ -345,6 +345,7 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
           <h1 class="text-xl font-semibold mt-0.5">Synth Studio &amp; Substantive Capabilities Workbench — <span class="font-mono text-emerald-300">{producer_id}@{producer_ver}</span></h1>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+          <a class="px-2.5 py-1 rounded-md bg-amber-950/50 border border-amber-500/40 text-amber-200" href="/project">Project workbench</a>
           <span class="px-2.5 py-1 rounded-md bg-emerald-950/60 border border-emerald-500/50 text-emerald-300">{mode_label}</span>
           <span class="px-2.5 py-1 rounded-md bg-[var(--background)] border border-[var(--border)]">Revision {rev}</span>
           <span class="px-2.5 py-1 rounded-md bg-[var(--background)] border border-[var(--border)]">{count} Resources ({total_bytes} B)</span>

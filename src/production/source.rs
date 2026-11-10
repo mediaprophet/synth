@@ -215,6 +215,9 @@ impl Host for assets::AssetHost<'_> {
         ])))
     }
     fn capability_invoke(&mut self, id: &str, args: &Value, _: Span) -> Result<Value, Diagnostic> {
+        if id == "qualia.anatomy.pack_reference_body" {
+            return super::atlas::pack_reference_body(self, args).map_err(diagnostic);
+        }
         self.0
             .invoke(&assets::canonical(id), args)
             .map_err(diagnostic)

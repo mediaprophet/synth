@@ -7,7 +7,7 @@ use std::{
 };
 use synth::production::{Candidate, ProducerRegistry, ProductionLimits, ProductionSession, Resource};
 
-const USAGE: &str = "synth produce [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
+const USAGE: &str = "synth produce [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
 
 enum CommandMode {
     Produce,
@@ -23,6 +23,9 @@ struct Options {
     out: PathBuf,
     export: Option<PathBuf>,
     present: Option<PathBuf>,
+    resource_mib: Option<u64>,
+    total_mib: Option<u64>,
+    package_mib: Option<u64>,
 }
 
 fn parse(args: &[String]) -> Result<Options, String> {
@@ -38,6 +41,9 @@ fn parse(args: &[String]) -> Result<Options, String> {
     let mut out = None;
     let mut export = None;
     let mut present = None;
+    let mut resource_mib = None;
+    let mut total_mib = None;
+    let mut package_mib = None;
     let mut i = 1;
     let value = |i: usize| {
         args.get(i)
@@ -75,6 +81,18 @@ fn parse(args: &[String]) -> Result<Options, String> {
                 inputs.push((value(i + 1)?, value(i + 2)?, value(i + 3)?.into()));
                 i += 4;
             }
+            "--resource-mib" if resource_mib.is_none() => {
+                resource_mib = Some(parse_mib(&value(i + 1)?)?);
+                i += 2;
+            }
+            "--total-mib" if total_mib.is_none() => {
+                total_mib = Some(parse_mib(&value(i + 1)?)?);
+                i += 2;
+            }
+            "--package-mib" if package_mib.is_none() => {
+                package_mib = Some(parse_mib(&value(i + 1)?)?);
+                i += 2;
+            }
             _ => return Err(USAGE.into()),
         }
     }
@@ -94,7 +112,22 @@ fn parse(args: &[String]) -> Result<Options, String> {
         out: out.ok_or(USAGE)?,
         export,
         present,
+        resource_mib,
+        total_mib,
+        package_mib,
     })
+}
+
+fn parse_mib(text: &str) -> Result<u64, String> {
+    text.parse::<u64>()
+        .map_err(|_| format!("Byte budget must be a whole number of MiB: {text}"))
+}
+
+fn mib_bytes(mib: u64) -> Result<usize, String> {
+    let bytes = mib
+        .checked_mul(1024 * 1024)
+        .ok_or("Byte budget overflow")?;
+    usize::try_from(bytes).map_err(|_| "Byte budget overflow".to_owned())
 }
 
 fn read(path: &Path, max: usize) -> Result<Vec<u8>, String> {
@@ -220,7 +253,16 @@ pub fn run(args: &[String]) -> Result<(), String> {
             return Err("Presentation output must use .html".into());
         }
     }
-    let limits = ProductionLimits::default();
+    let mut limits = ProductionLimits::default();
+    if let Some(mib) = options.resource_mib {
+        limits.resource_bytes = mib_bytes(mib)?;
+    }
+    if let Some(mib) = options.total_mib {
+        limits.total_resource_bytes = mib_bytes(mib)?;
+    }
+    if let Some(mib) = options.package_mib {
+        limits.package_bytes = mib_bytes(mib)?;
+    }
     let cancel = AtomicBool::new(false);
     let registry = ProducerRegistry::with_builtins();
     let session = prepare_session(&options, &registry, &limits, &cancel)?;

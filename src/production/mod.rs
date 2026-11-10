@@ -5,6 +5,7 @@
 //! deterministic and side-effect free, respect the supplied limits/cancellation,
 //! and validate their own formats. Resource `kind` is a label, not certification.
 pub mod assets;
+mod atlas;
 mod files;
 mod package;
 mod source;

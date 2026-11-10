@@ -414,6 +414,27 @@ let wallabia_bicolor_scaffold = {
     ]
 };
 
+// ── Species Rule Pack (.q42): safe range of motion, injury thresholds, post-injury behaviour ──
+// Authored as data; compiled by the anatomy op into a Q42LOGIC container (no Rust species tables).
+let wallabia_bicolor_rules = [
+    { kind: "permit", property: "q42:safeAnkleAchillesFlexionRad", value: 0.95 },
+    { kind: "permit", property: "q42:safeCervicalNeckPitchRad", value: 0.75 },
+    { kind: "permit", property: "q42:safeMandibularJawOpen01", value: 0.78 },
+    { kind: "permit", property: "q42:safeForelimbReachRad", value: 1.15 },
+    { kind: "forbid", property: "q42:injuryThresholdAchillesStrain01", value: 1.0 },
+    { kind: "forbid", property: "q42:injuryThresholdForepawSprain01", value: 1.0 },
+    { kind: "forbid", property: "q42:injuryThresholdCervicalHyperext01", value: 1.0 },
+    { kind: "forbid", property: "q42:injuryThresholdCaudalTorque01", value: 1.0 },
+    { kind: "obligate", property: "q42:obligateInjuredAsymmetricLimpGait", value: 0.35 },
+    { kind: "obligate", property: "q42:obligateForepawProtectiveGuarding", value: 0.9 },
+    { kind: "obligate", property: "q42:obligateNociceptiveEarPinBack", value: 0.85 },
+    { kind: "obligate", property: "q42:obligateHerbivoryToMyceliumCoupling", value: 1.0 },
+    { kind: "ltl_globally", property: "q42:ltlGloballyEnforceJointConeLimits", value: 60.0 },
+    { kind: "ltl_globally", property: "q42:ltlGloballyClampSmallLlmHooksToSafeRom", value: 4.0 },
+    { kind: "ltl_globally", property: "q42:ltlUntilWoundHealedMaintainGuarding", value: 1.0 },
+    { kind: "ltl_globally", property: "q42:ltlGloballyVerifyNQuinXorParity", value: 1.0 }
+];
+
 // 1. Complete 3-Layer Swamp Wallaby (Exterior Bicolor Countershaded Pelage)
 let wallaby_complete = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
     archetype: "macropod_saltatorial",
@@ -422,7 +443,8 @@ let wallaby_complete = capability.invoke("hypermedia.manifold.compile_vertebrate
     myology_vis_01: 0.0,
     integument_vis_01: 1.0,
     explode_01: 0.0,
-    scaffold: wallabia_bicolor_scaffold
+    spec: wallabia_bicolor_scaffold,
+    rules: wallabia_bicolor_rules
 });
 
 // 2. Ecorche Dissection Twin (Pelage Peeled & Myology/Osteology Exposed)
@@ -433,7 +455,8 @@ let wallaby_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_
     myology_vis_01: 0.95,
     integument_vis_01: 0.18,
     explode_01: 0.04,
-    scaffold: wallabia_bicolor_scaffold
+    spec: wallabia_bicolor_scaffold,
+    rules: wallabia_bicolor_rules
 });
 
 // 3. Osteology Skeletal Twin (Pure Articulated Macropod Skeleton + Epipubic Bones)
@@ -444,7 +467,8 @@ let wallaby_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate
     myology_vis_01: 0.0,
     integument_vis_01: 0.0,
     explode_01: 0.0,
-    scaffold: wallabia_bicolor_scaffold
+    spec: wallabia_bicolor_scaffold,
+    rules: wallabia_bicolor_rules
 });
 
 // 4. 18-Joint PGA Motor Saltatorial Rig & Two-Bone Hindlimb IK Verification
@@ -519,7 +543,7 @@ let dossier_pdf = capability.invoke("hypermedia.discourse.compile_pdf", {
             lines: [
                 "Species: Wallabia bicolor (Swamp Wallaby / Black-tailed Wallaby)",
                 "Biomechanical Archetype: MacropodSaltatorial (18-joint PGA Motor dual-quaternion rig)",
-                "Portable Scaffold: examples/scaffolds/swamp_wallaby_bicolor.json (zero Rust species hardcoding)",
+                "Species Spec: VibeScript record wallabia_bicolor_scaffold + wallabia_bicolor_rules .q42 pack (zero Rust species hardcoding)",
                 "Anatomical Layers: Layer 0 Osteology (8 submeshes), Layer 1 Myology (8 submeshes), Layer 2 Pelage (1 submesh)",
                 "Diagnostic Pelage: Sooty charcoal dorsal saddle, warm rufous-orange belly & chest, cream cheek stripe, black tail"
             ]

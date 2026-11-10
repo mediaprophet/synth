@@ -7,7 +7,7 @@ mod native_preview;
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let result = if args.is_empty() || args.as_slice() == ["--help"] {
-        println!("Synth commands:\n  capabilities  Inspect the admitted Vibe SDK providers\n  ontology      Inspect the category-theoretic ontology taxonomy and morphisms\n  operations    List shared-library asset operations and ontological contracts\n  profiles      List available production profiles\n  mcp           Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio\n  mcp-tools     Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env           Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve         Run the local Synth Studio HTTP workbench on a non-conflicting port (default: 8787)\n  tray          Launch the Aether resident tray & studio environment (requires native-ui feature)\n  produce       Generate or strictly reopen an asset HMC\n  present       Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview       Render .10d PNGs and interactive HTML turntable (requires preview feature)");
+        println!("Synth commands:\n  capabilities  Inspect the admitted Vibe SDK providers\n  ontology      Inspect the category-theoretic ontology taxonomy and morphisms\n  operations    List shared-library asset operations and ontological contracts\n  profiles      List available production profiles\n  mcp           Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio\n  mcp-tools     Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env           Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve         Run the local Synth Studio HTTP workbench on a non-conflicting port (default: 8787). QualiaDB demo at / ; current project at /project when --project DIR is set\n  tray          Launch the Aether resident tray & studio environment (requires native-ui feature)\n  produce       Generate or strictly reopen an asset HMC\n  present       Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview       Render .10d PNGs and interactive HTML turntable (requires preview feature)");
         asset_cli::run(&["--help".into()])
     } else if args.as_slice() == ["capabilities"] {
         synth::vibe_runtime::inspect().and_then(|report| {
@@ -66,6 +66,7 @@ fn main() {
     } else if args.first().is_some_and(|arg| arg == "serve") {
         let mut port: Option<u16> = None;
         let mut open_browser = false;
+        let mut project: Option<std::path::PathBuf> = None;
         let mut idx = 1;
         let mut parse_err: Option<String> = None;
         while idx < args.len() {
@@ -85,13 +86,26 @@ fn main() {
                         }
                         idx += 2;
                     } else {
-                        parse_err = Some("Usage: synth serve [--port PORT] [--open]".to_owned());
+                        parse_err = Some(
+                            "Usage: synth serve [--port PORT] [--open] [--project DIR]".to_owned(),
+                        );
+                        break;
+                    }
+                }
+                "--project" => {
+                    if let Some(p) = args.get(idx + 1) {
+                        project = Some(std::path::PathBuf::from(p));
+                        idx += 2;
+                    } else {
+                        parse_err = Some(
+                            "Usage: synth serve [--port PORT] [--open] [--project DIR]".to_owned(),
+                        );
                         break;
                     }
                 }
                 other => {
                     parse_err = Some(format!(
-                        "Unknown `synth serve` flag `{other}` (Usage: synth serve [--port PORT] [--open])"
+                        "Unknown `synth serve` flag `{other}` (Usage: synth serve [--port PORT] [--open] [--project DIR])"
                     ));
                     break;
                 }
@@ -100,7 +114,9 @@ fn main() {
         if let Some(err) = parse_err {
             Err(err)
         } else {
-            synth::web_server::serve_blocking(port, open_browser)
+            synth::project::attach(project).and_then(|_| {
+                synth::web_server::serve_blocking(port, open_browser)
+            })
         }
     } else if args.as_slice() == ["tray"] {
         #[cfg(feature = "native-ui")]

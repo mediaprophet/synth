@@ -5,7 +5,54 @@ description: Author VibeScript assets, query the 12-category / 114-morphism onto
 
 # Synth Studio — Agent Authoring, QualiaDB MCP & Presentation Skill
 
-Synth is a deterministic VibeScript asset-production engine and application over QualiaDB (`0.0.41`), Etalon, Hypermedia, and Aether. Use this skill whenever authoring, inspecting, packaging, or visually presenting `.vibe` assets and `.hmc` containers in Antigravity IDE, Antigravity 2.0, or via the `vendor/antigravity-sdk-python` harness.
+Synth is a deterministic VibeScript asset-production engine and application over QualiaDB (`0.0.41`), Etalon, Hypermedia, and Aether. Use this skill whenever authoring, inspecting, packaging, or visually presenting `.vibe` assets and `.hmc` containers.
+
+Grok’s adapter is `vendor/grok` (MCP project config, Grok skill, JSON invoke). Antigravity’s adapter is `vendor/antigravity-sdk-python`. The modeller is the same Hypermedia morphism set in both.
+
+A model type (heart, species, plant, part) is a `.vibe` that calls the existing Hypermedia morphisms (`locus`, `manifold.extrude` / `loft` / `revolve` / `boolean_3d` / `sweep_assembly_profile`, `surface`, `radiance`, `compile_10d`). Do not add a Rust compiler or a second binary per species, organ, or project.
+
+## 0. Local Grok produce-and-review loop
+
+`C:\github\synth\target\debug\synth.exe` is the live MCP server. Do not replace it and do not kill that process.
+
+The CLI this agent uses is a preview-enabled build in a separate Cargo target:
+
+```powershell
+$env:CARGO_TARGET_DIR = "C:\github\synth\target-studio"
+Set-Location C:\github\synth
+cargo build --bin synth --features preview
+$synth = "C:\github\synth\target-studio\debug\synth.exe"
+```
+
+`--out`, `--export-dir`, `--present`, and `preview --out` are create-only. Use a new run directory every time.
+
+```powershell
+$run = "C:\github\synth\target-studio\runs\<unique-name>"
+New-Item -ItemType Directory -Force -Path (Split-Path $run) | Out-Null
+& $synth produce --profile files --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
+Get-ChildItem $run -Filter *.10d | ForEach-Object {
+  & $synth preview --asset $_.FullName --out "$run-preview-$($_.BaseName)"
+}
+```
+
+Then review the pictures before claiming the shape is right:
+
+1. Read every exported `.png` / `.svg` from the produce step.
+2. Read `front-view-assumed.png`, `side-view-assumed.png`, and `three-quarter-view-assumed.png` from each preview directory.
+3. If a browser check is needed, serve the run directory and screenshot the HTML (`$run.html` and each preview `index.html`).
+4. A file existing, an HTTP 200, or a triangle count is not a visual review.
+
+Workbench:
+- QualiaDB demo studio (existing 5-tab page): `http://127.0.0.1:8787/`
+- Current project (working vs delivered, tags, comments, ratings, reference links): `http://127.0.0.1:8787/project`
+
+```powershell
+& $synth serve --port 8787 --project C:\github\anatomy
+```
+
+Read user notes from `GET /api/project/annotations` or `{project}/.synth/annotations.json` before changing a model. A note can name the file, an aspect (apex, chamber), tags, a 1–5 rating, a comment, and reference URLs.
+
+Run files: serve `C:\github\synth\target-studio\runs` (currently `http://127.0.0.1:8791/`).
 
 ## 1. Inspecting Capabilities, Ontology & the Comprehensive QualiaDB MCP Suite
 

@@ -1,0 +1,824 @@
+import "vibe:0.3/nquin" as nquin;
+requires [capability("capability.invoke")];
+
+let parity = nquin.wire.compute_wire_parity([65, 117, 116, 104, 111]);
+
+// Synth generates each named part. No external mesh is fetched.
+
+let m_0 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "heart",
+    title: "Synth authored male heart",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "lung_left",
+    title: "Synth authored male lung_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "lung_right",
+    title: "Synth authored male lung_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_3 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "eye_left",
+    title: "Synth authored male eye_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_4 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "eye_right",
+    title: "Synth authored male eye_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_5 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "brain",
+    title: "Synth authored male brain",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_6 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "spinal_cord",
+    title: "Synth authored male spinal_cord",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_7 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "liver",
+    title: "Synth authored male liver",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_8 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "stomach",
+    title: "Synth authored male stomach",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_9 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "kidney_left",
+    title: "Synth authored male kidney_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_10 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "kidney_right",
+    title: "Synth authored male kidney_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_11 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "spleen",
+    title: "Synth authored male spleen",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_12 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "pancreas",
+    title: "Synth authored male pancreas",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_13 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "trachea",
+    title: "Synth authored male trachea",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_14 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "thyroid",
+    title: "Synth authored male thyroid",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_15 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "aorta",
+    title: "Synth authored male aorta",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_16 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "bladder",
+    title: "Synth authored male bladder",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_17 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "cranium",
+    title: "Synth authored male cranium",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_18 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "spine",
+    title: "Synth authored male spine",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_19 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "pelvis",
+    title: "Synth authored male pelvis",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_20 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "femur_left",
+    title: "Synth authored male femur_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_21 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "femur_right",
+    title: "Synth authored male femur_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_22 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "humerus_left",
+    title: "Synth authored male humerus_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_23 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "humerus_right",
+    title: "Synth authored male humerus_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_24 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "pectoralis",
+    title: "Synth authored male pectoralis",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_25 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "deltoid_left",
+    title: "Synth authored male deltoid_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_26 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "deltoid_right",
+    title: "Synth authored male deltoid_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_27 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "quadriceps_left",
+    title: "Synth authored male quadriceps_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_28 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "quadriceps_right",
+    title: "Synth authored male quadriceps_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_29 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "prostate",
+    title: "Synth authored male prostate",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_30 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "testis_left",
+    title: "Synth authored male testis_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let m_31 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "testis_right",
+    title: "Synth authored male testis_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_0 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "heart",
+    title: "Synth authored female heart",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "lung_left",
+    title: "Synth authored female lung_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "lung_right",
+    title: "Synth authored female lung_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_3 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "eye_left",
+    title: "Synth authored female eye_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_4 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "eye_right",
+    title: "Synth authored female eye_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_5 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "brain",
+    title: "Synth authored female brain",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_6 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "spinal_cord",
+    title: "Synth authored female spinal_cord",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_7 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "liver",
+    title: "Synth authored female liver",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_8 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "stomach",
+    title: "Synth authored female stomach",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_9 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "kidney_left",
+    title: "Synth authored female kidney_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_10 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "kidney_right",
+    title: "Synth authored female kidney_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_11 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "spleen",
+    title: "Synth authored female spleen",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_12 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "pancreas",
+    title: "Synth authored female pancreas",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_13 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "trachea",
+    title: "Synth authored female trachea",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_14 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "thyroid",
+    title: "Synth authored female thyroid",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_15 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "aorta",
+    title: "Synth authored female aorta",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_16 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "bladder",
+    title: "Synth authored female bladder",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_17 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "cranium",
+    title: "Synth authored female cranium",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_18 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "spine",
+    title: "Synth authored female spine",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_19 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "pelvis",
+    title: "Synth authored female pelvis",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_20 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "femur_left",
+    title: "Synth authored female femur_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_21 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "femur_right",
+    title: "Synth authored female femur_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_22 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "humerus_left",
+    title: "Synth authored female humerus_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_23 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "humerus_right",
+    title: "Synth authored female humerus_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_24 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "pectoralis",
+    title: "Synth authored female pectoralis",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_25 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "deltoid_left",
+    title: "Synth authored female deltoid_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_26 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "deltoid_right",
+    title: "Synth authored female deltoid_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_27 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "quadriceps_left",
+    title: "Synth authored female quadriceps_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_28 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "quadriceps_right",
+    title: "Synth authored female quadriceps_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_29 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "uterus",
+    title: "Synth authored female uterus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_30 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "ovary_left",
+    title: "Synth authored female ovary_left",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let f_31 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    part: "ovary_right",
+    title: "Synth authored female ovary_right",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p0_0 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    part: "uterus",
+    gestational_week: 10,
+    title: "Synth authored female_trimester_1 uterus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p0_1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    part: "fetus",
+    gestational_week: 10,
+    title: "Synth authored female_trimester_1 fetus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p0_2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    part: "placenta",
+    gestational_week: 10,
+    title: "Synth authored female_trimester_1 placenta",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p1_0 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    part: "uterus",
+    gestational_week: 22,
+    title: "Synth authored female_trimester_2 uterus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p1_1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    part: "fetus",
+    gestational_week: 22,
+    title: "Synth authored female_trimester_2 fetus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p1_2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    part: "placenta",
+    gestational_week: 22,
+    title: "Synth authored female_trimester_2 placenta",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p2_0 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    part: "uterus",
+    gestational_week: 38,
+    title: "Synth authored female_trimester_3 uterus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p2_1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    part: "fetus",
+    gestational_week: 38,
+    title: "Synth authored female_trimester_3 fetus",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let p2_2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    part: "placenta",
+    gestational_week: 38,
+    title: "Synth authored female_trimester_3 placenta",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+
+// Chronological age and appearance age are separate morphisms.
+let age_spine = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "spine",
+    chronological_age_years: 78,
+    appearance_age_years: 55,
+    title: "Synth authored male spine age 78 look 55",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let age_aorta = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "aorta",
+    chronological_age_years: 78,
+    appearance_age_years: 55,
+    title: "Synth authored male aorta age 78 look 55",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let age_quad_old = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "quadriceps_left",
+    chronological_age_years: 78,
+    appearance_age_years: 78,
+    title: "Synth authored male quadriceps age 78 look 78",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let age_quad_younger = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "quadriceps_left",
+    chronological_age_years: 78,
+    appearance_age_years: 55,
+    title: "Synth authored male quadriceps age 78 look 55",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let age_quad_older_look = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "quadriceps_left",
+    chronological_age_years: 30,
+    appearance_age_years: 60,
+    title: "Synth authored male quadriceps age 30 look 60",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let age_child_heart = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    part: "heart",
+    chronological_age_years: 8,
+    appearance_age_years: 8,
+    title: "Synth authored male heart age 8",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 1.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+
+let mut asset = {files: [
+    {key: "male/heart.10d", resource: m_0.container_10d},
+    {key: "male/lung_left.10d", resource: m_1.container_10d},
+    {key: "male/lung_right.10d", resource: m_2.container_10d},
+    {key: "male/eye_left.10d", resource: m_3.container_10d},
+    {key: "male/eye_right.10d", resource: m_4.container_10d},
+    {key: "male/brain.10d", resource: m_5.container_10d},
+    {key: "male/spinal_cord.10d", resource: m_6.container_10d},
+    {key: "male/liver.10d", resource: m_7.container_10d},
+    {key: "male/stomach.10d", resource: m_8.container_10d},
+    {key: "male/kidney_left.10d", resource: m_9.container_10d},
+    {key: "male/kidney_right.10d", resource: m_10.container_10d},
+    {key: "male/spleen.10d", resource: m_11.container_10d},
+    {key: "male/pancreas.10d", resource: m_12.container_10d},
+    {key: "male/trachea.10d", resource: m_13.container_10d},
+    {key: "male/thyroid.10d", resource: m_14.container_10d},
+    {key: "male/aorta.10d", resource: m_15.container_10d},
+    {key: "male/bladder.10d", resource: m_16.container_10d},
+    {key: "male/cranium.10d", resource: m_17.container_10d},
+    {key: "male/spine.10d", resource: m_18.container_10d},
+    {key: "male/pelvis.10d", resource: m_19.container_10d},
+    {key: "male/femur_left.10d", resource: m_20.container_10d},
+    {key: "male/femur_right.10d", resource: m_21.container_10d},
+    {key: "male/humerus_left.10d", resource: m_22.container_10d},
+    {key: "male/humerus_right.10d", resource: m_23.container_10d},
+    {key: "male/pectoralis.10d", resource: m_24.container_10d},
+    {key: "male/deltoid_left.10d", resource: m_25.container_10d},
+    {key: "male/deltoid_right.10d", resource: m_26.container_10d},
+    {key: "male/quadriceps_left.10d", resource: m_27.container_10d},
+    {key: "male/quadriceps_right.10d", resource: m_28.container_10d},
+    {key: "male/prostate.10d", resource: m_29.container_10d},
+    {key: "male/testis_left.10d", resource: m_30.container_10d},
+    {key: "male/testis_right.10d", resource: m_31.container_10d},
+    {key: "female/heart.10d", resource: f_0.container_10d},
+    {key: "female/lung_left.10d", resource: f_1.container_10d},
+    {key: "female/lung_right.10d", resource: f_2.container_10d},
+    {key: "female/eye_left.10d", resource: f_3.container_10d},
+    {key: "female/eye_right.10d", resource: f_4.container_10d},
+    {key: "female/brain.10d", resource: f_5.container_10d},
+    {key: "female/spinal_cord.10d", resource: f_6.container_10d},
+    {key: "female/liver.10d", resource: f_7.container_10d},
+    {key: "female/stomach.10d", resource: f_8.container_10d},
+    {key: "female/kidney_left.10d", resource: f_9.container_10d},
+    {key: "female/kidney_right.10d", resource: f_10.container_10d},
+    {key: "female/spleen.10d", resource: f_11.container_10d},
+    {key: "female/pancreas.10d", resource: f_12.container_10d},
+    {key: "female/trachea.10d", resource: f_13.container_10d},
+    {key: "female/thyroid.10d", resource: f_14.container_10d},
+    {key: "female/aorta.10d", resource: f_15.container_10d},
+    {key: "female/bladder.10d", resource: f_16.container_10d},
+    {key: "female/cranium.10d", resource: f_17.container_10d},
+    {key: "female/spine.10d", resource: f_18.container_10d},
+    {key: "female/pelvis.10d", resource: f_19.container_10d},
+    {key: "female/femur_left.10d", resource: f_20.container_10d},
+    {key: "female/femur_right.10d", resource: f_21.container_10d},
+    {key: "female/humerus_left.10d", resource: f_22.container_10d},
+    {key: "female/humerus_right.10d", resource: f_23.container_10d},
+    {key: "female/pectoralis.10d", resource: f_24.container_10d},
+    {key: "female/deltoid_left.10d", resource: f_25.container_10d},
+    {key: "female/deltoid_right.10d", resource: f_26.container_10d},
+    {key: "female/quadriceps_left.10d", resource: f_27.container_10d},
+    {key: "female/quadriceps_right.10d", resource: f_28.container_10d},
+    {key: "female/uterus.10d", resource: f_29.container_10d},
+    {key: "female/ovary_left.10d", resource: f_30.container_10d},
+    {key: "female/ovary_right.10d", resource: f_31.container_10d},
+    {key: "female_trimester_1/uterus.10d", resource: p0_0.container_10d},
+    {key: "female_trimester_1/fetus.10d", resource: p0_1.container_10d},
+    {key: "female_trimester_1/placenta.10d", resource: p0_2.container_10d},
+    {key: "female_trimester_2/uterus.10d", resource: p1_0.container_10d},
+    {key: "female_trimester_2/fetus.10d", resource: p1_1.container_10d},
+    {key: "female_trimester_2/placenta.10d", resource: p1_2.container_10d},
+    {key: "female_trimester_3/uterus.10d", resource: p2_0.container_10d},
+    {key: "female_trimester_3/fetus.10d", resource: p2_1.container_10d},
+    {key: "female_trimester_3/placenta.10d", resource: p2_2.container_10d},
+    {key: "male/age78_look55/spine.10d", resource: age_spine.container_10d},
+    {key: "male/age78_look55/aorta.10d", resource: age_aorta.container_10d},
+    {key: "male/age78_look78/quadriceps_left.10d", resource: age_quad_old.container_10d},
+    {key: "male/age78_look55/quadriceps_left.10d", resource: age_quad_younger.container_10d},
+    {key: "male/age30_look60/quadriceps_left.10d", resource: age_quad_older_look.container_10d},
+    {key: "male/age8/heart.10d", resource: age_child_heart.container_10d}
+]};
+

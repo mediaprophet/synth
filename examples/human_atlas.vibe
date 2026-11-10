@@ -1,0 +1,35 @@
+import "vibe:0.3/nquin" as nquin;
+requires [capability("capability.invoke")];
+
+let parity = nquin.wire.compute_wire_parity([65, 116, 108, 97, 115]);
+
+// Master reference atlas. This script names the two complete bodies.
+// Synth calls the HRA packer. The files producer writes the HMC.
+// quality master is the reference. A person passes constitution_json
+// (stature_mm, sitting_height_mm, inseam_mm, arm_span_mm, chest_mm, waist_mm, hip_mm, weight_g).
+// The emitted fit JSON is what QualiaPortal set_body_fit_json applies to the organ vertices.
+// Lower tiers are derived from the master.
+
+let male = capability.invoke("qualia.anatomy.pack_reference_body", {
+    model: "male",
+    quality: "master",
+    scope: "complete"
+});
+let female = capability.invoke("qualia.anatomy.pack_reference_body", {
+    model: "female",
+    quality: "master",
+    scope: "complete"
+});
+
+let mut asset = {files: [
+    {key: "male.hmc", resource: male.hmc},
+    {key: "male.q42", resource: male.q42},
+    {key: "male.json", resource: male.report},
+    {key: "male.fit.json", resource: male.fit},
+    {key: "male.constitution.json", resource: male.constitution},
+    {key: "female.hmc", resource: female.hmc},
+    {key: "female.q42", resource: female.q42},
+    {key: "female.json", resource: female.report},
+    {key: "female.fit.json", resource: female.fit},
+    {key: "female.constitution.json", resource: female.constitution}
+]};
