@@ -57,6 +57,88 @@ fn subdivide_bevel_compile_two_produces_match_sha256() {
     assert_eq!(replayed.bundle(), bundle_a.as_slice());
 }
 
+/// Two produces of mixed compiled members (10d + png) must match SHA-256, and
+/// the HMC bag records each entry's resource.kind (no sidecar).
+#[test]
+fn mixed_compiled_members_two_produces_match_sha256_and_kinds() {
+    use qualia_core_db::bundle::BundleReader;
+
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let source = r##"
+        requires [capability("capability.invoke")];
+        let profile = capability.invoke("hypermedia.locus.construct", {
+            shape: "polygon",
+            points: [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
+        });
+        let mesh = capability.invoke("hypermedia.manifold.extrude", {
+            profile: profile,
+            path: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.5]],
+            caps: true
+        });
+        let compiled = capability.invoke("hypermedia.manifold.compile_10d", {
+            mesh: mesh
+        });
+        let preview = capability.invoke("hypermedia.radiance.create_rgba", {
+            width: 8,
+            height: 8,
+            color: [32, 160, 64, 255]
+        });
+        let previewPng = capability.invoke("hypermedia.radiance.encode_rgba_png", {
+            image: preview
+        });
+        let asset = {files: [
+            {key: "body.10d", resource: compiled},
+            {key: "preview.png", resource: previewPng}
+        ]};
+    "##;
+
+    let digest_of = |source: &str| {
+        let mut session = registry
+            .session("files", Vec::new(), ProductionLimits::default())
+            .unwrap();
+        session.submit(source, &cancel).unwrap();
+        let candidate = session.candidate().unwrap();
+        let outputs: Vec<(String, String)> = candidate
+            .outputs()
+            .iter()
+            .map(|r| (r.key.clone(), r.kind.clone()))
+            .collect();
+        (candidate.sha256(), candidate.bundle().to_vec(), outputs)
+    };
+
+    let (sha_a, bundle_a, outs_a) = digest_of(source);
+    let (sha_b, bundle_b, outs_b) = digest_of(source);
+    assert_eq!(sha_a, sha_b);
+    assert_eq!(bundle_a, bundle_b);
+    assert_eq!(outs_a, outs_b);
+    assert_eq!(
+        outs_a,
+        vec![
+            ("body.10d".into(), "10d".into()),
+            ("preview.png".into(), "png".into()),
+        ]
+    );
+
+    let reader = BundleReader::parse(&bundle_a).expect("HMC parses");
+    let ten_d = reader
+        .entry("outputs/body.10d")
+        .expect("bagged 10d member");
+    assert_eq!(ten_d.kind, "10d");
+    let png = reader
+        .entry("outputs/preview.png")
+        .expect("bagged png member");
+    assert_eq!(png.kind, "png");
+    assert!(reader.entries().iter().all(|e| reader.verify_entry(&e.key)));
+
+    let reopened = registry
+        .reopen(&bundle_a, ProductionLimits::default(), &cancel)
+        .unwrap();
+    let replayed = reopened.candidate().unwrap();
+    assert_eq!(replayed.sha256(), sha_a);
+    assert_eq!(replayed.bundle(), bundle_a.as_slice());
+}
+
 #[test]
 fn wave7_locus_fillet_rmf_and_manifold_radial_euler_bevel_sdf_fspm_botany() {
     let registry = ProducerRegistry::with_builtins();
