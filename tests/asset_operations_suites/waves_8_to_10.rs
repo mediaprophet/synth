@@ -1,5 +1,62 @@
 use super::*;
 
+/// Two independent produces of subdivide+bevel+compile_10d_pbr must byte-match
+/// (ordered topology maps). Reopen of the sealed HMC must match the same digest.
+#[test]
+fn subdivide_bevel_compile_two_produces_match_sha256() {
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let source = r##"
+        requires [capability("capability.invoke")];
+        let profile = capability.invoke("hypermedia.locus.construct", {
+            shape: "polygon",
+            points: [[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 2.0]]
+        });
+        let mesh = capability.invoke("hypermedia.manifold.extrude", {
+            profile: profile,
+            path: [[0.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+            caps: true
+        });
+        let subdivided = capability.invoke("hypermedia.manifold.subdivide_catmull_clark", {
+            mesh: mesh,
+            levels: 1,
+            crease: 0.25
+        });
+        let beveled = capability.invoke("hypermedia.manifold.bevel", {
+            mesh: subdivided,
+            width: 0.05,
+            segments: 1
+        });
+        let compiled = capability.invoke("hypermedia.manifold.compile_10d_pbr", {
+            mesh: beveled
+        });
+        let asset = {files: [
+            {key: "body.10d", resource: compiled}
+        ]};
+    "##;
+
+    let digest_of = |source: &str| {
+        let mut session = registry
+            .session("files", Vec::new(), ProductionLimits::default())
+            .unwrap();
+        session.submit(source, &cancel).unwrap();
+        let candidate = session.candidate().unwrap();
+        (candidate.sha256(), candidate.bundle().to_vec())
+    };
+
+    let (sha_a, bundle_a) = digest_of(source);
+    let (sha_b, bundle_b) = digest_of(source);
+    assert_eq!(sha_a, sha_b);
+    assert_eq!(bundle_a, bundle_b);
+
+    let reopened = registry
+        .reopen(&bundle_a, ProductionLimits::default(), &cancel)
+        .unwrap();
+    let replayed = reopened.candidate().unwrap();
+    assert_eq!(replayed.sha256(), sha_a);
+    assert_eq!(replayed.bundle(), bundle_a.as_slice());
+}
+
 #[test]
 fn wave7_locus_fillet_rmf_and_manifold_radial_euler_bevel_sdf_fspm_botany() {
     let registry = ProducerRegistry::with_builtins();
