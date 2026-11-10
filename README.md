@@ -38,6 +38,11 @@ production implementations belong to consumers and producer modules. Historical
 species outputs remain evidence of the former implementation, not its current
 architecture or API.
 
+Agent adapters live under `vendor/`:
+
+- `vendor/antigravity-sdk-python` — Antigravity IDE MCP + `<agent-embed>` presentation
+- `vendor/grok` — Grok MCP project config, skill, and JSON invoke helper
+
 ## VibeScript SDK and providers
 
 The shared `vibescript-abi` is unified with QualiaDB's local SDK crate, including

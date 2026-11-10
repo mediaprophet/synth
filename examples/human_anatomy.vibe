@@ -1,0 +1,199 @@
+import "vibe:0.3/nquin" as nquin;
+requires [capability("capability.invoke")];
+
+let parity = nquin.wire.compute_wire_parity([72, 117, 109, 97, 110]);
+
+// Human welfare suite. Geometry, measurements, and rule containers come from
+// hypermedia.manifold.compile_vertebrate_anatomy_10d. This script lists the
+// files. Synth's files producer writes the HMC.
+
+let human_male = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    title: "Human Welfare Anatomy — Adult Male",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.92,
+    integument_vis_01: 0.42,
+    explode_01: 0.0
+});
+let human_male_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    title: "Human Welfare Anatomy — Adult Male Osteology",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let human_male_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "male",
+    title: "Human Welfare Anatomy — Adult Male Ecorche",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.12,
+    explode_01: 0.04
+});
+
+let human_female = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    title: "Human Welfare Anatomy — Adult Female, Non-Pregnant",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.92,
+    integument_vis_01: 0.42,
+    explode_01: 0.0
+});
+let human_female_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    title: "Human Welfare Anatomy — Adult Female Osteology",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let human_female_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female",
+    title: "Human Welfare Anatomy — Adult Female Ecorche",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.12,
+    explode_01: 0.04
+});
+
+let human_t1 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    gestational_week: 10,
+    title: "Human Welfare Anatomy — Trimester 1, Week 10",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.38,
+    explode_01: 0.0
+});
+let human_t1_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    gestational_week: 10,
+    title: "Human Welfare Anatomy — Trimester 1 Osteology",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let human_t1_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_1",
+    gestational_week: 10,
+    title: "Human Welfare Anatomy — Trimester 1 Ecorche",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.12,
+    explode_01: 0.04
+});
+
+let human_t2 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    gestational_week: 22,
+    title: "Human Welfare Anatomy — Trimester 2, Week 22",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.38,
+    explode_01: 0.0
+});
+let human_t2_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    gestational_week: 22,
+    title: "Human Welfare Anatomy — Trimester 2 Osteology",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let human_t2_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_2",
+    gestational_week: 22,
+    title: "Human Welfare Anatomy — Trimester 2 Ecorche",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.12,
+    explode_01: 0.04
+});
+
+let human_t3 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    gestational_week: 38,
+    title: "Human Welfare Anatomy — Trimester 3, Week 38",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.38,
+    explode_01: 0.0
+});
+let human_t3_skeleton = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    gestational_week: 38,
+    title: "Human Welfare Anatomy — Trimester 3 Osteology",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.0,
+    integument_vis_01: 0.0,
+    explode_01: 0.0
+});
+let human_t3_ecorche = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    gestational_week: 38,
+    title: "Human Welfare Anatomy — Trimester 3 Ecorche",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.12,
+    explode_01: 0.04
+});
+
+let human_w34 = capability.invoke("hypermedia.manifold.compile_vertebrate_anatomy_10d", {
+    profile: "female_trimester_3",
+    gestational_week: 34,
+    title: "Human Welfare Anatomy — Week 34",
+    osteology_vis_01: 1.0,
+    myology_vis_01: 0.95,
+    integument_vis_01: 0.38,
+    explode_01: 0.0
+});
+
+let mut asset = {files: [
+    {key: "human/male.10d", resource: human_male.container_10d},
+    {key: "human/male_turnaround.png", resource: human_male.turntable_png},
+    {key: "human/male_blueprint.svg", resource: human_male.blueprint_svg},
+    {key: "human/male_measurements.json", resource: human_male.measurements_resource},
+    {key: "human/male_logic.q42", resource: human_male.logic_q42},
+    {key: "human/male_skeleton.10d", resource: human_male_skeleton.container_10d},
+    {key: "human/male_ecorche.10d", resource: human_male_ecorche.container_10d},
+
+    {key: "human/female.10d", resource: human_female.container_10d},
+    {key: "human/female_turnaround.png", resource: human_female.turntable_png},
+    {key: "human/female_blueprint.svg", resource: human_female.blueprint_svg},
+    {key: "human/female_measurements.json", resource: human_female.measurements_resource},
+    {key: "human/female_logic.q42", resource: human_female.logic_q42},
+    {key: "human/female_skeleton.10d", resource: human_female_skeleton.container_10d},
+    {key: "human/female_ecorche.10d", resource: human_female_ecorche.container_10d},
+
+    {key: "human/female_trimester_1.10d", resource: human_t1.container_10d},
+    {key: "human/female_trimester_1_turnaround.png", resource: human_t1.turntable_png},
+    {key: "human/female_trimester_1_blueprint.svg", resource: human_t1.blueprint_svg},
+    {key: "human/female_trimester_1_measurements.json", resource: human_t1.measurements_resource},
+    {key: "human/female_trimester_1_logic.q42", resource: human_t1.logic_q42},
+    {key: "human/female_trimester_1_skeleton.10d", resource: human_t1_skeleton.container_10d},
+    {key: "human/female_trimester_1_ecorche.10d", resource: human_t1_ecorche.container_10d},
+
+    {key: "human/female_trimester_2.10d", resource: human_t2.container_10d},
+    {key: "human/female_trimester_2_turnaround.png", resource: human_t2.turntable_png},
+    {key: "human/female_trimester_2_blueprint.svg", resource: human_t2.blueprint_svg},
+    {key: "human/female_trimester_2_measurements.json", resource: human_t2.measurements_resource},
+    {key: "human/female_trimester_2_logic.q42", resource: human_t2.logic_q42},
+    {key: "human/female_trimester_2_skeleton.10d", resource: human_t2_skeleton.container_10d},
+    {key: "human/female_trimester_2_ecorche.10d", resource: human_t2_ecorche.container_10d},
+
+    {key: "human/female_trimester_3.10d", resource: human_t3.container_10d},
+    {key: "human/female_trimester_3_turnaround.png", resource: human_t3.turntable_png},
+    {key: "human/female_trimester_3_blueprint.svg", resource: human_t3.blueprint_svg},
+    {key: "human/female_trimester_3_measurements.json", resource: human_t3.measurements_resource},
+    {key: "human/female_trimester_3_logic.q42", resource: human_t3.logic_q42},
+    {key: "human/female_trimester_3_skeleton.10d", resource: human_t3_skeleton.container_10d},
+    {key: "human/female_trimester_3_ecorche.10d", resource: human_t3_ecorche.container_10d},
+
+    {key: "human/female_week_34.10d", resource: human_w34.container_10d},
+    {key: "human/female_week_34_turnaround.png", resource: human_w34.turntable_png},
+    {key: "human/female_week_34_measurements.json", resource: human_w34.measurements_resource},
+    {key: "human/female_week_34_logic.q42", resource: human_w34.logic_q42}
+]};

@@ -1,16 +1,21 @@
 //! Local HTTP Studio & Capabilities Workbench Server (`http://127.0.0.1:8787`).
 //!
 //! Explicitly avoids QualiaDB / Webizen Desktop reserved ports (`8080`, `4242`, `9001`).
-//! Serves the interactive 5-tab Synth Studio UI (`GET /`) alongside live JSON endpoints:
+//! Serves the interactive 5-tab Synth Studio UI (`GET /`) for QualiaDB demo pages,
+//! the project workbench (`GET /project`), and live JSON endpoints:
 //! - `GET /api/status`
 //! - `GET /api/capabilities`
 //! - `POST /api/produce`
 //! - `POST /api/mcp/call`
+//! - `GET /api/project`
+//! - `GET|POST /api/project/annotations`
 
 use crate::{
     present::{render_resource_card, render_session_html},
     present_capabilities::FullCapabilitiesSnapshot,
+    present_project::render_project_html,
     production::{ProducerRegistry, ProductionLimits},
+    project::{self, Annotation, AnnotationLink},
     tray_env::{environment_report_json, TRAY_ENVIRONMENT_SOURCE},
 };
 use qualia_mcp::authoring::AuthoringBackend;
@@ -126,7 +131,15 @@ pub fn serve_blocking(preferred_port: Option<u16>, open_browser: bool) -> Result
     let url = format!("http://127.0.0.1:{port}");
     println!("Synth Studio & Capabilities Workbench listening on {url}");
     println!("(Non-conflicting with Webizen Desktop ports 8080 / 4242 / 9001)");
-    if open_browser {
+    if let Some(project) = project::current() {
+        println!(
+            "Project workbench: {url}/project  ({})",
+            project.name
+        );
+        if open_browser {
+            open_in_system_browser(&format!("{url}/project"));
+        }
+    } else if open_browser {
         open_in_system_browser(&url);
     }
     for stream in listener.incoming().flatten() {
@@ -252,7 +265,12 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     let first_line = header_str.lines().next().unwrap_or("");
     let mut parts = first_line.split_whitespace();
     let method = parts.next().unwrap_or("GET").to_owned();
-    let path = parts.next().unwrap_or("/").to_owned();
+    let raw_path = parts.next().unwrap_or("/").to_owned();
+    let path = raw_path
+        .split('?')
+        .next()
+        .unwrap_or(raw_path.as_str())
+        .to_owned();
 
     let content_len = header_str
         .lines()
@@ -310,6 +328,34 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
             let bytes = serde_json::to_vec(&res).map_err(|e| e.to_string())?;
             write_http_response(stream, "200 OK", "application/json", &bytes)
         }
+        ("GET", "/project" | "/project/") => {
+            let html = render_project_html()?;
+            write_http_response(stream, "200 OK", "text/html; charset=utf-8", html.as_bytes())
+        }
+        ("GET", "/api/project") => {
+            let payload = match project::current() {
+                Some(p) => p.status_json()?,
+                None => json!({ "ok": false, "error": "No project attached. Use synth serve --project DIR" }),
+            };
+            let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+            write_http_response(stream, "200 OK", "application/json", &bytes)
+        }
+        ("GET", "/api/project/annotations") => {
+            let payload = match project::current() {
+                Some(p) => json!({ "ok": true, "items": p.load_annotations()? }),
+                None => json!({ "ok": false, "error": "No project attached" }),
+            };
+            let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+            write_http_response(stream, "200 OK", "application/json", &bytes)
+        }
+        ("POST", "/api/project/annotations") => {
+            let res = handle_annotation(body);
+            let bytes = serde_json::to_vec(&res).map_err(|e| e.to_string())?;
+            write_http_response(stream, "200 OK", "application/json", &bytes)
+        }
+        _ if method == "GET" && path.starts_with("/project/file/") => {
+            serve_project_file(stream, &path)
+        }
         _ => write_http_response(
             stream,
             "404 Not Found",
@@ -317,4 +363,92 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
             br#"{"ok":false,"error":"Not found"}"#,
         ),
     }
+}
+
+fn handle_annotation(body: &[u8]) -> Value {
+    let Ok(req) = serde_json::from_slice::<AnnotationRequest>(body) else {
+        return json!({ "ok": false, "error": "Invalid JSON body for annotation" });
+    };
+    let Some(project) = project::current() else {
+        return json!({ "ok": false, "error": "No project attached" });
+    };
+    let item = Annotation {
+        id: String::new(),
+        created_at: String::new(),
+        lane: req.lane.unwrap_or_else(|| "working".into()),
+        file: req.file,
+        aspect: req.aspect.unwrap_or_default(),
+        tags: req.tags.unwrap_or_default(),
+        rating: req.rating.unwrap_or(0),
+        comment: req.comment.unwrap_or_default(),
+        links: req.links.unwrap_or_default(),
+    };
+    match project.add_annotation(item) {
+        Ok(saved) => json!({ "ok": true, "item": saved }),
+        Err(err) => json!({ "ok": false, "error": err }),
+    }
+}
+
+#[derive(serde::Deserialize)]
+struct AnnotationRequest {
+    lane: Option<String>,
+    file: String,
+    aspect: Option<String>,
+    tags: Option<Vec<String>>,
+    rating: Option<u8>,
+    comment: Option<String>,
+    links: Option<Vec<AnnotationLink>>,
+}
+
+fn serve_project_file(stream: TcpStream, path: &str) -> Result<(), String> {
+    let Some(project) = project::current() else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"No project attached"}"#,
+        );
+    };
+    let rest = path.trim_start_matches("/project/file/");
+    let Some((lane, rel_enc)) = rest.split_once('/') else {
+        return write_http_response(
+            stream,
+            "400 Bad Request",
+            "application/json",
+            br#"{"ok":false,"error":"Path must be /project/file/{working|delivered}/..."}"#,
+        );
+    };
+    let rel = percent_decode(rel_enc);
+    match project.resolve_file(lane, &rel) {
+        Ok(file) => {
+            let bytes = std::fs::read(&file).map_err(|e| e.to_string())?;
+            let kind = project::file_kind(&rel);
+            write_http_response(stream, "200 OK", project::mime_for(kind), &bytes)
+        }
+        Err(err) => {
+            let body = serde_json::to_vec(&json!({ "ok": false, "error": err }))
+                .map_err(|e| e.to_string())?;
+            write_http_response(stream, "404 Not Found", "application/json", &body)
+        }
+    }
+}
+
+fn percent_decode(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(hex) = std::str::from_utf8(&bytes[i + 1..i + 3]) {
+                if let Ok(value) = u8::from_str_radix(hex, 16) {
+                    out.push(value);
+                    i += 3;
+                    continue;
+                }
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }

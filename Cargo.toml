@@ -9,6 +9,11 @@ description = "General-purpose VibeScript asset production over QualiaDB"
 name = "synth"
 path = "src/main.rs"
 
+[[bin]]
+name = "synth-atlas"
+path = "src/main.rs"
+required-features = ["atlas"]
+
 [dependencies]
 qualia-core-db = { workspace = true }
 webizen-render = { workspace = true, optional = true }
@@ -20,6 +25,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "af57e82120b30b47fca238edb21a839d2cdb4278" }
+qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optional = true }
 
 aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
 aether-native = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
@@ -29,6 +35,7 @@ futures-timer = { version = "=3.0.4", optional = true }
 default = []
 preview = ["dep:webizen-render"]
 native-ui = ["dep:aether", "dep:aether-native", "dep:futures-timer"]
+atlas = ["dep:qualia-anatomy-pack"]
 
 [workspace]
 resolver = "2"
