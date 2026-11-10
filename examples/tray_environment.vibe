@@ -869,7 +869,6 @@ let wallaby_lod2_mesh = capability.invoke("hypermedia.manifold.simplify", {
 });
 let wallaby_lod2_10d = capability.invoke("hypermedia.manifold.compile_10d_pbr", {
     mesh: wallaby_lod2_mesh,
-    source_10d: wallaby_complete.container_10d,
     topology: false,
     spatial_index: true
 });
@@ -881,7 +880,6 @@ let wallaby_lod3_mesh = capability.invoke("hypermedia.manifold.simplify", {
 });
 let wallaby_lod3_10d = capability.invoke("hypermedia.manifold.compile_10d_pbr", {
     mesh: wallaby_lod3_mesh,
-    source_10d: wallaby_complete.container_10d,
     topology: false,
     spatial_index: true
 });
