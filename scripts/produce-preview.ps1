@@ -42,13 +42,7 @@ if (-not (Test-Path $Source)) {
     throw "Missing vibe: $Source"
 }
 
-$runsProd = "C:\github\synth\target-prod\runs"
-$runsStudio = "C:\github\synth\target-studio\runs"
-if (Test-Path -LiteralPath $runsProd) {
-    $runs = $runsProd
-} else {
-    $runs = $runsStudio
-}
+$runs = Join-Path (Split-Path (Split-Path $synth)) "runs"
 New-Item -ItemType Directory -Force -Path $runs | Out-Null
 $prefix = $Name
 $Name = Get-UniqueRunName -Prefix $prefix

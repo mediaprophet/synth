@@ -1,6 +1,6 @@
 # General-Purpose Categorical & Ontological Asset Operations
 
-> **SUPERSEDED 10 November 2026.** This file lists **114** morphisms. The live catalog is **145**. Agents must read `C:\github\synth\AGENTS.md` (full ID/args tables) and `C:\github\hypermedia-production\audit-docs\`. Do not use the 114-count tables below to claim tools are missing.
+> **SUPERSEDED 10 November 2026.** This file lists **114** morphisms. The live catalog is **148**. Agents must read `C:\github\synth\AGENTS.md` (full ID/args tables) and `C:\github\hypermedia-production\audit-docs\`. Do not use the 114-count tables below to claim tools are missing.
 
 Synth exposes shared production libraries across **Etalon**, **QualiaDB**, and **Hypermedia** through Vibe's existing host capability ABI.
 - `synth ontology` inspects the **12 canonical mathematical categories** and their **342 parity-verified `NQuin48` ontological triples** (`hasPrecondition`, `hasPostcondition`, `preservesInvariant`).

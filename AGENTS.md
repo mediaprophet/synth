@@ -64,11 +64,11 @@ let mesh = capability.invoke("hypermedia.manifold.loft", { sections: [...], caps
 CLI (this machine). Do not kill live MCP. Do not rebuild into `C:\github\synth\target` or `target-studio`.
 
 ```powershell
-$synth = "C:\github\synth\target-studio\debug\synth.exe"
+$synth = "C:\github\synth\target-prod\debug\synth.exe"
 $stamp = "$(Get-Date -Format 'yyyyMMdd-HHmmss-ffffff')-$PID-$([guid]::NewGuid().ToString('N').Substring(0,8))"
-$run = "C:\github\synth\target-studio\runs\$stamp"
+$run = "C:\github\synth\target-prod\runs\$stamp"
 & $synth produce --profile files --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
-C:\github\synth\vendor\grok\scripts\invoke.ps1 -Morphism hypermedia.manifold.revolve -ArgsJson '{"points":[[14,0],[22,12],[16,30]]}' -Name revolve-demo
+C:\github\synth\scripts\produce-preview.ps1 -Source <FILE.vibe> -Name revolve-demo
 ```
 
 `--out`, `--export-dir`, `--present`, and `preview --out` are create-only. Two `synth produce` HMCs of the same source must match SHA-256. Unknown argument keys fail closed (`fields()`). Historical `synth.*` and short `manifold.*` names resolve through `canonical_morphism_id`.
@@ -91,6 +91,7 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | Inset | `hypermedia.manifold.inset` |
 | Solidify | `hypermedia.manifold.solidify` |
 | Knife / bisect | `hypermedia.manifold.bisect_plane` |
+| Clay sculpt / displace | `hypermedia.manifold.evaluate_field` (`domain`, `expression`, `amplitude`) |
 | Catmull–Clark | `hypermedia.manifold.subdivide_catmull_clark` |
 | Decimate / remesh | `hypermedia.manifold.simplify` (`mode=decimate\|remesh\|anisotropic`) |
 | Import OBJ/STL/GLB | `hypermedia.manifold.import_mesh` |
@@ -160,6 +161,8 @@ RGBA and sonics are **conversions of the same cells**:
 
 ### Caps (honest bounds, not absences)
 
+- `evaluate_field` is the clay/displace path (expression over the mesh domain). There is no separate sculpt morphism.
+- `simplify` `mode=anisotropic` currently runs the anisotropic remesher with an identity metric
 - `boolean_3d` ~50k verts / 100k tris
 - loft 2..=256 sections, identical point counts; `interpolation=linear\|cubic\|nurbs`
 - revolve ≤256 segments; optional `interpolation=nurbs`
