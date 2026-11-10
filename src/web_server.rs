@@ -2,7 +2,8 @@
 //!
 //! Explicitly avoids QualiaDB / Webizen Desktop reserved ports (`8080`, `4242`, `9001`).
 //! Serves the interactive 5-tab Synth Studio UI (`GET /`) for QualiaDB demo pages,
-//! the project workbench (`GET /project`), and live JSON endpoints:
+//! the project workbench (`GET /project`), QualiaPortal WASM (`GET /qualia/` from
+//! `C:\\github\\qualiaDB\\docs`), and live JSON endpoints:
 //! - `GET /api/status`
 //! - `GET /api/capabilities`
 //! - `POST /api/produce`
@@ -11,7 +12,7 @@
 //! - `GET|POST /api/project/annotations`
 
 use crate::{
-    present::{render_resource_card, render_session_html},
+    present::render_session_html,
     present_capabilities::FullCapabilitiesSnapshot,
     present_project::render_project_html,
     production::{ProducerRegistry, ProductionLimits},
@@ -24,6 +25,7 @@ use serde_json::{json, Value};
 use std::{
     io::{Read, Write},
     net::{SocketAddr, TcpListener, TcpStream},
+    path::{Component, Path, PathBuf},
     process::Command,
     sync::atomic::AtomicBool,
     thread,
@@ -230,15 +232,20 @@ fn write_ranged_bytes(
     range_header: Option<&str>,
 ) -> Result<(), String> {
     let total = body.len();
+    let coi_html = content_type.starts_with("text/html");
     // Present Range (including empty/whitespace) is fail-closed 416; only a missing header is 200.
     match range_header {
-        None => write_http_response_with(
-            stream,
-            "200 OK",
-            content_type,
-            body,
-            &[("Accept-Ranges", "bytes")],
-        ),
+        None => {
+            let mut extra = vec![
+                ("Accept-Ranges", "bytes"),
+                ("Cross-Origin-Resource-Policy", "same-origin"),
+            ];
+            if coi_html {
+                extra.push(("Cross-Origin-Opener-Policy", "same-origin"));
+                extra.push(("Cross-Origin-Embedder-Policy", "require-corp"));
+            }
+            write_http_response_with(stream, "200 OK", content_type, body, &extra)
+        }
         Some(header) => match parse_single_byte_range(header, total) {
             Some((start, end)) => {
                 let content_range = format!("bytes {start}-{end}/{total}");
@@ -250,6 +257,7 @@ fn write_ranged_bytes(
                     &[
                         ("Accept-Ranges", "bytes"),
                         ("Content-Range", &content_range),
+                        ("Cross-Origin-Resource-Policy", "same-origin"),
                     ],
                 )
             }
@@ -268,6 +276,167 @@ fn write_ranged_bytes(
             }
         },
     }
+}
+
+const HTML_COI_HEADERS: &[(&str, &str)] = &[
+    ("Cross-Origin-Opener-Policy", "same-origin"),
+    ("Cross-Origin-Embedder-Policy", "require-corp"),
+    ("Cross-Origin-Resource-Policy", "same-origin"),
+];
+
+fn write_html_coi(stream: TcpStream, body: &[u8]) -> Result<(), String> {
+    write_http_response_with(
+        stream,
+        "200 OK",
+        "text/html; charset=utf-8",
+        body,
+        HTML_COI_HEADERS,
+    )
+}
+
+/// QualiaPortal static files: `C:\github\qualiaDB\docs` served at `/qualia/` (alias `/vendor/qualia/`).
+pub fn qualia_docs_root() -> Option<PathBuf> {
+    if let Ok(raw) = std::env::var("SYNTH_QUALIA_DOCS") {
+        let p = PathBuf::from(raw.trim());
+        if let Ok(canon) = p.canonicalize() {
+            if canon.is_dir() {
+                return Some(canon);
+            }
+        }
+    }
+    let candidates = [
+        PathBuf::from(r"C:\github\qualiaDB\docs"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("qualiaDB")
+            .join("docs"),
+    ];
+    for c in candidates {
+        if let Ok(canon) = c.canonicalize() {
+            if canon.is_dir() {
+                return Some(canon);
+            }
+        }
+    }
+    None
+}
+
+/// Path-confine a `/qualia/` relative path. Any `..` (including percent-encoded) is rejected.
+pub fn confine_qualia_rel(rest: &str) -> Option<PathBuf> {
+    let decoded = percent_decode(rest);
+    if decoded.is_empty()
+        || decoded.contains('\0')
+        || decoded.contains('\\')
+        || decoded.starts_with('/')
+        || decoded.starts_with("..")
+    {
+        return None;
+    }
+    let mut clean = PathBuf::new();
+    for comp in Path::new(&decoded).components() {
+        match comp {
+            Component::Normal(s) => {
+                let s = s.to_str()?;
+                if s == ".." || s.contains(':') {
+                    return None;
+                }
+                clean.push(s);
+            }
+            Component::CurDir => {}
+            _ => return None,
+        }
+    }
+    if clean.as_os_str().is_empty() {
+        None
+    } else {
+        Some(clean)
+    }
+}
+
+fn mime_for_qualia(rel: &str) -> &'static str {
+    let lower = rel.to_ascii_lowercase();
+    if lower.ends_with(".js") || lower.ends_with(".mjs") {
+        "text/javascript; charset=utf-8"
+    } else if lower.ends_with(".wasm") {
+        "application/wasm"
+    } else if lower.ends_with(".json") {
+        "application/json"
+    } else if lower.ends_with(".html") || lower.ends_with(".htm") {
+        "text/html; charset=utf-8"
+    } else if lower.ends_with(".css") {
+        "text/css; charset=utf-8"
+    } else if lower.ends_with(".svg") {
+        "image/svg+xml"
+    } else if lower.ends_with(".png") {
+        "image/png"
+    } else if lower.ends_with(".jpg") || lower.ends_with(".jpeg") || lower.ends_with(".webp") {
+        "image/jpeg"
+    } else if lower.ends_with(".map") || lower.ends_with(".txt") || lower.ends_with(".md") {
+        "text/plain; charset=utf-8"
+    } else {
+        "application/octet-stream"
+    }
+}
+
+fn extra_static_headers(mime: &str) -> Vec<(&'static str, &'static str)> {
+    let mut h = vec![("Cross-Origin-Resource-Policy", "same-origin")];
+    if mime.starts_with("text/html") {
+        h.push(("Cross-Origin-Opener-Policy", "same-origin"));
+        h.push(("Cross-Origin-Embedder-Policy", "require-corp"));
+    }
+    h
+}
+
+fn serve_qualia_static(stream: TcpStream, path: &str) -> Result<(), String> {
+    let Some(rest) = path
+        .strip_prefix("/qualia/")
+        .or_else(|| path.strip_prefix("/vendor/qualia/"))
+    else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"Not found"}"#,
+        );
+    };
+    let Some(rel) = confine_qualia_rel(rest) else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"Not found"}"#,
+        );
+    };
+    let Some(root) = qualia_docs_root() else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"QualiaDB docs not found"}"#,
+        );
+    };
+    let joined = root.join(&rel);
+    let Ok(canon) = joined.canonicalize() else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"Not found"}"#,
+        );
+    };
+    if !canon.starts_with(&root) || !canon.is_file() {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"Not found"}"#,
+        );
+    }
+    let bytes = std::fs::read(&canon).map_err(|e| e.to_string())?;
+    let rel_str = rel.to_string_lossy();
+    let mime = mime_for_qualia(&rel_str);
+    let extra = extra_static_headers(mime);
+    write_http_response_with(stream, "200 OK", mime, &bytes, &extra)
 }
 
 fn render_root_studio_html() -> Result<String, String> {
@@ -304,7 +473,11 @@ fn handle_produce(body: &[u8]) -> Value {
     }
     let mut cards_html = String::new();
     for (idx, resource) in candidate.outputs().iter().enumerate() {
-        cards_html.push_str(&render_resource_card(idx + 1, resource));
+        cards_html.push_str(&crate::present::render_resource_card_in_set(
+            idx + 1,
+            resource,
+            candidate.outputs(),
+        ));
         cards_html.push('\n');
     }
     let doc_digest = session
@@ -403,7 +576,7 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     match (method.as_str(), path.as_str()) {
         ("GET", "/" | "/index.html") => {
             let html = render_root_studio_html()?;
-            write_http_response(stream, "200 OK", "text/html; charset=utf-8", html.as_bytes())
+            write_html_coi(stream, html.as_bytes())
         }
         ("GET", "/api/status") => {
             let report = environment_report_json()?;
@@ -438,7 +611,7 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         }
         ("GET", "/project" | "/project/") => {
             let html = render_project_html()?;
-            write_http_response(stream, "200 OK", "text/html; charset=utf-8", html.as_bytes())
+            write_html_coi(stream, html.as_bytes())
         }
         ("GET", "/api/project") => {
             let payload = match project::current() {
@@ -463,6 +636,11 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         }
         _ if method == "GET" && path.starts_with("/project/file/") => {
             serve_project_file(stream, &path, range_header.as_deref())
+        }
+        _ if method == "GET"
+            && (path.starts_with("/qualia/") || path.starts_with("/vendor/qualia/")) =>
+        {
+            serve_qualia_static(stream, &path)
         }
         _ => write_http_response(
             stream,
@@ -817,5 +995,102 @@ mod tests {
         );
         assert!(header.contains(&format!("Content-Range: bytes */{total}")));
         assert!(body.is_empty());
+    }
+
+    fn exchange_raw(request: &[u8]) -> Vec<u8> {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            let (stream, _) = listener.accept().unwrap();
+            handle_connection(stream).unwrap();
+        });
+        let mut client = TcpStream::connect(addr).unwrap();
+        client.write_all(request).unwrap();
+        let mut resp = Vec::new();
+        client.read_to_end(&mut resp).unwrap();
+        server.join().unwrap();
+        resp
+    }
+
+    #[test]
+    fn confine_qualia_rel_rejects_parent_and_encoded_dotdot() {
+        assert!(confine_qualia_rel("js/qualia-shell.js").is_some());
+        assert!(confine_qualia_rel("../Cargo.toml").is_none());
+        assert!(confine_qualia_rel("js/../../src/lib.rs").is_none());
+        assert!(confine_qualia_rel("%2e%2e/Cargo.toml").is_none());
+        assert!(confine_qualia_rel("js/%2e%2e/%2e%2e/src/web_server.rs").is_none());
+        assert!(confine_qualia_rel("js\\qualia-shell.js").is_none());
+    }
+
+    #[test]
+    fn get_qualia_shell_js_is_200_js_and_path_escape_is_404() {
+        assert!(
+            qualia_docs_root().is_some(),
+            "QualiaDB docs must exist at C:\\github\\qualiaDB\\docs (or SYNTH_QUALIA_DOCS)"
+        );
+        let resp = exchange_raw(
+            b"GET /qualia/js/qualia-shell.js HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+        );
+        let (header, body) = http_split(&resp);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "GET /qualia/js/qualia-shell.js must be 200, got {header}"
+        );
+        let header_l = header.to_ascii_lowercase();
+        assert!(
+            header_l.contains("content-type: text/javascript"),
+            "qualia-shell.js MIME must be javascript, got {header}"
+        );
+        let text = std::str::from_utf8(body).unwrap_or("");
+        assert!(
+            text.contains("loadQualiaPortal"),
+            "qualia-shell.js body must export loadQualiaPortal"
+        );
+        assert!(header_l.contains("cross-origin-resource-policy: same-origin"));
+
+        for escape in [
+            "GET /qualia/../Cargo.toml HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+            "GET /qualia/js/../../Cargo.toml HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+            "GET /qualia/%2e%2e/Cargo.toml HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+            "GET /qualia/js/%2e%2e/%2e%2e/src/lib.rs HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+        ] {
+            let resp = exchange_raw(escape.as_bytes());
+            let (header, _) = http_split(&resp);
+            assert!(
+                header.starts_with("HTTP/1.1 404"),
+                "path escape must be 404, got {header} for {escape}"
+            );
+        }
+    }
+
+    #[test]
+    fn root_and_project_stay_200() {
+        let root = exchange_raw(b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        let (header, body) = http_split(&root);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "/ must stay 200, got {header}"
+        );
+        let header_l = header.to_ascii_lowercase();
+        assert!(header_l.contains("content-type: text/html"));
+        assert!(header_l.contains("cross-origin-opener-policy: same-origin"));
+        assert!(header_l.contains("cross-origin-embedder-policy: require-corp"));
+        let html = std::str::from_utf8(body).unwrap_or("");
+        assert!(html.contains("/qualia/js/qualia-shell.js"));
+
+        let project =
+            exchange_raw(b"GET /project HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        let (header, body) = http_split(&project);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "/project must stay 200, got {header}"
+        );
+        let header_l = header.to_ascii_lowercase();
+        assert!(header_l.contains("content-type: text/html"));
+        assert!(header_l.contains("cross-origin-opener-policy: same-origin"));
+        assert!(header_l.contains("cross-origin-embedder-policy: require-corp"));
+        let html = std::str::from_utf8(body).unwrap_or("");
+        assert!(html.contains("/qualia/js/qualia-shell.js"));
+        assert!(html.contains("webgpu-snapshot"));
     }
 }

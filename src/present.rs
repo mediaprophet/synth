@@ -133,8 +133,29 @@ fn hex_preview(bytes: &[u8], limit: usize) -> String {
     out
 }
 
+fn portal_pngs_for(key: &str, all: &[Resource]) -> Vec<(String, String)> {
+    all.iter()
+        .filter(|r| {
+            (r.kind.eq_ignore_ascii_case("png") || r.key.ends_with(".png"))
+                && crate::present_portal::related_png(key, &r.key)
+                && r.bytes.len() <= 8 * 1024 * 1024
+        })
+        .map(|r| {
+            (
+                r.key.clone(),
+                format!("data:image/png;base64,{}", base64_encode(&r.bytes)),
+            )
+        })
+        .collect()
+}
+
 /// Render a single resource card HTML fragment.
 pub fn render_resource_card(index: usize, resource: &Resource) -> String {
+    render_resource_card_in_set(index, resource, std::slice::from_ref(resource))
+}
+
+/// Render a resource card, attaching sibling PNG contact-sheet bytes when `all` is the output set.
+pub fn render_resource_card_in_set(index: usize, resource: &Resource, all: &[Resource]) -> String {
     let sha = hex(&Sha256::digest(&resource.bytes));
     let modality = classify_modality(&resource.kind, &resource.key);
     let safe_key = escape_html(&resource.key);
@@ -199,12 +220,26 @@ pub fn render_resource_card(index: usize, resource: &Resource) -> String {
         "spatial" => {
             let dump = escape_html(&hex_preview(&resource.bytes, 128));
             if resource.kind.eq_ignore_ascii_case("10d") || resource.key.ends_with(".10d") {
-                crate::present_3d::render_10d_interactive_card_body(
+                let degraded = crate::present_3d::render_10d_interactive_card_body(
                     index,
                     &safe_key,
                     &resource.bytes,
                     &dump,
-                )
+                );
+                let png_owned = portal_pngs_for(&resource.key, all);
+                let pngs: Vec<crate::present_portal::PortalPng<'_>> = png_owned
+                    .iter()
+                    .map(|(rel, src)| crate::present_portal::PortalPng { rel, src })
+                    .collect();
+                let mesh_url = resource.key.clone();
+                let emf_url = crate::present_portal::sibling_with_ext(&mesh_url, "emf");
+                let portal = crate::present_portal::render_portal_host(
+                    &format!("portal-present-{index}"),
+                    &mesh_url,
+                    &emf_url,
+                    &pngs,
+                );
+                format!("{portal}{degraded}")
             } else if resource.kind.eq_ignore_ascii_case("m64")
                 || resource.key.ends_with(".m64")
                 || resource.kind.eq_ignore_ascii_case("emf")
@@ -290,7 +325,7 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
 
     let mut cards = String::new();
     for (idx, resource) in outputs.iter().enumerate() {
-        cards.push_str(&render_resource_card(idx + 1, resource));
+        cards.push_str(&render_resource_card_in_set(idx + 1, resource, outputs));
         cards.push('\n');
     }
 
@@ -351,6 +386,8 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
           <span class="px-2.5 py-1 rounded-md bg-[var(--background)] border border-[var(--border)]">{count} Resources ({total_bytes} B)</span>
         </div>
       </div>
+      <div class="text-[11px] font-mono text-[var(--muted-foreground)]">QualiaPortal WASM: <span class="text-emerald-300">/qualia/js/qualia-shell.js</span> on the synth http origin (COOP/COEP). file:// keeps the PNG contact sheet. 2D canvas is degraded-only.</div>
+      {webgpu_snapshot}
 
       <div class="grid grid-cols-2 md:grid-cols-6 gap-2 pt-2 border-t border-[var(--border)] text-xs font-mono">
         <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg p-2.5">
@@ -617,11 +654,13 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
         const docEl = document.getElementById('doc-sha-display');
         if (docEl && data.document_digest) docEl.textContent = data.document_digest;
         if (status) status.textContent = 'Produced ' + data.resource_count + ' resources · strict replay verified (SHA-256: ' + data.package_sha256.slice(0, 12) + '…)';
+        if (typeof window.bootSynthPortals === 'function') window.bootSynthPortals();
       }} catch (err) {{
         if (status) status.textContent = 'Local server required (run `synth serve` or `synth tray`): ' + err;
       }}
     }}
     {viewer_3d_js}
+    {portal_boot_js}
   </script>
 </body>
 </html>
@@ -635,6 +674,8 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
         src_count = session.sources().len(),
         studio_css = crate::present_style::SYNTH_STUDIO_CSS,
         viewer_3d_js = crate::present_3d::SYNTH_3D_VIEWER_RUNTIME_JS,
+        portal_boot_js = crate::present_portal::PORTAL_BOOT_JS,
+        webgpu_snapshot = crate::present_portal::webgpu_snapshot_html(),
     ))
 }
 

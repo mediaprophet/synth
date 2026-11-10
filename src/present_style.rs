@@ -398,4 +398,35 @@ input[type="text"]:focus, input[type="search"]:focus, textarea:focus {
   border-color: var(--emerald);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
+
+.synth-portal-canvas {
+  width: 100%;
+  height: 320px;
+  background: #0c1210;
+  touch-action: none;
+  display: block;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+.synth-portal-status { min-height: 1.25rem; }
+.synth-contact-sheet { display: flex; flex-direction: column; gap: 0.4rem; }
+.synth-contact-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.synth-contact-item { margin: 0; max-width: 160px; }
+.synth-contact-item img {
+  max-height: 96px;
+  width: auto;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--background);
+  display: block;
+}
+.synth-contact-item figcaption {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  margin-top: 0.2rem;
+  word-break: break-all;
+}
+.resource-card.portal-gpu-live canvas[id^="synth3d-canvas-"] { display: none; }
 "#;

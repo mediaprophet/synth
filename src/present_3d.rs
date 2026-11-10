@@ -204,7 +204,7 @@ pub fn render_10d_interactive_card_body(
         r#"<div class="space-y-2.5">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
     <div class="flex flex-wrap items-center gap-1.5">
-      <span class="text-emerald-300 font-semibold">Interactive .10d 3D Turntable</span>
+      <span class="text-amber-300 font-semibold">Degraded 2D canvas — QualiaPortal GPU unavailable</span>
       <span id="synth3d-stats-{card_index}" class="text-[var(--muted-foreground)]">({v_count} verts · {t_count} tris · {kb_base:.1} KB)</span>
       {badges_html}
     </div>

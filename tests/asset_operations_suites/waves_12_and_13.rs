@@ -2,11 +2,11 @@ use super::*;
 
 #[test]
 fn wave12_living_world_botanical_vertebrate_anatomy_fauna_rig_ontology_pin_continuum_and_frustum() {
-    assert_eq!(synth::production::assets::OPERATIONS.len(), 145);
-    assert_eq!(synth::production::assets::ontology::MORPHISMS.len(), 145);
+    assert_eq!(synth::production::assets::OPERATIONS.len(), 148);
+    assert_eq!(synth::production::assets::ontology::MORPHISMS.len(), 148);
     assert_eq!(
         synth::production::assets::ontology::ONTOLOGY_NQUINS.len(),
-        435
+        444
     );
     let catalog = synth::production::assets::OPERATIONS
         .iter()

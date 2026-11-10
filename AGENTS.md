@@ -4,7 +4,7 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, and CPU geometry libraries. Etalon supplies render/signal providers. A `.vibe` names the work.
 
-**The 145 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
+**The 148 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
 
 Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Grep this file and `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` first.
 
@@ -14,19 +14,19 @@ Do not tell the user a catalog morphism or a rust-audit-indexed function does no
 
 | What | Path |
 |---|---|
-| Vibe-callable catalog (145) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
+| Vibe-callable catalog (148) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
 | Ontology, arguments, aliases | `...\src\ontology\morphisms_01.rs` … `morphisms_09.rs` (`ALL_MORPHISMS`) |
 | Dispatch | `...\src\lib.rs` `invoke_inner` |
 | Function registry from source | `C:\github\hypermedia-production\audit-docs\` — **902 files, 8708 functions, 69 modules** (generated 2026-11-10 by rust-audit `docs`) |
 | Crate list | `C:\github\hypermedia-production\CRATES.md` (partial; rust-audit `modules/*.md` is complete) |
 
-Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 145`.
+Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 148`.
 
 ```
-locus 15 + manifold 26 + surface 7 + radiance 28 + glyph 7 + layout 10
+locus 15 + manifold 26 + surface 8 + radiance 30 + glyph 7 + layout 10
 + kinetics 15 + acoustics 9 + electromagnetics 6 + geodesy 7
 + discourse 9 + chronicle 5 + qualia.species.assemble_corpus 1
-= 145
+= 148
 ```
 
 ### rust-audit (local tool, not a crates.io package)
@@ -65,7 +65,8 @@ CLI (this machine). Do not kill live MCP. Do not rebuild into `C:\github\synth\t
 
 ```powershell
 $synth = "C:\github\synth\target-studio\debug\synth.exe"
-$run = "C:\github\synth\target-studio\runs\<unique>"
+$stamp = "$(Get-Date -Format 'yyyyMMdd-HHmmss-ffffff')-$PID-$([guid]::NewGuid().ToString('N').Substring(0,8))"
+$run = "C:\github\synth\target-studio\runs\$stamp"
 & $synth produce --profile files --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
 C:\github\synth\vendor\grok\scripts\invoke.ps1 -Morphism hypermedia.manifold.revolve -ArgsJson '{"points":[[14,0],[22,12],[16,30]]}' -Name revolve-demo
 ```
@@ -84,20 +85,20 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 |---|---|
 | Extrude | `hypermedia.manifold.extrude` |
 | Spin / revolve | `hypermedia.manifold.revolve` |
-| Loft / bridge | `hypermedia.manifold.loft` (`interpolation=linear\|cubic`) |
+| Loft / bridge | `hypermedia.manifold.loft` (`interpolation=linear\|cubic\|nurbs`) |
 | Boolean | `hypermedia.manifold.boolean_3d` (`union\|intersection\|difference`) |
 | Bevel | `hypermedia.manifold.bevel` |
 | Inset | `hypermedia.manifold.inset` |
 | Solidify | `hypermedia.manifold.solidify` |
 | Knife / bisect | `hypermedia.manifold.bisect_plane` |
 | Catmull–Clark | `hypermedia.manifold.subdivide_catmull_clark` |
-| Decimate | `hypermedia.manifold.simplify` |
+| Decimate / remesh | `hypermedia.manifold.simplify` (`mode=decimate\|remesh\|anisotropic`) |
 | Import OBJ/STL/GLB | `hypermedia.manifold.import_mesh` |
 | Export DXF | `hypermedia.manifold.project_dxf` |
 | Sweep along spine | `hypermedia.manifold.sweep_assembly_profile` |
 | SDF remesh | `hypermedia.manifold.mesh_to_sdf_brick` then `sdf_brick_to_mesh` |
 | Dupliverts / instances | `hypermedia.manifold.instance_on_points` + `realize_instances` |
-| Unwrap / UV | `hypermedia.surface.unwrap_slim` |
+| Unwrap / UV | `hypermedia.surface.unwrap_slim` (`mode=slim\|atlas`) |
 | MikkT tangents | `hypermedia.surface.compute_mikktspace` |
 | Principled BSDF | `hypermedia.surface.compile_bsdf_graph` |
 | Bake AO/normal + MaterialX | `hypermedia.surface.bake_pbr_materialx` |
@@ -107,6 +108,8 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | 2D boolean / offset / fillet | `hypermedia.locus.boolean`, `offset`, `fillet` |
 | B-spline | `hypermedia.locus.spline` |
 | PNG / PSD | `hypermedia.radiance.encode_rgba_png`, `import_rgba_png`, `encode_psd`, `import_psd` |
+| Sprite sheet / 9-slice | `hypermedia.radiance.pack_sprite_sheet`, `pack_nine_slice` |
+| PBR set pack | `hypermedia.surface.pack_pbr_set` |
 | Grade / LUT / develop | `grade_color`, `apply_lut`, `develop_photo`, `grade_cdl_scopes` |
 | EMF volume | `hypermedia.electromagnetics.compile_emf` |
 | EMF preview PNG | `render_spectral_slice` or `raymarch_vox0_dda` then `encode_rgba_png` |
@@ -134,7 +137,7 @@ Compiled `.10d` attaches UV01 when an atlas exists. `consume_unwrap_uv01` in `li
 
 Flip-avoiding Symmetric Dirichlet / Tutte + local SLIM in `surface_bsdf_uv/slim_mikktspace.rs`. Returns `uvs`, `container_10d` (UV01-sealed), SVG chart. Open meshes get a boundary loop; closed meshes start from a spherical chart then SLIM. BTree adjacency (produce-safe).
 
-QualiaDB also has `computational_geometry/uv_atlas::unwrap_atlas_into` (harmonic disk charts, **explicit seams**, may split vertices). That is the library atlas. The catalog UV morphism is `unwrap_slim` (1:1 vertex UV01). Do not invent `hypermedia.surface.uv_atlas`.
+`unwrap_slim` `mode=slim` (default) keeps 1:1 vertex UV01. `mode=atlas` calls QualiaDB `uv_atlas::unwrap_atlas_into` (harmonic disk charts, **explicit seams**, may split vertices). Atlas fail-closes when a 1:1 UV01 consume is required. Do not invent `hypermedia.surface.uv_atlas`.
 
 ### `hypermedia.surface.bake_pbr_materialx`
 
@@ -158,10 +161,10 @@ RGBA and sonics are **conversions of the same cells**:
 ### Caps (honest bounds, not absences)
 
 - `boolean_3d` ~50k verts / 100k tris
-- loft 2..=256 sections, identical point counts; `interpolation=cubic` Catmull–Rom densify
-- revolve ≤256 segments
+- loft 2..=256 sections, identical point counts; `interpolation=linear\|cubic\|nurbs`
+- revolve ≤256 segments; optional `interpolation=nurbs`
 - `subdivide_catmull_clark` levels 1..=3, abort above 200k tris
-- `synthesize_maps` max 512²; typical radiance 1024²; envelopes ~16 MB
+- `synthesize_maps` max 1024²; typical radiance 1024²; envelopes ~16 MB
 - geodesy sculpt is 2.5D heightfield
 - `fspm_vascular_grow` is botanical Murray-law trees (generations 1..=6), not human coronaries
 - `compile_vertebrate_anatomy_10d` is an ellipsoid comparative scaffold
@@ -194,7 +197,7 @@ Catalog morphisms are hosted by `asset-production-vibe` and implemented across t
 
 | Crate | Role |
 |---|---|
-| `asset-production-vibe` | 145 morphisms, ontology, dispatch, produce-path |
+| `asset-production-vibe` | 148 morphisms, ontology, dispatch, produce-path |
 | `profile-authoring` | circle / rounded-rect / channel / polygon profiles |
 | `drafting-geometry` | 2D curves, bulged polylines, tessellation |
 | `vector-locus-geometry` | locus geometry |
@@ -239,7 +242,7 @@ Catalog morphisms are hosted by `asset-production-vibe` and implemented across t
 
 ---
 
-## Twelve categories — 145 morphisms
+## Twelve categories — 148 morphisms
 
 Arguments are the ontology `arguments:` strings. Handles are session-local unless noted as retained input keys or encoded resources.
 
@@ -268,12 +271,12 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | ID | Args |
 |---|---|
 | `hypermedia.manifold.extrude` | `profile`, `path:[[x,y,z],...]`, `caps` |
-| `hypermedia.manifold.revolve` | `points:[[radius,height],...]`, `segments` |
-| `hypermedia.manifold.loft` | `a`,`b` or `sections:[[ring],...]`, `interpolation=linear\|cubic`, `samples`, `caps` |
+| `hypermedia.manifold.revolve` | `points:[[radius,height],...]`, `segments`, optional `interpolation=linear\|nurbs` |
+| `hypermedia.manifold.loft` | `a`,`b` or `sections:[[ring],...]`, `interpolation=linear\|cubic\|nurbs`, `samples`, `caps` |
 | `hypermedia.manifold.compile_10d` | `mesh` |
 | `hypermedia.manifold.compile_10d_pbr` | `mesh`, optional `albedo`, `source_10d`, `topology`, `spatial_index`, `camera_*` |
 | `hypermedia.manifold.boolean_3d` | `a`, `b`, `op=union\|intersection\|difference` |
-| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error` |
+| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error`, `mode=decimate\|remesh\|anisotropic` |
 | `hypermedia.manifold.import_mesh` | `input` retained key, `format=obj\|stl\|glb` |
 | `hypermedia.manifold.project_dxf` | `profile` and/or `mesh`, `layer` |
 | `hypermedia.manifold.radial_euler` | `mesh`, Radial-Edge ops SEMV/SFME/JEKV/JVKE/JFKE |
@@ -294,19 +297,20 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.manifold.compile_botanical_organ_10d` | botanical scale 1..=4 (not a human organ) |
 | `hypermedia.manifold.compile_vertebrate_anatomy_10d` | ellipsoid comparative scaffold |
 
-### surface (7)
+### surface (8)
 
 | ID | Args |
 |---|---|
-| `hypermedia.surface.synthesize_maps` | `side` 8..=512, `seed`, `tint`, `roughness`, `metallic` → `{colour,normal,orm}` |
-| `hypermedia.surface.unwrap_slim` | `mesh`, `iterations` 8..=64, `chart_padding` 0..=0.25 |
+| `hypermedia.surface.synthesize_maps` | `side` 8..=1024, `seed`, `tint`, `roughness`, `metallic` → `{colour,normal,orm}` |
+| `hypermedia.surface.unwrap_slim` | `mesh`, `iterations` 8..=64, `chart_padding` 0..=0.25, `mode=slim\|atlas` |
 | `hypermedia.surface.compute_mikktspace` | `mesh`, optional `uvs` |
 | `hypermedia.surface.compile_bsdf_graph` | `closure=principled_v2\|chiang_hair\|fournier_forand_water\|random_walk_sss`, PBR params |
 | `hypermedia.surface.sample_procedural_field` | `basis=gabor\|voronoi\|wave\|blackbody\|wavelength` |
 | `hypermedia.surface.bake_pbr_materialx` | `mesh`, `resolution`, `samples`, `material_name`, optional `uvs` |
 | `hypermedia.surface.expand_procedural_brush` | `stroke_weight`, `bristle_count`, `wetness` |
+| `hypermedia.surface.pack_pbr_set` | `colour`, `normal`, `orm` → encoded PNG handles |
 
-### radiance (28)
+### radiance (30)
 
 | ID | Args |
 |---|---|
@@ -338,6 +342,8 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.radiance.develop_camera_raw_hdr` | Bayer/X-Trans CFA + exposure brackets |
 | `hypermedia.radiance.grade_cdl_scopes` | ASC CDL v1.2, 3-way wheels, LogC4, LUT, waveform/vectorscope |
 | `hypermedia.radiance.trace_vector_contours` | RGBA8 → cubic Bézier contours, seam carving, skeleton |
+| `hypermedia.radiance.pack_sprite_sheet` | `tiles`, `columns`, `padding`, optional `names` → `{image,png,frames:[{name,x,y,w,h}]}` |
+| `hypermedia.radiance.pack_nine_slice` | `image`, `left`, `right`, `top`, `bottom`, `dest_width`, `dest_height` |
 
 ### glyph (7)
 
@@ -459,6 +465,6 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 
 1. Read exported `.png` / `.svg`.
 2. Read `front-view-assumed.png`, `side-view-assumed.png`, `three-quarter-view-assumed.png` from each preview dir.
-3. Serve the project workbench: `http://127.0.0.1:8787/project`. Keep `http://127.0.0.1:8787/` as the QualiaDB demo studio.
+3. Serve the project workbench: `http://127.0.0.1:8787/project`. Keep `http://127.0.0.1:8787/` as the QualiaDB demo studio. QualiaPortal WASM is `http://127.0.0.1:8787/qualia/js/qualia-shell.js`.
 4. Read `{project}/.synth/annotations.json` before changing a model.
 5. A file existing, HTTP 200, or a triangle count is not a visual review.

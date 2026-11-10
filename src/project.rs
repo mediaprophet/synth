@@ -388,6 +388,7 @@ pub fn file_kind(rel: &str) -> &'static str {
         "svg" => "svg",
         "html" | "htm" => "html",
         "10d" => "10d",
+        "emf" => "emf",
         "hmc" => "hmc",
         "vibe" => "vibe",
         "wav" => "wav",

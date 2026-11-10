@@ -1,6 +1,7 @@
 //! Project workbench HTML: working vs delivered files, and user annotations.
 use crate::{
     present::escape_html,
+    present_portal::{self, PortalPng, PORTAL_BOOT_JS, QUALIA_SHELL_SRC},
     present_style::SYNTH_STUDIO_CSS,
     project::{current, Annotation, ListedFile, Project},
 };
@@ -40,12 +41,18 @@ fn render_unattached() -> String {
       <h1 class="text-xl font-semibold">No project is attached</h1>
       <p class="text-sm text-[var(--muted-foreground)]">Start Synth with a project directory so this page shows the work in progress, the delivered files, and your notes.</p>
       <pre class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] text-xs font-mono">synth serve --project C:\github\anatomy --open</pre>
+      <p class="text-[11px] font-mono text-[var(--muted-foreground)]">QualiaPortal WASM: {shell}</p>
+      {webgpu_snapshot}
       <a class="inline-block text-xs font-mono text-emerald-300" href="/">QualiaDB demo studio</a>
     </header>
   </main>
+  <script>{portal_boot_js}</script>
 </body>
 </html>"#,
-        css = SYNTH_STUDIO_CSS
+        css = SYNTH_STUDIO_CSS,
+        shell = QUALIA_SHELL_SRC,
+        webgpu_snapshot = present_portal::webgpu_snapshot_html(),
+        portal_boot_js = PORTAL_BOOT_JS,
     )
 }
 
@@ -93,6 +100,8 @@ fn page(
         </div>
       </div>
       <div class="text-[11px] font-mono text-[var(--muted-foreground)]">{root}</div>
+      <div class="text-[11px] font-mono text-[var(--muted-foreground)]">QualiaPortal WASM: <span class="text-emerald-300">{shell}</span> · COOP/COEP on this origin. PNG thumbs stay. 2D is degraded-only.</div>
+      {webgpu_snapshot}
       <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border)]" role="tablist">
         <button type="button" onclick="switchProjectTab('tab-working', this)" class="studio-nav-btn px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold border border-amber-500/50 bg-amber-950/60 text-amber-300 filter-pill-active">Working</button>
         <button type="button" onclick="switchProjectTab('tab-delivered', this)" class="studio-nav-btn px-3.5 py-1.5 rounded-lg text-xs font-mono border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">Delivered</button>
@@ -227,11 +236,15 @@ fn page(
       }}
       return false;
     }}
+    {portal_boot_js}
   </script>
 </body>
 </html>"#,
         name = escape_html(&project.name),
         css = SYNTH_STUDIO_CSS,
+        shell = QUALIA_SHELL_SRC,
+        webgpu_snapshot = present_portal::webgpu_snapshot_html(),
+        portal_boot_js = PORTAL_BOOT_JS,
         brief = escape_html(&brief),
         working_n = working.len(),
         delivered_n = delivered.len(),
@@ -268,6 +281,46 @@ fn empty_lane(msg: &str) -> String {
     )
 }
 
+fn portal_file_preview(file: &ListedFile, files: &[ListedFile]) -> String {
+    let href = format!(
+        "/project/file/{}/{}",
+        file.lane,
+        url_encode_path(&file.rel)
+    );
+    let emf_rel = present_portal::sibling_with_ext(&file.rel, "emf");
+    let emf_url = format!(
+        "/project/file/{}/{}",
+        file.lane,
+        url_encode_path(&emf_rel)
+    );
+    let mut png_owned: Vec<(String, String)> = Vec::new();
+    for other in files {
+        if other.kind == "png"
+            && present_portal::related_png(&file.rel, &other.rel)
+            && other.bytes <= 8 * 1024 * 1024
+        {
+            png_owned.push((
+                other.rel.clone(),
+                format!(
+                    "/project/file/{}/{}",
+                    other.lane,
+                    url_encode_path(&other.rel)
+                ),
+            ));
+        }
+    }
+    let pngs: Vec<PortalPng<'_>> = png_owned
+        .iter()
+        .map(|(rel, src)| PortalPng { rel, src })
+        .collect();
+    let id = format!(
+        "portal-{}-{}",
+        file.lane,
+        file.rel.replace(['/', '\\', '.', ' '], "-")
+    );
+    present_portal::render_portal_host(&id, &href, &emf_url, &pngs)
+}
+
 fn render_file_cards(files: &[ListedFile]) -> String {
     let mut out = String::new();
     for file in files {
@@ -276,7 +329,9 @@ fn render_file_cards(files: &[ListedFile]) -> String {
             file.lane,
             url_encode_path(&file.rel)
         );
-        let preview = if file.previewable && file.bytes <= 8 * 1024 * 1024 {
+        let preview = if file.kind == "10d" {
+            portal_file_preview(file, files)
+        } else if file.previewable && file.bytes <= 8 * 1024 * 1024 {
             if file.kind == "html" {
                 format!(
                     r#"<a class="text-xs font-mono text-emerald-300" href="{href}" target="_blank" rel="noreferrer">Open HTML</a>"#
