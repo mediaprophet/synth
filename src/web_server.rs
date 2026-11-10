@@ -8,6 +8,10 @@
 //! - `GET /api/capabilities`
 //! - `POST /api/produce`
 //! - `POST /api/mcp/call`
+//! - `POST /api/radiance/compose`
+//! - `POST /api/hmc/bridge`
+//! - `GET /synth/wasm-lite.js`
+//! - `GET /qualia` (QualiaPortal docs index; files under `/qualia/`)
 //! - `GET /api/project`
 //! - `GET|POST /api/project/annotations`
 
@@ -369,8 +373,10 @@ fn mime_for_qualia(rel: &str) -> &'static str {
         "image/svg+xml"
     } else if lower.ends_with(".png") {
         "image/png"
-    } else if lower.ends_with(".jpg") || lower.ends_with(".jpeg") || lower.ends_with(".webp") {
+    } else if lower.ends_with(".jpg") || lower.ends_with(".jpeg") {
         "image/jpeg"
+    } else if lower.ends_with(".webp") {
+        "image/webp"
     } else if lower.ends_with(".map") || lower.ends_with(".txt") || lower.ends_with(".md") {
         "text/plain; charset=utf-8"
     } else {
@@ -380,7 +386,8 @@ fn mime_for_qualia(rel: &str) -> &'static str {
 
 fn extra_static_headers(mime: &str) -> Vec<(&'static str, &'static str)> {
     let mut h = vec![("Cross-Origin-Resource-Policy", "same-origin")];
-    if mime.starts_with("text/html") {
+    let lower = mime.to_ascii_lowercase();
+    if lower.starts_with("text/html") || lower.contains("javascript") || lower.contains("wasm") {
         h.push(("Cross-Origin-Opener-Policy", "same-origin"));
         h.push(("Cross-Origin-Embedder-Policy", "require-corp"));
     }
@@ -437,6 +444,91 @@ fn serve_qualia_static(stream: TcpStream, path: &str) -> Result<(), String> {
     let mime = mime_for_qualia(&rel_str);
     let extra = extra_static_headers(mime);
     write_http_response_with(stream, "200 OK", mime, &bytes, &extra)
+}
+
+fn list_qualia_docs(root: &Path, max: usize) -> Vec<String> {
+    let mut files = Vec::new();
+    let mut stack = vec![root.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = std::fs::read_dir(&dir) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let name = entry.file_name();
+            let Some(name) = name.to_str() else {
+                continue;
+            };
+            if name == "." || name == ".." || name.contains("..") {
+                continue;
+            }
+            let path = entry.path();
+            let Ok(meta) = entry.metadata() else {
+                continue;
+            };
+            if meta.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if !meta.is_file() {
+                continue;
+            }
+            let Ok(rel) = path.strip_prefix(root) else {
+                continue;
+            };
+            let rel_str = rel.to_string_lossy().replace('\\', "/");
+            if rel_str.is_empty()
+                || rel_str.split('/').any(|c| c.is_empty() || c == "." || c == "..")
+            {
+                continue;
+            }
+            files.push(rel_str);
+            if files.len() >= max {
+                files.sort();
+                return files;
+            }
+        }
+    }
+    files.sort();
+    files
+}
+
+fn serve_qualia_index(stream: TcpStream) -> Result<(), String> {
+    let Some(root) = qualia_docs_root() else {
+        return write_http_response(
+            stream,
+            "404 Not Found",
+            "application/json",
+            br#"{"ok":false,"error":"QualiaDB docs not found"}"#,
+        );
+    };
+    let files = list_qualia_docs(&root, 200);
+    let mut links = String::new();
+    for rel in &files {
+        let href = format!("/qualia/{rel}");
+        links.push_str(&format!(
+            "<li><a href=\"{safe_href}\">{safe_rel}</a></li>\n",
+            safe_href = crate::present::escape_html(&href),
+            safe_rel = crate::present::escape_html(rel),
+        ));
+    }
+    let html = format!(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>QualiaPortal docs</title>
+</head>
+<body>
+  <h1>QualiaPortal docs</h1>
+  <p>Official painter: <code>load_10d</code> + sibling <code>load_emf</code>. Shell: <code>/qualia/js/qualia-shell.js</code>. WASM package: <code>pkg/qualia/qualia.js</code>.</p>
+  <ul>
+{links}
+  </ul>
+</body>
+</html>
+"#
+    );
+    write_html_coi(stream, html.as_bytes())
 }
 
 fn render_root_studio_html() -> Result<String, String> {
@@ -513,11 +605,12 @@ fn handle_mcp_call(body: &[u8]) -> Value {
     }
 }
 
-/// Processes a single HTTP request over `stream` (bounded to 256 KiB).
+/// Processes a single HTTP request over `stream` (256 KiB; 16 MiB for wasm-lite compose/bridge).
 pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     let _ = stream.set_read_timeout(Some(Duration::from_secs(3)));
     let _ = stream.set_write_timeout(Some(Duration::from_secs(5)));
-    let mut buf = vec![0u8; 256 * 1024];
+    const SMALL_MAX: usize = 256 * 1024;
+    let mut buf = vec![0u8; SMALL_MAX];
     let mut read_total = 0usize;
     let mut header_end = None;
     while read_total < buf.len() {
@@ -565,13 +658,31 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         .unwrap_or(0);
     let range_header = header_value("range");
 
-    while read_total < body_offset.saturating_add(content_len) && read_total < buf.len() {
-        match stream.read(&mut buf[read_total..]) {
+    let body_cap = match path.as_str() {
+        "/api/radiance/compose" | "/api/hmc/bridge" if method == "POST" => {
+            crate::wasm_lite::MAX_BODY_BYTES
+        }
+        _ => SMALL_MAX.saturating_sub(body_offset),
+    };
+    if content_len > body_cap {
+        return write_http_response(
+            stream,
+            "200 OK",
+            "application/json",
+            br#"{"ok":false,"error":"Request body exceeds limit"}"#,
+        );
+    }
+    let needed = body_offset.saturating_add(content_len);
+    if needed > buf.len() {
+        buf.resize(needed, 0);
+    }
+    while read_total < needed {
+        match stream.read(&mut buf[read_total..needed]) {
             Ok(0) | Err(_) => break,
             Ok(n) => read_total += n,
         }
     }
-    let body = &buf[body_offset..read_total.min(body_offset.saturating_add(content_len))];
+    let body = &buf[body_offset..read_total.min(needed)];
 
     match (method.as_str(), path.as_str()) {
         ("GET", "/" | "/index.html") => {
@@ -609,6 +720,30 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
             let bytes = serde_json::to_vec(&res).map_err(|e| e.to_string())?;
             write_http_response(stream, "200 OK", "application/json", &bytes)
         }
+        ("GET", "/synth/wasm-lite.js") => {
+            let mime = "text/javascript; charset=utf-8";
+            let extra = extra_static_headers(mime);
+            write_http_response_with(
+                stream,
+                "200 OK",
+                mime,
+                crate::wasm_lite::WASM_LITE_JS.as_bytes(),
+                &extra,
+            )
+        }
+        ("POST", "/api/radiance/compose") => match crate::wasm_lite::compose_png(body) {
+            Ok(png) => write_http_response(stream, "200 OK", "image/png", &png),
+            Err(err) => {
+                let bytes = serde_json::to_vec(&json!({ "ok": false, "error": err }))
+                    .map_err(|e| e.to_string())?;
+                write_http_response(stream, "200 OK", "application/json", &bytes)
+            }
+        },
+        ("POST", "/api/hmc/bridge") => {
+            let res = crate::wasm_lite::bridge_hmc(body);
+            let bytes = serde_json::to_vec(&res).map_err(|e| e.to_string())?;
+            write_http_response(stream, "200 OK", "application/json", &bytes)
+        }
         ("GET", "/project" | "/project/") => {
             let html = render_project_html()?;
             write_html_coi(stream, html.as_bytes())
@@ -636,6 +771,9 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         }
         _ if method == "GET" && path.starts_with("/project/file/") => {
             serve_project_file(stream, &path, range_header.as_deref())
+        }
+        ("GET", "/qualia" | "/qualia/" | "/vendor/qualia" | "/vendor/qualia/") => {
+            serve_qualia_index(stream)
         }
         _ if method == "GET"
             && (path.starts_with("/qualia/") || path.starts_with("/vendor/qualia/")) =>
@@ -1047,6 +1185,14 @@ mod tests {
             "qualia-shell.js body must export loadQualiaPortal"
         );
         assert!(header_l.contains("cross-origin-resource-policy: same-origin"));
+        assert!(
+            header_l.contains("cross-origin-opener-policy: same-origin"),
+            "JS must send COOP for SharedArrayBuffer, got {header}"
+        );
+        assert!(
+            header_l.contains("cross-origin-embedder-policy: require-corp"),
+            "JS must send COEP for SharedArrayBuffer, got {header}"
+        );
 
         for escape in [
             "GET /qualia/../Cargo.toml HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
@@ -1092,5 +1238,130 @@ mod tests {
         let html = std::str::from_utf8(body).unwrap_or("");
         assert!(html.contains("/qualia/js/qualia-shell.js"));
         assert!(html.contains("webgpu-snapshot"));
+    }
+
+    #[test]
+    fn mime_for_qualia_webp_is_image_webp_not_jpeg() {
+        assert_eq!(mime_for_qualia("shot.webp"), "image/webp");
+        assert_eq!(mime_for_qualia("shot.WEBP"), "image/webp");
+        assert_eq!(mime_for_qualia("shot.jpg"), "image/jpeg");
+        assert_eq!(mime_for_qualia("shot.jpeg"), "image/jpeg");
+        assert_eq!(mime_for_qualia("shell.js"), "text/javascript; charset=utf-8");
+        assert_eq!(mime_for_qualia("portal.wasm"), "application/wasm");
+    }
+
+    #[test]
+    fn extra_static_headers_coep_on_js_wasm_and_html() {
+        for mime in [
+            "text/html; charset=utf-8",
+            "text/javascript; charset=utf-8",
+            "application/javascript",
+            "application/wasm",
+        ] {
+            let h = extra_static_headers(mime);
+            let joined: Vec<_> = h.iter().map(|(k, v)| format!("{k}: {v}")).collect();
+            let blob = joined.join("\n").to_ascii_lowercase();
+            assert!(blob.contains("cross-origin-resource-policy: same-origin"), "{mime}");
+            assert!(blob.contains("cross-origin-opener-policy: same-origin"), "{mime}");
+            assert!(blob.contains("cross-origin-embedder-policy: require-corp"), "{mime}");
+        }
+        let png = extra_static_headers("image/png");
+        let blob = png
+            .iter()
+            .map(|(k, v)| format!("{k}: {v}"))
+            .collect::<Vec<_>>()
+            .join("\n")
+            .to_ascii_lowercase();
+        assert!(blob.contains("cross-origin-resource-policy: same-origin"));
+        assert!(!blob.contains("cross-origin-embedder-policy"));
+    }
+
+    #[test]
+    fn get_qualia_index_is_200_html_with_coep() {
+        assert!(
+            qualia_docs_root().is_some(),
+            "QualiaDB docs must exist at C:\\github\\qualiaDB\\docs (or SYNTH_QUALIA_DOCS)"
+        );
+        let resp =
+            exchange_raw(b"GET /qualia/ HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        let (header, body) = http_split(&resp);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "GET /qualia/ must be 200, got {header}"
+        );
+        let header_l = header.to_ascii_lowercase();
+        assert!(header_l.contains("content-type: text/html"));
+        assert!(header_l.contains("cross-origin-embedder-policy: require-corp"));
+        assert!(header_l.contains("cross-origin-opener-policy: same-origin"));
+        let html = std::str::from_utf8(body).unwrap_or("");
+        assert!(
+            html.contains("pkg/qualia") || html.contains("qualia.js"),
+            "index must mention pkg/qualia or qualia.js"
+        );
+        assert!(html.contains("QualiaPortal docs"));
+        assert!(html.contains("load_10d"));
+        assert!(html.contains("load_emf"));
+
+        let bare =
+            exchange_raw(b"GET /qualia HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        let (header, _) = http_split(&bare);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "GET /qualia must be 200, got {header}"
+        );
+    }
+
+    #[test]
+    fn get_wasm_lite_js_is_200_javascript_with_coep() {
+        let resp = exchange_raw(
+            b"GET /synth/wasm-lite.js HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+        );
+        let (header, body) = http_split(&resp);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "GET /synth/wasm-lite.js must be 200, got {header}"
+        );
+        let header_l = header.to_ascii_lowercase();
+        assert!(
+            header_l.contains("content-type: text/javascript"),
+            "wasm-lite.js MIME must be javascript, got {header}"
+        );
+        assert!(header_l.contains("cross-origin-embedder-policy: require-corp"));
+        assert!(header_l.contains("cross-origin-opener-policy: same-origin"));
+        let text = std::str::from_utf8(body).unwrap_or("");
+        assert!(text.contains("composeToOpfs"));
+        assert!(text.contains("getDirectory"));
+        assert!(text.contains("ingestHmc"));
+    }
+
+    fn exchange_post(path: &str, body: &[u8]) -> Vec<u8> {
+        let req = format!(
+            "POST {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+            body.len()
+        );
+        let mut bytes = req.into_bytes();
+        bytes.extend_from_slice(body);
+        exchange_raw(&bytes)
+    }
+
+    #[test]
+    fn post_radiance_compose_invalid_json_is_ok_false() {
+        let resp = exchange_post("/api/radiance/compose", b"not-json");
+        let (header, body) = http_split(&resp);
+        assert!(header.starts_with("HTTP/1.1 200 OK"), "got {header}");
+        let v: serde_json::Value = serde_json::from_slice(body).expect("json");
+        assert_eq!(v["ok"], false);
+        assert!(v.get("error").is_some());
+    }
+
+    #[test]
+    fn post_hmc_bridge_empty_files_is_error() {
+        let resp = exchange_post("/api/hmc/bridge", br#"{"files":[]}"#);
+        let (header, body) = http_split(&resp);
+        assert!(header.starts_with("HTTP/1.1 200 OK"), "got {header}");
+        let v: serde_json::Value = serde_json::from_slice(body).expect("json");
+        assert_eq!(v["ok"], false);
+        let err = v["error"].as_str().unwrap_or("");
+        assert!(!err.is_empty(), "empty files must return an error");
     }
 }

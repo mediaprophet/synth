@@ -91,7 +91,7 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | Inset | `hypermedia.manifold.inset` |
 | Solidify | `hypermedia.manifold.solidify` |
 | Knife / bisect | `hypermedia.manifold.bisect_plane` |
-| Clay sculpt / displace | `hypermedia.manifold.evaluate_field` (`domain`, `expression`, `amplitude`) |
+| Clay sculpt / displace | `hypermedia.manifold.evaluate_field` (`expression=clay`, `clay_mode=add\|subtract\|smooth\|pinch`, `brush_center`, `radius`, `strength`, `falloff`) |
 | Catmull–Clark | `hypermedia.manifold.subdivide_catmull_clark` |
 | Decimate / remesh | `hypermedia.manifold.simplify` (`mode=decimate\|remesh\|anisotropic`) |
 | Import OBJ/STL/GLB | `hypermedia.manifold.import_mesh` |
@@ -109,7 +109,7 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | 2D boolean / offset / fillet | `hypermedia.locus.boolean`, `offset`, `fillet` |
 | B-spline | `hypermedia.locus.spline` |
 | PNG / PSD | `hypermedia.radiance.encode_rgba_png`, `import_rgba_png`, `encode_psd`, `import_psd` |
-| Sprite sheet / 9-slice | `hypermedia.radiance.pack_sprite_sheet`, `pack_nine_slice` |
+| Sprite sheet / autotile / 9-slice | `hypermedia.radiance.pack_sprite_sheet` (`mode=grid\|autotile`, `wrap=clamp\|repeat\|mirror`), `pack_nine_slice` |
 | PBR set pack | `hypermedia.surface.pack_pbr_set` |
 | Grade / LUT / develop | `grade_color`, `apply_lut`, `develop_photo`, `grade_cdl_scopes` |
 | EMF volume | `hypermedia.electromagnetics.compile_emf` |
@@ -157,12 +157,12 @@ RGBA and sonics are **conversions of the same cells**:
 - **RGBA** — `hypermedia.electromagnetics.render_spectral_slice` / `raymarch_vox0_dda` (CIE 1931 + Bruton from `wavelength_nm` and vacuum-impedance irradiance `|E|²/Z0`). Encode with `encode_rgba_png`. This is a preview, not a replacement for `.emf`.
 - **Sonics** — QualiaPortal AcousticPlane maps the same σ (`spectral_sigma` / Tensor10D σ) to Hz (`sigma_to_center_frequency_hz`: 400–700 nm → 1760–110 Hz). There is no separate EMF-to-WAV store. STFT/CQT sidecars are acoustic bake of that σ, not a third field.
 
-`compile_emf` seals `.emf`. `verify_emf` checks CRC-32C + Bao. Do not invent `.10d` EMF cell sections. Portal `load_10d` is the mesh. Portal `load_emf` unpacks sibling `.emf` Hilbert bricks onto the GPU field and sets AcousticPlane σ from the same cells.
+`compile_emf` seals `.emf`. `verify_emf` checks CRC-32C + Bao. Do not invent `.10d` EMF cell sections. Portal `load_10d` is the mesh. Portal `load_emf` unpacks sibling `.emf` Hilbert bricks onto the GPU field and sets AcousticPlane σ from the same cells. `dense_volume()` fail-closes above `MAX_DENSE_CELLS` (1_048_576). The QualiaPortal WASM package (`docs/pkg/qualia/qualia.js`) exports `QualiaPortal.load_emf`.
 
 ### Caps (honest bounds, not absences)
 
-- `evaluate_field` is the clay/displace path (expression over the mesh domain). There is no separate sculpt morphism.
-- `simplify` `mode=anisotropic` currently runs the anisotropic remesher with an identity metric
+- `evaluate_field` clay brush: `expression=clay` with `clay_mode=add|subtract|smooth|pinch` (add/subtract/smooth along normals; pinch lerps toward `brush_center`). Other expressions remain `radial_wave|height_gradient|curvature_proxy|normal_displace`.
+- `simplify` `mode=anisotropic` uses a per-vertex isotropic(local mean edge) background metric by default; optional `target_edge` or SPD `metric:[m00,m10,m11,m20,m21,m22]` (indefinite metric fail-closes)
 - `boolean_3d` ~50k verts / 100k tris
 - loft 2..=256 sections, identical point counts; `interpolation=linear\|cubic\|nurbs`
 - revolve ≤256 segments; optional `interpolation=nurbs`
@@ -279,7 +279,7 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.manifold.compile_10d` | `mesh` |
 | `hypermedia.manifold.compile_10d_pbr` | `mesh`, optional `albedo`, `source_10d`, `topology`, `spatial_index`, `camera_*` |
 | `hypermedia.manifold.boolean_3d` | `a`, `b`, `op=union\|intersection\|difference` |
-| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error`, `mode=decimate\|remesh\|anisotropic` |
+| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error`, `mode=decimate\|remesh\|anisotropic`, optional `target_edge` or `metric:[6]` |
 | `hypermedia.manifold.import_mesh` | `input` retained key, `format=obj\|stl\|glb` |
 | `hypermedia.manifold.project_dxf` | `profile` and/or `mesh`, `layer` |
 | `hypermedia.manifold.radial_euler` | `mesh`, Radial-Edge ops SEMV/SFME/JEKV/JVKE/JFKE |
@@ -288,7 +288,7 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.manifold.solidify` | `mesh`, `thickness`, `offset` |
 | `hypermedia.manifold.bisect_plane` | `mesh`, `plane_origin`, `plane_normal`, caps |
 | `hypermedia.manifold.subdivide_catmull_clark` | `mesh`, `levels` 1..=3, `crease` |
-| `hypermedia.manifold.evaluate_field` | `mesh`, `domain`, `expression`, `amplitude` |
+| `hypermedia.manifold.evaluate_field` | `mesh`, `domain`, `expression=radial_wave\|height_gradient\|curvature_proxy\|normal_displace\|clay`, `amplitude`, clay: `clay_mode`, `brush_center`, `radius`, `strength`, `falloff` |
 | `hypermedia.manifold.mesh_to_sdf_brick` | `mesh`, `resolution` 8..=32, `padding` |
 | `hypermedia.manifold.sdf_brick_to_mesh` | `sdf`, `iso_level` |
 | `hypermedia.manifold.instance_on_points` | `prototype`, `points`, `scale` |
@@ -340,12 +340,12 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.radiance.filter_kuwahara_anisotropic` | `image`, `radius`, `sharpness`, `eccentricity` |
 | `hypermedia.radiance.decode_cryptomatte_q42` | `image`, `target_id`, luma range, `feather` |
 | `hypermedia.radiance.vector_motion_blur` | `image`, `velocity_px`, `samples`, `shutter` |
-| `hypermedia.radiance.solve_sdfgi_froxel` | `image`, cascades, fog, sun, sky |
+| `hypermedia.radiance.solve_sdfgi_froxel` | `image`, cascades, fog, sun, sky, `backend=cpu\|gpu` (gpu = Etalon/wgpu cascade probes + GGX; fail-closed without adapter) |
 | `hypermedia.radiance.build_light_tree` | `lights:[{position,direction,color,power,angle_rad}]`, `width`, `height` |
 | `hypermedia.radiance.develop_camera_raw_hdr` | Bayer/X-Trans CFA + exposure brackets |
 | `hypermedia.radiance.grade_cdl_scopes` | ASC CDL v1.2, 3-way wheels, LogC4, LUT, waveform/vectorscope |
 | `hypermedia.radiance.trace_vector_contours` | RGBA8 → cubic Bézier contours, seam carving, skeleton |
-| `hypermedia.radiance.pack_sprite_sheet` | `tiles`, `columns`, `padding`, optional `names` → `{image,png,frames:[{name,x,y,w,h}]}` |
+| `hypermedia.radiance.pack_sprite_sheet` | `tiles`, `columns`, `padding`, optional `names`, `mode=grid\|autotile`, `wrap=clamp\|repeat\|mirror` → `{image,png,frames,mode,wrap}` |
 | `hypermedia.radiance.pack_nine_slice` | `image`, `left`, `right`, `top`, `bottom`, `dest_width`, `dest_height` |
 
 ### glyph (7)
@@ -463,6 +463,13 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `qualia.species.assemble_corpus` | `corpus` record or `"corpus.q42"` |
 
 ---
+
+## Present, QualiaPortal, COEP, wasm-lite
+
+- Present HTML inlines `.10d` and sibling `.emf` as `data-mesh-b64` / `data-emf-b64` so QualiaPortal `load_10d` / `load_emf` do not `fetch("heart.10d")` (that 404s). PNG contact sheets stay data URIs. `related_png` matches a stem only when the rest is empty or starts with `/`, `_`, `.`, or `-` (`working/heart` does not match `working/heartbeat.png`); directory match requires `dir + "/"`.
+- Studio static: CORP is always `same-origin`. COOP `same-origin` + COEP `require-corp` apply to HTML, JavaScript, and WASM (SharedArrayBuffer needs COEP on the JS/WASM responses, not only the document).
+- `GET /qualia`, `/qualia/`, `/vendor/qualia`, `/vendor/qualia/` serve a QualiaPortal docs index (bounded listing, COI headers). Files under `qualia_docs_root()` (`C:\github\qualiaDB\docs`) at `/qualia/…`. Shell: `/qualia/js/qualia-shell.js`. WASM package: `pkg/qualia/qualia.js`.
+- wasm-lite: `GET /synth/wasm-lite.js` (`window.SynthWasmLite`: `composeToOpfs`, `ingestHmc`, `opfsReadPng`; uses `navigator.storage.getDirectory()` when present). `POST /api/radiance/compose` returns PNG via `import_rgba_png` + `compose_rgba` + `encode_rgba_png` (1..=8 layers, 1024², ~16 MB body). `POST /api/hmc/bridge` packs in-memory PNGs into an HMC candidate.
 
 ## Review before claiming the shape is right
 

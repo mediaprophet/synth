@@ -318,7 +318,7 @@ fn portal_file_preview(file: &ListedFile, files: &[ListedFile]) -> String {
         file.lane,
         file.rel.replace(['/', '\\', '.', ' '], "-")
     );
-    present_portal::render_portal_host(&id, &href, &emf_url, &pngs)
+    present_portal::render_portal_host(&id, &href, &emf_url, "", "", &pngs)
 }
 
 fn render_file_cards(files: &[ListedFile]) -> String {

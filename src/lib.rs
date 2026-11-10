@@ -15,5 +15,6 @@ pub mod present_style;
 pub mod production;
 pub mod tray_env;
 pub mod vibe_runtime;
+pub mod wasm_lite;
 pub mod web_server;
 pub use host::{HostSnapshot, NativeContext, NativeOutputRoot, SavedCandidate, SynthHost};

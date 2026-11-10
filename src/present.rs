@@ -22,7 +22,7 @@ fn hex(bytes: &[u8]) -> String {
     out
 }
 
-fn base64_encode(bytes: &[u8]) -> String {
+pub(crate) fn base64_encode(bytes: &[u8]) -> String {
     const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
     for chunk in bytes.chunks(3) {
@@ -233,10 +233,18 @@ pub fn render_resource_card_in_set(index: usize, resource: &Resource, all: &[Res
                     .collect();
                 let mesh_url = resource.key.clone();
                 let emf_url = crate::present_portal::sibling_with_ext(&mesh_url, "emf");
+                let mesh_b64 = base64_encode(&resource.bytes);
+                let emf_b64 = all
+                    .iter()
+                    .find(|r| r.key.eq_ignore_ascii_case(&emf_url))
+                    .map(|r| base64_encode(&r.bytes))
+                    .unwrap_or_default();
                 let portal = crate::present_portal::render_portal_host(
                     &format!("portal-present-{index}"),
                     &mesh_url,
                     &emf_url,
+                    &mesh_b64,
+                    &emf_b64,
                     &pngs,
                 );
                 format!("{portal}{degraded}")
@@ -820,6 +828,7 @@ pub fn session_presentation_summary(
 #[cfg(test)]
 mod tests {
     use super::file_url_from_fs_path;
+    use crate::production::Resource;
 
     #[test]
     fn session_presentation_embed_hint_strips_windows_verbatim_prefix() {
@@ -848,5 +857,33 @@ mod tests {
             assert!(url.starts_with("file:///C:"), "got {url}");
             assert!(!url.contains("?/C:"), "verbatim prefix leaked: {url}");
         }
+    }
+
+    #[test]
+    fn ten_d_card_html_contains_inline_mesh_b64() {
+        let bytes = b"Q42TEN10\x00fake-mesh";
+        let emf_bytes = b"Q42EMF64\x00fake-field";
+        let mesh = Resource {
+            key: "heart.10d".into(),
+            kind: "10d".into(),
+            bytes: bytes.to_vec(),
+        };
+        let emf = Resource {
+            key: "heart.emf".into(),
+            kind: "emf".into(),
+            bytes: emf_bytes.to_vec(),
+        };
+        let html = super::render_resource_card_in_set(1, &mesh, &[mesh.clone(), emf]);
+        let mesh_b64 = super::base64_encode(bytes);
+        let emf_b64 = super::base64_encode(emf_bytes);
+        assert!(
+            html.contains(&format!("data-mesh-b64=\"{mesh_b64}\"")),
+            "card must embed .10d bytes as data-mesh-b64"
+        );
+        assert!(
+            html.contains(&format!("data-emf-b64=\"{emf_b64}\"")),
+            "card must embed sibling .emf bytes as data-emf-b64"
+        );
+        assert!(html.contains("data-mesh-url=\"heart.10d\""));
     }
 }

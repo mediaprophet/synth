@@ -384,7 +384,8 @@ fn collect_files(
 pub fn file_kind(rel: &str) -> &'static str {
     match rel.rsplit('.').next().unwrap_or("").to_ascii_lowercase().as_str() {
         "png" | "ppm" => "png",
-        "jpg" | "jpeg" | "webp" => "jpg",
+        "jpg" | "jpeg" => "jpg",
+        "webp" => "webp",
         "svg" => "svg",
         "html" | "htm" => "html",
         "10d" => "10d",
@@ -402,6 +403,7 @@ pub fn mime_for(kind: &str) -> &'static str {
     match kind {
         "png" => "image/png",
         "jpg" => "image/jpeg",
+        "webp" => "image/webp",
         "svg" => "image/svg+xml",
         "html" => "text/html; charset=utf-8",
         "wav" => "audio/wav",

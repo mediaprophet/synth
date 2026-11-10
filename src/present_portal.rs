@@ -45,6 +45,10 @@ pub fn dir_of(rel: &str) -> &str {
     rel.rsplit_once('/').map(|(d, _)| d).unwrap_or("")
 }
 
+fn stem_boundary_rest(rest: &str) -> bool {
+    rest.starts_with('/') || rest.starts_with('_') || rest.starts_with('.') || rest.starts_with('-')
+}
+
 pub fn related_png(ten_d_rel: &str, png_rel: &str) -> bool {
     let png = png_rel.to_ascii_lowercase();
     if !png.ends_with(".png") {
@@ -54,29 +58,47 @@ pub fn related_png(ten_d_rel: &str, png_rel: &str) -> bool {
         .rsplit_once('.')
         .map(|(s, _)| s)
         .unwrap_or(ten_d_rel);
-    if png_rel.starts_with(stem) {
+    if png_rel == stem {
         return true;
+    }
+    if let Some(rest) = png_rel.strip_prefix(stem) {
+        if stem_boundary_rest(rest) {
+            return true;
+        }
     }
     let dir = dir_of(ten_d_rel);
     if dir.is_empty() {
-        return png_rel
+        let name = png_rel
             .rsplit_once('/')
             .map(|(_, n)| n)
-            .unwrap_or(png_rel)
-            .starts_with(stem);
+            .unwrap_or(png_rel);
+        if name == stem {
+            return true;
+        }
+        return name
+            .strip_prefix(stem)
+            .is_some_and(stem_boundary_rest);
     }
-    if !png_rel.starts_with(dir) {
+    let dir_prefix = format!("{dir}/");
+    if !png_rel.starts_with(&dir_prefix) {
         return false;
     }
-    png.contains("front-view")
-        || png.contains("side-view")
-        || png.contains("three-quarter")
-        || png.contains("turnaround")
-        || png.contains("_albedo")
-        || png.contains("_normal")
-        || png.contains("_orm")
-        || png.contains("_bsdf")
-        || png.contains("preview")
+    let ten_base = stem.rsplit_once('/').map(|(_, n)| n).unwrap_or(stem);
+    let png_base = png_rel.rsplit_once('/').map(|(_, n)| n).unwrap_or(png_rel);
+    if png_base == ten_base
+        || png_base
+            .strip_prefix(ten_base)
+            .is_some_and(stem_boundary_rest)
+    {
+        return true;
+    }
+    let base_l = png_base.to_ascii_lowercase();
+    base_l.starts_with("front-view")
+        || base_l.starts_with("side-view")
+        || base_l.starts_with("three-quarter")
+        || base_l == "turnaround.png"
+        || base_l.starts_with("turnaround.")
+        || base_l.starts_with("preview")
 }
 
 pub struct PortalPng<'a> {
@@ -105,19 +127,23 @@ pub fn render_contact_sheet(pngs: &[PortalPng<'_>]) -> String {
     )
 }
 
-/// Portal canvas plus PNG contact sheet. `mesh_url` is fetched only on an http(s) origin.
+/// Portal canvas plus PNG contact sheet. Inline `mesh_b64` / `emf_b64` skip fetch; URLs are the http(s) fallback.
 pub fn render_portal_host(
     host_id: &str,
     mesh_url: &str,
     emf_url: &str,
+    mesh_b64: &str,
+    emf_b64: &str,
     pngs: &[PortalPng<'_>],
 ) -> String {
     let sheet = render_contact_sheet(pngs);
     let id = escape_html(host_id);
     let mesh = escape_html(mesh_url);
     let emf = escape_html(emf_url);
+    let mesh_b64 = escape_html(mesh_b64);
+    let emf_b64 = escape_html(emf_b64);
     format!(
-        r#"<div class="synth-portal-host space-y-2" id="{id}" data-synth-portal="1" data-mesh-url="{mesh}" data-emf-url="{emf}">
+        r#"<div class="synth-portal-host space-y-2" id="{id}" data-synth-portal="1" data-mesh-url="{mesh}" data-emf-url="{emf}" data-mesh-b64="{mesh_b64}" data-emf-b64="{emf_b64}">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
     <span class="text-emerald-300 font-semibold">QualiaPortal WASM</span>
     <span class="text-[var(--muted-foreground)]">load_10d · sibling load_emf · {shell}</span>
@@ -179,6 +205,12 @@ async function snapshotWebGpuAdapter() {
     el.textContent = lines.join('\n');
   }
 }
+function b64ToU8(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
 function siblingUrl(meshUrl, ext) {
   if (typeof meshUrl !== 'string') return '';
   const lower = meshUrl.toLowerCase();
@@ -196,20 +228,41 @@ function markPortalGpu(host, live) {
   if (card) card.classList.toggle('portal-gpu-live', !!live);
 }
 async function loadPortalMesh(portal, host, meshUrl) {
-  if (!meshUrl) {
-    setPortalStatus(host, 'QualiaPortal ready · no fetchable .10d URL (PNG contact sheet is the review)');
-    return;
+  const meshB64 = host.dataset.meshB64 || '';
+  let bytes;
+  if (meshB64) {
+    bytes = b64ToU8(meshB64);
+    setPortalStatus(host, 'Loading inline .10d');
+  } else {
+    if (!meshUrl) {
+      setPortalStatus(host, 'QualiaPortal ready · no fetchable .10d URL (PNG contact sheet is the review)');
+      return;
+    }
+    setPortalStatus(host, 'Fetching ' + meshUrl.split('/').pop());
+    const response = await fetch(meshUrl);
+    if (!response.ok) throw new Error(response.status + ' ' + meshUrl);
+    bytes = new Uint8Array(await response.arrayBuffer());
   }
-  setPortalStatus(host, 'Fetching ' + meshUrl.split('/').pop());
-  const response = await fetch(meshUrl);
-  if (!response.ok) throw new Error(response.status + ' ' + meshUrl);
-  const bytes = new Uint8Array(await response.arrayBuffer());
   const receipt = portal.load_10d(bytes);
   const tris = receipt && (receipt.triangle_count ?? receipt.total_triangles);
   const verts = receipt && receipt.vertex_count;
   const renderer = window.__qualiaAnatomyInit && window.__qualiaAnatomyInit.renderer || 'unknown';
   let meshStatus = (tris != null ? tris : '?') + ' triangles · ' + (verts != null ? verts : '?') + ' verts · QualiaPortal/' + renderer;
   setPortalStatus(host, meshStatus);
+  const emfB64 = host.dataset.emfB64 || '';
+  if (emfB64) {
+    try {
+      const emfBytes = b64ToU8(emfB64);
+      const emfReceipt = portal.load_emf(emfBytes);
+      const nx = emfReceipt && emfReceipt.nx;
+      const cells = emfReceipt && emfReceipt.cell_count;
+      meshStatus += ' · .emf' + (nx != null ? ' ' + nx + '×' + (emfReceipt.ny ?? '?') + '×' + (emfReceipt.nz ?? '?') : '') + (typeof cells === 'number' ? ' (' + cells + ' cells)' : '');
+      setPortalStatus(host, meshStatus);
+    } catch (err) {
+      setPortalStatus(host, meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')');
+    }
+    return;
+  }
   const emfUrl = host.dataset.emfUrl || siblingUrl(meshUrl, '.emf');
   if (!emfUrl) {
     setPortalStatus(host, meshStatus + ' · mesh-only (no field)');
@@ -346,5 +399,29 @@ mod tests {
         assert!(related_png("heart/heart.10d", "heart/heart_turnaround.png"));
         assert!(related_png("heart/heart.10d", "heart/front-view-assumed.png"));
         assert!(!related_png("heart/heart.10d", "liver/liver.png"));
+        assert!(!related_png("working/heart.10d", "working/heartbeat.png"));
+        assert!(!related_png(
+            "working/heart.10d",
+            "working/heartbeat_turnaround.png"
+        ));
+        assert!(related_png("working/heart.10d", "working/heart_turnaround.png"));
+        assert!(related_png("heart/heart.10d", "heart/front-view-assumed.png"));
+    }
+
+    #[test]
+    fn render_portal_host_includes_inline_mesh_b64() {
+        let html = render_portal_host("portal-1", "heart.10d", "heart.emf", "QUFBQQ==", "QkJCQg==", &[]);
+        assert!(html.contains("data-mesh-b64=\"QUFBQQ==\""));
+        assert!(html.contains("data-emf-b64=\"QkJCQg==\""));
+        assert!(html.contains("data-mesh-url=\"heart.10d\""));
+        assert!(html.contains("data-emf-url=\"heart.emf\""));
+    }
+
+    #[test]
+    fn portal_boot_js_loads_inline_b64_without_fetch() {
+        assert!(PORTAL_BOOT_JS.contains("meshB64"));
+        assert!(PORTAL_BOOT_JS.contains("b64ToU8"));
+        assert!(PORTAL_BOOT_JS.contains("emfB64"));
+        assert!(PORTAL_BOOT_JS.contains("function b64ToU8(b64)"));
     }
 }
