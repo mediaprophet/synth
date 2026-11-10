@@ -17,7 +17,7 @@ Do not tell the user a catalog morphism or a rust-audit-indexed function does no
 | Vibe-callable catalog (148) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
 | Ontology, arguments, aliases | `...\src\ontology\morphisms_01.rs` … `morphisms_09.rs` (`ALL_MORPHISMS`) |
 | Dispatch | `...\src\lib.rs` `invoke_inner` |
-| Function registry from source | `C:\github\hypermedia-production\audit-docs\` — **902 files, 8708 functions, 69 modules** (generated 2026-11-10 by rust-audit `docs`) |
+| Function registry from source | `C:\github\hypermedia-production\audit-docs\` — **903 files, 8745 functions, 69 modules** (generated 2026-11-10T12:07:10Z by rust-audit `docs`) |
 | Crate list | `C:\github\hypermedia-production\CRATES.md` (partial; rust-audit `modules/*.md` is complete) |
 
 Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 148`.

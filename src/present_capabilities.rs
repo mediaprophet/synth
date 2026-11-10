@@ -1,6 +1,6 @@
 //! Full-capability snapshot and HTML studio renderer for Synth's 6 substantive pillars:
 //! 1. Asset Production Workbench (`.vibe` -> `.hmc` / SVG / PNG / WAV / `.10d`)
-//! 2. Categorical Ontology (12 Categories, 145 Morphisms, 435 `NQuin48` Triples)
+//! 2. Categorical Ontology (12 Categories, 148 Morphisms, 444 `NQuin48` Triples)
 //! 3. Unified QualiaDB 0.0.41 + Synth MCP Suite (94 Tools)
 //! 4. Admitted Etalon-Vibe SDK Providers (11 Providers, 37 Functions, 5-Field Parity Probe)
 //! 5. Living-World Biological/Anatomical Engine (33 Canonical Pins) & Cosmic Coordinates (OCS v2.2.0)
@@ -118,7 +118,7 @@ pub fn format_bytes_human(bytes: u64) -> String {
     }
 }
 
-/// Renders the HTML sections for Ontology (12 categories / 145 morphisms),
+/// Renders the HTML sections for Ontology (12 categories / 148 morphisms),
 /// MCP Tool Suite (94 tools), Etalon-Vibe SDK (11 providers), Living-World & Cosmic,
 /// and Local LLM Vault (`C:\LLM_files`).
 pub fn render_capabilities_panels_html(snap: &FullCapabilitiesSnapshot) -> String {

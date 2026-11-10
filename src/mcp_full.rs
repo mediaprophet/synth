@@ -151,13 +151,16 @@ impl StandaloneSynthMcp {
                 name: "synth_ontology_morphisms".into(),
                 description: format!(
                     "Inspect the {} asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 contracts",
-                    crate::production::assets::ontology::MORPHISMS.len()
+                    crate::production::assets::OPERATIONS.len()
                 ),
                 input_schema: object(json!({"category": {"type": "string", "maxLength": 64}}), vec![]),
             },
             AuthoringTool {
                 name: "synth_operations".into(),
-                description: "List the admitted shared-library asset operations and ontological contracts".into(),
+                description: format!(
+                    "List the {} admitted shared-library asset operations and ontological contracts from the live catalogue",
+                    crate::production::assets::OPERATIONS.len()
+                ),
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {
@@ -336,13 +339,16 @@ pub fn run_standalone_stdio() -> Result<(), String> {
 /// Return the JSON catalogue of all tools exposed by `synth mcp`.
 pub fn catalogue_json() -> Value {
     let tools = StandaloneSynthMcp::default().tools();
+    let asset_operations = crate::production::assets::catalogue();
     json!({
         "schema": "synth.comprehensive-mcp/v1",
         "total_tools": tools.len(),
         "synth_tools": StandaloneSynthMcp::synth_tools().len(),
         "qualia_engine_tools": qualia_engine_authoring_tools().len(),
+        "admitted_morphisms": crate::production::assets::OPERATIONS.len(),
         "identifier_safe_for_fastmcp": tools.iter().all(|t| !t.name.contains('.')),
         "tools": tools,
+        "asset_operations": asset_operations,
     })
 }
 
@@ -365,6 +371,76 @@ mod tests {
         ));
         std::fs::create_dir_all(&path).unwrap();
         path
+    }
+
+    const PACKING_MORPHISMS: &[&str] = &[
+        "hypermedia.radiance.pack_sprite_sheet",
+        "hypermedia.radiance.pack_nine_slice",
+        "hypermedia.surface.pack_pbr_set",
+    ];
+
+    fn packing_ids_present(operations: &[Value]) -> bool {
+        PACKING_MORPHISMS.iter().all(|id| {
+            operations.iter().any(|op| op["id"].as_str() == Some(*id))
+        })
+    }
+
+    #[test]
+    fn operations_and_catalogue_match_live_148_ontology_including_packing() {
+        assert_eq!(crate::production::assets::OPERATIONS.len(), 148);
+        assert_eq!(crate::production::assets::ontology::MORPHISMS.len(), 148);
+        let catalogue = crate::production::assets::catalogue();
+        let operations = catalogue["operations"]
+            .as_array()
+            .expect("catalogue operations array");
+        assert_eq!(operations.len(), 148);
+        assert_eq!(catalogue["count"], 148);
+        assert!(
+            packing_ids_present(operations),
+            "live catalogue must include packing morphisms {PACKING_MORPHISMS:?}"
+        );
+
+        let tools = StandaloneSynthMcp::synth_tools();
+        let morphisms = tools
+            .iter()
+            .find(|t| t.name == "synth_ontology_morphisms")
+            .expect("synth_ontology_morphisms");
+        let operations_tool = tools
+            .iter()
+            .find(|t| t.name == "synth_operations")
+            .expect("synth_operations");
+        assert!(morphisms.description.contains("148"));
+        assert!(operations_tool.description.contains("148"));
+        assert!(!morphisms.description.contains("114"));
+        assert!(!morphisms.description.contains("145"));
+        assert!(!operations_tool.description.contains("114"));
+        assert!(!operations_tool.description.contains("145"));
+
+        let mut mcp = StandaloneSynthMcp::default();
+        let live_ops = mcp.call("synth_operations", json!({})).unwrap();
+        let live_ops_arr = live_ops["operations"].as_array().unwrap();
+        assert_eq!(live_ops_arr.len(), 148);
+        assert_eq!(live_ops["count"], 148);
+        assert!(packing_ids_present(live_ops_arr));
+        let live_morphisms = mcp
+            .call("synth_ontology_morphisms", json!({}))
+            .unwrap();
+        assert_eq!(live_morphisms["count"], 148);
+        assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 148);
+        assert!(packing_ids_present(
+            live_morphisms["morphisms"].as_array().unwrap()
+        ));
+
+        let mcp_tools = catalogue_json();
+        assert_eq!(mcp_tools["admitted_morphisms"], 148);
+        let mcp_ops = mcp_tools["asset_operations"]["operations"]
+            .as_array()
+            .expect("mcp-tools asset_operations");
+        assert_eq!(mcp_ops.len(), 148);
+        assert!(
+            packing_ids_present(mcp_ops),
+            "mcp-tools JSON total must include packing morphisms"
+        );
     }
 
     #[test]

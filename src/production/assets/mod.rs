@@ -14,6 +14,7 @@ pub fn canonical(id: &str) -> Cow<'_, str> {
 }
 pub fn catalogue() -> serde_json::Value {
     let mut value = asset_production_vibe::catalogue();
+    value["count"] = serde_json::json!(OPERATIONS.len());
     value["legacy_aliases"] = serde_json::json!(ontology::MORPHISMS
         .iter()
         .flat_map(|m| m.aliases.iter().map(move |alias| {

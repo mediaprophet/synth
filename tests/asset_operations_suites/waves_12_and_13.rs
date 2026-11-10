@@ -4,6 +4,22 @@ use super::*;
 fn wave12_living_world_botanical_vertebrate_anatomy_fauna_rig_ontology_pin_continuum_and_frustum() {
     assert_eq!(synth::production::assets::OPERATIONS.len(), 148);
     assert_eq!(synth::production::assets::ontology::MORPHISMS.len(), 148);
+    let catalogue = synth::production::assets::catalogue();
+    let catalogue_ops = catalogue["operations"]
+        .as_array()
+        .expect("catalogue operations array");
+    assert_eq!(catalogue_ops.len(), 148);
+    assert_eq!(catalogue["count"], 148);
+    for packing in [
+        "hypermedia.radiance.pack_sprite_sheet",
+        "hypermedia.radiance.pack_nine_slice",
+        "hypermedia.surface.pack_pbr_set",
+    ] {
+        assert!(
+            catalogue_ops.iter().any(|op| op["id"] == packing),
+            "live catalogue must include packing morphism {packing}"
+        );
+    }
     assert_eq!(
         synth::production::assets::ontology::ONTOLOGY_NQUINS.len(),
         444
