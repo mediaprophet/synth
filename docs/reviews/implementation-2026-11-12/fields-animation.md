@@ -1,0 +1,15 @@
+# Fields and animation integration notes
+
+Terrain sculpt returns f32 metre samples with local origin, spacing and explicit no-data policy. Erosion accepts and returns the physical field, with mesh positions in the same frame. M64 compilation uses the existing checked georaster v3 writer, geographic origin and millimetre quantization; retained f32 remains authoritative. Masks and arbitrary affine rotations are not yet supported. Erosion crater radius is in grid cells and the existing solver is not spacing-aware physics. WGS84/ellipsoidal datum and northward rows are declared.
+
+The static GLB importer explicitly rejects skin and animation; the separate Qualia living-scene parser retains them and still needs production integration. The rig wrapper accepts a 10d container and complete per-vertex four-influence skin, seals the existing fauna skeleton, inverse binds and stepped clip in SKL1. Anatomy finalization seals existing weights with an existing archetype rest/cruise/sprint/rest clip. Existing read_skeletal_section and SkeletalPlayer provide playback. Added focused tests for field handoff, metadata, attachment, full weights, rest and sampled poses; execution deferred to integration.
+
+The wrapper also transfers an existing validated SKL1 skeleton, inverse binds, weights and clips from a second 10d source; both arguments support retained input keys. Vertex correspondence is caller supplied and count-checked. Verify compile/tests and inspect actual sequence. Geospatial uses the sibling QualiaDB workspace path directly so offline dependency resolution does not fetch an unrelated Git revision; Cargo lockfile may need refresh. Tests must use isolated build directories.
+
+## Native shot
+
+`synth preview --asset FILE.10d --out NEW_DIR --shot SHOT.json [--hmc PACKAGE.hmc --asset-key KEY]` accepts explicit side, orbit yaw/pitch/distance/target, sunlight, ambient, clear color, optional SSAO/shadow settings and prefiltered environment probes, optional SKL1 clip ID and up to 16 ordered timestamps. Optional HMC works for both default review and shot and resolves canonical digest-keyed texture dependencies and rejects unavailable/deferred textures. Without HMC, receipt reports potential fallback textures. Untextured animated meshes do not require UV01: tangent fallback UVs stay internal and are not attached to the mesh. Each frame uses SkeletalPlayer on original bind positions. The default three-view command is unchanged. JSON and aggregate frame sizes are bounded; tests and visual review remain pending.
+
+Example: `{ "side": 512, "camera_yaw": 0.72, "camera_pitch": 0.28, "camera_distance": 3.0, "camera_target": [0,0,0], "sun_direction": [0.4,0.8,0.4], "direct_intensity": 1.8, "ambient_intensity": 0.45, "clear_color": [0.34,0.34,0.34,1], "clip_id": 1, "times": [0,0.3333333333,0.6666666667] }`
+
+The terrain field and mesh declare local-east-north-up, with x=east, y=north and z=up. Native preview uses its normal Y-up camera: orient the view explicitly for terrain; no rotation of the physical mesh is implied. A zero crater radius disables crater formation.

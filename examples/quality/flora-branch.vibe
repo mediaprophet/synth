@@ -1,0 +1,11 @@
+requires [capability("capability.invoke")];
+let canopy = capability.invoke("hypermedia.manifold.compile_botanical_organ_10d", {scale:1,species_id:"corymbia-aparrerinja",stage:"mature"});
+let flower = capability.invoke("hypermedia.manifold.compile_botanical_organ_10d", {scale:3,species_id:"corymbia-aparrerinja",anthesis_01:0.75,peel_01:0.45,stage:"mature"});
+let asset = {files:[
+    {key:"flora-branch-canopy.10d",resource:canopy.container_10d},
+    {key:"flora-branch-canopy-blueprint.svg",resource:canopy.blueprint_svg},
+    {key:"flora-branch-canopy-turnaround.png",resource:canopy.turntable_png},
+    {key:"flora-flower-dissection.10d",resource:flower.container_10d},
+    {key:"flora-flower-blueprint.svg",resource:flower.blueprint_svg},
+    {key:"flora-flower-turnaround.png",resource:flower.turntable_png}
+]};

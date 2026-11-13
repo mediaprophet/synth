@@ -19,12 +19,12 @@ qualia-core-db = { workspace = true }
 webizen-render = { workspace = true, optional = true }
 vibe = { workspace = true }
 vibescript-abi = { workspace = true }
-qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263" }
-qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263", default-features = false, features = ["authoring", "engine-tools"] }
+qualia-cooperative-core = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995" }
+qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995", default-features = false, features = ["authoring", "engine-tools"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
-asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "929c49ada70670b5e0b05e7b9a2784ce22e3c1d1" }
+asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "75e9007bfc7e06633a94548e8b02e233381c640b" }
 qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optional = true }
 
 aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "third-party-renderer"], optional = true }
@@ -46,10 +46,10 @@ default-members = ["."]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"
-qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263", default-features = false }
-vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263" }
-vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263" }
-webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "ce88c2adc5f7411561f5670f0cc42452a7f39263" }
+qualia-core-db = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995", default-features = false }
+vibe = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995" }
+vibescript-abi = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995" }
+webizen-render = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "cfc063cae667cf0768c34bb376d795a93aebb995" }
 
 [patch."https://github.com/mediaprophet/qualiaDB.git"]
 qualia-core-db = { path = "../qualiaDB/crates/qualia-core-db" }
@@ -69,6 +69,9 @@ vibescript-abi = { path = "../qualiaDB/crates/vibescript-abi" }
 
 [patch."https://github.com/mediaprophet/hypermedia-production.git"]
 asset-production-vibe = { path = "../hypermedia-production/crates/asset-production-vibe" }
+pixel-buffer-output = { path = "../hypermedia-production/crates/pixel-buffer-output" }
+pixel-window-render-adapter = { path = "../hypermedia-production/crates/pixel-window-render-adapter" }
+vector-cpu-render-adapter = { path = "../hypermedia-production/crates/vector-cpu-render-adapter" }
 
 [patch."https://github.com/mediaprophet/etalon.git"]
 naga = { path = "../etalon/naga" }

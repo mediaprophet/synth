@@ -1,0 +1,44 @@
+# Interfaces EMF v3 implementation handoff
+
+Source-ready for root-coordinated tests. No Cargo, build, new Synth binary launch, provider call, network install, or SDK setup performed by this worker in this format task.
+
+## Code and contract
+
+Qualia q42/emf_container adds opt-in version3 typed interpretation/time/original PCM extension through extension/{mod,model,codec,tests}.rs; mod/header/reader/writer integrate version dispatch, exact extents, full hashes, byte admission, and explicit Hilbert dense decoding. Default writer remains repaired v2; current reader2/3, explicitly named migration reader handles v1. Physical cells remain64B; chunk_payload excludes hashes and all extension data. Existing external chunk_integrity remains the owner of full32B BLAKE3+32B zero-tail trailers. Unknown required structure refuses, no Bao/range/PQ/streaming claim.
+
+Hypermedia focused electromagnetics_compile.rs retains default emitter generator and opt-in v3; electromagnetics_v3.rs admits strict typed metadata, original mono Audio handles or retained pcm_f32le inputs, and exports typed verification metadata. Emitters are explicitly amplitude-centroid/legacy-sigma, not full sampled spectra. Broader physical wavelength storage never claims generic colour/audio equivalence. Electromagnetics ops verifies/report version+hash scopes+metadata+track bytes/counts; both slice and raymarch use shared visible projection guard. All declared RgbPreview values refuse current fixed preview. SpectralOnly permits labelled legacy human-visible derivative including out-of-band false colour/clamping. Original tracks remain available independently.
+
+Time-aware reader lookup selects exact (spatial key,time) and retains deterministic t0 legacy wrappers; canonical directories use lower-bound search+equal-key scan, unsorted v2 bounded linear lookup. Both H preview paths accept time_slice default0 and report source time/version/projection scope, refuse missing snapshots, use declared v3 Hilbert order, and account lookup work. A dedicated parser admits zero (generic count() disallows it). Source review also removed duplicate v3 module declaration and corrected test writer parameter order (time is third argument, flags fifth), and conservatively included a terminating directory visit in lookup admission.
+
+Ontology edits are narrow: morphisms_04 compile/verify/slice contracts, morphisms_07 raymarch optional time contract, and two stale Bao invariant strings in nquins. Catalog count/IDs unchanged148. Public core metadata derives serde without adding high-level dependencies. Conformance harness manifest has serde+serde_json; root owns lock/tests.
+
+## Public API
+
+EmfContainerWriter::to_bytes_v3(&EmfFieldInterpretation, &[EmfAudioTrack], EmfExtensionLimits). EmfContainerReader::parse_with_extension_limits(bytes, EmfReadLimits, EmfExtensionLimits). reader.extension()->Option<&EmfExtensionView>; view.metadata(), audio_payload(track), audio_sample(track,frame,channel). field.supports_legacy_visible_projection(). reader.find_chunk_at_time(key,time), lookup_brick_cell_at_time(bx,by,bz,lx,ly,lz,order,time), lookup_work_bound(). All previous parse/dense/legacy lookup APIs retained. Root owns Portal inspect/load metadata+PCM exposure, guard, v3 sigma-to-audio disable, and served WASM rebuild.
+
+## Tests and qualification
+
+Root's actual-source container-format-conformance harness passed66 tests before the last time-lookup additions (tests-resume-formats.log). New same-spatial-key reversed-insertion t0/t1 core regression checks default0, explicit1, missing2 and dense frames. H electromagnetics_v3/tests.rs adds three regressions: original retained PCM bits including signed zero and pressure outside[-1,1], descriptors/reporting/default-v2; contradictory/unknown metadata, v3 sub-nanometre admission vs unchanged v2 bound and both RGB guards; actual visible output equality for default/t0 and difference for t1 in both slice/raymarch, plus missing-snapshot refusal and receipt metadata. These new tests have not been executed by this worker. Root must rerun fast codec harness and integrated asset-production-vibe/Synth+preview suites, then actual native/Portal runtime qualification.
+
+Focused authoritative addendum: Qualia docs/manuals/standards/emf-v3-extension.md, linked from preserved emf-container-format.md v2 standard. Describes exact locator/footer, original full hashes, typed metadata, bounds, rational time, audio units and honest projection policy. Design remains docs/reviews/implementation-2026-11-12/emf-v3-extension-design.md.
+
+## Prior regression/SDK state
+
+Five original fixture/metadata/PNG16 failures repaired as recorded in interfaces-regression-repairs.md. Actual CLI/MCP HMC difference proven source-newline-only using same frozen executable; exact LF source gives byte-identical HMC SHA f0729d78eba42291c304006136a45552e4d3e863d1305cc38d5ae215b099e2c5. Strict equality retained in harness, fixture source writes exact UTF8 bytes. SDK dependency work remains deferred: isolated .venv-antigravity retained; no successful mcp/actual SDK install confirmed, prior DNS-failed pip session82564 ended and escalation aborted by user. No ongoing worker-owned pip/build session. Antigravity verification script prepared but unrun; no IDE or actual SDK roundtrip claim.
+
+
+## Parent review repair: combined peak and metadata admission
+
+The concern was real: generic charge(work,scratch) compares only the supplied scratch, without workspace occupancy or accumulation. The old request cloned PCM one track at a time and compile charged one cell buffer, while earlier owned tracks, original staged cells, writer copies, final output and metadata could coexist. H-only repair preflights all source descriptors and byte/frame counts, counts aggregate metadata recursively while still borrowed (keys, worst-case escaped strings, values, map overhead), then admits existing workspace + retained input payloads + every owned PCM copy + two field-cell buffers + final serialized output + bounded metadata/descriptor/readback scratch before PCM scans/copies or field allocation. Output metadata is serialized to a bounded counting writer with maximal digest byte widths, so the output admission has a concrete upper bound without allocating a JSON buffer. Available output resource slot is checked early. Core files remain untouched during parent build.
+
+Two added H regressions require (1) small-budget refusal before any sample/field work despite final output+workspace fitting, with exact two-track delivery after explicitly larger combined budget; (2) aggregate metadata refusal before serde cloning for many individually valid-sized shallow strings. These source regressions await root execution. The limits remain logical payload/scratch admission rather than an OS allocator guarantee.
+
+
+## Parent review repair: read/verify/preview peaks
+
+Source resolution formerly cloned the entire retained/workspace EMF before any cumulative admission. It now borrows source bytes to check length/current version/chunk count and bounded metadata extent first, admits fixed workspace plus all retained backing, exactly one source clone, typed parse/directory validation-set/JSON-to-Vibe report scratch, and caller live buffers before to_vec. No owned directory clone is assumed. V2 reserves bounded summary-record scratch; v3 accounts bounded metadata DOM/model/report projection and validation sets. Exact I64/U64 metadata conversion is unchanged and H regression now asserts epoch seconds and ticks above2^53 through verify's Vibe record.
+
+Slice admits pixels with the clone and parser before copying or pixel work. DDA admits its actual bounded grid with clone+parse first; clone/reader drop at branch end, then grid+pixels are admitted as a separate phase. Procedural dense-grid allocation also admits fixed backing. Header-based grid estimation is read-only checked sizing; core remains integrity owner. Dimension multiplication cannot overflow before clamp. New regressions cover retained and encoded source near-full refusal before clone/work, source per-resource refusal, source-only fitting but slice output/dense-grid combined refusal, DDA grid-fitting/pixels-refusing phase, procedural grid admission, and successful explicitly larger budgets. No Cargo/core edits by this worker; await root execution.
+
+
+Final review adjustments: default-v2 compile now preflights the same staged/writer cells and exact v2 output bound plus fixed backing/resource slot before field work; a48KiB refusal/192KiB success regression retains version2. Read-only peak admission preserves immutable resolver use by the existing explicit field-sonification path. DDA computes both independent phase bounds up front, so a future grid+pixels failure refuses before source clone/grid work without adding clone and pixels together. Phase-specific tests distinguish source+grid admission from later render phase admission, both before copy/work.

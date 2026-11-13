@@ -227,6 +227,29 @@ function markPortalGpu(host, live) {
   const card = host.closest('.resource-card');
   if (card) card.classList.toggle('portal-gpu-live', !!live);
 }
+const emfDisplayStates = ['empty', 'pending', 'uploaded', 'unavailable'];
+function refreshEmfStatus(portal, host) {
+  const context = host.__synthEmfStatus;
+  if (!context) return;
+  const state = typeof portal.emf_display_state === 'function'
+    ? emfDisplayStates[portal.emf_display_state()] || 'unverified' : context.receiptState;
+  if (context.lastState === state) return;
+  context.lastState = state;
+  const label = state === 'uploaded' ? 'field uploaded to WebGPU'
+    : state === 'pending' ? 'field retained; awaiting WebGPU'
+    : state === 'unavailable' ? 'field retained; field view unavailable on this renderer'
+    : 'field display unverified';
+  setPortalStatus(host, context.base + ' · ' + label);
+}
+function acceptEmfReceipt(portal, host, meshStatus, receipt) {
+  const nx = receipt && receipt.nx;
+  const cells = receipt && receipt.cell_count;
+  const base = meshStatus + ' · .emf'
+    + (nx != null ? ' ' + nx + '×' + (receipt.ny ?? '?') + '×' + (receipt.nz ?? '?') : '')
+    + (typeof cells === 'number' ? ' (' + cells + ' cells)' : '');
+  host.__synthEmfStatus = { base, receiptState: receipt && receipt.display_status || 'unverified', lastState: null };
+  refreshEmfStatus(portal, host);
+}
 async function loadPortalMesh(portal, host, meshUrl) {
   const meshB64 = host.dataset.meshB64 || '';
   let bytes;
@@ -254,10 +277,7 @@ async function loadPortalMesh(portal, host, meshUrl) {
     try {
       const emfBytes = b64ToU8(emfB64);
       const emfReceipt = portal.load_emf(emfBytes);
-      const nx = emfReceipt && emfReceipt.nx;
-      const cells = emfReceipt && emfReceipt.cell_count;
-      meshStatus += ' · .emf' + (nx != null ? ' ' + nx + '×' + (emfReceipt.ny ?? '?') + '×' + (emfReceipt.nz ?? '?') : '') + (typeof cells === 'number' ? ' (' + cells + ' cells)' : '');
-      setPortalStatus(host, meshStatus);
+      acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
     } catch (err) {
       setPortalStatus(host, meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')');
     }
@@ -280,10 +300,7 @@ async function loadPortalMesh(portal, host, meshUrl) {
     }
     const emfBytes = new Uint8Array(await emfRes.arrayBuffer());
     const emfReceipt = portal.load_emf(emfBytes);
-    const nx = emfReceipt && emfReceipt.nx;
-    const cells = emfReceipt && emfReceipt.cell_count;
-    meshStatus += ' · .emf' + (nx != null ? ' ' + nx + '×' + (emfReceipt.ny ?? '?') + '×' + (emfReceipt.nz ?? '?') : '') + (typeof cells === 'number' ? ' (' + cells + ' cells)' : '');
-    setPortalStatus(host, meshStatus);
+    acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
   } catch (err) {
     setPortalStatus(host, meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')');
   }
@@ -339,6 +356,7 @@ async function bootSynthPortals() {
     liveCanvas.classList.add('synth-portal-canvas');
     if (typeof portal.set_camera === 'function') portal.set_camera(yaw, pitch, zoom);
     startPortalLoop(liveCanvas, function () {
+      refreshEmfStatus(portal, host);
       if (spinning && portal && typeof portal.set_camera === 'function') {
         yaw += 0.008;
         portal.set_camera(yaw, pitch, zoom);

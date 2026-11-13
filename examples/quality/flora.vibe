@@ -1,0 +1,3 @@
+requires [capability("capability.invoke")];
+let leaf = capability.invoke("hypermedia.manifold.compile_botanical_organ_10d", {scale:4,species_id:"corymbia-aparrerinja",peel_01:0.9});
+let asset={files:[{key:"flora.10d",resource:leaf.container_10d},{key:"flora-blueprint.svg",resource:leaf.blueprint_svg},{key:"flora-turnaround.png",resource:leaf.turntable_png}]};

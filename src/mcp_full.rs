@@ -13,8 +13,12 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use std::{
     path::{Path, PathBuf},
-    sync::atomic::AtomicBool,
 };
+
+#[path = "mcp_full/production.rs"]
+mod production;
+#[path = "mcp_full/contracts.rs"]
+mod contracts;
 
 #[derive(Deserialize, Default)]
 #[serde(deny_unknown_fields)]
@@ -22,14 +26,6 @@ struct MorphismsArg {
     category: Option<String>,
 }
 
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ProducePreviewArg {
-    source: String,
-    profile: Option<String>,
-    out_hmc: Option<String>,
-    present_html: Option<String>,
-}
 
 /// Convert `qualia_mcp::stable_mcp_tools()` descriptors into `AuthoringTool` entries.
 pub fn qualia_engine_authoring_tools() -> Vec<AuthoringTool> {
@@ -74,10 +70,18 @@ pub fn dispatch_qualia_engine_tool(name: &str, value: &Value) -> Option<Result<V
             Ok(other) => Ok(json!({ "status": "ok", "tool": tool_id, "result": other })),
             Err(_) => Ok(json!({ "status": "ok", "tool": tool_id, "text": text })),
         },
-        Err(err) => Err(ToolError::new(
-            "qualia_engine_error",
-            format!("QualiaDB MCP tool '{tool_id}' failed: {err:?}"),
-        )),
+        Err(err) => {
+            use qualia_mcp::types::McpSystemError as E;
+            let code = match &err {
+                E::InvalidParameters | E::ParseError => "invalid_arguments",
+                E::ToolNotFound => "unknown_operation",
+                E::ToolNotReady | E::FeatureNotEnabled => "operation_unavailable",
+                E::ExecutionFailed(_) => "execution_failed",
+                E::SanctuaryGateTriggered | E::IntentFrameViolation => "permission_denied",
+            };
+            let message: String = err.to_string().chars().take(3500).collect();
+            Err(ToolError::new(code, message))
+        },
     })
 }
 
@@ -85,20 +89,24 @@ pub fn dispatch_qualia_engine_tool(name: &str, value: &Value) -> Option<Result<V
 /// and `vendor/antigravity-sdk-python` `McpStdioServer`), exposing all 60 QualiaDB MCP
 /// tools plus Synth's standalone capabilities, ontology, and HTML presentation tools.
 pub struct StandaloneSynthMcp {
-    intent: McpIntentFrame,
     output_root: Option<NativeOutputRoot>,
+    input_root: Option<production::InputRoot>,
 }
 
 impl Default for StandaloneSynthMcp {
     fn default() -> Self {
         Self {
-            intent: McpIntentFrame::default(),
             output_root: None,
+            input_root: None,
         }
     }
 }
 
 impl StandaloneSynthMcp {
+    pub fn with_input_root(mut self, root: &Path) -> Result<Self, String> {
+        self.input_root = Some(production::InputRoot::admit(root)?);
+        Ok(self)
+    }
     pub fn with_output_root(mut self, root: NativeOutputRoot) -> Self {
         self.output_root = Some(root);
         self
@@ -112,6 +120,11 @@ impl StandaloneSynthMcp {
                 mcp.output_root = Some(NativeOutputRoot::admit(Path::new(raw.trim()))?);
             }
             _ => {}
+        }
+        if let Ok(raw) = std::env::var("SYNTH_INPUT_ROOT") {
+            if !raw.trim().is_empty() {
+                mcp.input_root = Some(production::InputRoot::admit(Path::new(raw.trim()))?);
+            }
         }
         Ok(mcp)
     }
@@ -174,15 +187,33 @@ impl StandaloneSynthMcp {
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {
+                name: "synth_operation_contracts".into(),
+                description: "Inspect execution host, handle lifetime and explicit encoded/record output recipes. Recipes declare field extraction and encoding; never infer output types from namespaces.".into(),
+                input_schema: object(json!({}), vec![]),
+            },
+            AuthoringTool {
                 name: "synth_produce_present".into(),
-                description: "Evaluate VibeScript source in a bounded ProductionSession, verify strict replay, and optionally write create-only .hmc and Antigravity/Browser Preview .html showcase files".into(),
-                input_schema: object(
+                description: "Execute Hypermedia asset operations inside one bounded ProductionSession. Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. Handles expire after source evaluation. Return hashes, absolute resource paths and optional native review receipts.".into(),
+                input_schema: {
+                    let mut schema = object(
                     json!({
                         "source": {
                             "type": "string",
-                            "maxLength": ProductionLimits::default().source.submission_bytes
+                            "maxLength": 4 * 1024 * 1024
                         },
+                        "source_path": {"type":"string", "maxLength":4096, "description":"UTF-8 source file under SYNTH_INPUT_ROOT; provide exactly one of source and source_path."},
                         "profile": {"type": "string", "maxLength": 64},
+                        "quality_profile": {"type":"string","enum":["preview","production16"],"description":"preview uses 16/64/80 MiB resource/aggregate/package budgets; production16 explicitly admits 64/256/320 MiB for true 2k RGBA16. Image work budget is 500 million logical units; mesh size caps are unchanged."},
+                        "inputs": {"type": "array", "maxItems": ProductionLimits::default().resources,
+                            "items": {"type": "object", "additionalProperties": false,
+                                "required": ["key", "kind", "path"], "properties": {
+                                    "key": {"type": "string", "maxLength": 1024},
+                                    "kind": {"type": "string", "maxLength": 64},
+                                    "path": {"type": "string", "maxLength": 4096}
+                                }}},
+                        "export_dir": {"type": "string", "maxLength": 96, "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*$"},
+                        "preview_assets": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 1024}, "description": "Exported .10d resource keys to render with native preview; requires export_dir."},
+                        "receipt_json": {"type": "string", "maxLength": 96, "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.json$"},
                         "out_hmc": {
                             "type": "string",
                             "maxLength": 96,
@@ -194,14 +225,20 @@ impl StandaloneSynthMcp {
                             "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.html$"
                         }
                     }),
-                    vec!["source"],
-                ),
+                    vec![],
+                    );
+                    schema["oneOf"] = json!([{ "required": ["source"] }, { "required": ["source_path"] }]);
+                    schema
+                },
             },
         ]
     }
 }
 
 impl AuthoringBackend for StandaloneSynthMcp {
+    fn instructions(&self) -> Option<String> {
+        Some(format!("Synth exposes {} asset morphisms through synth_operations and synth_ontology_morphisms. Execute them using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. Handles live only within one source evaluation. Use synth_operation_contracts for explicit output recipes and emit encoded resources via asset.files. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/receipt destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
+    }
     fn tools(&self) -> Vec<AuthoringTool> {
         let mut all = Self::synth_tools();
         all.extend(qualia_engine_authoring_tools());
@@ -224,6 +261,7 @@ impl AuthoringBackend for StandaloneSynthMcp {
                 ))
             }
             "synth_operations" | "synth.operations" => Ok(crate::production::assets::catalogue()),
+            "synth_operation_contracts" => Ok(contracts::catalogue()),
             "synth_profiles" | "synth.profiles" => {
                 let profiles: Vec<Value> = ProducerRegistry::with_builtins()
                     .profiles()
@@ -236,92 +274,22 @@ impl AuthoringBackend for StandaloneSynthMcp {
                     .map_err(|e| ToolError::new("environment_bootstrap_failed", e))
             }
             "synth_produce_present" | "synth.produce.present" => {
-                let parsed: ProducePreviewArg = serde_json::from_value(args).map_err(|_| {
-                    ToolError::new("invalid_arguments", "Invalid synth_produce_present arguments")
-                })?;
-                let limits = ProductionLimits::default();
-                let cancel = AtomicBool::new(false);
-                let registry = ProducerRegistry::with_builtins();
-                let mut session = registry
-                    .session(
-                        parsed.profile.as_deref().unwrap_or("files"),
-                        vec![],
-                        limits.clone(),
-                    )
-                    .map_err(|e| ToolError::new("session_error", e))?;
-                session
-                    .submit(&parsed.source, &cancel)
-                    .map_err(|e| ToolError::new("production_failed", e))?;
-                let candidate = session
-                    .candidate()
-                    .ok_or_else(|| ToolError::new("no_candidate", "No candidate produced"))?;
-                registry
-                    .reopen(candidate.bundle(), limits.clone(), &cancel)
-                    .map_err(|e| ToolError::new("replay_failed", e))?;
-                if let Some(hmc_str) = &parsed.out_hmc {
-                    let hmc_path = self.confined_destination(
-                        hmc_str,
-                        ".hmc",
-                        "Use a visible HMC filename without directory components",
-                    )?;
-                    qualia_core_db::poet_host::invoke::studio_store::checkpoint::save_bundle(
-                        &hmc_path,
-                        candidate.bundle(),
-                        qualia_core_db::poet_host::invoke::studio_store::checkpoint::ExpectedFile::Absent,
-                        limits.package_bytes,
-                    )
-                    .map_err(|e| ToolError::new("hmc_save_failed", e))?;
-                }
-                let mut saved_html = None;
-                if let Some(html_str) = &parsed.present_html {
-                    let html_path = self.confined_destination(
-                        html_str,
-                        ".html",
-                        "Use a visible HTML filename without directory components",
-                    )?;
-                    let html = crate::present::render_session_html(&session)
-                        .map_err(|e| ToolError::new("present_render_failed", e))?;
-                    crate::present::write_presentation_file(&html_path, &html, limits.package_bytes)
-                        .map_err(|e| ToolError::new("present_save_failed", e))?;
-                    saved_html = Some(html_path.display().to_string());
-                }
-                let mut summary = crate::present::session_presentation_summary(
-                    &session,
-                    saved_html.as_deref(),
-                )
-                .map_err(|e| ToolError::new("summary_failed", e))?;
-                if let Some(obj) = summary.as_object_mut() {
-                    obj.insert("saved_hmc".into(), json!(parsed.out_hmc));
-                    obj.insert("strict_replay_verified".into(), json!(true));
-                }
-                Ok(summary)
+                production::produce(self, args)
             }
-            _ => {
-                let raw_args = serde_json::to_vec(&args).unwrap_or_else(|_| b"{}".to_vec());
-                let payload = RawToolPayload {
-                    tool_name: name.as_bytes(),
-                    arguments_raw: &raw_args,
-                };
-                match enforce_fiduciary_tool_dispatch(payload, &self.intent) {
-                    Ok(text) => match serde_json::from_str::<Value>(&text) {
-                        Ok(Value::Object(map)) => Ok(Value::Object(map)),
-                        Ok(other) => Ok(json!({ "status": "ok", "tool": name, "result": other })),
-                        Err(_) => Ok(json!({ "status": "ok", "tool": name, "text": text })),
-                    },
-                    Err(_) => Err(ToolError::new(
-                        "unknown_or_failed_tool",
-                        "MCP operation is unknown or refused execution",
-                    )),
-                }
-            }
+            _ => dispatch_qualia_engine_tool(name, &args).unwrap_or_else(|| {
+                Err(ToolError::new("unknown_tool", "Tool is not in the advertised catalog; use underscore tool names"))
+            }),
         }
     }
 }
 
-/// Default protocol limits accommodating the combined 66+ Synth + QualiaDB MCP tool catalogue.
+/// Bounded standalone transport for the combined tool and full 148-operation catalog.
+/// Authoring admits result objects at one eighth of the wire budget before making
+/// text+structured copies. The full operation catalog is ~326 KiB compact, above
+/// the former 256 KiB result ceiling; 4 MiB wire keeps a 512 KiB result ceiling.
 pub fn comprehensive_protocol_limits() -> ProtocolLimits {
     ProtocolLimits {
-        max_message_bytes: 2 * 1024 * 1024,
+        max_message_bytes: 4 * 1024 * 1024,
         max_tools: 128,
         max_id_bytes: 256,
     }
@@ -351,6 +319,10 @@ pub fn catalogue_json() -> Value {
         "asset_operations": asset_operations,
     })
 }
+
+#[cfg(test)]
+#[path = "mcp_full/tests.rs"]
+mod interface_tests;
 
 #[cfg(test)]
 mod tests {
@@ -452,8 +424,9 @@ mod tests {
         let props = &tool.input_schema["properties"];
         assert_eq!(
             props["source"]["maxLength"],
-            ProductionLimits::default().source.submission_bytes
+            4 * 1024 * 1024
         );
+        assert_eq!(tool.input_schema["oneOf"], json!([{ "required": ["source"] }, { "required": ["source_path"] }]));
         assert_eq!(props["out_hmc"]["maxLength"], 96);
         let pattern = props["out_hmc"]["pattern"].as_str().unwrap();
         assert!(pattern.contains("hmc"));
@@ -491,7 +464,7 @@ mod tests {
                 }),
             )
             .unwrap();
-        assert_eq!(result["saved_hmc"], "note.hmc");
+        assert_eq!(Path::new(result["saved_hmc"].as_str().unwrap()), dir.canonicalize().unwrap().join("note.hmc"));
         assert!(dir.join("note.hmc").is_file());
         assert!(dir.join("note.html").is_file());
         let confined_html = dir
@@ -529,7 +502,7 @@ mod tests {
                 json!({"source": SOURCE, "out_hmc": "note.hmc"}),
             )
             .unwrap_err();
-        assert_eq!(create_only.code, "hmc_save_failed");
+        assert_eq!(create_only.code, "native_output_refused");
         let traversal = mcp
             .call(
                 "synth_produce_present",

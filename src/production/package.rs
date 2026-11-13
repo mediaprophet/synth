@@ -96,7 +96,9 @@ pub(super) fn build(
         for r in resources {
             writer
                 .add_file(
-                    format!("{prefix}/{}", r.key),
+                    if producer.id() == "files" && producer.version() == "2" && prefix == "outputs" && r.key.starts_with("textures/sha256/") && r.kind.starts_with("image/") {
+                        r.key.clone()
+                    } else { format!("{prefix}/{}", r.key) },
                     &r.kind,
                     r.bytes.clone(),
                     None,
@@ -126,7 +128,8 @@ pub(super) fn reopen(
     let raw = reader
         .get(MANIFEST)
         .ok_or("Not a Synth general production package")?;
-    if raw.len() > manifest_limit(&limits) {
+    let manifest_ceiling = limits.for_retained_inputs(&[])?;
+    if raw.len() > manifest_limit(&manifest_ceiling) {
         return Err("Manifest exceeds byte budget".into());
     }
     let manifest: Manifest =
@@ -138,25 +141,18 @@ pub(super) fn reopen(
         .producers
         .get(&manifest.producer)
         .ok_or_else(|| format!("Unknown producer: {}", manifest.producer))?;
-    if producer.version() != manifest.version {
+    let producer: Arc<dyn AssetProducer> = if producer.version() == manifest.version {
+        producer.clone()
+    } else if manifest.producer == "files" && manifest.version == "1" {
+        Arc::new(super::files::LegacyFilesProducer)
+    } else {
         return Err("Producer version does not match saved package".into());
-    }
+    };
     if manifest.sources.is_empty()
         || manifest.sources.len() as u64 > limits.source.revisions
         || manifest.inputs.len() > limits.resources
     {
         return Err("Manifest count exceeds source/resource limits".into());
-    }
-    let mut source_bytes = 0usize;
-    for source in &manifest.sources {
-        source_bytes = source_bytes
-            .checked_add(source.len())
-            .ok_or("Source bytes overflow")?;
-        if source.len() > limits.source.submission_bytes
-            || source_bytes > limits.source.retained_source_bytes
-        {
-            return Err("Saved source exceeds limits".into());
-        }
     }
     let mut inputs = Vec::new();
     let mut total = 0usize;
@@ -183,7 +179,16 @@ pub(super) fn reopen(
             bytes: bytes.to_vec(),
         });
     }
-    let mut session = registry.session(&manifest.producer, inputs, limits)?;
+    validate_resources(&inputs, &limits)?;
+    let limits = limits.for_retained_inputs(&inputs)?;
+    let mut source_bytes = 0usize;
+    for source in &manifest.sources {
+        source_bytes = source_bytes.checked_add(source.len()).ok_or("Source bytes overflow")?;
+        if source.len() > limits.source.submission_bytes || source_bytes > limits.source.retained_source_bytes {
+            return Err(format!("Saved source admission refused: submission {} bytes (available {}), history {} bytes (available {})", source.len(), limits.source.submission_bytes, source_bytes, limits.source.retained_source_bytes));
+        }
+    }
+    let mut session = ProductionSession::new(producer, inputs, limits);
     for source in &manifest.sources {
         session.submit(source, cancel)?;
     }

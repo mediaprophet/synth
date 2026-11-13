@@ -334,7 +334,7 @@ dependencies = [
  "peniko",
  "rustc-hash 2.1.3",
  "slotmap",
- "vector-cpu-render-adapter 0.18.0 (git+https://github.com/mediaprophet/hypermedia-production.git?rev=929c49ada70670b5e0b05e7b9a2784ce22e3c1d1)",
+ "vector-cpu-render-adapter",
  "webbrowser",
  "winit",
 ]
@@ -870,6 +870,7 @@ dependencies = [
  "discourse-scientific-matlang",
  "drafting-geometry",
  "electromagnetics-rf-sensing",
+ "etalon",
  "geodesy-spatial-analysis",
  "kinetics-block-simulation",
  "kinetics-continuum-multiphysics",
@@ -886,11 +887,13 @@ dependencies = [
  "manifold-bim-csg",
  "media-isobmff",
  "multimodal-synthesis-schema",
+ "parley",
  "peniko",
  "png 0.18.1",
  "profile-authoring",
  "qualia-audio",
  "qualia-core-db",
+ "qualia-geospatial",
  "radiance-camera-raw",
  "radiance-color-grading",
  "raster-blend-operators",
@@ -898,12 +901,14 @@ dependencies = [
  "raster-selection-morphology",
  "raster-spatial-operators",
  "serde_json",
+ "sha2 0.10.9",
  "surface-layered-codecs",
  "surface-pbr-studio",
  "terrain-brushes",
  "terrain-erosion-solvers",
  "timeline-editing",
- "vector-cpu-render-adapter 0.18.0",
+ "ttf-parser",
+ "vector-cpu-render-adapter",
  "vector-glyph-shaping",
  "vector-locus-geometry",
  "vector-locus-pathops",
@@ -5585,7 +5590,6 @@ dependencies = [
 [[package]]
 name = "pixel-buffer-output"
 version = "0.17.2"
-source = "git+https://github.com/mediaprophet/hypermedia-production.git?rev=929c49ada70670b5e0b05e7b9a2784ce22e3c1d1#929c49ada70670b5e0b05e7b9a2784ce22e3c1d1"
 dependencies = [
  "bytemuck",
  "etalon",
@@ -5598,7 +5602,6 @@ dependencies = [
 [[package]]
 name = "pixel-window-render-adapter"
 version = "0.9.0"
-source = "git+https://github.com/mediaprophet/hypermedia-production.git?rev=929c49ada70670b5e0b05e7b9a2784ce22e3c1d1#929c49ada70670b5e0b05e7b9a2784ce22e3c1d1"
 dependencies = [
  "anyrender",
  "debug_timer",
@@ -8316,22 +8319,6 @@ dependencies = [
 [[package]]
 name = "vector-cpu-render-adapter"
 version = "0.18.0"
-dependencies = [
- "anyrender",
- "bytemuck",
- "color",
- "debug_timer",
- "glifo",
- "kurbo",
- "peniko",
- "vello_common",
- "vello_cpu",
-]
-
-[[package]]
-name = "vector-cpu-render-adapter"
-version = "0.18.0"
-source = "git+https://github.com/mediaprophet/hypermedia-production.git?rev=929c49ada70670b5e0b05e7b9a2784ce22e3c1d1#929c49ada70670b5e0b05e7b9a2784ce22e3c1d1"
 dependencies = [
  "anyrender",
  "bytemuck",

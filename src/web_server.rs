@@ -379,6 +379,14 @@ fn mime_for_qualia(rel: &str) -> &'static str {
         "image/webp"
     } else if lower.ends_with(".map") || lower.ends_with(".txt") || lower.ends_with(".md") {
         "text/plain; charset=utf-8"
+    } else if lower.ends_with(".glsl") || lower.ends_with(".wgsl") {
+        "text/plain; charset=utf-8"
+    } else if lower.ends_with(".ttl") || lower.ends_with(".n3") {
+        "text/turtle; charset=utf-8"
+    } else if lower.ends_with(".nt") {
+        "application/n-triples"
+    } else if lower.ends_with(".nq") {
+        "application/n-quads"
     } else {
         "application/octet-stream"
     }
@@ -1248,6 +1256,9 @@ mod tests {
         assert_eq!(mime_for_qualia("shot.jpeg"), "image/jpeg");
         assert_eq!(mime_for_qualia("shell.js"), "text/javascript; charset=utf-8");
         assert_eq!(mime_for_qualia("portal.wasm"), "application/wasm");
+        assert_eq!(mime_for_qualia("rdf-holograph.vert.glsl"), "text/plain; charset=utf-8");
+        assert_eq!(mime_for_qualia("graph.ttl"), "text/turtle; charset=utf-8");
+        assert_eq!(mime_for_qualia("graph.nt"), "application/n-triples");
     }
 
     #[test]

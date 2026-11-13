@@ -59,9 +59,7 @@ impl ProductionSession {
         if cancel.load(Ordering::Acquire) {
             return Err("Production cancelled".into());
         }
-        if source.len() > self.limits.source.submission_bytes {
-            return Err("Source bytes exceed limit".into());
-        }
+        self.check_source_admission(source)?;
         let mut next = Self::new(
             self.producer.clone(),
             self.inputs.clone(),
@@ -86,6 +84,22 @@ impl ProductionSession {
         registry.reopen(bytes, self.limits.clone(), cancel)
     }
 
+    /// Validate a whole edit before cloning retained inputs, history, or replaying.
+    fn check_source_admission(&self, source: &str) -> Result<usize, String> {
+        // Reject before cloning retained history; SourceSession enforces its other bounds.
+        let total = self
+            .sources()
+            .iter()
+            .try_fold(source.len(), |n, s| n.checked_add(s.len()))
+            .ok_or("Source size overflow")?;
+        if source.len() > self.limits.source.submission_bytes
+            || total > self.limits.source.retained_source_bytes
+        {
+            return Err(format!("Source admission refused: submission {} bytes (available {}), retained history {} bytes (available {})", source.len(), self.limits.source.submission_bytes, total, self.limits.source.retained_source_bytes));
+        }
+        Ok(total)
+    }
+
     /// Setup cells may define imports/helpers before `asset` exists and return
     /// `None`. Once `asset` exists, validation, generation and packaging succeed
     /// together. Rejection preserves the preceding bindings and candidate.
@@ -97,23 +111,14 @@ impl ProductionSession {
         if cancel.load(Ordering::Acquire) {
             return Err("Production cancelled".into());
         }
-        // Reject before cloning retained history; SourceSession enforces its other bounds.
-        let total = self
-            .sources()
-            .iter()
-            .try_fold(source.len(), |n, s| n.checked_add(s.len()))
-            .ok_or("Source size overflow")?;
-        if source.len() > self.limits.source.submission_bytes
-            || total > self.limits.source.retained_source_bytes
-        {
-            return Err("Source bytes exceed limit".into());
-        }
+        let total = self.check_source_admission(source)?;
+        let effective = self.limits.for_source_usage(total)?;
         let revision = self.revision().checked_add(1).ok_or("Revision overflow")?;
         let mut sources = self.sources().to_vec();
         sources.push(source.to_owned());
         let mut candidate = None;
         let producer = &self.producer;
-        let tool_limits = assets::tool_limits(&self.limits);
+        let tool_limits = assets::tool_limits(&effective);
         let mut host = assets::AssetHost(asset_production_vibe::AssetHost {
             workspace: self.assets.clone(),
             inputs: &self.inputs,
@@ -125,11 +130,11 @@ impl ProductionSession {
             .submit_validated_bindings(
                 source,
                 &mut host,
-                self.limits.evaluation.clone(),
+                effective.evaluation.clone(),
                 |_, bindings, host| {
                     let context = ProductionContext {
                         inputs: &self.inputs,
-                        limits: &self.limits,
+                        limits: &effective,
                         cancel,
                         assets: &host.workspace,
                     };
@@ -148,7 +153,7 @@ impl ProductionSession {
                         &sources,
                         &self.inputs,
                         &outputs,
-                        &self.limits,
+                        &effective,
                     )
                     .map_err(diagnostic)?;
                     context.check_cancelled().map_err(diagnostic)?;

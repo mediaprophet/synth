@@ -35,15 +35,76 @@ pub struct ProductionLimits {
 }
 impl Default for ProductionLimits {
     fn default() -> Self {
+        // Caller ceilings are optional; admission derives bounded effective limits.
+        let mut source = vibe::session::SessionLimits::default();
+        source.submission_bytes = usize::MAX;
+        source.retained_source_bytes = usize::MAX;
+        let mut evaluation = vibe::Budget::default();
+        // u64::MAX means an automatic per-revision evaluator allowance.
+        evaluation.steps_left = u64::MAX;
         Self {
-            source: vibe::session::SessionLimits::default(),
-            evaluation: vibe::Budget::default(),
+            source,
+            evaluation,
             resources: 512,
             resource_bytes: 16 * 1024 * 1024,
             total_resource_bytes: 64 * 1024 * 1024,
             package_bytes: 80 * 1024 * 1024,
             asset_work_units: 50_000_000,
         }
+    }
+}
+
+impl ProductionLimits {
+    /// Conservative logical reservation for owned syntax trees, their clones,
+    /// source history and packaging. The streaming lexer, owned AST nodes,
+    /// definition copies and retained strings can amplify dense numeric source;
+    /// 128x is a policy estimate, not a measured allocator or RSS hard limit.
+    /// Per-revision logical component allowance is resource total + evaluation
+    /// workspace; this does not bound overlapping candidates, clones or RSS.
+    pub const SOURCE_RESERVATION_PER_BYTE: usize = 128;
+
+    pub fn for_retained_inputs(&self, inputs: &[Resource]) -> Result<Self, String> {
+        let used = inputs.iter().try_fold(0usize, |n, r| n.checked_add(r.bytes.len()))
+            .ok_or("Retained input byte count overflow")?;
+        let workspace = usize::try_from(self.evaluation.workspace_left).map_err(|_| "Evaluation workspace exceeds addressable memory")?;
+        let combined = self.total_resource_bytes.checked_add(workspace).ok_or("Combined live budget overflow")?;
+        let available = combined.saturating_sub(workspace).saturating_sub(used);
+        let work_bytes = usize::try_from(self.asset_work_units / 4).unwrap_or(usize::MAX);
+        let capacity = (available / Self::SOURCE_RESERVATION_PER_BYTE)
+            .min(work_bytes).min(self.package_bytes / 6).min(u32::MAX as usize);
+        let mut result = self.clone();
+        result.source.submission_bytes = self.source.submission_bytes.min(capacity);
+        result.source.retained_source_bytes = self.source.retained_source_bytes.min(capacity);
+        Ok(result)
+    }
+
+    /// Derive per-revision host and evaluator allowances from admitted history.
+    pub fn for_source_usage(&self, total: usize) -> Result<Self, String> {
+        let reserved = total.checked_mul(Self::SOURCE_RESERVATION_PER_BYTE).ok_or("Source reservation overflow")?;
+        let mut effective = self.clone();
+        effective.total_resource_bytes = effective.total_resource_bytes.checked_sub(reserved).ok_or("Source reservation exceeds asset budget")?;
+        let source_work = u64::try_from(total).unwrap_or(u64::MAX).saturating_mul(4);
+        effective.asset_work_units = effective.asset_work_units.checked_sub(source_work).ok_or("Source work exceeds asset budget")?;
+        if effective.evaluation.steps_left == u64::MAX {
+            effective.evaluation.steps_left = vibe::Budget::default().steps_left.max(source_work).min(self.asset_work_units);
+        }
+        Ok(effective)
+    }
+
+    /// Explicit bounded native profiles shared by CLI and MCP admission.
+    pub fn for_quality_profile(profile: &str) -> Result<Self, String> {
+        let mut limits = Self::default();
+        match profile {
+            "preview" => {},
+            "production16" => {
+                limits.resource_bytes = 64 * 1024 * 1024;
+                limits.total_resource_bytes = 256 * 1024 * 1024;
+                limits.package_bytes = 320 * 1024 * 1024;
+                limits.asset_work_units = 500_000_000;
+            },
+            _ => return Err("quality profile must be preview or production16".into()),
+        }
+        Ok(limits)
     }
 }
 
@@ -124,6 +185,7 @@ impl ProducerRegistry {
             .get(profile)
             .ok_or_else(|| format!("Unknown producer: {profile}"))?;
         validate_resources(&inputs, &limits)?;
+        let limits = limits.for_retained_inputs(&inputs)?;
         Ok(ProductionSession::new(producer.clone(), inputs, limits))
     }
     /// Verify container digests, exact producer version and source replay before returning a session.
@@ -204,7 +266,15 @@ fn validate_resources(resources: &[Resource], limits: &ProductionLimits) -> Resu
     let mut total = 0usize;
     for resource in resources {
         valid_key(&resource.key)?;
-        valid_label(&resource.kind)?;
+        if let Some(expected) = resource.key.strip_prefix("textures/sha256/").filter(|_| resource.kind.starts_with("image/")) {
+            if expected.len() != 64 || !expected.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+                || !matches!(resource.kind.as_str(), "image/png" | "image/jpeg" | "image/ktx2" | "image/webp")
+                || digest(&resource.bytes) != expected {
+                return Err("Invalid content-addressed texture resource".into());
+            }
+        } else {
+            valid_label(&resource.kind)?;
+        }
         if !keys.insert(resource.key.to_lowercase()) {
             return Err("Duplicate resource key (case-insensitive)".into());
         }

@@ -9,6 +9,9 @@ use qualia_core_db::container_10d::surface_reading::decode_surface_reading;
 use qualia_core_db::render::compile_10d::{decode_10d_mesh, decode_10d_normals};
 use std::fmt::Write as _;
 
+#[path = "present_3d_integrity.rs"]
+mod integrity;
+
 /// Attempts to decode a `.10d` container and render an interactive 3D turntable HTML widget
 /// with real-time Adaptive Complexity Streaming (`LOD0 Hero` · `LOD1 High` · `LOD2 Med Stream` · `LOD3 Low Proxy`),
 /// domain-aware Whole-Model Behavioral Macros (Fauna Neuromotor OR Flora Mycelial Neural Network),
@@ -293,7 +296,8 @@ pub fn render_10d_interactive_card_body(
 
 /// Renders a rich inspector card for:
 /// - `.q42` (`Q42LOGIC` 64B Header + 48B `NQuin` Deontic/LTL Safe-RoM, Injury-Threshold & Mycelial Logic Container)
-/// - `.m64` (`M64\0` Matter-64 Subsurface/Shell Continuum Container)
+/// - `.m64` (`m64\0` Matter-64) and `.e64` (`e64\0` Matter-64 magic alias)
+/// - `.p64` (`p64\0` neural/AI weight container)
 /// - `.emf` (`Q42EMF64` 64-Byte Electromagnetic / Environment Field Container)
 pub fn render_m64_or_emf_card_body(
     safe_key: &str,
@@ -304,7 +308,14 @@ pub fn render_m64_or_emf_card_body(
     let is_q42 = bytes.starts_with(b"Q42LOGIC")
         || safe_kind.eq_ignore_ascii_case("q42")
         || safe_key.ends_with(".q42");
-    let is_m64 = bytes.starts_with(b"M64\0")
+    let is_p64 = bytes.starts_with(b"p64\0")
+        || safe_kind.eq_ignore_ascii_case("p64")
+        || safe_key.ends_with(".p64");
+    let is_e64 = bytes.starts_with(b"e64\0")
+        || safe_kind.eq_ignore_ascii_case("e64")
+        || safe_key.ends_with(".e64");
+    let is_m64 = bytes.starts_with(b"m64\0")
+        || is_e64
         || safe_kind.eq_ignore_ascii_case("m64")
         || safe_key.ends_with(".m64");
     let is_emf = bytes.starts_with(b"Q42EMF64")
@@ -395,37 +406,93 @@ pub fn render_m64_or_emf_card_body(
         );
     }
 
-    let record_count = bytes.len() / 64;
-    let payload_records = record_count.saturating_sub(1);
+    if is_p64 {
+        let version = if bytes.len() >= 6 {
+            u16::from_le_bytes(bytes[4..6].try_into().unwrap_or([0, 0]))
+        } else {
+            0
+        };
+        let tensor_count = if bytes.len() >= 40 {
+            u32::from_le_bytes(bytes[36..40].try_into().unwrap_or([0; 4]))
+        } else {
+            0
+        };
+        let page_size = if bytes.len() >= 44 {
+            u32::from_le_bytes(bytes[40..44].try_into().unwrap_or([0; 4]))
+        } else {
+            0
+        };
+        return format!(
+            r#"<div class="p-3.5 rounded-lg bg-[var(--background)] border border-violet-500/40 space-y-2.5">
+  <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-0.5 rounded bg-violet-950/70 border border-violet-500/50 text-violet-300 font-bold">p64\0 · Neural / AI Weight Container</span>
+      <span class="text-sky-300">HMC sibling of .10d / .emf / .m64</span>
+    </div>
+    <span class="text-violet-300">64B Header · Q4K / tensor table</span>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+    <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
+      <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Container Magic</div>
+      <div class="text-violet-300 font-bold">p64\0</div>
+    </div>
+    <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
+      <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Format Version</div>
+      <div class="text-sky-300 font-bold">{version}</div>
+    </div>
+    <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
+      <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Tensors</div>
+      <div class="text-amber-300 font-bold">{tensor_count}</div>
+    </div>
+    <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
+      <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Page Size / Footprint</div>
+      <div class="text-purple-300 font-bold">{page_size} B pages · {len} B ({kb:.2} KB)</div>
+    </div>
+  </div>
+  <details class="text-xs">
+    <summary class="cursor-pointer text-[var(--muted-foreground)] hover:text-[var(--foreground)] font-mono">Inspect `.p64` 64-byte header hex</summary>
+    <pre class="mt-2 p-2.5 rounded-lg bg-[var(--card)] border border-[var(--border)] overflow-x-auto font-mono text-[11px] text-[var(--muted-foreground)] leading-relaxed">{hex_dump_fallback}</pre>
+  </details>
+</div>"#,
+            len = bytes.len(),
+            kb = bytes.len() as f64 / 1024.0,
+        );
+    }
 
     if is_m64 {
-        let mode_byte = bytes.get(5).copied().unwrap_or(1);
-        let mode_label = match mode_byte {
-            0x04 => "M64_MODE_SHELL (0x04 · B-Rep Radial Euler Shell)",
-            0x02 => "M64_MODE_ADVECTION (0x02 · Semi-Lagrangian Continuum Brick)",
-            _ => "M64_MODE_STRATA (0x01 · Hilbert-3D Subsurface Strata Column)",
+        let inspected = integrity::inspect(bytes, true);
+        if !inspected.valid {
+            return format!("<p>Container verification refused.</p>{}", render_fallback(safe_key, hex_dump_fallback));
+        }
+        let mode_label = &inspected.layout;
+        let integrity_status = &inspected.status;
+        let verified_records = &inspected.records;
+        let magic_label = if bytes.starts_with(b"e64\0") {
+            "e64\\0"
+        } else {
+            "m64\\0"
         };
         format!(
             r#"<div class="p-3.5 rounded-lg bg-[var(--background)] border border-emerald-500/40 space-y-2.5">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
     <div class="flex items-center gap-2">
-      <span class="px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 font-bold">M64\0 · Matter-64 Container</span>
+      <span class="px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 font-bold">{magic_label} · Matter-64 Container</span>
       <span class="text-sky-300">{mode_label}</span>
     </div>
-    <span class="text-emerald-300">64B Cache-Line Aligned · CRC-32C Verified</span>
+    <span class="text-emerald-300">{integrity_status}</span>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Container Magic</div>
-      <div class="text-emerald-300 font-bold">0x4D363400 ("M64\0")</div>
+      <div class="text-emerald-300 font-bold">{magic_label}</div>
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">64-Byte Records</div>
-      <div class="text-sky-300 font-bold">{record_count} total ({payload_records} bricks/strata)</div>
+      <div class="text-sky-300 font-bold">{verified_records}</div>
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Spatial Indexing</div>
-      <div class="text-amber-300 font-bold">3D Hilbert Curve Order</div>
+      <div class="text-amber-300 font-bold">{mode_label}</div>
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Total Footprint</div>
@@ -441,14 +508,21 @@ pub fn render_m64_or_emf_card_body(
             kb = bytes.len() as f64 / 1024.0,
         )
     } else if is_emf {
+        let inspected = integrity::inspect(bytes, false);
+        if !inspected.valid {
+            return format!("<p>Container verification refused.</p>{}", render_fallback(safe_key, hex_dump_fallback));
+        }
+        let integrity_status = &inspected.status;
+        let verified_records = &inspected.records;
+        let field_layout = &inspected.layout;
         format!(
             r#"<div class="p-3.5 rounded-lg bg-[var(--background)] border border-sky-500/40 space-y-2.5">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
     <div class="flex items-center gap-2">
-      <span class="px-2 py-0.5 rounded bg-sky-950/70 border border-sky-500/50 text-sky-300 font-bold">Q42EMF64 · 64-Byte Environment &amp; EM Field Container ("e64")</span>
-      <span class="text-emerald-300">8×8×8 Hilbert Volumetric Radiance Bricks</span>
+      <span class="px-2 py-0.5 rounded bg-sky-950/70 border border-sky-500/50 text-sky-300 font-bold">Q42EMF64 · 64-Byte Environment &amp; EM Field Container (.emf)</span>
+      <span class="text-emerald-300">{field_layout}</span>
     </div>
-    <span class="text-sky-300">BLAKE3-Bao + CRC-32C Sealed</span>
+    <span class="text-sky-300">{integrity_status}</span>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
@@ -457,7 +531,7 @@ pub fn render_m64_or_emf_card_body(
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">EmfCellRecord64 Cells</div>
-      <div class="text-emerald-300 font-bold">{payload_records} × 64B cells</div>
+      <div class="text-emerald-300 font-bold">{verified_records}</div>
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Field Modalities</div>
@@ -1154,3 +1228,67 @@ if (!window.SYNTH_3D_TICK_STARTED) {
   requestAnimationFrame(tickSynth3d);
 }
 "#;
+
+#[cfg(test)]
+mod hmc_kind_tests {
+    use super::render_m64_or_emf_card_body;
+
+    fn empty_matter_container(magic: [u8; 4]) -> Vec<u8> {
+        use qualia_core_db::q42::m64_matter::M64Header;
+        let mut header = M64Header { magic, ..M64Header::default() };
+        header.update_crc();
+        // Serialize the actual empty container header, including its integrity seal.
+        let mut bytes = Vec::with_capacity(64);
+        bytes.extend_from_slice(&header.magic);
+        bytes.extend_from_slice(&header.version.to_le_bytes());
+        bytes.extend_from_slice(&header.header_size.to_le_bytes());
+        bytes.extend_from_slice(&header.total_file_size.to_le_bytes());
+        for value in header.spatial_origin.into_iter().chain(header.elevation_datum) {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
+        bytes.extend_from_slice(&header.chunk_table_offset.to_le_bytes());
+        bytes.extend_from_slice(&header.chunk_count.to_le_bytes());
+        bytes.extend_from_slice(&header.header_crc32c.to_le_bytes());
+        bytes.extend_from_slice(&header.container_flags.to_le_bytes());
+        bytes
+    }
+
+    #[test]
+    fn m64_card_accepts_lowercase_magic() {
+        let bytes = empty_matter_container(*b"m64\0");
+        let html = render_m64_or_emf_card_body("rock.m64", "m64", &bytes, "00");
+        assert!(html.contains("m64\\0"));
+        assert!(html.contains("Matter-64"));
+        assert!(!html.contains("0x4D363400"));
+    }
+
+    #[test]
+    fn e64_is_matter_not_emf() {
+        let bytes = empty_matter_container(*b"e64\0");
+        let html = render_m64_or_emf_card_body("rock.e64", "e64", &bytes, "00");
+        assert!(html.contains("e64\\0"));
+        assert!(html.contains("Matter-64"));
+        assert!(!html.contains("Q42EMF64"));
+    }
+
+    #[test]
+    fn emf_badge_is_not_e64_alias() {
+        use qualia_core_db::q42::emf_container as emf;
+        let mut writer = emf::EmfContainerWriter::new([0.0; 3], 1.0, [1; 3], 0.0);
+        writer.add_brick_chunk(0, &[emf::EmfCellRecord64::default(); emf::EMF_BRICK_CELLS], 0, 1, 0).unwrap();
+        let bytes = writer.to_bytes().unwrap();
+        let html = render_m64_or_emf_card_body("field.emf", "emf", &bytes, "00");
+        assert!(html.contains("Q42EMF64"));
+        assert!(!html.contains("(\"e64\")"));
+    }
+
+    #[test]
+    fn p64_card_reads_tensor_count() {
+        let mut bytes = vec![0u8; 64];
+        bytes[..4].copy_from_slice(b"p64\0");
+        bytes[36..40].copy_from_slice(&3u32.to_le_bytes());
+        let html = render_m64_or_emf_card_body("model.p64", "p64", &bytes, "00");
+        assert!(html.contains("p64\\0"));
+        assert!(html.contains(">3<"));
+    }
+}

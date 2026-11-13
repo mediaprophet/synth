@@ -390,6 +390,9 @@ pub fn file_kind(rel: &str) -> &'static str {
         "html" | "htm" => "html",
         "10d" => "10d",
         "emf" => "emf",
+        "m64" => "m64",
+        "e64" => "e64",
+        "p64" => "p64",
         "hmc" => "hmc",
         "vibe" => "vibe",
         "wav" => "wav",
@@ -454,5 +457,16 @@ mod tests {
             .unwrap_err();
         assert!(err.contains("comment"));
         fs::remove_dir_all(dir).ok();
+    }
+
+    #[test]
+    fn file_kind_classifies_hmc_siblings() {
+        assert_eq!(file_kind("mesh.10d"), "10d");
+        assert_eq!(file_kind("field.emf"), "emf");
+        assert_eq!(file_kind("matter.m64"), "m64");
+        assert_eq!(file_kind("alias.e64"), "e64");
+        assert_eq!(file_kind("weights.p64"), "p64");
+        assert_eq!(file_kind("logic.q42"), "q42");
+        assert_eq!(file_kind("pack.hmc"), "hmc");
     }
 }

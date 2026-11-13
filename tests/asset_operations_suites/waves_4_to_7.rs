@@ -13,7 +13,7 @@ fn wave3_manifold_pbr_10d_electromagnetics_emf_and_geodesy_m64_pack() {
                 kind: "obj".into(),
                 bytes: obj_text,
             }],
-            ProductionLimits::default(),
+            ProductionLimits::for_quality_profile("production16").unwrap(),
         )
         .unwrap();
     let source = r#"
@@ -35,7 +35,8 @@ fn wave3_manifold_pbr_10d_electromagnetics_emf_and_geodesy_m64_pack() {
         let unionMesh = capability.invoke("hypermedia.manifold.boolean_3d", {
             a: pillar,
             b: imported,
-            op: "union"
+            op: "union",
+            attribute_policy: "discard"
         });
         let simplified = capability.invoke("hypermedia.manifold.simplify", {
             mesh: unionMesh,
@@ -147,6 +148,28 @@ fn wave3_manifold_pbr_10d_electromagnetics_emf_and_geodesy_m64_pack() {
         .unwrap()
         .bytes;
     assert_eq!(&m64_bytes[..4], b"m64\0");
+}
+
+#[test]
+fn capped_circle_and_pyramid_union_replays_without_centroid_slivers() {
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let pyramid = b"v -1.0 -1.0 0.0\nv 1.0 -1.0 0.0\nv 1.0 1.0 0.0\nv -1.0 1.0 0.0\nv 0.0 0.0 2.0\nf 1 2 5\nf 2 3 5\nf 3 4 5\nf 4 1 5\nf 1 4 3\nf 1 3 2\n".to_vec();
+    let mut session = registry.session("files", vec![Resource {key:"pyramid.obj".into(), kind:"obj".into(), bytes:pyramid}], ProductionLimits::for_quality_profile("production16").unwrap()).unwrap();
+    let source = r#"
+        requires [capability("capability.invoke")];
+        let pyramid=capability.invoke("hypermedia.manifold.import_mesh",{input:"pyramid.obj",format:"obj"});
+        let circle=capability.invoke("hypermedia.locus.construct",{shape:"circle",radius:1.5,segments:16});
+        let pillar=capability.invoke("hypermedia.manifold.extrude",{profile:circle,path:[[0,0,-1],[0,0,1]],caps:true});
+        let joined=capability.invoke("hypermedia.manifold.boolean_3d",{a:pillar,b:pyramid,op:"union",attribute_policy:"discard"});
+        let sealed=capability.invoke("hypermedia.manifold.compile_10d",{mesh:joined});
+        let asset={files:[{key:"union.10d",resource:sealed}]};
+    "#;
+    session.submit(source, &cancel).unwrap();
+    let candidate = session.candidate().unwrap();
+    assert_eq!(candidate.outputs()[0].kind, "10d");
+    let reopened = registry.reopen(candidate.bundle(), ProductionLimits::for_quality_profile("production16").unwrap(), &cancel).unwrap();
+    assert_eq!(reopened.candidate().unwrap().bundle(), candidate.bundle());
 }
 
 #[test]

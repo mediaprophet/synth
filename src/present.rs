@@ -66,7 +66,8 @@ fn classify_modality(kind: &str, key: &str) -> &'static str {
     match (kind.to_ascii_lowercase().as_str(), ext.as_str()) {
         ("svg", _) | (_, "svg") => "vector",
         ("png" | "ppm" | "jpg" | "jpeg" | "webp", _) | (_, "png" | "ppm") => "raster",
-        ("10d" | "m64" | "emf" | "q42" | "dxf", _) | (_, "10d" | "m64" | "emf" | "q42" | "dxf") => "spatial",
+        ("10d" | "m64" | "e64" | "emf" | "q42" | "p64" | "dxf", _)
+        | (_, "10d" | "m64" | "e64" | "emf" | "q42" | "p64" | "dxf") => "spatial",
         ("wav" | "aac", _) | (_, "wav" | "aac") => "audio",
         ("mp4", _) | (_, "mp4") => "video",
         _ => "data",
@@ -250,6 +251,10 @@ pub fn render_resource_card_in_set(index: usize, resource: &Resource, all: &[Res
                 format!("{portal}{degraded}")
             } else if resource.kind.eq_ignore_ascii_case("m64")
                 || resource.key.ends_with(".m64")
+                || resource.kind.eq_ignore_ascii_case("e64")
+                || resource.key.ends_with(".e64")
+                || resource.kind.eq_ignore_ascii_case("p64")
+                || resource.key.ends_with(".p64")
                 || resource.kind.eq_ignore_ascii_case("emf")
                 || resource.key.ends_with(".emf")
                 || resource.kind.eq_ignore_ascii_case("q42")
@@ -493,7 +498,7 @@ pub fn render_session_html(session: &ProductionSession) -> Result<String, String
           <div class="text-xs font-mono text-[var(--muted-foreground)]">3. Filter by Modality:</div>
           <div class="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Modality Filter">
             <button onclick="filterCards('all', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)] filter-pill-active" data-filter="all">All Modalities ({count})</button>
-            <button onclick="filterCards('spatial', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)]" data-filter="spatial">Spatial (.10d · .m64 · .emf)</button>
+            <button onclick="filterCards('spatial', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)]" data-filter="spatial">Spatial (.10d · .m64 · .e64 · .emf · .p64 · .q42)</button>
             <button onclick="filterCards('video', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)]" data-filter="video">Cinema Video (.mp4)</button>
             <button onclick="filterCards('raster', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)]" data-filter="raster">Raster / PNG</button>
             <button onclick="filterCards('vector', this)" class="filter-btn px-2.5 py-1 rounded text-xs font-mono border border-[var(--border)] bg-[var(--background)]" data-filter="vector">Vector / SVG</button>

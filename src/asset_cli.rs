@@ -7,7 +7,7 @@ use std::{
 };
 use synth::production::{Candidate, ProducerRegistry, ProductionLimits, ProductionSession, Resource};
 
-const USAGE: &str = "synth produce [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
+const USAGE: &str = "synth produce [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
 
 enum CommandMode {
     Produce,
@@ -17,6 +17,7 @@ enum CommandMode {
 struct Options {
     mode: CommandMode,
     profile: Option<String>,
+    quality_profile: String,
     sources: Vec<PathBuf>,
     inputs: Vec<(String, String, PathBuf)>,
     reopen: Option<PathBuf>,
@@ -35,6 +36,7 @@ fn parse(args: &[String]) -> Result<Options, String> {
         _ => return Err(USAGE.into()),
     };
     let mut profile = None;
+    let mut quality_profile = None;
     let mut sources = Vec::new();
     let mut inputs = Vec::new();
     let mut reopen = None;
@@ -59,6 +61,10 @@ fn parse(args: &[String]) -> Result<Options, String> {
             }
             "--profile" if profile.is_none() => {
                 profile = Some(value(i + 1)?);
+                i += 2;
+            }
+            "--quality-profile" if quality_profile.is_none() => {
+                quality_profile = Some(value(i + 1)?);
                 i += 2;
             }
             "--reopen" if reopen.is_none() => {
@@ -106,6 +112,7 @@ fn parse(args: &[String]) -> Result<Options, String> {
     Ok(Options {
         mode,
         profile,
+        quality_profile: quality_profile.unwrap_or_else(|| "preview".into()),
         sources,
         inputs,
         reopen,
@@ -132,8 +139,11 @@ fn mib_bytes(mib: u64) -> Result<usize, String> {
 
 fn read(path: &Path, max: usize) -> Result<Vec<u8>, String> {
     let meta = fs::symlink_metadata(path).map_err(|e| e.to_string())?;
-    if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > max as u64 {
-        return Err("Input must be a regular file within budget".into());
+    if !meta.is_file() || meta.file_type().is_symlink() {
+        return Err("Input must be a regular file".into());
+    }
+    if meta.len() > max as u64 {
+        return Err(format!("Input is {} bytes; available budget is {max} bytes", meta.len()));
     }
     let mut bytes = Vec::new();
     fs::File::open(path)
@@ -142,7 +152,7 @@ fn read(path: &Path, max: usize) -> Result<Vec<u8>, String> {
         .read_to_end(&mut bytes)
         .map_err(|e| e.to_string())?;
     if bytes.len() > max {
-        return Err("Input grew beyond budget".into());
+        return Err(format!("Input grew to at least {} bytes; available budget is {max} bytes", bytes.len()));
     }
     Ok(bytes)
 }
@@ -215,7 +225,9 @@ fn prepare_session(
             limits.clone(),
         )?;
         for path in &options.sources {
-            let bytes = read(path, limits.source.submission_bytes)?;
+            let retained = session.sources().iter().try_fold(0usize, |n, source| n.checked_add(source.len())).ok_or("Source history overflow")?;
+            let available = session.limits().source.retained_source_bytes.saturating_sub(retained).min(session.limits().source.submission_bytes);
+            let bytes = read(path, available)?;
             session.submit(
                 std::str::from_utf8(&bytes).map_err(|_| "Source must be UTF-8")?,
                 cancel,
@@ -253,7 +265,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
             return Err("Presentation output must use .html".into());
         }
     }
-    let mut limits = ProductionLimits::default();
+    let mut limits = ProductionLimits::for_quality_profile(&options.quality_profile)?;
     if let Some(mib) = options.resource_mib {
         limits.resource_bytes = mib_bytes(mib)?;
     }
@@ -313,4 +325,19 @@ pub fn run(args: &[String]) -> Result<(), String> {
         println!("Presented: {}", present_path.display());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod quality_profile_tests {
+    use super::*;
+    #[test]
+    fn help_and_parser_expose_the_shared_bounded_quality_profiles() {
+        assert!(USAGE.contains("--quality-profile preview|production16"));
+        let options = parse(&["produce","--source","fixture.vibe","--out","fixture.hmc","--quality-profile","production16"].map(String::from)).unwrap();
+        assert_eq!(options.quality_profile,"production16");
+        let limits = ProductionLimits::for_quality_profile(&options.quality_profile).unwrap();
+        assert_eq!(limits.resource_bytes,64*1024*1024);
+        assert_eq!(limits.asset_work_units,500_000_000);
+        assert!(ProductionLimits::for_quality_profile("unbounded").is_err());
+    }
 }

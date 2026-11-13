@@ -13,6 +13,21 @@ let wallabia_bicolor_scaffold = {
     scientific_name: "Wallabia bicolor",
     common_name: "Swamp Wallaby (Black-tailed Wallaby)",
     archetype: "macropod_saltatorial",
+    // Joint pivots share the authored mesh's metre coordinates (+X is its left side).
+    // Right forelimb indices are appended to the existing eighteen-joint namespace.
+    bind_landmarks: {
+        pelvis: [0.0, 0.335, -0.115], spine: [0.0, 0.395, -0.055],
+        chest: [0.0, 0.470, 0.090], neck: [0.0, 0.520, 0.135],
+        head: [0.0, 0.565, 0.165], jaw: [0.0, 0.545, 0.200],
+        left_hip: [0.068, 0.328, -0.115], left_knee: [0.076, 0.225, -0.022],
+        left_ankle: [0.066, 0.088, -0.135], right_hip: [-0.068, 0.328, -0.115],
+        right_knee: [-0.076, 0.225, -0.022], right_ankle: [-0.066, 0.088, -0.135],
+        left_shoulder: [0.052, 0.438, 0.102], left_elbow: [0.058, 0.365, 0.088],
+        left_wrist: [0.050, 0.324, 0.142], tail_base: [0.0, 0.318, -0.140],
+        tail_mid: [0.0, 0.115, -0.355], tail_tip: [0.0, 0.022, -0.600],
+        right_shoulder: [-0.052, 0.438, 0.102], right_elbow: [-0.058, 0.365, 0.088],
+        right_wrist: [-0.050, 0.324, 0.142]
+    },
     palette: {
         bone_cortical: [0.92, 0.89, 0.82, 1.0],
         bone_cancellous: [0.86, 0.82, 0.74, 1.0],
@@ -365,7 +380,7 @@ let wallabia_bicolor_scaffold = {
                     radial_segs: 14, cap_ends: true, mirror_x: true,
                     dorsal: "extremity_soot", flank: "extremity_soot", ventral: "extremity_soot",
                     stations: [
-                        { center: [0.066, 0.078, -0.142], radii: [0.022, 0.024], joint1: "left_ankle", joint2: "left_knee", weight: 0.90 },
+                        { center: [0.066, 0.086, -0.136], radii: [0.030, 0.032], joint1: "left_ankle", joint2: "left_knee", weight: 0.90 },
                         { center: [0.066, 0.036, -0.075], radii: [0.020, 0.020], joint1: "left_ankle", joint2: "left_ankle", weight: 1.0 },
                         { center: [0.067, 0.022, -0.005], radii: [0.021, 0.016], joint1: "left_ankle", joint2: "left_ankle", weight: 1.0 },
                         { center: [0.068, 0.016, 0.052], radii: [0.018, 0.013], joint1: "left_ankle", joint2: "left_ankle", weight: 1.0 },
@@ -376,7 +391,7 @@ let wallabia_bicolor_scaffold = {
                     radial_segs: 12, cap_ends: true, mirror_x: true,
                     dorsal: "dorsal_umber", flank: "flank_grizzled", ventral: "ventral_ochre",
                     stations: [
-                        { center: [0.052, 0.438, 0.102], radii: [0.028, 0.032], dorsal: "dorsal_sooty", flank: "flank_grizzled", ventral: "ventral_ochre", joint1: "left_shoulder", joint2: "chest", weight: 0.85 },
+                        { center: [0.022, 0.425, 0.102], radii: [0.025, 0.029], dorsal: "dorsal_sooty", flank: "flank_grizzled", ventral: "ventral_ochre", joint1: "left_shoulder", joint2: "chest", weight: 0.85 },
                         { center: [0.058, 0.365, 0.088], radii: [0.021, 0.024], dorsal: "dorsal_umber", flank: "flank_grizzled", ventral: "ventral_ochre", joint1: "left_elbow", joint2: "left_shoulder", weight: 0.85 },
                         { center: [0.050, 0.324, 0.142], radii: [0.016, 0.017], dorsal: "extremity_soot", flank: "extremity_soot", ventral: "dorsal_sooty", joint1: "left_wrist", joint2: "left_elbow", weight: 0.90 },
                         { center: [0.044, 0.302, 0.168], radii: [0.013, 0.011], dorsal: "extremity_soot", flank: "extremity_soot", ventral: "extremity_soot", joint1: "left_wrist", joint2: "left_wrist", weight: 1.0 }
@@ -542,7 +557,7 @@ let dossier_pdf = capability.invoke("hypermedia.discourse.compile_pdf", {
             heading: "1. Species Taxonomy & Portable Scaffold Architecture",
             lines: [
                 "Species: Wallabia bicolor (Swamp Wallaby / Black-tailed Wallaby)",
-                "Biomechanical Archetype: MacropodSaltatorial (18-joint PGA Motor dual-quaternion rig)",
+                "Biomechanical Archetype: MacropodSaltatorial (21 authored bind joints, independent bilateral forelimbs)",
                 "Species Spec: VibeScript record wallabia_bicolor_scaffold + wallabia_bicolor_rules .q42 pack (zero Rust species hardcoding)",
                 "Anatomical Layers: Layer 0 Osteology (8 submeshes), Layer 1 Myology (8 submeshes), Layer 2 Pelage (1 submesh)",
                 "Diagnostic Pelage: Sooty charcoal dorsal saddle, warm rufous-orange belly & chest, cream cheek stripe, black tail"

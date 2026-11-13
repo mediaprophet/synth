@@ -5,6 +5,28 @@ let radius = render.spatial.skeletal_lerp_joint([8.0, 0.0, 0.0], [12.0, 0.0, 0.0
 let mut asset = { files: [{ key: "icons/dot.svg", kind: "svg", text: "<svg xmlns=\"http://www.w3.org/2000/svg\"><circle r=\"10\"/></svg>" }] };"##;
 
 #[test]
+fn original_files_v1_packages_reopen_with_original_semantics() {
+    let limits = ProductionLimits::default();
+    let cancel = AtomicBool::new(false);
+    let mut original = ProductionSession::new(Arc::new(super::files::LegacyFilesProducer), vec![], limits.clone());
+    original.submit(r#"let mut asset = {files:[{key:"legacy.txt",kind:"txt",text:"original"}]};"#, &cancel).unwrap();
+    let bytes = original.candidate().unwrap().bundle();
+    let reopened = ProducerRegistry::with_builtins().reopen(bytes, limits, &cancel).unwrap();
+    assert_eq!(reopened.profile(), ("files", "1"));
+    assert_eq!(reopened.candidate().unwrap().bundle(), bytes);
+    assert_eq!(FilesProducer.version(), "2");
+}
+
+#[test]
+fn original_files_v1_package_writer_keeps_reserved_looking_images_under_outputs() {
+    let resource=Resource{key:format!("textures/sha256/{}","0".repeat(64)),kind:"image/png".into(),bytes:vec![1,2,3]};
+    let bytes=super::package::build(&super::files::LegacyFilesProducer,&["fixture".into()],&[],&[resource.clone()],&ProductionLimits::default()).unwrap();
+    let reader=BundleReader::parse(&bytes).unwrap();
+    assert!(reader.get(&format!("outputs/{}",resource.key)).is_some());
+    assert!(reader.get(&resource.key).is_none());
+}
+
+#[test]
 fn heterogeneous_files_and_retained_inputs_roundtrip_with_edits() {
     let registry = ProducerRegistry::with_builtins();
     let cancel = AtomicBool::new(false);
@@ -236,4 +258,138 @@ fn source_resource_and_package_budgets_are_enforced_before_promotion() {
     assert!(registry
         .session("unknown", vec![], ProductionLimits::default())
         .is_err());
+}
+
+#[test]
+fn adaptive_source_budget_accepts_structured_large_source_and_replays_exactly() {
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let source = format!("let data = [{}]; let asset = {{files:[{{key:\"value.bin\",kind:\"bin\",bytes:data}}]}};", vec!["0"; 34_000].join(","));
+    assert!(source.len() > 64 * 1024);
+    let mut session = registry.session("files", vec![], ProductionLimits::default()).unwrap();
+    session.submit(&source, &cancel).unwrap();
+    assert_eq!(session.candidate().unwrap().outputs()[0].bytes, vec![0; 34_000]);
+    let bundle = session.candidate().unwrap().bundle().to_vec();
+    let reopened = registry.reopen(&bundle, ProductionLimits::default(), &cancel).unwrap();
+    assert_eq!(reopened.sources(), &[source]);
+    assert_eq!(reopened.candidate().unwrap().bundle(), bundle);
+}
+
+#[test]
+fn adaptive_source_budget_accounts_for_inputs_history_and_overflow() {
+    let mut limits = ProductionLimits::default();
+    limits.total_resource_bytes = 1024 * 1024;
+    let input = Resource { key:"input.bin".into(), kind:"bin".into(), bytes:vec![0; 256 * 1024] };
+    let empty = limits.for_retained_inputs(&[]).unwrap();
+    let with_input = limits.for_retained_inputs(&[input.clone()]).unwrap();
+    assert_eq!(empty.source.submission_bytes, 8192);
+    assert_eq!(with_input.source.submission_bytes, 6144);
+    let registry = ProducerRegistry::with_builtins();
+    let mut session = registry.session("files", vec![input], limits).unwrap();
+    let cancel = AtomicBool::new(false);
+    session.submit("let helper = 1;", &cancel).unwrap();
+    let source = "x".repeat(with_input.source.retained_source_bytes);
+    assert!(matches!(session.submit(&source, &cancel), Err(e) if e.contains("retained history")));
+    let mut overflow = ProductionLimits::default();
+    overflow.total_resource_bytes = usize::MAX;
+    assert!(overflow.for_retained_inputs(&[]).is_err());
+}
+
+#[test]
+fn small_source_keeps_more_than_22_mib_of_default_resource_headroom() {
+    let inputs = (0..2).map(|i| Resource { key:format!("input{i}.bin"), kind:"bin".into(), bytes:vec![7; 12*1024*1024] }).collect();
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let mut session = registry.session("files", inputs, ProductionLimits::default()).unwrap();
+    session.submit(SVG, &cancel).unwrap();
+    assert!(session.candidate().is_some());
+}
+
+#[test]
+fn explicit_source_cap_and_rejected_edit_preserve_candidate() {
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let mut limits = ProductionLimits::default();
+    limits.source.submission_bytes = 64 * 1024;
+    let mut session = registry.session("files", vec![], limits).unwrap();
+    assert_eq!(session.limits().source.submission_bytes, 64 * 1024);
+    session.submit("let helper = 31;", &cancel).unwrap();
+    session.submit(r#"let asset = { files: [{ key: "value.bin", kind: "bin", bytes: [helper] }] };"#, &cancel).unwrap();
+    let old = session.candidate().unwrap().sha256();
+    let old_sources = session.sources().to_vec();
+    assert!(session.prepare_edit(&"x".repeat(64 * 1024 + 1), &cancel).is_err());
+    assert_eq!(session.candidate().unwrap().sha256(), old);
+    assert_eq!(session.sources(), old_sources);
+}
+
+#[test]
+fn retained_image_workspace_above_22_mib_fits_and_smaller_budget_refuses() {
+    let mut source = String::from("requires [capability(\"capability.invoke\")];\n");
+    for i in 0..6 {
+        source.push_str(&format!("let image{i}=capability.invoke(\"hypermedia.radiance.create_rgba\",{{width:1024,height:1024,color:[1,2,3,255]}});\n"));
+    }
+    source.push_str("let pixel=capability.invoke(\"hypermedia.radiance.create_rgba\",{width:1,height:1,color:[1,2,3,255]}); let png=capability.invoke(\"hypermedia.radiance.encode_rgba_png\",{image:pixel}); let asset={files:[{key:\"pixel.png\",resource:png}]};");
+    let registry = ProducerRegistry::with_builtins();
+    let cancel = AtomicBool::new(false);
+    let mut enough = registry.session("files", vec![], ProductionLimits::default()).unwrap();
+    enough.submit(&source, &cancel).unwrap();
+    assert!(enough.candidate().is_some());
+    let mut small = ProductionLimits::default();
+    small.total_resource_bytes = 20 * 1024 * 1024;
+    let mut refused = registry.session("files", vec![], small).unwrap();
+    assert!(refused.submit(&source, &cancel).is_err());
+    assert!(refused.candidate().is_none());
+}
+
+#[test]
+fn explicitly_fixed_evaluator_steps_are_not_expanded() {
+    let mut limits = ProductionLimits::default();
+    limits.evaluation = vibe::Budget::from_steps(100_000);
+    assert_eq!(limits.for_source_usage(100_000).unwrap().evaluation.steps_left, 100_000);
+    assert_eq!(ProductionLimits::default().for_source_usage(100_000).unwrap().evaluation.steps_left, 400_000);
+}
+
+#[test]
+fn rejected_cumulative_edit_never_replays_producer() {
+    use std::sync::atomic::AtomicUsize;
+    struct CountingProducer(Arc<AtomicUsize>);
+    impl AssetProducer for CountingProducer {
+        fn id(&self) -> &str { "counting" }
+        fn version(&self) -> &str { "1" }
+        fn produce(&self, asset: &AssetValue, context: &ProductionContext<'_>) -> Result<Vec<Resource>, String> {
+            self.0.fetch_add(1, Ordering::SeqCst);
+            NumberProducer { version: "1", bias: 0 }.produce(asset, context)
+        }
+    }
+    let calls = Arc::new(AtomicUsize::new(0));
+    let mut registry = ProducerRegistry::default();
+    registry.register(CountingProducer(calls.clone())).unwrap();
+    let mut limits = ProductionLimits::default();
+    limits.source.submission_bytes = 128;
+    limits.source.retained_source_bytes = 96;
+    let cancel = AtomicBool::new(false);
+    let input = Resource { key: "input.bin".into(), kind: "bin".into(), bytes: vec![1, 2, 3] };
+    let mut session = registry.session("counting", vec![input], limits).unwrap();
+    session.submit("let helper = 31;", &cancel).unwrap();
+    session.submit("let mut asset = helper;", &cancel).unwrap();
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    let old_hash = session.candidate().unwrap().sha256();
+    let old_sources = session.sources().to_vec();
+    let old_revision = session.revision();
+    let history: usize = old_sources.iter().map(String::len).sum();
+    let too_much = " ".repeat(96 - history + 1);
+    assert!(too_much.len() < session.limits().source.submission_bytes);
+    assert!(matches!(session.prepare_edit(&too_much, &cancel), Err(e) if e.contains("retained history")));
+    assert_eq!(calls.load(Ordering::SeqCst), 1, "refused edit replayed the producer");
+    assert_eq!(session.candidate().unwrap().sha256(), old_hash);
+    assert_eq!(session.sources(), old_sources);
+    assert_eq!(session.revision(), old_revision);
+    cancel.store(true, Ordering::Release);
+    assert!(matches!(session.prepare_edit("asset = 32;", &cancel), Err(e) if e.contains("cancelled")));
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    cancel.store(false, Ordering::Release);
+    let edited = session.prepare_edit("asset = 32;", &cancel).unwrap();
+    assert_eq!(calls.load(Ordering::SeqCst), 3, "accepted edit must replay and produce");
+    assert_eq!(edited.candidate().unwrap().outputs()[0].bytes, b"32");
+    assert_eq!(session.candidate().unwrap().sha256(), old_hash);
 }

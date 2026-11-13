@@ -1,0 +1,13 @@
+# Snippet for Grok project config. Merge into .grok/config.toml
+# Tools appear as synth__<tool>, e.g. synth__synth_produce_present
+
+[mcp_servers.synth]
+command = "C:\\github\\synth\\target-gap-review\\debug\\synth.exe"
+args = ["mcp"]
+enabled = true
+startup_timeout_sec = 60
+tool_timeout_sec = 600
+
+[mcp_servers.synth.env]
+SYNTH_INPUT_ROOT = 'C:\github'
+SYNTH_OUTPUT_ROOT = 'C:\github\synth\production'

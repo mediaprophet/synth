@@ -1,0 +1,5 @@
+# Schematic animal-cell cutaway
+
+This is a symbolic, not specimen-derived illustration. A nominal model-unit-to-micrometre correspondence (one unit = one micrometre; approximately 12 µm diameter) is a viewing convention only: the `.10d` geometry has not been calibrated to physical metres and must not be used for measurement. The blueprint that labelled working units as metres is deliberately excluded. Colours, compartment placement and the simplified mitochondrial folds are explanatory; they do not identify a cell type, express molecular scale, or provide a complete organelle inventory. Reference-based scientific and visual review remains required.
+
+The latest pre-smoothing native front, side and three-quarter views were inspected. The section is an intentionally simplified teaching illustration: the membrane encloses a hemisphere, mitochondrial folds and additional organelles are schematic, and the side view hides the cut surface. Smooth-shading output must be re-produced and visually checked after the runtime is rebuilt.
