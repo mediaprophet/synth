@@ -237,6 +237,7 @@ fn page(
       return false;
     }}
     {portal_boot_js}
+    {qac_viewer_js}
   </script>
 </body>
 </html>"#,
@@ -245,6 +246,7 @@ fn page(
         shell = QUALIA_SHELL_SRC,
         webgpu_snapshot = present_portal::webgpu_snapshot_html(),
         portal_boot_js = PORTAL_BOOT_JS,
+        qac_viewer_js = crate::present_qac::QAC_VIEWER_JS,
         brief = escape_html(&brief),
         working_n = working.len(),
         delivered_n = delivered.len(),
@@ -331,6 +333,8 @@ fn render_file_cards(files: &[ListedFile]) -> String {
         );
         let preview = if file.kind == "10d" {
             portal_file_preview(file, files)
+        } else if file.kind == "qac" {
+            crate::present_qac::render_project_qac_card(&file.lane, &file.rel, &href, file.bytes)
         } else if file.previewable && file.bytes <= 8 * 1024 * 1024 {
             if file.kind == "html" {
                 format!(

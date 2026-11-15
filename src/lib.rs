@@ -9,6 +9,7 @@ pub mod present;
 pub mod present_3d;
 pub mod present_portal;
 pub mod present_project;
+pub mod present_qac;
 pub mod project;
 pub mod present_capabilities;
 pub mod present_style;

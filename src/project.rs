@@ -390,6 +390,8 @@ pub fn file_kind(rel: &str) -> &'static str {
         "html" | "htm" => "html",
         "10d" => "10d",
         "emf" => "emf",
+        // Presentation classification only: byte admission remains the codec's job.
+        "qac" => "qac",
         "m64" => "m64",
         "e64" => "e64",
         "p64" => "p64",
@@ -463,6 +465,10 @@ mod tests {
     fn file_kind_classifies_hmc_siblings() {
         assert_eq!(file_kind("mesh.10d"), "10d");
         assert_eq!(file_kind("field.emf"), "emf");
+        assert_eq!(file_kind("sound.qac"), "qac");
+        assert_eq!(file_kind("legacy.Q4AU"), "file");
+        assert_eq!(file_kind("legacy.bin"), "file");
+        assert_eq!(mime_for("qac"), "application/octet-stream");
         assert_eq!(file_kind("matter.m64"), "m64");
         assert_eq!(file_kind("alias.e64"), "e64");
         assert_eq!(file_kind("weights.p64"), "p64");

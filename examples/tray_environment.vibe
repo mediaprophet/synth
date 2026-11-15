@@ -972,7 +972,7 @@ let environment_vox0_raymarch = capability.invoke("hypermedia.electromagnetics.r
     emf: environment_field_emf,
     width: 96,
     height: 64,
-    deflection_mass: 0.04,
+    deflection_mass: 0.0,
     step_limit: 48
 });
 let environment_vox0_png = capability.invoke("hypermedia.radiance.encode_rgba_png", {
