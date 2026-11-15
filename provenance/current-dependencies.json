@@ -4,22 +4,22 @@
     {
       "name": "hypermedia-production",
       "url": "https://github.com/mediaprophet/hypermedia-production.git",
-      "commit": "929c49ada70670b5e0b05e7b9a2784ce22e3c1d1",
-      "usage": "144 categorical ontology morphisms across 12 categories and modular domain crates"
+      "commit": "a01384e6b79fa0f80d4de0d0de94da38f184b3d0",
+      "usage": "150 categorical ontology morphisms across 12 categories and modular domain crates"
     },
     {
       "name": "qualiaDB",
       "url": "https://github.com/mediaprophet/qualiaDB.git",
-      "commit": "ce88c2adc5f7411561f5670f0cc42452a7f39263"
+      "commit": "4ec9ab3dfb2eabf8b19af8c10bcf52c714c5c994"
     },
     {
       "name": "etalon",
       "url": "https://github.com/mediaprophet/etalon.git",
-      "commit": "6ace6cc6413a87ca10a1da58397ddc7c0b2fc41e"
+      "commit": "057545fc14bc1202a167b9a76a8f82e246c1738f"
     },
     {
       "name": "vibe-script",
-      "commit": "b140a0ab72b891051c4fb19f7caabbb0a794640b",
+      "commit": "2696fa6ab8220cdfb5fc9b2c2173f4061526966f",
       "usage": "SDK distribution/tooling reference; compiled ABI is unified with QualiaDB's local vibescript-abi"
     },
     {

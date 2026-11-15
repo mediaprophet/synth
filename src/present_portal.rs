@@ -32,7 +32,7 @@ pub fn sibling_with_ext(path: &str, ext: &str) -> String {
     let lower = path.to_ascii_lowercase();
     if let Some(stem) = lower
         .rsplit_once('.')
-        .filter(|(_, e)| *e == "10d" || *e == "emf" || *e == "png")
+        .filter(|(_, e)| *e == "10d" || *e == "emf" || *e == "png" || *e == "qac")
         .map(|(s, _)| path[..s.len()].to_string())
     {
         format!("{stem}{suffix}")
@@ -136,17 +136,34 @@ pub fn render_portal_host(
     emf_b64: &str,
     pngs: &[PortalPng<'_>],
 ) -> String {
+    render_portal_host_with_qac(host_id, mesh_url, emf_url, "", mesh_b64, emf_b64, "", pngs)
+}
+
+/// Portal canvas plus PNG contact sheet with optional sibling `.qac` acoustic/telemetric container pairing.
+#[allow(clippy::too_many_arguments)]
+pub fn render_portal_host_with_qac(
+    host_id: &str,
+    mesh_url: &str,
+    emf_url: &str,
+    qac_url: &str,
+    mesh_b64: &str,
+    emf_b64: &str,
+    qac_b64: &str,
+    pngs: &[PortalPng<'_>],
+) -> String {
     let sheet = render_contact_sheet(pngs);
     let id = escape_html(host_id);
     let mesh = escape_html(mesh_url);
     let emf = escape_html(emf_url);
+    let qac = escape_html(qac_url);
     let mesh_b64 = escape_html(mesh_b64);
     let emf_b64 = escape_html(emf_b64);
+    let qac_b64 = escape_html(qac_b64);
     format!(
-        r#"<div class="synth-portal-host space-y-2" id="{id}" data-synth-portal="1" data-mesh-url="{mesh}" data-emf-url="{emf}" data-mesh-b64="{mesh_b64}" data-emf-b64="{emf_b64}">
+        r#"<div class="synth-portal-host space-y-2" id="{id}" data-synth-portal="1" data-mesh-url="{mesh}" data-emf-url="{emf}" data-qac-url="{qac}" data-mesh-b64="{mesh_b64}" data-emf-b64="{emf_b64}" data-qac-b64="{qac_b64}">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
     <span class="text-emerald-300 font-semibold">QualiaPortal WASM</span>
-    <span class="text-[var(--muted-foreground)]">load_10d · sibling load_emf · {shell}</span>
+    <span class="text-[var(--muted-foreground)]">load_10d · sibling load_emf · sibling load_qac · {shell}</span>
   </div>
   <div class="synth-portal-status text-[11px] font-mono text-[var(--muted-foreground)]">QualiaPortal: waiting for http origin + WASM</div>
   <canvas class="synth-portal-canvas" width="680" height="360"></canvas>
@@ -250,6 +267,67 @@ function acceptEmfReceipt(portal, host, meshStatus, receipt) {
   host.__synthEmfStatus = { base, receiptState: receipt && receipt.display_status || 'unverified', lastState: null };
   refreshEmfStatus(portal, host);
 }
+async function loadSiblingEmf(portal, host, meshUrl, meshStatus) {
+  const emfB64 = host.dataset.emfB64 || '';
+  if (emfB64) {
+    try {
+      const emfBytes = b64ToU8(emfB64);
+      const emfReceipt = portal.load_emf(emfBytes);
+      acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
+      return (host.querySelector('.synth-portal-status') || {}).textContent || meshStatus;
+    } catch (err) {
+      return meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')';
+    }
+  }
+  const emfUrl = host.dataset.emfUrl || siblingUrl(meshUrl, '.emf');
+  if (!emfUrl) {
+    return meshStatus + ' · mesh-only (no field)';
+  }
+  try {
+    const emfRes = await fetch(emfUrl);
+    if (emfRes.status === 404) {
+      return meshStatus + ' · mesh-only (no field)';
+    }
+    if (!emfRes.ok) {
+      return meshStatus + ' · .emf ' + emfRes.status + ' (mesh kept)';
+    }
+    const emfBytes = new Uint8Array(await emfRes.arrayBuffer());
+    const emfReceipt = portal.load_emf(emfBytes);
+    acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
+    return (host.querySelector('.synth-portal-status') || {}).textContent || meshStatus;
+  } catch (err) {
+    return meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')';
+  }
+}
+async function loadSiblingQac(portal, host, baseStatus) {
+  const qacB64 = host.dataset.qacB64 || '';
+  const qacUrl = host.dataset.qacUrl || '';
+  if (!qacB64 && !qacUrl) {
+    return baseStatus;
+  }
+  if (typeof portal.load_qac !== 'function') {
+    return baseStatus + ' · .qac wasm api absent';
+  }
+  try {
+    let qacBytes;
+    if (qacB64) {
+      qacBytes = b64ToU8(qacB64);
+    } else {
+      const qacRes = await fetch(qacUrl);
+      if (qacRes.status === 404) {
+        return baseStatus + ' · .qac absent';
+      }
+      if (!qacRes.ok) {
+        return baseStatus + ' · .qac ' + qacRes.status + ' (mesh kept)';
+      }
+      qacBytes = new Uint8Array(await qacRes.arrayBuffer());
+    }
+    portal.load_qac.length >= 2 ? portal.load_qac(qacBytes, 1) : portal.load_qac(qacBytes);
+    return baseStatus + ' · .qac loaded';
+  } catch (err) {
+    return baseStatus + ' · .qac skipped (' + (err && err.message ? err.message : err) + ')';
+  }
+}
 async function loadPortalMesh(portal, host, meshUrl) {
   const meshB64 = host.dataset.meshB64 || '';
   let bytes;
@@ -272,38 +350,9 @@ async function loadPortalMesh(portal, host, meshUrl) {
   const renderer = window.__qualiaAnatomyInit && window.__qualiaAnatomyInit.renderer || 'unknown';
   let meshStatus = (tris != null ? tris : '?') + ' triangles · ' + (verts != null ? verts : '?') + ' verts · QualiaPortal/' + renderer;
   setPortalStatus(host, meshStatus);
-  const emfB64 = host.dataset.emfB64 || '';
-  if (emfB64) {
-    try {
-      const emfBytes = b64ToU8(emfB64);
-      const emfReceipt = portal.load_emf(emfBytes);
-      acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
-    } catch (err) {
-      setPortalStatus(host, meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')');
-    }
-    return;
-  }
-  const emfUrl = host.dataset.emfUrl || siblingUrl(meshUrl, '.emf');
-  if (!emfUrl) {
-    setPortalStatus(host, meshStatus + ' · mesh-only (no field)');
-    return;
-  }
-  try {
-    const emfRes = await fetch(emfUrl);
-    if (emfRes.status === 404) {
-      setPortalStatus(host, meshStatus + ' · mesh-only (no field)');
-      return;
-    }
-    if (!emfRes.ok) {
-      setPortalStatus(host, meshStatus + ' · .emf ' + emfRes.status + ' (mesh kept)');
-      return;
-    }
-    const emfBytes = new Uint8Array(await emfRes.arrayBuffer());
-    const emfReceipt = portal.load_emf(emfBytes);
-    acceptEmfReceipt(portal, host, meshStatus, emfReceipt);
-  } catch (err) {
-    setPortalStatus(host, meshStatus + ' · .emf skipped (' + (err && err.message ? err.message : err) + ')');
-  }
+  const afterEmfStatus = await loadSiblingEmf(portal, host, meshUrl, meshStatus);
+  const finalStatus = await loadSiblingQac(portal, host, afterEmfStatus);
+  setPortalStatus(host, finalStatus);
 }
 async function bootSynthPortals() {
   const hosts = document.querySelectorAll('[data-synth-portal]');
@@ -433,6 +482,29 @@ mod tests {
         assert!(html.contains("data-emf-b64=\"QkJCQg==\""));
         assert!(html.contains("data-mesh-url=\"heart.10d\""));
         assert!(html.contains("data-emf-url=\"heart.emf\""));
+        assert!(html.contains("data-qac-url=\"\""));
+        assert!(html.contains("data-qac-b64=\"\""));
+    }
+
+    #[test]
+    fn render_portal_host_with_qac_embeds_qac_attributes_and_loader() {
+        let html = render_portal_host_with_qac(
+            "portal-qac",
+            "heart.10d",
+            "heart.emf",
+            "heart.qac",
+            "QUFBQQ==",
+            "QkJCQg==",
+            "UUFDMQ==",
+            &[],
+        );
+        assert!(html.contains("data-qac-url=\"heart.qac\""));
+        assert!(html.contains("data-qac-b64=\"UUFDMQ==\""));
+        assert!(html.contains("data-mesh-b64=\"QUFBQQ==\""));
+        assert!(html.contains("data-emf-b64=\"QkJCQg==\""));
+        assert!(PORTAL_BOOT_JS.contains("qacB64"));
+        assert!(PORTAL_BOOT_JS.contains("qacUrl"));
+        assert!(PORTAL_BOOT_JS.contains("portal.load_qac("));
     }
 
     #[test]

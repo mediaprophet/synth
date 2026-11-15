@@ -4,7 +4,7 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, and CPU geometry libraries. Etalon supplies render/signal providers. A `.vibe` names the work.
 
-**The 148 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
+**The 150 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
 
 Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Grep this file and `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` first.
 
@@ -14,19 +14,19 @@ Do not tell the user a catalog morphism or a rust-audit-indexed function does no
 
 | What | Path |
 |---|---|
-| Vibe-callable catalog (148) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
+| Vibe-callable catalog (150) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
 | Ontology, arguments, aliases | `...\src\ontology\morphisms_01.rs` … `morphisms_09.rs` (`ALL_MORPHISMS`) |
 | Dispatch | `...\src\lib.rs` `invoke_inner` |
 | Function registry from source | `C:\github\hypermedia-production\audit-docs\` — **903 files, 8745 functions, 69 modules** (generated 2026-11-10T12:07:10Z by rust-audit `docs`) |
 | Crate list | `C:\github\hypermedia-production\CRATES.md` (partial; rust-audit `modules/*.md` is complete) |
 
-Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 148`.
+Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`.
 
 ```
-locus 15 + manifold 26 + surface 8 + radiance 30 + glyph 7 + layout 10
-+ kinetics 15 + acoustics 9 + electromagnetics 6 + geodesy 7
+locus 15 + manifold 27 + surface 8 + radiance 30 + glyph 7 + layout 10
++ kinetics 16 + acoustics 9 + electromagnetics 6 + geodesy 7
 + discourse 9 + chronicle 5 + qualia.species.assemble_corpus 1
-= 148
+= 150
 ```
 
 ### rust-audit (local tool, not a crates.io package)
@@ -200,7 +200,7 @@ Catalog morphisms are hosted by `asset-production-vibe` and implemented across t
 
 | Crate | Role |
 |---|---|
-| `asset-production-vibe` | 148 morphisms, ontology, dispatch, produce-path |
+| `asset-production-vibe` | 150 morphisms, ontology, dispatch, produce-path |
 | `profile-authoring` | circle / rounded-rect / channel / polygon profiles |
 | `drafting-geometry` | 2D curves, bulged polylines, tessellation |
 | `vector-locus-geometry` | locus geometry |
@@ -245,7 +245,7 @@ Catalog morphisms are hosted by `asset-production-vibe` and implemented across t
 
 ---
 
-## Twelve categories — 148 morphisms
+## Twelve categories — 150 morphisms
 
 Arguments are the ontology `arguments:` strings. Handles are session-local unless noted as retained input keys or encoded resources.
 

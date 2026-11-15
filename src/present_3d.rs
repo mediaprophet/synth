@@ -10,7 +10,48 @@ use qualia_core_db::render::compile_10d::{decode_10d_mesh, decode_10d_normals};
 use std::fmt::Write as _;
 
 #[path = "present_3d_integrity.rs"]
-mod integrity;
+pub mod integrity;
+pub use integrity::{inspect, inspect_with_emf, verify_emf, BundleIntegrity};
+
+fn escape_3d_html(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+}
+
+/// Verifies `.10d` and optional `.m64` / `.emf` siblings before emitting any portal host markup.
+/// Fails closed if any container fails verification so corrupt `.emf` bytes are never embedded.
+#[allow(clippy::too_many_arguments)]
+pub fn render_3d_host(
+    card_index: usize,
+    safe_key: &str,
+    ten_d: &[u8],
+    m64: Option<&[u8]>,
+    emf: Option<&[u8]>,
+    mesh_url: &str,
+    emf_url: &str,
+    qac_url: &str,
+    mesh_b64: &str,
+    emf_b64: &str,
+    qac_b64: &str,
+    pngs: &[crate::present_portal::PortalPng<'_>],
+    hex_dump_fallback: &str,
+) -> String {
+    if let Err(reason) = integrity::inspect_with_emf(ten_d, m64, emf) {
+        return format!(
+            "<p class=\"text-xs font-mono text-rose-400\">Container verification refused: {}</p>{}",
+            escape_3d_html(&reason),
+            render_fallback(safe_key, hex_dump_fallback)
+        );
+    }
+    let host_id = format!("portal-present-{card_index}");
+    let portal = crate::present_portal::render_portal_host_with_qac(
+        &host_id, mesh_url, emf_url, qac_url, mesh_b64, emf_b64, qac_b64, pngs,
+    );
+    let degraded = render_10d_interactive_card_body(card_index, safe_key, ten_d, hex_dump_fallback);
+    format!("{portal}{degraded}")
+}
 
 /// Attempts to decode a `.10d` container and render an interactive 3D turntable HTML widget
 /// with real-time Adaptive Complexity Streaming (`LOD0 Hero` · `LOD1 High` · `LOD2 Med Stream` · `LOD3 Low Proxy`),
@@ -460,7 +501,7 @@ pub fn render_m64_or_emf_card_body(
     }
 
     if is_m64 {
-        let inspected = integrity::inspect(bytes, true);
+        let inspected = integrity::inspect_container(bytes, true);
         if !inspected.valid {
             return format!("<p>Container verification refused.</p>{}", render_fallback(safe_key, hex_dump_fallback));
         }
@@ -508,13 +549,18 @@ pub fn render_m64_or_emf_card_body(
             kb = bytes.len() as f64 / 1024.0,
         )
     } else if is_emf {
-        let inspected = integrity::inspect(bytes, false);
+        let inspected = integrity::inspect_container(bytes, false);
         if !inspected.valid {
             return format!("<p>Container verification refused.</p>{}", render_fallback(safe_key, hex_dump_fallback));
         }
         let integrity_status = &inspected.status;
         let verified_records = &inspected.records;
         let field_layout = &inspected.layout;
+        let header_badge = if field_layout.contains("v4") {
+            "\"Q42EMF64\" (128B v4 Envelope)"
+        } else {
+            "\"Q42EMF64\" (64B Header)"
+        };
         format!(
             r#"<div class="p-3.5 rounded-lg bg-[var(--background)] border border-sky-500/40 space-y-2.5">
   <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
@@ -527,7 +573,7 @@ pub fn render_m64_or_emf_card_body(
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Header Magic</div>
-      <div class="text-sky-300 font-bold">"Q42EMF64" (64B Header)</div>
+      <div class="text-sky-300 font-bold">{header_badge}</div>
     </div>
     <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)]">
       <div class="text-[10px] text-[var(--muted-foreground)] uppercase">EmfCellRecord64 Cells</div>
@@ -1290,5 +1336,126 @@ mod hmc_kind_tests {
         let html = render_m64_or_emf_card_body("model.p64", "p64", &bytes, "00");
         assert!(html.contains("p64\\0"));
         assert!(html.contains(">3<"));
+    }
+
+    #[test]
+    fn emf_v4_card_verifies_and_corrupt_v4_refuses() {
+        use qualia_core_db::q42::field_envelope::{EntryInput, EnvelopeInput, Family, Limits, StructuralView};
+        let mut payload = vec![0u8; 128];
+        payload[..8].copy_from_slice(&1.0_f64.to_le_bytes());
+        let entry = EntryInput {
+            mode: 0,
+            revision: 1,
+            flags: 0,
+            stream_id: 0,
+            frame_id: 1,
+            start_tick: 0,
+            time_count: 0,
+            spatial_key: 0,
+            record_count: 1,
+            stride: 128,
+            codec: 0,
+            descriptor_id: 1,
+            payload: &payload,
+        };
+        let input = EnvelopeInput {
+            family: Family::EmfV4Candidate,
+            flags: 0,
+            metadata: &[],
+            entries: &[entry],
+        };
+        let mut bytes = vec![0u8; input.encoded_len(Limits::default()).unwrap()];
+        input.encode_into(&mut bytes, Limits::default()).unwrap();
+
+        let html = render_m64_or_emf_card_body("field.emf", "emf", &bytes, "00");
+        assert!(html.contains("Q42EMF64"));
+        assert!(html.contains("EMF v4"));
+
+        let view = StructuralView::open(&bytes, Family::EmfV4Candidate, Limits::default()).unwrap();
+        let at = view.entry(1).unwrap().payload_offset() as usize;
+        bytes[at] ^= 0x55;
+        let refused = render_m64_or_emf_card_body("field.emf", "emf", &bytes, "00");
+        assert!(refused.contains("Container verification refused."));
+    }
+
+    #[test]
+    fn render_3d_host_fails_closed_on_corrupt_emf_before_portal_embedding() {
+        use qualia_core_db::q42::field_envelope::{EntryInput, EnvelopeInput, Family, Limits, StructuralView};
+        use qualia_core_db::render::assets::Mesh;
+        use qualia_core_db::render::compile_10d::compile_mesh_to_10d;
+
+        let mesh = Mesh {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            triangles: vec![[0, 1, 2]],
+            min: [0.0, 0.0, 0.0],
+            max: [1.0, 1.0, 0.0],
+        };
+        let ten_d = compile_mesh_to_10d(&mesh).unwrap();
+
+        let payload = vec![0u8; 128];
+        let entry = EntryInput {
+            mode: 0,
+            revision: 1,
+            flags: 0,
+            stream_id: 0,
+            frame_id: 1,
+            start_tick: 0,
+            time_count: 0,
+            spatial_key: 0,
+            record_count: 1,
+            stride: 128,
+            codec: 0,
+            descriptor_id: 1,
+            payload: &payload,
+        };
+        let input = EnvelopeInput {
+            family: Family::EmfV4Candidate,
+            flags: 0,
+            metadata: &[],
+            entries: &[entry],
+        };
+        let mut emf = vec![0u8; input.encoded_len(Limits::default()).unwrap()];
+        input.encode_into(&mut emf, Limits::default()).unwrap();
+
+        let ok_html = super::render_3d_host(
+            1,
+            "heart.10d",
+            &ten_d,
+            None,
+            Some(&emf),
+            "heart.10d",
+            "heart.emf",
+            "heart.qac",
+            "MESH",
+            "EMF",
+            "QAC",
+            &[],
+            "00",
+        );
+        assert!(ok_html.contains("data-synth-portal=\"1\""));
+        assert!(ok_html.contains("data-qac-url=\"heart.qac\""));
+        assert!(ok_html.contains("data-qac-b64=\"QAC\""));
+
+        let view = StructuralView::open(&emf, Family::EmfV4Candidate, Limits::default()).unwrap();
+        let at = view.entry(1).unwrap().payload_offset() as usize;
+        emf[at] ^= 0x01;
+        let refused_html = super::render_3d_host(
+            1,
+            "heart.10d",
+            &ten_d,
+            None,
+            Some(&emf),
+            "heart.10d",
+            "heart.emf",
+            "heart.qac",
+            "MESH",
+            "CORRUPT",
+            "QAC",
+            &[],
+            "00",
+        );
+        assert!(refused_html.contains("Container verification refused"));
+        assert!(!refused_html.contains("data-synth-portal"));
+        assert!(!refused_html.contains("data-emf-b64"));
     }
 }

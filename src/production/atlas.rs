@@ -6,7 +6,9 @@
 //! `quality: master` is the complete discovered body. Lower tiers for a device,
 //! a connection, or a task are derived from this master later.
 
+#[cfg(feature = "atlas")]
 use std::collections::BTreeMap;
+#[cfg(feature = "atlas")]
 use std::sync::{Mutex, OnceLock};
 
 use super::assets::AssetHost;
@@ -27,6 +29,7 @@ pub(super) fn pack_reference_body(
     }
 }
 
+#[cfg(feature = "atlas")]
 fn arg_string<'a>(args: &'a Value, key: &str) -> Result<&'a str, String> {
     let Value::Record(map) = args else {
         return Err("atlas arguments must be a record".into());
@@ -38,6 +41,7 @@ fn arg_string<'a>(args: &'a Value, key: &str) -> Result<&'a str, String> {
     }
 }
 
+#[cfg(feature = "atlas")]
 fn optional_string<'a>(args: &'a Value, key: &str) -> Option<&'a str> {
     let Value::Record(map) = args else {
         return None;
@@ -65,9 +69,9 @@ struct Packed {
 }
 
 #[cfg(feature = "atlas")]
-fn cache() -> &'static Mutex<BTreeMap<String, Packed>> {
-    static CACHE: OnceLock<Mutex<BTreeMap<String, Packed>>> = OnceLock::new();
-    CACHE.get_or_init(|| Mutex::new(BTreeMap::new()))
+fn cache() -> &'static Mutex<[Option<(String, Packed)>; 2]> {
+    static CACHE: OnceLock<Mutex<[Option<(String, Packed)>; 2]>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new([None, None]))
 }
 
 #[cfg(feature = "atlas")]
@@ -129,7 +133,7 @@ fn pack_master(host: &mut AssetHost<'_>, args: &Value) -> Result<Value, String> 
 fn load_or_build(model_name: &str) -> Result<Packed, String> {
     {
         let guard = cache().lock().unwrap_or_else(|poison| poison.into_inner());
-        if let Some(hit) = guard.get(model_name) {
+        if let Some((_, hit)) = guard.iter().flatten().find(|(k, _)| k == model_name) {
             return Ok(hit.clone());
         }
     }
@@ -158,6 +162,10 @@ fn load_or_build(model_name: &str) -> Result<Packed, String> {
         curated_not_found: built.curated_not_found,
     };
     let mut guard = cache().lock().unwrap_or_else(|poison| poison.into_inner());
-    guard.insert(model_name.to_string(), packed.clone());
+    if !guard.iter().flatten().any(|(k, _)| k == model_name) {
+        if let Some(slot) = guard.iter_mut().find(|s| s.is_none()) {
+            *slot = Some((model_name.to_string(), packed.clone()));
+        }
+    }
     Ok(packed)
 }

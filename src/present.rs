@@ -148,7 +148,6 @@ pub fn render_resource_card_in_set(index: usize, resource: &Resource, all: &[Res
         "spatial" => {
             let dump = escape_html(&hex_preview(&resource.bytes, 128));
             if resource.kind.eq_ignore_ascii_case("10d") || resource.key.ends_with(".10d") {
-                let degraded = crate::present_3d::render_10d_interactive_card_body(index, &safe_key, &resource.bytes, &dump);
                 let png_owned = portal_pngs_for(&resource.key, all);
                 let pngs: Vec<crate::present_portal::PortalPng<'_>> = png_owned
                     .iter()
@@ -156,21 +155,38 @@ pub fn render_resource_card_in_set(index: usize, resource: &Resource, all: &[Res
                     .collect();
                 let mesh_url = resource.key.clone();
                 let emf_url = crate::present_portal::sibling_with_ext(&mesh_url, "emf");
-                let mesh_b64 = base64_encode(&resource.bytes);
-                let emf_b64 = all
+                let m64_url = crate::present_portal::sibling_with_ext(&mesh_url, "m64");
+                let qac_sibling = crate::present_portal::sibling_with_ext(&mesh_url, "qac");
+                let emf_res = all.iter().find(|r| r.key.eq_ignore_ascii_case(&emf_url));
+                let m64_bytes = all
                     .iter()
-                    .find(|r| r.key.eq_ignore_ascii_case(&emf_url))
-                    .map(|r| base64_encode(&r.bytes))
-                    .unwrap_or_default();
-                let portal = crate::present_portal::render_portal_host(
-                    &format!("portal-present-{index}"),
+                    .find(|r| r.key.eq_ignore_ascii_case(&m64_url))
+                    .map(|r| r.bytes.as_slice());
+                let qac_res = all.iter().find(|r| r.key.eq_ignore_ascii_case(&qac_sibling));
+                let mesh_b64 = base64_encode(&resource.bytes);
+                let emf_bytes = emf_res.map(|r| r.bytes.as_slice());
+                let emf_b64 = emf_res.map(|r| base64_encode(&r.bytes)).unwrap_or_default();
+                let qac_url = if qac_res.is_some() {
+                    qac_sibling.as_str()
+                } else {
+                    ""
+                };
+                let qac_b64 = qac_res.map(|r| base64_encode(&r.bytes)).unwrap_or_default();
+                crate::present_3d::render_3d_host(
+                    index,
+                    &safe_key,
+                    &resource.bytes,
+                    m64_bytes,
+                    emf_bytes,
                     &mesh_url,
                     &emf_url,
+                    qac_url,
                     &mesh_b64,
                     &emf_b64,
+                    &qac_b64,
                     &pngs,
-                );
-                format!("{portal}{degraded}")
+                    &dump,
+                )
             } else if ["m64", "e64", "p64", "emf", "q42"]
                 .iter()
                 .any(|ext| resource.kind.eq_ignore_ascii_case(ext) || resource.key.ends_with(&format!(".{ext}")))
@@ -449,17 +465,75 @@ mod tests {
         }
     }
 
+    fn sample_valid_10d() -> Vec<u8> {
+        use qualia_core_db::render::assets::Mesh;
+        use qualia_core_db::render::compile_10d::compile_mesh_to_10d;
+        let mesh = Mesh {
+            positions: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            triangles: vec![[0, 1, 2]],
+            min: [0.0, 0.0, 0.0],
+            max: [1.0, 1.0, 0.0],
+        };
+        compile_mesh_to_10d(&mesh).unwrap()
+    }
+
+    fn sample_valid_emf_v4() -> Vec<u8> {
+        use qualia_core_db::q42::field_envelope::{EntryInput, EnvelopeInput, Family, Limits};
+        let payload = vec![0u8; 128];
+        let entry = EntryInput {
+            mode: 0,
+            revision: 1,
+            flags: 0,
+            stream_id: 0,
+            frame_id: 1,
+            start_tick: 0,
+            time_count: 0,
+            spatial_key: 0,
+            record_count: 1,
+            stride: 128,
+            codec: 0,
+            descriptor_id: 1,
+            payload: &payload,
+        };
+        let input = EnvelopeInput {
+            family: Family::EmfV4Candidate,
+            flags: 0,
+            metadata: &[],
+            entries: &[entry],
+        };
+        let mut out = vec![0u8; input.encoded_len(Limits::default()).unwrap()];
+        input.encode_into(&mut out, Limits::default()).unwrap();
+        out
+    }
+
     #[test]
-    fn ten_d_card_html_contains_inline_mesh_b64() {
-        let bytes = b"Q42TEN10\x00fake-mesh";
-        let emf_bytes = b"Q42EMF64\x00fake-field";
-        let mesh = Resource { key: "heart.10d".into(), kind: "10d".into(), bytes: bytes.to_vec() };
-        let emf = Resource { key: "heart.emf".into(), kind: "emf".into(), bytes: emf_bytes.to_vec() };
-        let html = super::render_resource_card_in_set(1, &mesh, &[mesh.clone(), emf]);
-        let mesh_b64 = super::base64_encode(bytes);
-        let emf_b64 = super::base64_encode(emf_bytes);
+    fn ten_d_card_html_contains_inline_mesh_b64_and_pairs_sibling_qac() {
+        let bytes = sample_valid_10d();
+        let emf_bytes = sample_valid_emf_v4();
+        let qac_bytes = b"qac\0\0\0\0\0sample-qac-envelope";
+        let mesh = Resource { key: "heart.10d".into(), kind: "10d".into(), bytes: bytes.clone() };
+        let emf = Resource { key: "heart.emf".into(), kind: "emf".into(), bytes: emf_bytes.clone() };
+        let qac = Resource { key: "heart.qac".into(), kind: "qac".into(), bytes: qac_bytes.to_vec() };
+        let html = super::render_resource_card_in_set(1, &mesh, &[mesh.clone(), emf, qac]);
+        let mesh_b64 = super::base64_encode(&bytes);
+        let emf_b64 = super::base64_encode(&emf_bytes);
+        let qac_b64 = super::base64_encode(qac_bytes);
         assert!(html.contains(&format!("data-mesh-b64=\"{mesh_b64}\"")));
         assert!(html.contains(&format!("data-emf-b64=\"{emf_b64}\"")));
+        assert!(html.contains("data-qac-url=\"heart.qac\""));
+        assert!(html.contains(&format!("data-qac-b64=\"{qac_b64}\"")));
         assert!(html.contains("data-mesh-url=\"heart.10d\""));
+    }
+
+    #[test]
+    fn ten_d_card_fails_closed_when_sibling_emf_is_corrupt() {
+        let bytes = sample_valid_10d();
+        let corrupt_emf = b"Q42EMF64\x00fake-field".to_vec();
+        let mesh = Resource { key: "heart.10d".into(), kind: "10d".into(), bytes };
+        let emf = Resource { key: "heart.emf".into(), kind: "emf".into(), bytes: corrupt_emf };
+        let html = super::render_resource_card_in_set(1, &mesh, &[mesh.clone(), emf]);
+        assert!(html.contains("Container verification refused"));
+        assert!(!html.contains("data-synth-portal=\"1\""));
+        assert!(!html.contains("data-emf-b64="));
     }
 }

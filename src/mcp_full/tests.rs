@@ -53,7 +53,7 @@ fn admitted_input_export_matches_direct_production_and_has_durable_receipt() {
     assert_eq!(std::fs::read(fixture.0.join("exported/copies/reference.bin")).unwrap(), [1,4,9,16]);
     let receipt: Value = serde_json::from_slice(&std::fs::read(fixture.0.join("receipt.json")).unwrap()).unwrap();
     assert_eq!(receipt["hmc"]["sha256"], direct.candidate().unwrap().sha256());
-    assert_eq!(receipt["catalog"]["count"], 148);
+    assert_eq!(receipt["catalog"]["count"], 150);
     assert_eq!(receipt["inputs"][0]["sha256"].as_str().unwrap().len(), 64);
     assert_eq!(receipt["binary"]["sha256"].as_str().unwrap().len(), 64);
     assert_eq!(result["receipt"], receipt);
@@ -92,9 +92,9 @@ fn wrong_host_error_reaches_mcp_is_error_and_initialize_names_production_host() 
 }
 
 #[test]
-fn declared_output_recipes_execute_and_contracts_cover_all_148_ids() {
+fn declared_output_recipes_execute_and_contracts_cover_all_150_ids() {
     let inventory = contracts::catalogue();
-    assert_eq!(inventory["count"],148);
+    assert_eq!(inventory["count"],150);
     for recipe in inventory["recipes"].as_array().unwrap() {
         let result = StandaloneSynthMcp::default().call("synth_produce_present", json!({"source":recipe["source"]})).unwrap();
         let resources=result["receipt"]["resources"].as_array().unwrap();
@@ -160,8 +160,8 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
     assert!(reply.get("error").is_none(),"{reply}");
     let result=&reply["result"];
     assert_eq!(result["isError"],false);
-    assert_eq!(result["structuredContent"]["count"],148);
-    assert_eq!(result["structuredContent"]["operations"].as_array().unwrap().len(),148);
+    assert_eq!(result["structuredContent"]["count"],150);
+    assert_eq!(result["structuredContent"]["operations"].as_array().unwrap().len(),150);
     let text:Value=serde_json::from_str(result["content"][0]["text"].as_str().unwrap()).unwrap();
     assert_eq!(text,result["structuredContent"],"both actual MCP payload representations remain complete");
     let small=ProtocolLimits{max_message_bytes:2*1024*1024,..comprehensive_protocol_limits()};

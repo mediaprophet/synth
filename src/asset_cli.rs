@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
     sync::atomic::AtomicBool,
 };
-use synth::production::{Candidate, ProducerRegistry, ProductionLimits, ProductionSession, Resource};
+use crate::production::{Candidate, ProducerRegistry, ProductionLimits, ProductionSession, Resource};
 
 const USAGE: &str = "synth produce [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
 
@@ -283,8 +283,8 @@ pub fn run(args: &[String]) -> Result<(), String> {
     registry.reopen(candidate.bundle(), limits.clone(), &cancel)?;
 
     if matches!(options.mode, CommandMode::PresentOnly) {
-        let html = synth::present::render_session_html(&session)?;
-        synth::present::write_presentation_file(&options.out, &html, limits.package_bytes)?;
+        let html = crate::present::render_session_html(&session)?;
+        crate::present::write_presentation_file(&options.out, &html, limits.package_bytes)?;
         println!(
             "Synth {}/{} presentation written: {}",
             session.profile().0,
@@ -320,8 +320,8 @@ pub fn run(args: &[String]) -> Result<(), String> {
         println!("Exported: {}", directory.display());
     }
     if let Some(present_path) = options.present {
-        let html = synth::present::render_session_html(&session)?;
-        synth::present::write_presentation_file(&present_path, &html, limits.package_bytes)?;
+        let html = crate::present::render_session_html(&session)?;
+        crate::present::write_presentation_file(&present_path, &html, limits.package_bytes)?;
         println!("Presented: {}", present_path.display());
     }
     Ok(())

@@ -295,6 +295,18 @@ fn portal_file_preview(file: &ListedFile, files: &[ListedFile]) -> String {
         file.lane,
         url_encode_path(&emf_rel)
     );
+    let qac_rel = present_portal::sibling_with_ext(&file.rel, "qac");
+    let qac_url = if files.iter().any(|candidate| {
+        candidate.lane == file.lane && candidate.rel.eq_ignore_ascii_case(&qac_rel)
+    }) {
+        format!(
+            "/project/file/{}/{}",
+            file.lane,
+            url_encode_path(&qac_rel)
+        )
+    } else {
+        String::new()
+    };
     let mut png_owned: Vec<(String, String)> = Vec::new();
     for other in files {
         if other.kind == "png"
@@ -320,7 +332,7 @@ fn portal_file_preview(file: &ListedFile, files: &[ListedFile]) -> String {
         file.lane,
         file.rel.replace(['/', '\\', '.', ' '], "-")
     );
-    present_portal::render_portal_host(&id, &href, &emf_url, "", "", &pngs)
+    present_portal::render_portal_host_with_qac(&id, &href, &emf_url, &qac_url, "", "", "", &pngs)
 }
 
 fn render_file_cards(files: &[ListedFile]) -> String {
@@ -483,4 +495,32 @@ fn escape_js(text: &str) -> String {
         .replace('\'', "\\'")
         .replace('"', "\\\"")
         .replace('\n', "\\n")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_file(lane: &str, rel: &str, kind: &str) -> ListedFile {
+        ListedFile {
+            lane: lane.into(),
+            rel: rel.into(),
+            kind: kind.into(),
+            bytes: 64,
+            previewable: true,
+        }
+    }
+
+    #[test]
+    fn portal_file_preview_pairs_sibling_qac_in_same_lane() {
+        let mesh = sample_file("working", "heart/heart.10d", "10d");
+        let qac = sample_file("working", "heart/heart.qac", "qac");
+        let other_lane_qac = sample_file("final", "other/other.qac", "qac");
+
+        let paired = portal_file_preview(&mesh, &[mesh.clone(), qac]);
+        assert!(paired.contains("data-qac-url=\"/project/file/working/heart/heart.qac\""));
+
+        let unpaired = portal_file_preview(&mesh, &[mesh.clone(), other_lane_qac]);
+        assert!(unpaired.contains("data-qac-url=\"\""));
+    }
 }

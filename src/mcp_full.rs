@@ -283,7 +283,7 @@ impl AuthoringBackend for StandaloneSynthMcp {
     }
 }
 
-/// Bounded standalone transport for the combined tool and full 148-operation catalog.
+/// Bounded standalone transport for the combined tool and full 150-operation catalog.
 /// Authoring admits result objects at one eighth of the wire budget before making
 /// text+structured copies. The full operation catalog is ~326 KiB compact, above
 /// the former 256 KiB result ceiling; 4 MiB wire keeps a 512 KiB result ceiling.
@@ -358,15 +358,15 @@ mod tests {
     }
 
     #[test]
-    fn operations_and_catalogue_match_live_148_ontology_including_packing() {
-        assert_eq!(crate::production::assets::OPERATIONS.len(), 148);
-        assert_eq!(crate::production::assets::ontology::MORPHISMS.len(), 148);
+    fn operations_and_catalogue_match_live_150_ontology_including_packing() {
+        assert_eq!(crate::production::assets::OPERATIONS.len(), 150);
+        assert_eq!(crate::production::assets::ontology::MORPHISMS.len(), 150);
         let catalogue = crate::production::assets::catalogue();
         let operations = catalogue["operations"]
             .as_array()
             .expect("catalogue operations array");
-        assert_eq!(operations.len(), 148);
-        assert_eq!(catalogue["count"], 148);
+        assert_eq!(operations.len(), 150);
+        assert_eq!(catalogue["count"], 150);
         assert!(
             packing_ids_present(operations),
             "live catalogue must include packing morphisms {PACKING_MORPHISMS:?}"
@@ -381,8 +381,8 @@ mod tests {
             .iter()
             .find(|t| t.name == "synth_operations")
             .expect("synth_operations");
-        assert!(morphisms.description.contains("148"));
-        assert!(operations_tool.description.contains("148"));
+        assert!(morphisms.description.contains("150"));
+        assert!(operations_tool.description.contains("150"));
         assert!(!morphisms.description.contains("114"));
         assert!(!morphisms.description.contains("145"));
         assert!(!operations_tool.description.contains("114"));
@@ -391,24 +391,24 @@ mod tests {
         let mut mcp = StandaloneSynthMcp::default();
         let live_ops = mcp.call("synth_operations", json!({})).unwrap();
         let live_ops_arr = live_ops["operations"].as_array().unwrap();
-        assert_eq!(live_ops_arr.len(), 148);
-        assert_eq!(live_ops["count"], 148);
+        assert_eq!(live_ops_arr.len(), 150);
+        assert_eq!(live_ops["count"], 150);
         assert!(packing_ids_present(live_ops_arr));
         let live_morphisms = mcp
             .call("synth_ontology_morphisms", json!({}))
             .unwrap();
-        assert_eq!(live_morphisms["count"], 148);
-        assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 148);
+        assert_eq!(live_morphisms["count"], 150);
+        assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 150);
         assert!(packing_ids_present(
             live_morphisms["morphisms"].as_array().unwrap()
         ));
 
         let mcp_tools = catalogue_json();
-        assert_eq!(mcp_tools["admitted_morphisms"], 148);
+        assert_eq!(mcp_tools["admitted_morphisms"], 150);
         let mcp_ops = mcp_tools["asset_operations"]["operations"]
             .as_array()
             .expect("mcp-tools asset_operations");
-        assert_eq!(mcp_ops.len(), 148);
+        assert_eq!(mcp_ops.len(), 150);
         assert!(
             packing_ids_present(mcp_ops),
             "mcp-tools JSON total must include packing morphisms"

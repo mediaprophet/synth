@@ -2,6 +2,39 @@
 use super::*;
 use std::{io::Read, process::{Command, Stdio}, time::{Duration, Instant}};
 
+pub(super) fn output_recipes() -> Value {
+    json!([{
+        "id": "rgba_png",
+        "resource_key": "image.png",
+        "resource_kind": "png",
+        "source": "requires [capability(\"capability.invoke\")]; let image = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let png = capability.invoke(\"hypermedia.radiance.encode_rgba_png\", {image:image}); let mut asset = {files:[{key:\"image.png\",resource:png}]};"
+    }, {
+        "id": "sprite_record_png",
+        "resource_key": "sheet.png",
+        "resource_kind": "png",
+        "source": "requires [capability(\"capability.invoke\")]; let tile = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let sheet = capability.invoke(\"hypermedia.radiance.pack_sprite_sheet\", {tiles:[tile],columns:1,padding:0}); let mut asset = {files:[{key:\"sheet.png\",resource:sheet.png}]};"
+    }, {
+        "id": "lossless_sequence",
+        "resource_key": "sequence.json",
+        "resource_kind": "json",
+        "source": "requires [capability(\"capability.invoke\")]; let tile = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let sequence = capability.invoke(\"hypermedia.chronicle.capture_deterministic_movie\", {frames:[tile,tile],fps:{numerator:24000,denominator:1001},profile:\"png-sequence\"}); let mut asset = {files:[{key:\"sequence.json\",resource:sequence.manifest_resource}]};"
+    }, {
+        "id": "emf",
+        "resource_key": "field.emf",
+        "resource_kind": "emf",
+        "container_magic": "Q42EMF64",
+        "container_version": 4,
+        "source": "requires [capability(\"capability.invoke\")]; let emf = capability.invoke(\"hypermedia.electromagnetics.compile_emf\", {origin:[0.0,0.0,0.0],voxel_size:0.5,grid_dims:[1,1,1],epoch_s:1700000000.0,sources:[{position:[0.0,0.0,0.0],e_amplitude:[150.0,0.0,0.0],wavelength_nm:550.0,phase:0.0}]}); let mut asset = {files:[{key:\"field.emf\",resource:emf}]};"
+    }, {
+        "id": "qac",
+        "resource_key": "signal.qac",
+        "resource_kind": "qac",
+        "container_magic": "qac\0\0\0\0\0",
+        "container_version": 1,
+        "source": "requires [capability(\"capability.invoke\")]; let tone = capability.invoke(\"hypermedia.acoustics.synthesize_tone\", {frequency:440.0,sample_rate:48000,frames:256,amplitude:0.3}); let qac = capability.invoke(\"hypermedia.acoustics.encode_aac\", {audio:tone,format:\"qac\"}); let mut asset = {files:[{key:\"signal.qac\",resource:qac}]};"
+    }])
+}
+
 pub(super) fn catalogue() -> Value {
     let operations: Vec<Value> = crate::production::assets::ontology::MORPHISMS.iter().map(|operation| {
         let (kind, fields, encoder) = match operation.id {
@@ -15,7 +48,7 @@ pub(super) fn catalogue() -> Value {
             "hypermedia.radiance.pack_sprite_sheet" => ("record", json!([{"field":"png","type":"encoded_resource","kind":"png"},{"field":"image","type":"rgba_handle"},{"field":"frames","type":"array"}]), Value::Null),
             "hypermedia.surface.bake_pbr_materialx" => ("record", json!([{"field":"materialx_resource","type":"encoded_resource"},{"field":"psd_resource","type":"encoded_resource"},{"field":"ao_image","type":"rgba_handle"},{"field":"normal_image","type":"rgba_handle"}]), Value::Null),
             "hypermedia.radiance.create_rgba" | "hypermedia.layout.render_ui_sheet" => ("rgba_handle", json!([]), json!({"operation":"hypermedia.radiance.encode_rgba_png","arguments":{"image":"$result"}})),
-            "hypermedia.radiance.encode_rgba_png" | "hypermedia.radiance.encode_rgb_png" | "hypermedia.locus.project_svg" | "hypermedia.acoustics.encode_wav" => ("encoded_resource", json!([]), Value::Null),
+            "hypermedia.radiance.encode_rgba_png" | "hypermedia.radiance.encode_rgb_png" | "hypermedia.locus.project_svg" | "hypermedia.acoustics.encode_wav" | "hypermedia.acoustics.encode_aac" | "hypermedia.electromagnetics.compile_emf" => ("encoded_resource", json!([]), Value::Null),
             _ => ("operation_specific", json!([]), Value::Null),
         };
         let attribute_edit = matches!(operation.id,
@@ -33,17 +66,13 @@ pub(super) fn catalogue() -> Value {
             "output":{"type":kind,"resource_fields":fields,"encoder":encoder},
             "handle_lifetime":"one source evaluation", "metadata_provider_call":"schema hash only; does not execute production"})
     }).collect();
+    let recipes = output_recipes();
     json!({"schema":"synth.operation-contracts/v1", "count":operations.len(), "operations": operations,
         "fallback":"operation_specific means consult the codomain and implementation contract; no namespace-based export inference is permitted",
         "production_profiles":[{"id":"preview","resource_mib":16,"aggregate_mib":64,"package_mib":80,"logical_work_units":50000000},{"id":"production16","resource_mib":64,"aggregate_mib":256,"package_mib":320,"logical_work_units":500000000,"raster_max_dimension":2048,"precision":"RGBA16 UNORM with sRGB/linear PNG metadata"},{"id":"png-sequence","operation":"hypermedia.chronicle.capture_deterministic_movie","frames":64,"raster_max_dimension":2048,"precision":"congruent RGBA8 or RGBA16 frames","timing":"exact rational manifest, optional sample-aligned PCM WAV"}],
         "resource_type":{"type":"encoded_resource", "export_binding":{"key":"output.ext","resource":"$encoded"}},
-        "recipes":[{
-            "id":"rgba_png", "resource_key":"image.png", "resource_kind":"png", "source": "requires [capability(\"capability.invoke\")]; let image = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let png = capability.invoke(\"hypermedia.radiance.encode_rgba_png\", {image:image}); let mut asset = {files:[{key:\"image.png\",resource:png}]};"
-        }, {
-            "id":"sprite_record_png", "resource_key":"sheet.png", "resource_kind":"png", "source":"requires [capability(\"capability.invoke\")]; let tile = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let sheet = capability.invoke(\"hypermedia.radiance.pack_sprite_sheet\", {tiles:[tile],columns:1,padding:0}); let mut asset = {files:[{key:\"sheet.png\",resource:sheet.png}]};"
-        }, {
-            "id":"lossless_sequence", "resource_key":"sequence.json", "resource_kind":"json", "source":"requires [capability(\"capability.invoke\")]; let tile = capability.invoke(\"hypermedia.radiance.create_rgba\", {width:8,height:8,color:[51,102,153,255]}); let sequence = capability.invoke(\"hypermedia.chronicle.capture_deterministic_movie\", {frames:[tile,tile],fps:{numerator:24000,denominator:1001},profile:\"png-sequence\"}); let mut asset = {files:[{key:\"sequence.json\",resource:sequence.manifest_resource}]};"
-        }]})
+        "output_recipes": recipes,
+        "recipes": recipes})
 }
 
 fn preview_command(executable: &Path, asset: &Path, destination: &Path, package: &Path, asset_key: &str) -> Command {
@@ -99,5 +128,41 @@ mod tests {
         let command = preview_command(Path::new("synth.exe"),Path::new("export/mesh.10d"),Path::new("review"),Path::new("asset.hmc"),"outputs/mesh.10d");
         let args:Vec<_> = command.get_args().map(|v|v.to_string_lossy().into_owned()).collect();
         assert_eq!(args, ["preview","--asset","export/mesh.10d","--out","review","--hmc","asset.hmc","--asset-key","outputs/mesh.10d"]);
+    }
+
+    #[test]
+    fn output_recipes_declare_emf_v4_and_qac_v1_formats() {
+        let recipes = output_recipes();
+        let list = recipes.as_array().expect("output_recipes returns array");
+        let emf = list.iter().find(|r| r["id"] == "emf").expect("emf recipe");
+        assert_eq!(emf["resource_key"], "field.emf");
+        assert_eq!(emf["resource_kind"], "emf");
+        assert_eq!(emf["container_magic"], "Q42EMF64");
+        assert_eq!(emf["container_version"], 4);
+
+        let qac = list.iter().find(|r| r["id"] == "qac").expect("qac recipe");
+        assert_eq!(qac["resource_key"], "signal.qac");
+        assert_eq!(qac["resource_kind"], "qac");
+        assert_eq!(qac["container_magic"], "qac\0\0\0\0\0");
+        assert_eq!(qac["container_version"], 1);
+
+        let cat = catalogue();
+        let compile_emf = cat["operations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|op| op["id"] == "hypermedia.electromagnetics.compile_emf")
+            .unwrap();
+        assert_eq!(compile_emf["output"]["type"], "encoded_resource");
+
+        let encode_aac = cat["operations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|op| op["id"] == "hypermedia.acoustics.encode_aac")
+            .unwrap();
+        assert_eq!(encode_aac["output"]["type"], "encoded_resource");
+        assert_eq!(cat["output_recipes"], recipes);
+        assert_eq!(cat["recipes"], recipes);
     }
 }

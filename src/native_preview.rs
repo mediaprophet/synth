@@ -120,7 +120,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
         .iter()
         .map(|(v, png)| (v.name.to_string(), png.clone()))
         .collect();
-    let html_bytes = synth::present::render_10d_preview_html(&receipt, &named_views)?
+    let html_bytes = crate::present::render_10d_preview_html(&receipt, &named_views)?
         .into_bytes();
     if total
         .checked_add(receipt_bytes.len())
@@ -180,7 +180,7 @@ fn run_shot(args: &[String]) -> Result<(), String> {
     // HTML embeds all PNGs as base64; admit their maximum combined size before allocation.
     let embedded = total.checked_add(2).and_then(|n| n.checked_div(3)).and_then(|n| n.checked_mul(4)).ok_or("shot HTML size overflow")?;
     if total.checked_add(embedded).and_then(|n| n.checked_add(receipt_bytes.len() * 8)).and_then(|n| n.checked_add(1024 * 1024)).ok_or("shot package overflow")? > MAX_TOTAL_OUTPUT_BYTES { return Err("shot package exceeds embedded HTML budget".into()); }
-    let html = synth::present::render_10d_preview_html(&receipt, &named)?.into_bytes();
+    let html = crate::present::render_10d_preview_html(&receipt, &named)?.into_bytes();
     if total.checked_add(receipt_bytes.len()).and_then(|n| n.checked_add(html.len())).ok_or("shot package overflow")? > MAX_TOTAL_OUTPUT_BYTES { return Err("shot package exceeds output budget".into()); }
     fs::create_dir(&destination).map_err(|e| format!("create-only preview directory: {e}"))?;
     for (name, png) in named { write_new(&destination.join(format!("{name}.png")), &png)?; }
