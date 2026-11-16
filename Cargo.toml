@@ -10,6 +10,10 @@ name = "synth"
 path = "src/main.rs"
 
 [[bin]]
+name = "webizen-studio"
+path = "src/bin/webizen_studio.rs"
+
+[[bin]]
 name = "synth-atlas"
 path = "src/bin/synth_atlas.rs"
 required-features = ["atlas"]
@@ -72,27 +76,6 @@ asset-production-vibe = { path = "../hypermedia-production/crates/asset-producti
 pixel-buffer-output = { path = "../hypermedia-production/crates/pixel-buffer-output" }
 pixel-window-render-adapter = { path = "../hypermedia-production/crates/pixel-window-render-adapter" }
 vector-cpu-render-adapter = { path = "../hypermedia-production/crates/vector-cpu-render-adapter" }
-
-[patch."https://github.com/mediaprophet/etalon.git"]
-naga = { path = "../etalon/naga" }
-etalon = { path = "../etalon/etalon" }
-etalon-diagnostics = { path = "../etalon/crates/etalon-diagnostics" }
-etalon-agent = { path = "../etalon/crates/etalon-agent" }
-etalon-wgsl-forge = { path = "../etalon/crates/etalon-wgsl-forge" }
-etalon-nquin = { path = "../etalon/crates/etalon-nquin" }
-etalon-tensor = { path = "../etalon/crates/etalon-tensor" }
-etalon-render = { path = "../etalon/crates/etalon-render" }
-etalon-sim = { path = "../etalon/crates/etalon-sim" }
-etalon-signal = { path = "../etalon/crates/etalon-signal" }
-etalon-wasm = { path = "../etalon/crates/etalon-wasm" }
-etalon-model = { path = "../etalon/crates/etalon-model" }
-etalon-resources = { path = "../etalon/crates/etalon-resources" }
-etalon-inference-kernel = { path = "../etalon/crates/etalon-inference-kernel" }
-etalon-inference = { path = "../etalon/crates/etalon-inference" }
-etalon-inference-contract = { path = "../etalon/crates/etalon-inference-contract" }
-etalon-model-io = { path = "../etalon/crates/etalon-model-io" }
-etalon-inference-lab = { path = "../etalon/crates/etalon-inference-lab" }
-etalon-vibe = { path = "../etalon/crates/etalon-vibe" }
 
 [profile.dev]
 debug = 0

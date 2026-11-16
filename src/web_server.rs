@@ -36,6 +36,10 @@ use std::{
     time::Duration,
 };
 
+mod website;
+mod production_response;
+pub use website::configure_website_root;
+
 pub const DEFAULT_STUDIO_PORT: u16 = 8787;
 pub const WEBIZEN_RESERVED_PORTS: &[u16] = &[8080, 4242, 9001];
 
@@ -43,6 +47,9 @@ pub const WEBIZEN_RESERVED_PORTS: &[u16] = &[8080, 4242, 9001];
 struct ProduceRequest {
     source: String,
     profile: Option<String>,
+    include_html: Option<bool>,
+    include_resources: Option<bool>,
+    include_package: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -236,7 +243,8 @@ fn write_ranged_bytes(
     range_header: Option<&str>,
 ) -> Result<(), String> {
     let total = body.len();
-    let coi_html = content_type.starts_with("text/html");
+    let coi = ["text/html", "application/javascript", "text/javascript", "application/wasm"]
+        .iter().any(|mime| content_type.starts_with(mime));
     // Present Range (including empty/whitespace) is fail-closed 416; only a missing header is 200.
     match range_header {
         None => {
@@ -244,7 +252,7 @@ fn write_ranged_bytes(
                 ("Accept-Ranges", "bytes"),
                 ("Cross-Origin-Resource-Policy", "same-origin"),
             ];
-            if coi_html {
+            if coi {
                 extra.push(("Cross-Origin-Opener-Policy", "same-origin"));
                 extra.push(("Cross-Origin-Embedder-Policy", "require-corp"));
             }
@@ -253,16 +261,21 @@ fn write_ranged_bytes(
         Some(header) => match parse_single_byte_range(header, total) {
             Some((start, end)) => {
                 let content_range = format!("bytes {start}-{end}/{total}");
+                let mut extra = vec![
+                    ("Accept-Ranges", "bytes"),
+                    ("Content-Range", content_range.as_str()),
+                    ("Cross-Origin-Resource-Policy", "same-origin"),
+                ];
+                if coi {
+                    extra.push(("Cross-Origin-Opener-Policy", "same-origin"));
+                    extra.push(("Cross-Origin-Embedder-Policy", "require-corp"));
+                }
                 write_http_response_with(
                     stream,
                     "206 Partial Content",
                     content_type,
                     &body[start..=end],
-                    &[
-                        ("Accept-Ranges", "bytes"),
-                        ("Content-Range", &content_range),
-                        ("Cross-Origin-Resource-Policy", "same-origin"),
-                    ],
+                    &extra,
                 )
             }
             None => {
@@ -572,7 +585,7 @@ fn handle_produce(body: &[u8]) -> Value {
         return json!({ "ok": false, "error": format!("Strict replay check failed: {e}") });
     }
     let mut cards_html = String::new();
-    for (idx, resource) in candidate.outputs().iter().enumerate() {
+    for (idx, resource) in candidate.outputs().iter().enumerate().filter(|_| req.include_html.unwrap_or(true)) {
         cards_html.push_str(&crate::present::render_resource_card_in_set(
             idx + 1,
             resource,
@@ -588,13 +601,22 @@ fn handle_produce(body: &[u8]) -> Value {
                 .collect::<String>()
         })
         .unwrap_or_default();
-    json!({
+    let mut response = json!({
         "ok": true,
         "package_sha256": candidate.sha256(),
+        "package_byte_length": candidate.bundle().len(),
+        "strict_replay_verified": true,
         "document_digest": doc_digest,
         "resource_count": candidate.outputs().len(),
-        "cards_html": cards_html,
-    })
+    });
+    if req.include_html.unwrap_or(true) { response["cards_html"] = json!(cards_html); }
+    if req.include_resources.unwrap_or(false) {
+        response["resources"] = production_response::resources(candidate.outputs());
+    }
+    if req.include_package.unwrap_or(false) {
+        response["package_base64"] = json!(crate::present::base64_encode(candidate.bundle()));
+    }
+    response
 }
 
 fn handle_mcp_call(body: &[u8]) -> Value {
@@ -692,6 +714,9 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     }
     let body = &buf[body_offset..read_total.min(needed)];
 
+    if method == "GET" && website::handles(&path) {
+        return website::serve(stream, &path, range_header.as_deref());
+    }
     match (method.as_str(), path.as_str()) {
         ("GET", "/" | "/index.html") => {
             let html = render_root_studio_html()?;
@@ -937,6 +962,19 @@ mod tests {
         let pos = resp.windows(4).position(|w| w == b"\r\n\r\n").expect("headers");
         let header = std::str::from_utf8(&resp[..pos]).unwrap();
         (header, &resp[pos + 4..])
+    }
+
+    #[test]
+    fn ranged_executable_assets_preserve_cross_origin_isolation() {
+        for mime in ["text/html; charset=utf-8", "application/javascript", "application/wasm"] {
+            for request in [b"GET /asset HTTP/1.1\r\n\r\n".as_slice(), b"GET /asset HTTP/1.1\r\nRange: bytes=0-3\r\n\r\n".as_slice()] {
+                let response = exchange(request, b"abcdefgh".to_vec(), mime);
+                let (headers, _) = http_split(&response);
+                assert!(headers.contains("Cross-Origin-Opener-Policy: same-origin"));
+                assert!(headers.contains("Cross-Origin-Embedder-Policy: require-corp"));
+                assert!(headers.contains("Cross-Origin-Resource-Policy: same-origin"));
+            }
+        }
     }
 
     fn produce_hmc() -> (Vec<u8>, Vec<u8>) {
