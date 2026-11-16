@@ -1,6 +1,6 @@
 # Native website checkpoint
 
-The authored website workspace at `production/webizen-swarm` is checkpointed in the dedicated private repository `https://github.com/mediaprophet/webizen-website`, branch `codex/website-foundation`.
+The authored website workspace at `production/webizen-swarm` is checkpointed in the dedicated repository `https://github.com/mediaprophet/webizen-website`. The user subsequently enabled GitHub Pages through Actions; its initial publication targets the repository's `main` branch.
 
 The website repository retains native host source, Vibe recipes, genuine Q42/data and production artifacts, actual review images, benchmark evidence and incomplete/rejected work. Its `CHECKPOINT.md` is the restart handoff; the work is not represented as a completed AAA website or deployed to webizen.au.
 
