@@ -1,0 +1,676 @@
+{
+  "schema": "production-core.acceptance-plan/v1",
+  "status": "frozen_test_contracts_not_results",
+  "requirements": [
+    {
+      "requirement": "REQ-01",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P00"
+      ],
+      "fixture_id": "mixed_objectives",
+      "fixture_description": "Geometry passes but semantics fails",
+      "method": "Independent gates; no weighted-score override",
+      "threshold": "Reject candidate",
+      "backend": "CPU",
+      "implementation_owner_role": "Coordinator",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-01-mixed_objectives.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-02",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02",
+        "P04",
+        "P21"
+      ],
+      "fixture_id": "identity_chain",
+      "fixture_description": "Canonical asset, decoded vertices, shader, variant",
+      "method": "Mutate each identity and validate dependency binding",
+      "threshold": "No stale/mismatched activation",
+      "backend": "CPU + native",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-02-identity_chain.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-03",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P01"
+      ],
+      "fixture_id": "reuse_inventory",
+      "fixture_description": "Inspected symbols and executed capability probes",
+      "method": "Match actual compiled source to baseline manifest",
+      "threshold": "All claimed reuse traced",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB + Etalon",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-03-reuse_inventory.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-04",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P05"
+      ],
+      "fixture_id": "capacity_cancel",
+      "fixture_description": "Zero/exact/one-over budget and cancellation",
+      "method": "Allocation/capacity instrumentation and interrupted jobs",
+      "threshold": "Bounded failure; no partial success",
+      "backend": "CPU + native",
+      "implementation_owner_role": "QualiaDB + Etalon",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-04-capacity_cancel.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-05",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P00",
+        "P03",
+        "P04",
+        "P22"
+      ],
+      "fixture_id": "baseline_comparison",
+      "fixture_description": "B0/B1/B2/B4 and relevant B3/B5/B6",
+      "method": "Fixed quality and work budgets; all cases denominator",
+      "threshold": "No unmeasured improvement claim",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Coordinator",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-05-baseline_comparison.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-06",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P01"
+      ],
+      "fixture_id": "capability_manifest",
+      "fixture_description": "SemanticQEM, codec, DDG, workspace, Forge",
+      "method": "Symbol/hash/arithmetic/resource/backend/executed-test record",
+      "threshold": "Complete per used path",
+      "backend": "CPU + native",
+      "implementation_owner_role": "QualiaDB + Etalon",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-06-capability_manifest.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-07",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02"
+      ],
+      "fixture_id": "representation_roles",
+      "fixture_description": "Visual, operator, contact and volume descriptors",
+      "method": "Reject role/units/frame/source mismatch",
+      "threshold": "No implicit equivalence",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-07-representation_roles.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-08",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P07"
+      ],
+      "fixture_id": "transfer_invariants",
+      "fixture_description": "Constant, rigid, virtual work and conservation fixtures",
+      "method": "Independent dot-product/conservation checks",
+      "threshold": "T1 precision-derived tolerances; quantized sum65535",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB geometry / codecs",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-08-transfer_invariants.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-09",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P06"
+      ],
+      "fixture_id": "semantic_domains",
+      "fixture_description": "Two authored UV charts and protected domain labels",
+      "method": "Check vertex/face/corner compatibility schema",
+      "threshold": "Zero forbidden domain merges",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB geometry",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-09-semantic_domains.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-10",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P06"
+      ],
+      "fixture_id": "collapse_admission",
+      "fixture_description": "Boundary, link, orientation, transfer-invalid cases",
+      "method": "Adversarial candidate collapse decisions",
+      "threshold": "All hard predicates satisfied",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB geometry",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-10-collapse_admission.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-11",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P06"
+      ],
+      "fixture_id": "ranking_scale",
+      "fixture_description": "Uniformly scaled equivalent meshes",
+      "method": "Nondimensional costs; ranking versus admission separated",
+      "threshold": "Same admissibility; deterministic ties",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB geometry",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-11-ranking_scale.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-12",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P07"
+      ],
+      "fixture_id": "attribute_seams",
+      "fixture_description": "Checker seams, tangent handedness, skin weights",
+      "method": "Decoded final attribute and correspondence checks",
+      "threshold": "No chart leakage; declared T1 tolerances",
+      "backend": "CPU + rendered views",
+      "implementation_owner_role": "QualiaDB geometry / codecs",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-12-attribute_seams.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-13",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02",
+        "P08"
+      ],
+      "fixture_id": "error_ledger",
+      "fixture_description": "QEM cost, geometric bound, quantization, response",
+      "method": "Validate measurement class/units/domain separately",
+      "threshold": "No cost renamed surface certificate",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-13-error_ledger.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-14",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P08"
+      ],
+      "fixture_id": "surface_bracket",
+      "fixture_description": "Known plane/thin features/near-threshold cases",
+      "method": "Symmetric decoded-output lower/upper enclosure",
+      "threshold": "G1 U<=1e-3D and width<=1e-5D; else reject/inconclusive",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB geometry",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-14-surface_bracket.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-15",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P04",
+        "P05",
+        "P08",
+        "P21"
+      ],
+      "fixture_id": "repeat_build",
+      "fixture_description": "Three identical source/asset builds",
+      "method": "Hash artifacts and source; specify arithmetic scope",
+      "threshold": "Three equal hashes where claimed",
+      "backend": "CPU",
+      "implementation_owner_role": "Hypermedia + Synth",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-15-repeat_build.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-16",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Optional research behavior excluded; required interfaces and truthful refusal remain applicable.",
+      "packet_owners": [
+        "P09"
+      ],
+      "fixture_id": "operator_conventions",
+      "fixture_description": "Pinned square, disconnected nullspaces",
+      "method": "Sign/mass/units/boundary/nullspace checks",
+      "threshold": "Declared conventions + downstream fixture",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB mathematics",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-16-operator_conventions.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-17",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Optional research behavior excluded; required interfaces and truthful refusal remain applicable.",
+      "packet_owners": [
+        "P09"
+      ],
+      "fixture_id": "algebraic_residual",
+      "fixture_description": "Pinned analytic sparse linear system",
+      "method": "Compute b-Ax independently of iteration helper",
+      "threshold": "Declared residual threshold, not iterate change",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB mathematics",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-17-algebraic_residual.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-18",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Optional research behavior excluded; required interfaces and truthful refusal remain applicable.",
+      "packet_owners": [
+        "P10"
+      ],
+      "fixture_id": "physical_authority",
+      "fixture_description": "Declared load/time/constitutive model",
+      "method": "Visual LOD changes while authoritative state retained",
+      "threshold": "No implicit solver replacement",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB physics adapters",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-18-physical_authority.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-19",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Optional research behavior excluded; required interfaces and truthful refusal remain applicable.",
+      "packet_owners": [
+        "P10"
+      ],
+      "fixture_id": "physical_guarantees",
+      "fixture_description": "Deformed/contact/inversion adversarial states",
+      "method": "Test declared assumptions and unsupported requests",
+      "threshold": "No unsupported guarantee accepted",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB physics adapters",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-19-physical_guarantees.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-20",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P11"
+      ],
+      "fixture_id": "legal_cuts",
+      "fixture_description": "Legal/illegal sibling replacement permutations",
+      "method": "CPU coverage validator plus codec roundtrip",
+      "threshold": "No holes/duplicate coverage",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB hierarchy",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-20-legal_cuts.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-21",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P16"
+      ],
+      "fixture_id": "view_bounds",
+      "fixture_description": "Perspective/orthographic/multiview/two-sided/camera cuts",
+      "method": "CPU/GPU conservative selection and pose-domain checks",
+      "threshold": "No false disappearance in admitted domain",
+      "backend": "Native + browser",
+      "implementation_owner_role": "Etalon selection",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-21-view_bounds.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-22",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P17"
+      ],
+      "fixture_id": "residency_fallback",
+      "fixture_description": "Page arrival/eviction permutations",
+      "method": "State-machine injection and real runtime integration",
+      "threshold": "Complete resident fallback cut",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Etalon runtime / QualiaDB resources",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-22-residency_fallback.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-23",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P18"
+      ],
+      "fixture_id": "draw_worklists",
+      "fixture_description": "Empty/all/alternating/exact/overflow selection",
+      "method": "Compare GPU compaction/indirect draws to CPU lists",
+      "threshold": "Exact worklist and bounded failure",
+      "backend": "Native + browser",
+      "implementation_owner_role": "Etalon GPU runtime",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-23-draw_worklists.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-24",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P12"
+      ],
+      "fixture_id": "semantic_ir",
+      "fixture_description": "Affine, reduction, sparse operator, selection",
+      "method": "Type/units/shapes/discretization/schedule/ABI checks",
+      "threshold": "No unsupported lowering accepted",
+      "backend": "CPU",
+      "implementation_owner_role": "Etalon Forge",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-24-semantic_ir.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-25",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P12"
+      ],
+      "fixture_id": "rewrite_guards",
+      "fixture_description": "Zero/nonfinite/domain-sensitive algebra cases",
+      "method": "Guarded-rule trace and independent evaluation",
+      "threshold": "Preserve declared arithmetic semantics",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Etalon Forge",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-25-rewrite_guards.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-26",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P05",
+        "P13",
+        "P18"
+      ],
+      "fixture_id": "bounds_barriers",
+      "fixture_description": "Odd tails, empty/ragged/max shapes, alias conflicts",
+      "method": "Shader validation + adversarial actual dispatch",
+      "threshold": "No out-of-bounds or invalid barrier admission",
+      "backend": "Native + browser",
+      "implementation_owner_role": "QualiaDB + Etalon",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-26-bounds_barriers.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-27",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Optional research behavior excluded; required interfaces and truthful refusal remain applicable.",
+      "packet_owners": [
+        "P12",
+        "P14"
+      ],
+      "fixture_id": "precision_profiles",
+      "fixture_description": "f32 versus paired-f32 backend probes",
+      "method": "Separate arithmetic domain and oracle records",
+      "threshold": "No universal f64 claim; disabled failed routes",
+      "backend": "Native + browser",
+      "implementation_owner_role": "Etalon Forge",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-27-precision_profiles.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-28",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P03",
+        "P13",
+        "P14"
+      ],
+      "fixture_id": "numeric_boundaries",
+      "fixture_description": "Cancellation/overflow/underflow/ill-conditioning",
+      "method": "Analytic or independent f64 reference",
+      "threshold": "K1 for well-conditioned inputs; declared refusals otherwise",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Independent QA",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-28-numeric_boundaries.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-29",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P04",
+        "P13",
+        "P14",
+        "P15"
+      ],
+      "fixture_id": "forge_stages",
+      "fixture_description": "Generated/Naga/pipeline/oracle/profile stages",
+      "method": "Retain actual checkpoints and adapter identity",
+      "threshold": "No silent skip promoted to pass",
+      "backend": "Native + browser",
+      "implementation_owner_role": "Hypermedia + Synth",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-29-forge_stages.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-30",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02",
+        "P15"
+      ],
+      "fixture_id": "cache_mutations",
+      "fixture_description": "Change source/semantics/ABI/schedule/precision/driver",
+      "method": "Recompute dependency closure and invalidation",
+      "threshold": "No stale evidence reuse",
+      "backend": "CPU + native",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-30-cache_mutations.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-31",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P03",
+        "P13",
+        "P22"
+      ],
+      "fixture_id": "independent_oracles",
+      "fixture_description": "Known-bad output, metamorphic transforms, adjoints",
+      "method": "Separate evaluator and counterexample tests",
+      "threshold": "Known-bad rejected; declared tolerance",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Independent QA",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-31-independent_oracles.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-32",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P19"
+      ],
+      "fixture_id": "tuning_gate",
+      "fixture_description": "Fast invalid candidate and fixed schedule baseline",
+      "method": "Frozen quality gates plus equal-budget search",
+      "threshold": "Invalid candidate never wins",
+      "backend": "Native",
+      "implementation_owner_role": "Etalon tuning",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-32-tuning_gate.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-33",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P20"
+      ],
+      "fixture_id": "activation_faults",
+      "fixture_description": "Incomplete dependencies/device loss/state migration",
+      "method": "Inject around boundary and test real lifecycle",
+      "threshold": "Atomic qualified set; explicit recovery/refusal",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Etalon runtime + QualiaDB authority",
+      "independent_reviewer_role": "Astra numerical reviewer",
+      "evidence_destination": "evidence/qualification/req-33-activation_faults.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-34",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02",
+        "P15"
+      ],
+      "fixture_id": "result_states",
+      "fixture_description": "Invalid/unsupported/constraint/capacity/cancel/oracle/inconclusive",
+      "method": "Validate typed non-success records",
+      "threshold": "No invented device/output/zero measurements",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-34-result_states.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-35",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P02",
+        "P15"
+      ],
+      "fixture_id": "schema_evolution",
+      "fixture_description": "Unknown fields, versions, oversized referenced arrays",
+      "method": "Strict schema + canonical byte/hash fixtures",
+      "threshold": "Reject or explicit negotiate; bounded resources",
+      "backend": "CPU",
+      "implementation_owner_role": "QualiaDB records / Etalon receipts",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-35-schema_evolution.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-36",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P04",
+        "P21"
+      ],
+      "fixture_id": "production_roundtrip",
+      "fixture_description": "Existing simplify/UV/compile operations and HMC",
+      "method": "Catalog consistency + .10d encode/decode + packaging",
+      "threshold": "150-count invariant unless agreed change",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Hypermedia + Synth",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-36-production_roundtrip.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-37",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P03",
+        "P22"
+      ],
+      "fixture_id": "corpus_manifest",
+      "fixture_description": "All eleven spec families with heldout split",
+      "method": "Hashes/rights/provenance and relevant route coverage",
+      "threshold": "Every applicable family represented",
+      "backend": "CPU + native + browser",
+      "implementation_owner_role": "Independent QA",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-37-corpus_manifest.json",
+      "execution_status": "not_executed"
+    },
+    {
+      "requirement": "REQ-38",
+      "applicability": "required in frozen core profile",
+      "applicability_note": "Applies directly to the declared core domain.",
+      "packet_owners": [
+        "P22"
+      ],
+      "fixture_id": "ablations",
+      "fixture_description": "Locks/attributes/transfers/precision/compaction/schedule",
+      "method": "Fixed-quality/fixed-cost comparisons including failures",
+      "threshold": "No silent exclusion or unmeasured result",
+      "backend": "CPU + native",
+      "implementation_owner_role": "Independent QA",
+      "independent_reviewer_role": "Independent QA/Sol reviewer",
+      "evidence_destination": "evidence/qualification/req-38-ablations.json",
+      "execution_status": "not_executed"
+    }
+  ]
+}

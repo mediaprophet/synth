@@ -1,0 +1,26 @@
+{
+  "adapter": {
+    "backend": "Dx12",
+    "device": 11608,
+    "device_type": "DiscreteGpu",
+    "driver": "32.0.16.2114",
+    "driver_info": "",
+    "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+    "vendor": 4318
+  },
+  "constraints": {
+    "max_invocations_per_workgroup": 1024,
+    "max_workgroup_size_x": 1024,
+    "max_workgroups_per_dimension": 65535,
+    "supports_coopmat": false,
+    "supports_rt_cores": true,
+    "supports_subgroups": true,
+    "warp_size": 32
+  },
+  "max_compute_workgroup_storage_size": 32768,
+  "max_storage_buffer_binding_size": 2147483644,
+  "memory_class": "discrete",
+  "min_storage_buffer_offset_alignment": 32,
+  "min_uniform_buffer_offset_alignment": 256,
+  "supports_timestamp_query": true
+}

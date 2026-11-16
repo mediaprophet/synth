@@ -1,0 +1,10 @@
+{
+  "command": "production_core_probe.exe OUTPUT_DIR NVIDIA",
+  "env_ETALON_WGPU_BACKEND": "dx12",
+  "outcome_exit_code": 0,
+  "wall_seconds": 3.8395811,
+  "source_sha256_before": "96663F313EA640EAAB33ED82D032FBCA85B86D9E5041FA02D693DA99E8BC95EB",
+  "source_sha256_after": "96663F313EA640EAAB33ED82D032FBCA85B86D9E5041FA02D693DA99E8BC95EB",
+  "executable_sha256": "FB21A09DF330C0FB6ACCC729A2EFF0AD0BEA81EDCCD70F9A286B5C74BA9EDB4D",
+  "output_dir": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\probe-native-dx12-20261116-01"
+}

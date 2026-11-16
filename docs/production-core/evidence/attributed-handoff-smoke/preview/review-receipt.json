@@ -1,0 +1,120 @@
+{
+  "projection": {
+    "bounds_max": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "bounds_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "camera_aspect": 1.0,
+    "camera_distance": 1.995579719543457,
+    "camera_fit_margin": 1.0800000429153442,
+    "camera_target": [
+      0.5,
+      0.5,
+      0.0
+    ],
+    "colors": "absent-renderer-default",
+    "lighting": {
+      "ambient_intensity": 0.44999998807907104,
+      "clear_color": [
+        0.3400000035762787,
+        0.3400000035762787,
+        0.3400000035762787,
+        1.0
+      ],
+      "direct_intensity": 1.7999999523162842,
+      "environment_additive_fallback_rgb": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sun_direction": [
+        0.40824830532073975,
+        0.8164966106414795,
+        0.40824830532073975
+      ]
+    },
+    "materials": "canonical-MAT1",
+    "normals": "authored",
+    "requested_camera_distance": 1.995579719543457,
+    "screen_space_ao_available": true,
+    "screen_space_ao_radius_m": 0.05000000074505806,
+    "screen_space_ao_samples": 12,
+    "screen_space_ao_strength": 0.75,
+    "shadows_available": true,
+    "tangents": "authored",
+    "texture_coordinates": "authored-UV01",
+    "triangle_count": 2,
+    "vertex_count": 6,
+    "vertical_tan_half_fov": 0.4142135679721832
+  },
+  "renderer": "QualiaDB webizen-render::VolumetricRenderer / PortalGpu native offscreen path",
+  "schema": "synth.native-10d-preview/v1",
+  "scope": "native readback PNG projection; not model acceptance or an adapter capability receipt",
+  "source": {
+    "bytes": 2072,
+    "path": "\\\\?\\C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\export\\fixture.10d",
+    "sha256": "5d2396ae090f9eab7a7339556beee322a997fb5979d4d173a92b3cb1dc5fe56c"
+  },
+  "textures": {
+    "asset_key": "outputs/fixture.10d",
+    "hmc_sha256": "fe941704c37c5c4505f24f624e65b0157ccea27f108a6e412edf3d9207d221d6",
+    "requested": 0,
+    "resident": 0
+  },
+  "views": [
+    {
+      "bytes": 95672,
+      "camera_distance_applied": 1.995579719543457,
+      "camera_distance_requested": 1.995579719543457,
+      "camera_pitch": 0.2800000011920929,
+      "camera_target": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "camera_yaw": 0.7200000286102295,
+      "file": "three-quarter-view-assumed.png",
+      "height": 2048,
+      "sha256": "4d9e02334e2dfc351addde2ecf72f468bbdaa82100a2b0fa6e5f3d4ad4b5defd",
+      "width": 2048
+    },
+    {
+      "bytes": 86138,
+      "camera_distance_applied": 1.995579719543457,
+      "camera_distance_requested": 1.995579719543457,
+      "camera_pitch": 0.11999999731779099,
+      "camera_target": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "camera_yaw": 1.5707963705062866,
+      "file": "side-view-assumed.png",
+      "height": 2048,
+      "sha256": "40d2c370da9d72f6c0a63a7d4533f0b06d30be0e25833a19648d6e4e69350ff7",
+      "width": 2048
+    },
+    {
+      "bytes": 93139,
+      "camera_distance_applied": 1.995579719543457,
+      "camera_distance_requested": 1.995579719543457,
+      "camera_pitch": 0.11999999731779099,
+      "camera_target": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "camera_yaw": 0.0,
+      "file": "front-view-assumed.png",
+      "height": 2048,
+      "sha256": "7dc6d1ef4d2414344e8a61e6762fa43f9777b2dc14f0a9fead40d2c8265f2c28",
+      "width": 2048
+    }
+  ]
+}

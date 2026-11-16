@@ -1,0 +1,248 @@
+{
+  "schema": "specification-research-source-evidence/0.2",
+  "research_date_local": "2026-11-16",
+  "timezone": "Australia/Sydney",
+  "captured_at_utc": "2026-11-16T06:09:56.550658+00:00",
+  "purpose": "Working-tree source identity at package assembly; no runtime qualification implied",
+  "tests_executed": false,
+  "repositories": [
+    {
+      "path": "C:/github/qualiaDB",
+      "head": "7f6057a743937173260c1d62d670283214a1d09a",
+      "scope": "HEAD observation only; file hashes identify working-tree bytes"
+    },
+    {
+      "path": "C:/github/etalon",
+      "head": "785ab9c1b7d729db9afcd9b0f3fd70344b37be1e",
+      "scope": "HEAD observation only; file hashes identify working-tree bytes"
+    },
+    {
+      "path": "C:/github/hypermedia-production",
+      "head": "8321792cb700cdac90adf1b1ef8accdc039597f1",
+      "scope": "HEAD observation only; file hashes identify working-tree bytes"
+    },
+    {
+      "path": "C:/github/synth",
+      "head": "0d08884612f387685eb96e5ddd0a2085c1f1ff02",
+      "scope": "HEAD observation only; file hashes identify working-tree bytes"
+    }
+  ],
+  "files": [
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/ir.rs",
+      "bytes": 12354,
+      "sha256": "ce5f809a89292b3c3cf701e8df185196a92df1ff350a586c5754027d3410f521",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/lib.rs",
+      "bytes": 2312,
+      "sha256": "61c68b403321ad46099ed7d82fb4d3adfe24352794f8250789361807885858dc",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/numerical/emit/df64.rs",
+      "bytes": 7096,
+      "sha256": "f330e0f04e0ec67ce7a9c21d9315364d06876ddc7256c33f7c8be543532fca7b",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/numerical/ir/graph.rs",
+      "bytes": 26407,
+      "sha256": "3b1627ad97f512d200c38dd85a4ba40b63443404aaf733d70743b8a8d18d4f7c",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/numerical/manifest.rs",
+      "bytes": 12789,
+      "sha256": "475884a436c2320c36f790269156f2ef1fcf4ba5ab2c7aeb36d61edc68e51d04",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/numerical/physics/cull_and_lod.rs",
+      "bytes": 15003,
+      "sha256": "6d30978a720147114485bf2580fa69f34eeb38d2c7a3d5c2373c08fa52d4d586",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/etalon/crates/etalon-wgsl-forge/src/numerical/physics/xpbd_volume.rs",
+      "bytes": 12656,
+      "sha256": "ca775d7a98bfd19ed1c45396c1aeb3a25aacae3b1ffdc3797a00538d1fcbe220",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/hypermedia-production/audit-docs/FUNCTIONS.md",
+      "bytes": 1027971,
+      "sha256": "179355b67c115afee7fe565e40c520f41194cd2f0180ab801a3aa4f7cffa9186",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/hypermedia-production/crates/asset-production-vibe/src/manifold_ops.rs",
+      "bytes": 95221,
+      "sha256": "8b07bbc50b9693b70e214fabcc4ec8bf36161b553cce8e3a2a5712358fe0e860",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/container_10d/cluster_dag_section.rs",
+      "bytes": 21024,
+      "sha256": "acfeb4b7a8b28f4f70c4a0b414bdc136038592fb3bf0b60ddb1fd35d92749d19",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/container_10d/correspondence_section.rs",
+      "bytes": 17443,
+      "sha256": "c3076cc0b88802ad46b6a250df94646fdadcd70451bf7e47b9949ce183e2824a",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/container_10d/section.rs",
+      "bytes": 49408,
+      "sha256": "a2fed80c105563a716416f51faaa5a3c514431fbe70aa35f7e25f8a8116b2b31",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/entity_view/bifurcation.rs",
+      "bytes": 9694,
+      "sha256": "a51681b328b07007f77222e39231675fbda8738e8da3d609f5194de46332e424",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/analysis.rs",
+      "bytes": 16526,
+      "sha256": "8c22891960f75babababdd8f00fe807537b3fe34087e17cb8bd94de1c9a93e67",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/capabilities.rs",
+      "bytes": 8736,
+      "sha256": "0051f870caff6e6d8c0adda04262af5a91f82bbae9866bdb6e7bfbc54fb44818",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/differential.rs",
+      "bytes": 12382,
+      "sha256": "0668ebe8c2f4b7ba5265571ade9db0eb650f47a6678bbcf54230b1559b73961f",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/exterior.rs",
+      "bytes": 7813,
+      "sha256": "c80b0f72a37bc10561b3829a51761dad24ba2f214fd92fd46d6d2ce6821d444d",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/manifold.rs",
+      "bytes": 6562,
+      "sha256": "2d45ff6c5039bf8283f9dad3cff75f7989d1234a70cca0ee2b851e30062a2df7",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/calculus/workspace.rs",
+      "bytes": 3009,
+      "sha256": "0130c76cdebfc018e99f4c6fe968d06a279a834d6a07f918dbd621cf328d61be",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/linear_algebra/cholesky.rs",
+      "bytes": 5714,
+      "sha256": "ea23668e0eaf8d39f10c72108e2a528cb384a011a0f72646f35c878dce5d285f",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/linear_algebra/eigen.rs",
+      "bytes": 8549,
+      "sha256": "2f11484245b8e82033f44bc4b5d90c6955c8d8844f60c85e08aa74b51c243697",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/linear_algebra/mod.rs",
+      "bytes": 20926,
+      "sha256": "2426df3b6618eed86c0107b98e5e713f12bdf4b15aaafecf7b435778cb1318b8",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/linear_algebra/svd.rs",
+      "bytes": 5696,
+      "sha256": "3d020de9dc6d6bc077040b92107fcd52a72ce0b6c250e431cd7e3e93c7b6f2f8",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/solvers/units/dimension.rs",
+      "bytes": 5071,
+      "sha256": "84964876d442093a9617b1ed30f42af7f6f29d44806b5630aa322766e2ac58ea",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/anisotropic_remesh.rs",
+      "bytes": 35071,
+      "sha256": "6d38ba9b50240c6e9dd7fb050e84101db34a72f8c51dc6c042edecf862c1eb21",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/ddg_operators.rs",
+      "bytes": 29338,
+      "sha256": "6897089ebde2e21c6b3b94e3e0ea22a8cc046af74894cdb015123606e26fddb4",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3.rs",
+      "bytes": 62249,
+      "sha256": "6c18046006468e872bdd0e200bccf755c19b8f2d321a267a134ad385931d1fa7",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic.rs",
+      "bytes": 27241,
+      "sha256": "a0a415dfc5a2a1317d19fd139ef8a7d189776d22d30dd4affc706f7040bd7550",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/geometry_workspace.rs",
+      "bytes": 35950,
+      "sha256": "66d2a5464d870f51565689ac7f9d294e23bdae60322090476b354969f41b5d9e",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/heat_geodesics.rs",
+      "bytes": 7335,
+      "sha256": "07da61c89ef73f2a259ce9a5da304b14f90498f99989672a84a0d37f31b1aed6",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/kernel.rs",
+      "bytes": 18805,
+      "sha256": "6cde5b0998b64b949ab196eee3c92b7debe3dfe5d5b55116e02479a7fcd07eb1",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/laplacian_3d.rs",
+      "bytes": 16904,
+      "sha256": "239fde152908dd7b78df3100bb85743240e6f3fcd4d2312d5a607666cb6569e0",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/mesh_quality.rs",
+      "bytes": 53906,
+      "sha256": "8bb59d05e8e0faba54e7c591faf5184f19875b02827d9178a6fa259a320be209",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/symbolic_algebra.rs",
+      "bytes": 48534,
+      "sha256": "da0c3ac2ff7bd2b18eb9d691fe5233365be83754a0c7748847597cabefcb1238",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/crates/qualia-core-db/src/specialized_libs/symbolic_assumptions.rs",
+      "bytes": 10455,
+      "sha256": "476da3df90ea0f5c18c23aa7f48b9d03c63760a80ebd826a38444bc6368dde22",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    },
+    {
+      "path": "C:/github/qualiaDB/docs/manuals/wgsl-forge.md",
+      "bytes": 5680,
+      "sha256": "99c2a44aea138b482f3ab53e838982a4541bd05900689ed78dd3e7d98ed944a6",
+      "inspection_scope": "Selected declarations, implementation sections, registry entries, or documentation; not a complete file audit"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Synth files/2 candidate saved: \\?\C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\joined-tracer-01\production-2.hmc
+SHA-256: 3bb1000d9893f4f501bbbd8ae1032eaa5c3869ffc8126480b93ea49501e30260; outputs: 5; revision: 1
+Exported: C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\joined-tracer-01\export-2
+Presented: C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\joined-tracer-01\production-2.html

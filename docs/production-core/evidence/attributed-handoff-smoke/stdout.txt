@@ -1,0 +1,4 @@
+Synth files/2 candidate saved: \\?\C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\attributed-handoff-smoke\fixture.hmc
+SHA-256: fe941704c37c5c4505f24f624e65b0157ccea27f108a6e412edf3d9207d221d6; outputs: 1; revision: 1
+Exported: C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\attributed-handoff-smoke\export
+Presented: C:\Users\Hp\.codex\worktrees\qualia-etalon-production-core\synth\docs\production-core\evidence\attributed-handoff-smoke\fixture.html

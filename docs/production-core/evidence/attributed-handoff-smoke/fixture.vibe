@@ -1,0 +1,4 @@
+requires [capability("capability.invoke")];
+let mesh = capability.invoke("hypermedia.manifold.import_mesh", {input:"fixture.glb",format:"glb"});
+let sealed = capability.invoke("hypermedia.manifold.compile_10d_pbr", {mesh:mesh,topology:true,spatial_index:true});
+let mut asset={files:[{key:"fixture.10d",resource:sealed}]};

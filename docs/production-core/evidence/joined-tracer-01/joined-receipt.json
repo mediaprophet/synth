@@ -1,0 +1,751 @@
+{
+  "schema": "production-core.joined-tracer/v1",
+  "status": "passed_numeric_and_packaging_pending_visual_review",
+  "started_at": "2026-11-16T10:28:18.072578+00:00",
+  "mode": "joined",
+  "commands": [
+    {
+      "label": "geometry-1",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-1"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.04881850001402199,
+      "stdout": "geometry-1.stdout.txt",
+      "stderr": "geometry-1.stderr.txt"
+    },
+    {
+      "label": "geometry-2",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-2"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.048275900015141815,
+      "stdout": "geometry-2.stdout.txt",
+      "stderr": "geometry-2.stderr.txt"
+    },
+    {
+      "label": "geometry-3",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-3"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.046862199960742146,
+      "stdout": "geometry-3.stdout.txt",
+      "stderr": "geometry-3.stderr.txt"
+    },
+    {
+      "label": "negative-empty",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\negative-empty",
+        "--empty"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 2,
+      "wall_seconds": 0.009370099985972047,
+      "stdout": "negative-empty.stdout.txt",
+      "stderr": "negative-empty.stderr.txt"
+    },
+    {
+      "label": "negative-target",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\negative-target",
+        "--target-faces",
+        "0"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 2,
+      "wall_seconds": 0.047247799986507744,
+      "stdout": "negative-target.stdout.txt",
+      "stderr": "negative-target.stderr.txt"
+    },
+    {
+      "label": "forge-asset",
+      "argv": [
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\forge-asset",
+        "NVIDIA",
+        "--vertices-json",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-1\\decoded-vertices.json",
+        "--asset-sha256",
+        "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 1.9934783999924548,
+      "stdout": "forge-asset.stdout.txt",
+      "stderr": "forge-asset.stderr.txt"
+    },
+    {
+      "label": "produce-1",
+      "argv": [
+        "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "produce",
+        "--profile",
+        "files",
+        "--source",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-core.vibe",
+        "--input",
+        "gpu-derived.glb",
+        "glb",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\gpu-derived.glb",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-1.hmc",
+        "--export-dir",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\export-1",
+        "--present",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-1.html"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.41391940001631156,
+      "stdout": "produce-1.stdout.txt",
+      "stderr": "produce-1.stderr.txt"
+    },
+    {
+      "label": "produce-2",
+      "argv": [
+        "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "produce",
+        "--profile",
+        "files",
+        "--source",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-core.vibe",
+        "--input",
+        "gpu-derived.glb",
+        "glb",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\gpu-derived.glb",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-2.hmc",
+        "--export-dir",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\export-2",
+        "--present",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-2.html"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.391244700003881,
+      "stdout": "produce-2.stdout.txt",
+      "stderr": "produce-2.stderr.txt"
+    },
+    {
+      "label": "produce-3",
+      "argv": [
+        "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "produce",
+        "--profile",
+        "files",
+        "--source",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-core.vibe",
+        "--input",
+        "gpu-derived.glb",
+        "glb",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\gpu-derived.glb",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-3.hmc",
+        "--export-dir",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\export-3",
+        "--present",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-3.html"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 0.40536440000869334,
+      "stdout": "produce-3.stdout.txt",
+      "stderr": "produce-3.stderr.txt"
+    },
+    {
+      "label": "preview-derived",
+      "argv": [
+        "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "preview",
+        "--asset",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\export-1\\gpu-derived.10d",
+        "--out",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\preview-derived",
+        "--hmc",
+        "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\production-1.hmc",
+        "--asset-key",
+        "outputs/gpu-derived.10d"
+      ],
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\joined-tracer-01",
+      "environment_overrides": {
+        "ETALON_WGPU_BACKEND": "dx12"
+      },
+      "exit_code": 0,
+      "wall_seconds": 8.113619400013704,
+      "stdout": "preview-derived.stdout.txt",
+      "stderr": "preview-derived.stderr.txt"
+    }
+  ],
+  "executables": {
+    "geometry_exe": {
+      "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+      "sha256": "8b4188f7087148818e02001d54c68da9240c0febdab04f67da43775fa304d51e",
+      "present": true
+    },
+    "forge_exe": {
+      "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+      "sha256": "fb21a09df330c0fb6accc729a2eff0ad0bea81edccd70f9a286b5c74ba9edb4d",
+      "present": true
+    },
+    "synth_exe": {
+      "path": "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+      "sha256": "62095c5c1c126bfade382c1251a6293be9c87b41abb88902dedc834ff742618e",
+      "present": true
+    }
+  },
+  "limitations": [
+    "Integration tracer, not full production-core acceptance.",
+    "Semantic policy is library-level; public simplify remains geometric until later production integration.",
+    "No whole-surface bound, collapse provenance map, operator or physical qualification.",
+    "Supplied Synth executable provenance is its recorded binary hash; source equivalence is not assumed.",
+    "Runner log capture is not P05 total-memory/cancellation qualification; commands have a 600-second timeout.",
+    "Final production .10d sealing fidelity is not independently decoded here; visual review cannot certify UV/material retention.",
+    "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical.",
+    "Geometry example previously failed E0277 LowerHex on format!(\"{:x}\", Sha256::digest(bytes)); the repair is now built (qualiaDB/target-production-core/debug/examples/production_core_geometry.exe exists). Execution is not qualification; no GPU receipt is invented.",
+    "Library present, callable, executed and qualified are distinct; source on disk is not qualification.",
+    "GPU-identical timing is not claimed."
+  ],
+  "capability_states": {
+    "admitted_geometry_library": {
+      "present": true,
+      "callable": true,
+      "executed": true,
+      "qualified": false,
+      "state": "executed",
+      "public_api": "decimate_3_semantic::admission::decimate_semantic_admitted_3",
+      "parent_export": true,
+      "note": "Source presence is not compilation, execution or qualification."
+    },
+    "admitted_geometry_example": {
+      "present": true,
+      "callable": true,
+      "executed": true,
+      "qualified": false,
+      "state": "executed",
+      "source_wired_to_admitted_driver": true,
+      "lowerhex_repair_in_source": true,
+      "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+      "note": "Example is the admitted semantic path. Callable means the rebuilt binary exists; inspect does not execute it."
+    },
+    "etalon_production_core_probe": {
+      "present": true,
+      "callable": true,
+      "executed": true,
+      "qualified": false,
+      "state": "executed",
+      "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+      "prior_native_baseline": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\forge-native-baseline\\probe.json",
+      "note": "Prior native DX12 baseline is separate evidence and is not replayed by inspect."
+    },
+    "producer_glb_smoke": {
+      "present": true,
+      "callable": true,
+      "executed": true,
+      "qualified": false,
+      "state": "executed",
+      "executable": "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+      "prior_attributed_handoff_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+      "note": "Historical packaging smoke is not joined admitted-geometry qualification."
+    }
+  },
+  "documented_commands": [
+    {
+      "id": "qualiadb-production-core-geometry",
+      "title": "QualiaDB example production_core_geometry (admitted semantic path)",
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+      "notes": [
+        "Example source calls decimate_semantic_admitted_3; this is not a compiled binary.",
+        "Previous cargo build exited 101 on SHA-256 LowerHex formatting; source repair is unbuilt.",
+        "Do not invent a passing geometry receipt. Do not rebuild into synth target or target-studio."
+      ],
+      "build_powershell": [
+        "$env:CARGO_BUILD_JOBS = '1'",
+        "$env:CARGO_INCREMENTAL = '0'",
+        "$env:RUSTFLAGS = '-C debuginfo=0'",
+        "cargo --config .cargo/production-core.toml build --offline --no-default-features -p qualia-core-db --example production_core_geometry --target-dir target-production-core"
+      ],
+      "run_powershell": [
+        "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir>",
+        "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --empty",
+        "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --target-faces 0"
+      ]
+    },
+    {
+      "id": "etalon-production-core-probe",
+      "title": "Etalon production_core_probe",
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+      "notes": [
+        "Fixed AffineF32 kernel only. Optional --vertices-json requires a real decoded geometry asset.",
+        "Prior native DX12 baseline is separate evidence; this command list is not a GPU replay.",
+        "GPU timestamp samples are not byte-identical across runs."
+      ],
+      "build_powershell": [
+        "$env:CARGO_TARGET_DIR = 'C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core'",
+        "cargo build --locked --offline -p etalon-wgsl-forge --example production_core_probe --features gpu-native-dx12"
+      ],
+      "run_powershell": [
+        "$env:ETALON_WGPU_BACKEND = 'dx12'",
+        "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA",
+        "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA --vertices-json <decoded-vertices.json> --asset-sha256 <simplified.10d-sha256>"
+      ]
+    },
+    {
+      "id": "producer-glb-smoke",
+      "title": "Existing producer GLB smoke / joined tracer packaging",
+      "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+      "notes": [
+        "Attributed-handoff-smoke already recorded a packaging pass of a six-vertex fixture.",
+        "Joined tracer produce/preview uses the same cached producer binary identity; source equivalence is not assumed.",
+        "Three HMC repeats test packaging hashes, not three independent GPU timing receipts."
+      ],
+      "historical_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+      "inspect_powershell": [
+        "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\admitted_geometry_probe.py\" --out <new-create-only-dir> --inspect-only"
+      ],
+      "run_powershell": [
+        "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --inspect-only --out <new-create-only-dir>",
+        "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --geometry-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --forge-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" --synth-exe \"C:\\github\\synth\\target-prod\\debug\\synth.exe\" --out <new-create-only-dir>"
+      ]
+    }
+  ],
+  "sha256_lowerhex_history": {
+    "schema": "production-core.sha256-lowerhex-history/v1",
+    "previous_failure": {
+      "error": "E0277",
+      "message": "the trait bound Array<u8, ...>: LowerHex is not satisfied",
+      "example": "crates/qualia-core-db/examples/production_core_geometry.rs",
+      "source_line_then": "format!(\"{:x}\", Sha256::digest(bytes))",
+      "rustc_note": "generic SHA2 digest array does not implement fmt::LowerHex",
+      "log": "qualiaDB/target-production-core/geometry-build-01.log",
+      "long_type": "qualiaDB/target-production-core/debug/examples/production_core_geometry.long-type-10344221273783986174.txt",
+      "cargo_exit": 101,
+      "observed_log_span_utc": [
+        "2026-11-16T06:52:05.969Z",
+        "2026-11-16T07:32:30.054Z"
+      ],
+      "observed_log_span_is_not_full_command_duration": true
+    },
+    "repair": {
+      "location": "examples/production_core_geometry.rs sha256()",
+      "method": "explicit nibble encoding over Sha256::digest(bytes).iter()",
+      "status": "rebuilt",
+      "passing_receipt": "tracer_run_not_qualification",
+      "rebuild_required": false,
+      "binary": "qualiaDB/target-production-core/debug/examples/production_core_geometry.exe",
+      "tracer_receipt": "synth/docs/production-core/evidence/admitted-geometry-run-01/geometry-receipt.json"
+    }
+  },
+  "determinism_boundary": "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical.",
+  "joined_three_geometry_builds_are_not_three_gpu_runs": true,
+  "gpu_identical_timing_claimed": false,
+  "invented_passing_geometry_receipt": false,
+  "incomplete_core_checklist": [
+    {
+      "item": "geometry_example_rebuilt_after_lowerhex_repair",
+      "status": "done"
+    },
+    {
+      "item": "admitted_geometry_executable",
+      "status": "present"
+    },
+    {
+      "item": "joined_tracer_execution",
+      "status": "not_executed"
+    },
+    {
+      "item": "p01_p03_accepted",
+      "status": "open"
+    },
+    {
+      "item": "public_hypermedia_simplify_semantic",
+      "status": "source_wired_uncompiled"
+    },
+    {
+      "item": "whole_surface_bound",
+      "status": "not_measured"
+    },
+    {
+      "item": "collapse_provenance_qualification",
+      "status": "not_executed"
+    },
+    {
+      "item": "operator_or_physical_qualification",
+      "status": "not_executed"
+    },
+    {
+      "item": "final_10d_sealing_independently_decoded",
+      "status": "not_executed"
+    },
+    {
+      "item": "gpu_timing_byte_identical_across_repeats",
+      "status": "not_claimed"
+    },
+    {
+      "item": "cached_synth_exe_source_equivalence",
+      "status": "not_established"
+    },
+    {
+      "item": "p02_p05_p06_p07_compiled_together",
+      "status": "compiled"
+    }
+  ],
+  "admitted_geometry_inspection": {
+    "schema": "production-core.admitted-geometry-probe/v1",
+    "worktrees": {
+      "root": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core",
+      "synth": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+      "qualiaDB": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+      "etalon": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+      "hypermedia": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\hypermedia-production"
+    },
+    "sources": {
+      "example": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\examples\\production_core_geometry.rs",
+        "present": true,
+        "sha256": "5a19d5ed4fcdf052e938eb9cc176dadd23fcc2709583af31107f719c1d9bbb62",
+        "required_snippets": {
+          "decimate_semantic_admitted_3": true,
+          "const HEX:": true,
+          "Sha256::digest": true
+        },
+        "forbidden_snippets": {
+          "format!(\"{:x}\", Sha256::digest": false
+        }
+      },
+      "admission": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic\\admission.rs",
+        "present": true,
+        "sha256": "a6fa9ed58e1aabe73932ded9ef92073dfc43e2102146266422c5a01df55657aa",
+        "required_snippets": {
+          "pub fn decimate_semantic_admitted_3": true
+        },
+        "forbidden_snippets": {}
+      },
+      "semantic_mod": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic.rs",
+        "present": true,
+        "sha256": "0fb56b68fbe4df8ab49bfeb1a4373e63a1c478fb831e27fc745f0a62367ea4d9",
+        "required_snippets": {
+          "pub mod admission": true
+        },
+        "forbidden_snippets": {}
+      },
+      "forge_example": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\crates\\etalon-wgsl-forge\\examples\\production_core_probe.rs",
+        "present": true,
+        "sha256": "96663f313ea640eaab33ed82d032fbca85b86d9e5041fa02d693da99e8bc95eb",
+        "required_snippets": {
+          "production_core_probe": true,
+          "AffineF32": true
+        },
+        "forbidden_snippets": {}
+      }
+    },
+    "sha256_lowerhex_history": {
+      "schema": "production-core.sha256-lowerhex-history/v1",
+      "previous_failure": {
+        "error": "E0277",
+        "message": "the trait bound Array<u8, ...>: LowerHex is not satisfied",
+        "example": "crates/qualia-core-db/examples/production_core_geometry.rs",
+        "source_line_then": "format!(\"{:x}\", Sha256::digest(bytes))",
+        "rustc_note": "generic SHA2 digest array does not implement fmt::LowerHex",
+        "log": "qualiaDB/target-production-core/geometry-build-01.log",
+        "long_type": "qualiaDB/target-production-core/debug/examples/production_core_geometry.long-type-10344221273783986174.txt",
+        "cargo_exit": 101,
+        "observed_log_span_utc": [
+          "2026-11-16T06:52:05.969Z",
+          "2026-11-16T07:32:30.054Z"
+        ],
+        "observed_log_span_is_not_full_command_duration": true
+      },
+      "repair": {
+        "location": "examples/production_core_geometry.rs sha256()",
+        "method": "explicit nibble encoding over Sha256::digest(bytes).iter()",
+        "status": "rebuilt",
+        "passing_receipt": "tracer_run_not_qualification",
+        "rebuild_required": false,
+        "binary": "qualiaDB/target-production-core/debug/examples/production_core_geometry.exe",
+        "tracer_receipt": "synth/docs/production-core/evidence/admitted-geometry-run-01/geometry-receipt.json"
+      }
+    },
+    "lowerhex_repair_in_source": true,
+    "previous_build_log": {
+      "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\geometry-build-01.log",
+      "present": true,
+      "records_e0277_lowerhex": true
+    },
+    "capabilities": {
+      "admitted_geometry_library": {
+        "present": true,
+        "callable": true,
+        "executed": true,
+        "qualified": false,
+        "state": "executed",
+        "public_api": "decimate_3_semantic::admission::decimate_semantic_admitted_3",
+        "parent_export": true,
+        "note": "Source presence is not compilation, execution or qualification."
+      },
+      "admitted_geometry_example": {
+        "present": true,
+        "callable": true,
+        "executed": true,
+        "qualified": false,
+        "state": "executed",
+        "source_wired_to_admitted_driver": true,
+        "lowerhex_repair_in_source": true,
+        "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "note": "Example is the admitted semantic path. Callable means the rebuilt binary exists; inspect does not execute it."
+      },
+      "etalon_production_core_probe": {
+        "present": true,
+        "callable": true,
+        "executed": true,
+        "qualified": false,
+        "state": "executed",
+        "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+        "prior_native_baseline": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\forge-native-baseline\\probe.json",
+        "note": "Prior native DX12 baseline is separate evidence and is not replayed by inspect."
+      },
+      "producer_glb_smoke": {
+        "present": true,
+        "callable": true,
+        "executed": true,
+        "qualified": false,
+        "state": "executed",
+        "executable": "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "prior_attributed_handoff_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "note": "Historical packaging smoke is not joined admitted-geometry qualification."
+      }
+    },
+    "documented_commands": [
+      {
+        "id": "qualiadb-production-core-geometry",
+        "title": "QualiaDB example production_core_geometry (admitted semantic path)",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+        "notes": [
+          "Example source calls decimate_semantic_admitted_3; this is not a compiled binary.",
+          "Previous cargo build exited 101 on SHA-256 LowerHex formatting; source repair is unbuilt.",
+          "Do not invent a passing geometry receipt. Do not rebuild into synth target or target-studio."
+        ],
+        "build_powershell": [
+          "$env:CARGO_BUILD_JOBS = '1'",
+          "$env:CARGO_INCREMENTAL = '0'",
+          "$env:RUSTFLAGS = '-C debuginfo=0'",
+          "cargo --config .cargo/production-core.toml build --offline --no-default-features -p qualia-core-db --example production_core_geometry --target-dir target-production-core"
+        ],
+        "run_powershell": [
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir>",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --empty",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --target-faces 0"
+        ]
+      },
+      {
+        "id": "etalon-production-core-probe",
+        "title": "Etalon production_core_probe",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+        "notes": [
+          "Fixed AffineF32 kernel only. Optional --vertices-json requires a real decoded geometry asset.",
+          "Prior native DX12 baseline is separate evidence; this command list is not a GPU replay.",
+          "GPU timestamp samples are not byte-identical across runs."
+        ],
+        "build_powershell": [
+          "$env:CARGO_TARGET_DIR = 'C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core'",
+          "cargo build --locked --offline -p etalon-wgsl-forge --example production_core_probe --features gpu-native-dx12"
+        ],
+        "run_powershell": [
+          "$env:ETALON_WGPU_BACKEND = 'dx12'",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA --vertices-json <decoded-vertices.json> --asset-sha256 <simplified.10d-sha256>"
+        ]
+      },
+      {
+        "id": "producer-glb-smoke",
+        "title": "Existing producer GLB smoke / joined tracer packaging",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+        "notes": [
+          "Attributed-handoff-smoke already recorded a packaging pass of a six-vertex fixture.",
+          "Joined tracer produce/preview uses the same cached producer binary identity; source equivalence is not assumed.",
+          "Three HMC repeats test packaging hashes, not three independent GPU timing receipts."
+        ],
+        "historical_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "inspect_powershell": [
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\admitted_geometry_probe.py\" --out <new-create-only-dir> --inspect-only"
+        ],
+        "run_powershell": [
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --inspect-only --out <new-create-only-dir>",
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --geometry-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --forge-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" --synth-exe \"C:\\github\\synth\\target-prod\\debug\\synth.exe\" --out <new-create-only-dir>"
+        ]
+      }
+    ],
+    "determinism_boundary": "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical.",
+    "joined_three_geometry_builds_are_not_three_gpu_runs": true,
+    "gpu_identical_timing_claimed": false,
+    "invented_passing_geometry_receipt": false,
+    "incomplete_core_checklist": [
+      {
+        "item": "geometry_example_rebuilt_after_lowerhex_repair",
+        "status": "done"
+      },
+      {
+        "item": "admitted_geometry_executable",
+        "status": "present"
+      },
+      {
+        "item": "joined_tracer_execution",
+        "status": "not_executed"
+      },
+      {
+        "item": "p01_p03_accepted",
+        "status": "open"
+      },
+      {
+        "item": "public_hypermedia_simplify_semantic",
+        "status": "source_wired_uncompiled"
+      },
+      {
+        "item": "whole_surface_bound",
+        "status": "not_measured"
+      },
+      {
+        "item": "collapse_provenance_qualification",
+        "status": "not_executed"
+      },
+      {
+        "item": "operator_or_physical_qualification",
+        "status": "not_executed"
+      },
+      {
+        "item": "final_10d_sealing_independently_decoded",
+        "status": "not_executed"
+      },
+      {
+        "item": "gpu_timing_byte_identical_across_repeats",
+        "status": "not_claimed"
+      },
+      {
+        "item": "cached_synth_exe_source_equivalence",
+        "status": "not_established"
+      },
+      {
+        "item": "p02_p05_p06_p07_compiled_together",
+        "status": "compiled"
+      }
+    ],
+    "inspect_executed_gpu": false,
+    "inspect_ran_cargo": false,
+    "sha256_lowerhex_encoding": {
+      "algorithm": "explicit_nibble_lowercase_hex",
+      "marker": "production-core-lowerhex-marker",
+      "digest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "hashlib_hexdigest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "note": "Matching Python encodings do not qualify the QualiaDB example."
+    }
+  },
+  "geometry_invocation": "admitted_semantic_decimate_semantic_admitted_3",
+  "geometry_repeat_hashes": {
+    "source.10d": "a01a417f7d4557841049ea30d5acc9eef7e495b0d23db28b446145451c94510a",
+    "simplified.10d": "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d",
+    "source-attributes.json": "f469ffcda57cae0f13f8894183696d579eaddfd0b3ca57e0176afc6542ce15de",
+    "decoded-vertices.json": "27e9411767a35a505babe1cd65f883624ba4bce1b0fe42e09b207414b3b92fdd",
+    "decoded-triangles.json": "ea977a0200675d85b99d62b4bf1a20351dddd54cb71c829c9e3d058629d5eb59",
+    "attributes.json": "88807ad2885ae623c62f5dcc6fba89ba03fbffc7195a92b85ee63c70c87f4e49"
+  },
+  "geometry_repeat_scope": "three admitted-geometry asset builds from one executable; not three independent GPU runs",
+  "kernel_identity": {
+    "wgsl_blake3": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e",
+    "semantic_hash": "5ad91ac72d82f4b43cb70e65027c2e4ab79ebbfbe2e2b9d599780bf07c5389c7",
+    "schedule": {
+      "workgroup_size": 64,
+      "items_per_invocation": 2,
+      "vector_width": 4
+    },
+    "adapter": {
+      "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+      "vendor": 4318,
+      "device": 11608,
+      "device_type": "DiscreteGpu",
+      "backend": "Dx12",
+      "driver": "32.0.16.2114",
+      "driver_info": ""
+    },
+    "seeded_oracle": "existing CPU f32 mul_add; independent binary64 asset oracle recorded separately",
+    "gpu_timing_not_byte_deterministic": true
+  },
+  "asset_join": {
+    "source_10d_sha256": "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d",
+    "decoded_json_sha256": "27e9411767a35a505babe1cd65f883624ba4bce1b0fe42e09b207414b3b92fdd",
+    "derived_json_sha256": "0cd47c203b8aeb764edb8dc07fd6499664172dffe34ddd7a408c8161ff9fa2aa",
+    "geometry_decode_method": "existing QualiaDB decode_10d_mesh inside geometry executable; artifact hashes checked here",
+    "source_binding_verified": true,
+    "independently_recomputed_blake3": {
+      "vertices_json_blake3": "d5fd0bb17ca858610c32a9b59598588922ef1c84a40858194bd23b091e5f9ead",
+      "decoded_f32_blake3": "5620d6ee5c499c9459323c01533c20b58a38e8a57a566bf116398094519f1c24",
+      "output_f32_blake3": "7fb4862b153587fb8c6818838ae1dfa05f99f016dcb3c8c30ef51f32c1e1db9c"
+    },
+    "oracle": {
+      "compared": 78,
+      "maximum_absolute_error": 2.9802322387695312e-08,
+      "reference": "independent Python binary64 on source f32",
+      "absolute_tolerance": 1e-06,
+      "relative_tolerance": 1e-05,
+      "known_bad_output_rejected": true
+    }
+  },
+  "production": {
+    "source_sha256": "3e7c1759e3b3f6bfafb21edf6c2ecabb856d8800a9bbe3d31367171024cffa70",
+    "input_glb_sha256": "858ac66efe07f819b03b88d007891037b0871b0c959b51e52955cca19a12ffa1",
+    "hmc_sha256": [
+      "3bb1000d9893f4f501bbbd8ae1032eaa5c3869ffc8126480b93ea49501e30260",
+      "3bb1000d9893f4f501bbbd8ae1032eaa5c3869ffc8126480b93ea49501e30260",
+      "3bb1000d9893f4f501bbbd8ae1032eaa5c3869ffc8126480b93ea49501e30260"
+    ],
+    "deterministic_three_runs": true,
+    "determinism_scope": "three geometry asset builds plus three HMC builds from one fixed Vibe/input/embedded receipt; GPU timing receipts not byte deterministic",
+    "joined_three_geometry_builds_are_not_three_gpu_runs": true,
+    "final_roundtrip_validation": "not_executed",
+    "derived_10d_sha256": "10d1c72a0f92bb2e56cf301c808b35990b4b04d8b393a70a22421745e07033e7"
+  },
+  "visual_review": "rendered_pending_independent_inspection"
+}

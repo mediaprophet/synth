@@ -1,0 +1,70 @@
+{
+  "schema": "production-core.leases/v1",
+  "coordinator": "/root",
+  "leases": [
+    {
+      "agent": "/root/baseline_geometry",
+      "paths": [
+        "qualiaDB/crates/qualia-core-db/examples/production_core_geometry.rs",
+        "qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic.rs",
+        "qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/**"
+      ],
+      "packets": [
+        "P06"
+      ],
+      "lease_status": "released"
+    },
+    {
+      "agent": "/root/baseline_forge",
+      "paths": [
+        "qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/**"
+      ],
+      "packets": [
+        "P02"
+      ],
+      "lease_status": "released"
+    },
+    {
+      "agent": "/root/production_transfer",
+      "paths": [
+        "qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/**"
+      ],
+      "packets": [
+        "P07"
+      ],
+      "lease_status": "released"
+    },
+    {
+      "agent": "/root",
+      "paths": [
+        "synth/docs/production-core/**",
+        "synth/scripts/production_core/**",
+        "synth/examples/production_core/**",
+        "qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/geometry_workspace/production_budget*.rs",
+        "shared module exports/manifests/config"
+      ],
+      "packets": [
+        "P05",
+        "integration"
+      ],
+      "lease_status": "released"
+    },
+    {
+      "agent": "/root/scope_review",
+      "paths": [],
+      "read_only": true,
+      "status": "initial_source_review_complete; next_review_pending",
+      "lease_status": "released"
+    }
+  ],
+  "interfaces": {
+    "decoded_vertices": "UTF-8 JSON array [[x,y,z],...] of finite f32 decoded .10d positions; no wrapper; <=65536 scalar values",
+    "decoded_triangles": "JSON array of zero-based [i,j,k] rows",
+    "asset_binding": "SHA256 of exact simplified.10d; Forge records caller binding; coordinator verifies actual file and geometry decoded-input identity",
+    "kernel": "Generated AffineF32 at scale2.0 bias0.25, compared with independent CPU f64, K1 domain",
+    "evidence": "Reuse existing Forge manifest; versioned production join envelope; absent execution evidence remains absent, never fabricated."
+  },
+  "phase": "round_closed_all_leases_released",
+  "heavy_build": "none; all further builds deferred",
+  "gpu": "none; all further probes deferred"
+}

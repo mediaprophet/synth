@@ -1,0 +1,9 @@
+{
+  "binding_count": 3,
+  "entry_points": [
+    "affine_f32"
+  ],
+  "naga_validated": true,
+  "native_tool_validated": null,
+  "source_hash": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e"
+}

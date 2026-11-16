@@ -1,0 +1,63 @@
+{
+  "adapter": {
+    "backend": "Dx12",
+    "device": 11608,
+    "device_type": "DiscreteGpu",
+    "driver": "32.0.16.2114",
+    "driver_info": "",
+    "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+    "vendor": 4318
+  },
+  "device_admission_wall_ns": 2897049000,
+  "expected_adapter_substring": "NVIDIA",
+  "length": 4099,
+  "limitations": "fixed FP32 affine kernel only; not application, browser, cross-vendor, geometry, or WebGPU CTS qualification; three device slabs plus staging and pipeline allocations are not a total-memory bound",
+  "oracle": {
+    "compared": 4099,
+    "first_mismatch": null,
+    "max_absolute_error": 0.0,
+    "max_relative_error": 0.0,
+    "mismatch_count": 0
+  },
+  "outcome": "passed",
+  "probe": "production_core_affine_baseline",
+  "probe_source_blake3": "ed78b197a1dd5265f6738f4cc30c03c746cab2bc0c2c96d970ce283495097a32",
+  "requested_backend": "dx12",
+  "retained_samples": 30,
+  "schema_version": 1,
+  "semantic_hash": "5ad91ac72d82f4b43cb70e65027c2e4ab79ebbfbe2e2b9d599780bf07c5389c7",
+  "slab_capacity_bytes": 1048576,
+  "source_hash": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e",
+  "stages": [
+    {
+      "stage": "generated",
+      "wall_ns": 4121500
+    },
+    {
+      "stage": "naga_validated",
+      "wall_ns": 12663400
+    },
+    {
+      "stage": "pipeline_created",
+      "wall_ns": 176119900
+    },
+    {
+      "includes": [
+        "oracle_verified",
+        "profiled"
+      ],
+      "note": "oracle and profiling share the existing certification procedure; separate wall times are not measured",
+      "stage": "certified",
+      "wall_ns": 227156600
+    }
+  ],
+  "timing": {
+    "median_ns": 1088,
+    "minimum_ns": 960,
+    "p95_ns": 4320,
+    "sample_count": 30,
+    "source": "gpu_timestamp"
+  },
+  "total_wall_ns": 3559071000,
+  "warmups": 5
+}

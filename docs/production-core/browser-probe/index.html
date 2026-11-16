@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><title>Production core — WebGPU baseline</title>
+<style>body{font:16px system-ui;max-width:1050px;margin:40px auto;background:#f5f7fb;color:#17263c}button{font:inherit;padding:12px 20px;background:#174b87;color:white;border:0;border-radius:6px}pre{white-space:pre-wrap;background:white;padding:20px;border:1px solid #ccd4e0;border-radius:6px}small{color:#53657b}</style>
+<h1>Browser WebGPU baseline</h1><p>This local check executes the exact WGSL emitted by Etalon Forge on 4,099 values. It checks adapter availability, compilation, odd tails and readback against an independent JavaScript binary64 calculation.</p>
+<p><small>Discovery and one numerical kernel only. This does not certify the production core, cross-vendor behavior or WebGPU conformance.</small></p>
+<button id="run">Run local GPU check</button><pre id="result">Not executed</pre>
+<script>
+const button=document.querySelector('#run'), result=document.querySelector('#result');
+const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
+button.onclick=async()=>{
+ button.disabled=true;result.textContent='Running';
+ const receipt={schema:'production-core.browser-baseline/v1',user_agent:navigator.userAgent,secure_context:isSecureContext,stages:[],status:'running',limitations:'Fixed affine kernel only; not geometry, rendering, application, timing or cross-vendor qualification.'};
+ let device;const buffers=[];
+ try{
+  if(!navigator.gpu)throw new Error('WebGPU unavailable');
+  const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+  if(!adapter)throw new Error('No WebGPU adapter');
+  const info=adapter.info;
+  receipt.adapter={vendor:info.vendor,architecture:info.architecture,device:info.device,description:info.description,is_fallback:info.isFallbackAdapter??adapter.isFallbackAdapter??null};
+  receipt.features=Array.from(adapter.features).sort();
+  device=await adapter.requestDevice();receipt.stages.push('device_created');
+  const response=await fetch('affine.wgsl');if(!response.ok)throw new Error('Missing generated WGSL');
+  const source=await response.text();receipt.wgsl_sha256=await hash(new TextEncoder().encode(source));
+  const module=device.createShaderModule({code:source});
+  const compilation=await module.getCompilationInfo();receipt.compilation_messages=compilation.messages.map(x=>({type:x.type,message:x.message,line:x.lineNum}));
+  if(compilation.messages.some(x=>x.type==='error'))throw new Error('WGSL compilation failed');
+  receipt.stages.push('shader_compiled');
+  const pipeline=await device.createComputePipelineAsync({layout:'auto',compute:{module,entryPoint:'affine_f32'}});receipt.stages.push('pipeline_created');
+  const n=4099,input=Float32Array.from({length:n},(_,i)=>(i-2048)/256),size=input.byteLength;
+  const alloc=(size,usage)=>{const b=device.createBuffer({size,usage});buffers.push(b);return b;};
+  const a=alloc(size,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST),b=alloc(size,GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC),u=alloc(16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST),read=alloc(size,GPUBufferUsage.MAP_READ|GPUBufferUsage.COPY_DST);
+  const uniform=new ArrayBuffer(16),dv=new DataView(uniform);dv.setUint32(0,n,true);dv.setFloat32(4,2,true);dv.setFloat32(8,.25,true);
+  device.queue.writeBuffer(a,0,input);device.queue.writeBuffer(u,0,uniform);
+  const bindings=device.createBindGroup({layout:pipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:a}},{binding:1,resource:{buffer:b}},{binding:2,resource:{buffer:u}}]});
+  device.pushErrorScope('validation');
+  const encoder=device.createCommandEncoder(),pass=encoder.beginComputePass();pass.setPipeline(pipeline);pass.setBindGroup(0,bindings);pass.dispatchWorkgroups(Math.ceil(n/(64*2*4)));pass.end();encoder.copyBufferToBuffer(b,0,read,0,size);device.queue.submit([encoder.finish()]);
+  await read.mapAsync(GPUMapMode.READ);const output=new Float32Array(read.getMappedRange().slice(0));read.unmap();const error=await device.popErrorScope();if(error)throw new Error(error.message);
+  receipt.stages.push('dispatched_readback');
+  const mismatch=(values)=>{let bad=0,max=0;for(let i=0;i<n;i++){const expected=Number(input[i])*2+.25,diff=Math.abs(Number(values[i])-expected);max=Math.max(max,diff);if(!Number.isFinite(values[i])||diff>1e-6+1e-5*Math.abs(expected))bad++;}return{count:bad,max_absolute_error:max};};
+  const check=mismatch(output);const poisoned=output.slice();poisoned[0]+=1;const negative=mismatch(poisoned);
+  receipt.count=n;receipt.oracle={kind:'independent_js_binary64',...check,known_bad_detected:negative.count===1};receipt.input_f32_sha256=await hash(input.buffer);receipt.output_f32_sha256=await hash(output.buffer);
+  if(check.count||negative.count!==1)throw new Error('Oracle failed');
+  receipt.stages.push('oracle_verified');receipt.status='passed';
+ }catch(error){receipt.status=receipt.stages.length?'failed':'unsupported';receipt.reason=String(error.message||error);}
+ finally{for(const b of buffers)b.destroy();if(device)device.destroy();}
+ const saved=await fetch('/receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(receipt)}).then(r=>r.json()).catch(e=>({error:String(e)}));
+ receipt.saved=saved;result.textContent=JSON.stringify(receipt,null,2);button.disabled=false;
+};
+</script>

@@ -1,0 +1,40 @@
+{
+  "scope": "Attributed GLB to existing producer smoke; not full joined geometry tracer",
+  "argv": [
+    "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+    "produce",
+    "--profile",
+    "files",
+    "--source",
+    "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\fixture.vibe",
+    "--input",
+    "fixture.glb",
+    "glb",
+    "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\fixture.glb",
+    "--out",
+    "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\fixture.hmc",
+    "--export-dir",
+    "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\export",
+    "--present",
+    "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\fixture.html"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 0.7348110000020824,
+  "executable_sha256": "62095c5c1c126bfade382c1251a6293be9c87b41abb88902dedc834ff742618e",
+  "input_glb_sha256": "619967ba9d1f317edb58f23d8aa9e91343f71c086357d1157459a98c7435a1fd",
+  "negative_checks": [
+    {
+      "check": "wrong_numeric_result",
+      "result": "rejected"
+    },
+    {
+      "check": "nonfinite_numeric_result",
+      "result": "rejected"
+    },
+    {
+      "check": "mixed_semantic_glb",
+      "result": "rejected"
+    }
+  ],
+  "status": "passed"
+}

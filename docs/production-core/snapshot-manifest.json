@@ -1,0 +1,527 @@
+{
+  "schema": "production-core.handoff-snapshot/v1",
+  "created_at_utc": "2026-11-16T08:03:56.909733+00:00",
+  "repositories": {
+    "synth": {
+      "base_head": "0d08884612f387685eb96e5ddd0a2085c1f1ff02",
+      "branch": "codex/geometry-production-core",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+      "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "qualiaDB": {
+      "base_head": "7f6057a743937173260c1d62d670283214a1d09a",
+      "branch": "codex/geometry-production-core",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+      "tracked_diff_sha256": "a4605d15bdf54ca96fb7ee4542e5fb315747ee2778d23871a6f09b941a1d0e2a"
+    },
+    "etalon": {
+      "base_head": "48af56392a13ba7734c438887b58db4a1057f1bd",
+      "branch": "codex/geometry-production-core",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+      "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hypermedia-production": {
+      "base_head": "8321792cb700cdac90adf1b1ef8accdc039597f1",
+      "branch": "codex/geometry-production-core",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\hypermedia-production",
+      "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "accepted_packets": 1,
+  "remaining_unaccepted": 23,
+  "plan_integrity": [
+    {
+      "file": "qualia-etalon-specification-competition-v0.2.md",
+      "sha256": "83cc5f7573199b25696c80d17c988957f8dadd8b212d0cdc4bae383d734d3590",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "qualia-etalon-swarm-implementation-plan-v0.1.md",
+      "sha256": "df0bd49ecbb9fe9d5637b6ac7d6b9f4a0fb5a462a2b0bcbe31442506303eea35",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "research-dossier-v0.2.md",
+      "sha256": "2d40c1dfe8834a3c64ad26c15d31a5af4b71eead22866a73107b95daca72faca",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "source-evidence-v0.2.json",
+      "sha256": "5fb35e7d2cad35f8eb5dabdedc39cc39c12714347b2ebf22c99522f7d694b8da",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-agent-handoff-v0.1.md",
+      "sha256": "33c89a104f8bba2a82e5ff7084b459ebad3d639f0dc2f2ca4aaed492df7550be",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-cost-model-v0.1.json",
+      "sha256": "ea173087da401f5fbf575537269c45511ba0a41cd1560d86a625c8c92615df4d",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-packet-register-v0.1.md",
+      "sha256": "e190e7cbf89b94a4c42f2366b52688c6b5a53075cf661ac464ffbb05e233c6ca",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-requirement-matrix-v0.1.md",
+      "sha256": "fb9d9daaf3947961f145083d385c5b9491b0f9e73d629f070d2d2a2db89d324f",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-schedule-v0.1.csv",
+      "sha256": "6c1c06607be98341bd067237cc5ff560919e2b1a74ae5bf9a81d261e0f16a592",
+      "matches_original_artifact": true
+    },
+    {
+      "file": "swarm-work-packets-v0.1.json",
+      "sha256": "0092abe5370873b0abe8d892f490b4ac475dfe193ac7db124800883c22c3d032",
+      "matches_original_artifact": true
+    }
+  ],
+  "excluded": [
+    "build trees",
+    "local Python vendor",
+    "cached producer executable",
+    "uninstalled coordinator runtime drafts"
+  ],
+  "files": [
+    {
+      "path": "ROUND-HANDOFF.md",
+      "bytes": 25715,
+      "sha256": "d581db549190e72ecb43f6e2f76aacbb68f2fde5381d8cf946d2c0791d35fe4a"
+    },
+    {
+      "path": "evidence/geometry-build-01.log",
+      "bytes": 17814,
+      "sha256": "4f35166b0510c8aac7668af1070ef35cc7625585497df918917fbc9f7d10dd38"
+    },
+    {
+      "path": "source/etalon/crates/etalon-wgsl-forge/examples/production_core_probe.rs",
+      "bytes": 14229,
+      "sha256": "96663f313ea640eaab33ed82d032fbca85b86d9e5041fa02d693da99e8bc95eb"
+    },
+    {
+      "path": "source/qualiaDB/.cargo/production-core.toml",
+      "bytes": 1239,
+      "sha256": "df58a2b75c369370fa717ace7aee231536653136fbb7afe51a643f43e1135506"
+    },
+    {
+      "path": "source/qualiaDB/Cargo.lock",
+      "bytes": 402768,
+      "sha256": "4713d91234c141f7c6040c81e2a8c0bafe2ddbeb05b756006b2b048e86a066f7"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/examples/production_core_geometry.rs",
+      "bytes": 21109,
+      "sha256": "9eaca8a01559878f7b6ff363b041d848518d159afbf16bd4a28aa8d40a53f943"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/collapse.rs",
+      "bytes": 13514,
+      "sha256": "45510ea5aca789ab59fb5ae9622232d24bb3a3b88f24c0edc6e138ed59a4485c"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/corner.rs",
+      "bytes": 3068,
+      "sha256": "eba3067b25972c00eb7796f6dc9a1325af085c9d85f05774cd933914aa35de4d"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/femc.rs",
+      "bytes": 5153,
+      "sha256": "a22c3b5e71d9e328c4dd79e1601e4d2b11bac4776e3aaa24753087b573123660"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/frames.rs",
+      "bytes": 3414,
+      "sha256": "99ceec14b7fdb310ed9fa2da62dcc82fc3e6ce097429ce2b00d14660a8e7d1e1"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/mod.rs",
+      "bytes": 5604,
+      "sha256": "50c6c6b4a7734cb9d863b0dfafff3752b6e6fe01a0e28f02b9a005ba29bb4cf0"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/resource.rs",
+      "bytes": 6054,
+      "sha256": "64f68bf452327ee7ef65bea1177daf95005a092730282f7486b775d5ce56808d"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/skin.rs",
+      "bytes": 2909,
+      "sha256": "abec55525d568d7e8a3137f543678513ef00f8d56e5347e12575ceb4a6c9eab1"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/attribute_transfer/sparse.rs",
+      "bytes": 9073,
+      "sha256": "40b2d4a76690759bff644be95110343716d4f1b5d0af4e53119baec6a2faefb3"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic.rs",
+      "bytes": 30148,
+      "sha256": "0fb56b68fbe4df8ab49bfeb1a4373e63a1c478fb831e27fc745f0a62367ea4d9"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/admission.rs",
+      "bytes": 10990,
+      "sha256": "a6fa9ed58e1aabe73932ded9ef92073dfc43e2102146266422c5a01df55657aa"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/admission_tests.rs",
+      "bytes": 5232,
+      "sha256": "1f181b5564c79470c11e117a36b1c5dd9fd1ced27f6ddb928070f97ed2601838"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/bounded_driver.rs",
+      "bytes": 15391,
+      "sha256": "24b976e895b1ee0fbb9e2ce790f5a8d305f3d1222627c6030e17bdd0c112785c"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/normalized_cost.rs",
+      "bytes": 4077,
+      "sha256": "0c5eecdb8c4abad75f62fd79de5706d1367dd3d697d344f86d5c1bcbe6b492cf"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/decimate_3_semantic/topology.rs",
+      "bytes": 9563,
+      "sha256": "a2ce318dbc8747fd1752167fa8319635f9a3b3981daa06bb9e53fea93867ce1c"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/geometry_workspace.rs",
+      "bytes": 36063,
+      "sha256": "3c507330f1c55e2af0a00ede11019870328069d8cec1d95665cb243e413f5e7b"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/geometry_workspace/production_budget.rs",
+      "bytes": 5917,
+      "sha256": "abcaaf882ccb7ebfdfc1f75db3b6d838a7c5fa5733d1ec6ed06390682abc806b"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/geometry_workspace/production_budget_tests.rs",
+      "bytes": 2315,
+      "sha256": "f9e5f6a7f648353fe589806b28f7e0d9b118a7fa83c0508d9a779eb3a2bc89b4"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/mod.rs",
+      "bytes": 31960,
+      "sha256": "4538c3b2e793375e2629eb0f65a0b34f918703a577beb012174881523c2baf54"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/collapse.rs",
+      "bytes": 5075,
+      "sha256": "67462fdd732e9ef2d47d07b14c59d5af2e06eddf1a7a74a4e40d9d81eb9e37b3"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/identity.rs",
+      "bytes": 11406,
+      "sha256": "0045b6037201bc7201abf1e5d8801dd8bc69f581b78e5385427910a21631ca02"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/mod.rs",
+      "bytes": 280,
+      "sha256": "e74fc1a41eb0b984965e3bd7b235c92c2595c15f5122cb6bb20c5954c5fe3635"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/records.rs",
+      "bytes": 11327,
+      "sha256": "88b3c09a017c4500de1cabfa2b6f6f1e903a6ee7ed8628a98c270c1a93cf30ce"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/tests.rs",
+      "bytes": 12010,
+      "sha256": "0cf15097fc1bc342a16c74de7b73709b7bf0ceb61a6500b4e4498559449830f7"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/transfer.rs",
+      "bytes": 4557,
+      "sha256": "cc7f44e8fb111f5c94e14ec6fe65108128033305d89ff5929ff5e342e13b729c"
+    },
+    {
+      "path": "source/qualiaDB/crates/qualia-core-db/src/specialized_libs/computational_geometry/production_contracts/validation.rs",
+      "bytes": 15848,
+      "sha256": "10699f6f0ca04f461a8a1bf701c6b66ee1d0b545517b815327087ef705b4f884"
+    },
+    {
+      "path": "source/synth/docs/production-core/README.md",
+      "bytes": 503,
+      "sha256": "89f520e24cea6cc263ca84c56fcaa140c2ff2a6235aa291a7b68b2e931ac91f7"
+    },
+    {
+      "path": "source/synth/docs/production-core/ROUND-HANDOFF.md",
+      "bytes": 25715,
+      "sha256": "d581db549190e72ecb43f6e2f76aacbb68f2fde5381d8cf946d2c0791d35fe4a"
+    },
+    {
+      "path": "source/synth/docs/production-core/acceptance-matrix.json",
+      "bytes": 29979,
+      "sha256": "7519dc575894161403278f1b29787a9a9bb88c6db12aaf83411856d342a32abc"
+    },
+    {
+      "path": "source/synth/docs/production-core/baseline-review.md",
+      "bytes": 1743,
+      "sha256": "06353cd1f6ddd50a4adc65a4789cfb9a2107475bba23bbd6df47e8b2f38a370a"
+    },
+    {
+      "path": "source/synth/docs/production-core/browser-probe/affine.wgsl",
+      "bytes": 1783,
+      "sha256": "d5a6d8ac4dea817f078ffd0d9f0affeb4b2cdee7254e9b625c4bc6e3ba24bd36"
+    },
+    {
+      "path": "source/synth/docs/production-core/browser-probe/index.html",
+      "bytes": 5405,
+      "sha256": "c9b5a1ee3c95e97c20eff386038966523be98493c09a8b1f8d12ca6e6feae40e"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/export/fixture.10d",
+      "bytes": 2072,
+      "sha256": "5d2396ae090f9eab7a7339556beee322a997fb5979d4d173a92b3cb1dc5fe56c"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/fixture.glb",
+      "bytes": 1652,
+      "sha256": "619967ba9d1f317edb58f23d8aa9e91343f71c086357d1157459a98c7435a1fd"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/fixture.hmc",
+      "bytes": 4792,
+      "sha256": "fe941704c37c5c4505f24f624e65b0157ccea27f108a6e412edf3d9207d221d6"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/fixture.hmc.poet-source.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/fixture.html",
+      "bytes": 521257,
+      "sha256": "d5f7375f99ea8c6f21783ee5db0e817dce86e74117d20bd6051c397e91aaa9b0"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/fixture.vibe",
+      "bytes": 327,
+      "sha256": "13de95dd7402aab407174e375120e0d70da895c0cf4cc59b076e52bcad4b5fe7"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/preview/front-view-assumed.png",
+      "bytes": 93139,
+      "sha256": "7dc6d1ef4d2414344e8a61e6762fa43f9777b2dc14f0a9fead40d2c8265f2c28"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/preview/index.html",
+      "bytes": 385121,
+      "sha256": "7d11434027fd0bdd0247097d7411a8d1c8195a6ec210e5096a791a83cd1c1783"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/preview/review-receipt.json",
+      "bytes": 3403,
+      "sha256": "7f076f94311f0ad6bfbd1b4f7f8d8d27eff620c4544c1a41c1c01dad7c73c306"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/preview/side-view-assumed.png",
+      "bytes": 86138,
+      "sha256": "40d2c370da9d72f6c0a63a7d4533f0b06d30be0e25833a19648d6e4e69350ff7"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/preview/three-quarter-view-assumed.png",
+      "bytes": 95672,
+      "sha256": "4d9e02334e2dfc351addde2ecf72f468bbdaa82100a2b0fa6e5f3d4ad4b5defd"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/receipt.json",
+      "bytes": 1632,
+      "sha256": "958caf325654056bf8d658e4df0a18e88e7ce96e3eda7c3fdaa16364e8430710"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/attributed-handoff-smoke/stdout.txt",
+      "bytes": 551,
+      "sha256": "0a3a632c57db6fe6e7b724c23051ba9899b6749555ab8443323a2e4cd9663154"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/browser-baseline-20261116-065406-847337.json",
+      "bytes": 1738,
+      "sha256": "4991b691bb54193522ea4ae544e97840bb02e35139f2449c098cb64162b4602e"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/cargo-metadata.json",
+      "bytes": 3177072,
+      "sha256": "bdbb0ba9f0d55b1ac6f78c31fbb560288db4bac9a7dbc311144be206880f8077"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/cargo-metadata.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/affine.wgsl",
+      "bytes": 1783,
+      "sha256": "d5a6d8ac4dea817f078ffd0d9f0affeb4b2cdee7254e9b625c4bc6e3ba24bd36"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/execution.json",
+      "bytes": 589,
+      "sha256": "02b2cb0660cd418a84c6e2d23e393d6fab5b86d22634174aefb6079c10064df5"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/hardware.json",
+      "bytes": 733,
+      "sha256": "bdd790c9154084dcc929785fc82bc0c6efd97214f985bf8650a6b4f10010a72f"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/manifest.json",
+      "bytes": 1458,
+      "sha256": "30d5eb9d25e4852c0a6b5b3485f613067745432afb728c9ba3ad363fc05b7ecb"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/probe.json",
+      "bytes": 1822,
+      "sha256": "a4b5c082cc98c89d94edcb26859326161636d78e92544eedd5aa8ec681832061"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-native-baseline/validation.json",
+      "bytes": 210,
+      "sha256": "8ddf25cacbd5a2b39a7651394db00ac5a1131d851c0471ec50a0c7d72ea4be32"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/forge-negative-checks.json",
+      "bytes": 379,
+      "sha256": "a8112c728f78f001acb51df22a15d7ebe67cb0b40b90e2a9f660b7647cb74115"
+    },
+    {
+      "path": "source/synth/docs/production-core/evidence/workspace-baseline.json",
+      "bytes": 26815,
+      "sha256": "f0e8811bd4ca985037242f3937b5f881d0d23587589d02d6611c892321e626c3"
+    },
+    {
+      "path": "source/synth/docs/production-core/leases-and-interfaces.json",
+      "bytes": 2572,
+      "sha256": "1973567701cff36c0b6bcbe16adfd4a6a8103cbb52e792fa81851760e9f53808"
+    },
+    {
+      "path": "source/synth/docs/production-core/packet-state.json",
+      "bytes": 60942,
+      "sha256": "d76eb8cfa52885bde65706bdd6641aabd077a040493ae9ce30f11bca71605cab"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/qualia-etalon-specification-competition-v0.2.md",
+      "bytes": 61935,
+      "sha256": "83cc5f7573199b25696c80d17c988957f8dadd8b212d0cdc4bae383d734d3590"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/qualia-etalon-swarm-implementation-plan-v0.1.md",
+      "bytes": 32019,
+      "sha256": "df0bd49ecbb9fe9d5637b6ac7d6b9f4a0fb5a462a2b0bcbe31442506303eea35"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/research-dossier-v0.2.md",
+      "bytes": 17488,
+      "sha256": "2d40c1dfe8834a3c64ad26c15d31a5af4b71eead22866a73107b95daca72faca"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/source-evidence-v0.2.json",
+      "bytes": 14099,
+      "sha256": "5fb35e7d2cad35f8eb5dabdedc39cc39c12714347b2ebf22c99522f7d694b8da"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-agent-handoff-v0.1.md",
+      "bytes": 6556,
+      "sha256": "33c89a104f8bba2a82e5ff7084b459ebad3d639f0dc2f2ca4aaed492df7550be"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-cost-model-v0.1.json",
+      "bytes": 2392,
+      "sha256": "ea173087da401f5fbf575537269c45511ba0a41cd1560d86a625c8c92615df4d"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-packet-register-v0.1.md",
+      "bytes": 31050,
+      "sha256": "e190e7cbf89b94a4c42f2366b52688c6b5a53075cf661ac464ffbb05e233c6ca"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-requirement-matrix-v0.1.md",
+      "bytes": 2497,
+      "sha256": "fb9d9daaf3947961f145083d385c5b9491b0f9e73d629f070d2d2a2db89d324f"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-schedule-v0.1.csv",
+      "bytes": 3205,
+      "sha256": "6c1c06607be98341bd067237cc5ff560919e2b1a74ae5bf9a81d261e0f16a592"
+    },
+    {
+      "path": "source/synth/docs/production-core/plan/swarm-work-packets-v0.1.json",
+      "bytes": 58363,
+      "sha256": "0092abe5370873b0abe8d892f490b4ac475dfe193ac7db124800883c22c3d032"
+    },
+    {
+      "path": "source/synth/docs/production-core/scope-v0.1.md",
+      "bytes": 4221,
+      "sha256": "aa5b354cd1c6879e3ef05d6255756d78ab31e3bf677d6b03a88c1f1da17bfa72"
+    },
+    {
+      "path": "source/synth/docs/production-core/worker-reports.md",
+      "bytes": 8068,
+      "sha256": "4e0659a14e5446b8e998322c4648422f84e279f4099bc45c230dd51117fdee49"
+    },
+    {
+      "path": "source/synth/scripts/production_core/.gitignore",
+      "bytes": 23,
+      "sha256": "0fad13a455db2ac0626b4a29539c71388b010e2b0420bdae321bb5b88b8c4821"
+    },
+    {
+      "path": "source/synth/scripts/production_core/production_core_artifacts.py",
+      "bytes": 4651,
+      "sha256": "4371753a827a7bd47749748a0c0238b6e25e70a50232f9defaa65fae601a33b0"
+    },
+    {
+      "path": "source/synth/scripts/production_core/qualification_corpus.py",
+      "bytes": 9280,
+      "sha256": "811b61db6d341ed5544022e599abd634e03de73d8242c10db60acefe000ed64f"
+    },
+    {
+      "path": "source/synth/scripts/production_core/requirements.txt",
+      "bytes": 16,
+      "sha256": "785d5ca294c7073c30257bd4b9690fe99969ba76475d3c9c31f0d017d65ede3f"
+    },
+    {
+      "path": "source/synth/scripts/production_core/run_production_core_tracer.py",
+      "bytes": 11366,
+      "sha256": "ef97076ad2a85b66a352dc54d989d0d76ea7862fb33a4f597c6b06b95ab5b2b1"
+    },
+    {
+      "path": "source/synth/scripts/production_core/test_production_core_artifacts.py",
+      "bytes": 1772,
+      "sha256": "436ef03fcd069def0adf357e9913de5a15ba0b4eb13aad13943341dbf041c8ae"
+    },
+    {
+      "path": "tracked-diffs/etalon.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tracked-diffs/hypermedia-production.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tracked-diffs/qualiaDB.patch",
+      "bytes": 14466,
+      "sha256": "a4605d15bdf54ca96fb7ee4542e5fb315747ee2778d23871a6f09b941a1d0e2a"
+    },
+    {
+      "path": "tracked-diffs/synth.patch",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "worker-reports.md",
+      "bytes": 8068,
+      "sha256": "4e0659a14e5446b8e998322c4648422f84e279f4099bc45c230dd51117fdee49"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "artifacts": [
+    {
+      "bytes": 252,
+      "file": "source.10d",
+      "sha256": "b8f4afebe878dc52284b9023a4699fa7657902ffe54eef52cd427d21cb6351bc"
+    },
+    {
+      "bytes": 252,
+      "file": "simplified.10d",
+      "sha256": "b8f4afebe878dc52284b9023a4699fa7657902ffe54eef52cd427d21cb6351bc"
+    },
+    {
+      "bytes": 1038,
+      "file": "source-attributes.json",
+      "sha256": "47a8fd1b18a52114c4020b5e5333bd11055a69a0c581898fa68a049655e6d019"
+    },
+    {
+      "bytes": 166,
+      "file": "decoded-vertices.json",
+      "sha256": "ea6e2fdc6667323385852d824c0cdfbf481307d83bf822724a6832429483cdd8"
+    },
+    {
+      "bytes": 60,
+      "file": "decoded-triangles.json",
+      "sha256": "33230eb67d5fbef0760a1b3dc917670ec6cc008997e7545f8dfe5b79a64fa83d"
+    },
+    {
+      "bytes": 1038,
+      "file": "attributes.json",
+      "sha256": "47a8fd1b18a52114c4020b5e5333bd11055a69a0c581898fa68a049655e6d019"
+    }
+  ],
+  "fixture": {
+    "consumes_corpus_json": true,
+    "extent_diagonal": 1414213.5623730952,
+    "input_faces": 2,
+    "input_vertices": 4,
+    "name": "analytic-plane-scale-1e+06",
+    "source": "corpus_json",
+    "subpart_tags": [
+      101,
+      202
+    ],
+    "uv_seam": null
+  },
+  "limitations": [
+    "integration tracer only",
+    "labels retained in attributes.json rather than a new .10d section",
+    "non-ReachedTarget reports are a committed prefix, not an accepted asset",
+    "no independent whole-surface distance certificate",
+    "no GPU stage in this executable",
+    "existing infinite-penalty path may reject compatible labels via infinity times zero; see policy probe"
+  ],
+  "metrics": {
+    "analytic_plane_residual": {
+      "reason": "builtin tilted-plane residual applies only to the two-chart grid",
+      "status": "not_measured"
+    },
+    "decoded_locked_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "largest_normalized_collapse_cost": {
+      "kind": "ranking_cost_not_distance",
+      "value": 0.0
+    },
+    "operator_residual": {
+      "status": "not_measured"
+    },
+    "physical_response": {
+      "status": "not_measured"
+    },
+    "simplified_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "source_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "symmetric_surface_deviation": {
+      "status": "not_measured"
+    },
+    "uv01_exact_f32_roundtrip": true
+  },
+  "policy": {
+    "cost_helper_probes": {
+      "finite_cross_label_pair_ranked": true,
+      "infinite_compatible_admission_status": "passed",
+      "infinite_compatible_label_pair_admitted": true,
+      "infinite_cross_label_pair_rejected": true,
+      "locked_endpoint_rejected": true
+    },
+    "protected": "perimeter_and_center_seam",
+    "semantic_transition": "hard_reject_admitted_domains",
+    "transfer_gate": "p07_collapse_transfer"
+  },
+  "resources": {
+    "admitted_bytes": 3423,
+    "decoded_scalar_cap": 65536,
+    "fixture_faces_cap": 2,
+    "fixture_vertices_cap": 4,
+    "work_used": 93
+  },
+  "result": {
+    "collapses": 0,
+    "faces": 2,
+    "forbidden_label_vertices": 0,
+    "locked_precompile_displacement": 0.0,
+    "mixed_domain_triangles": 0,
+    "protected_vertices_preserved": 0,
+    "target_faces": 2,
+    "termination": "ReachedTarget",
+    "vertices": 4
+  },
+  "schema": "qualia.production-core.geometry-tracer.v1",
+  "status": "passed",
+  "timings_ms": {
+    "admitted_decimate": 0.2243,
+    "geometry_probe_total": 1.143,
+    "seal_and_roundtrip": 0.3341
+  }
+}

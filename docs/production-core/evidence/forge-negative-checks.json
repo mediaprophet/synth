@@ -1,0 +1,9 @@
+{
+  "create_only_exit": 1,
+  "original_report_sha256_before": "A4B5C082CC98C89D94EDCB26859326161636D78E92544EEDD5AA8EC681832061",
+  "original_report_sha256_after": "A4B5C082CC98C89D94EDCB26859326161636D78E92544EEDD5AA8EC681832061",
+  "unavailable_metal_exit": 2,
+  "unavailable_metal_outcome": "unsupported",
+  "empty_asset_exit": 1,
+  "empty_asset_outcome": "failed"
+}
