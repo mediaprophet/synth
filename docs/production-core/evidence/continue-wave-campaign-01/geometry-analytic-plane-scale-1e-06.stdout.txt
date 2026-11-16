@@ -1,0 +1,1 @@
+{"output_directory":"C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-01\\geometry-analytic-plane-scale-1e-06","receipt":"geometry-receipt.json","status":"passed"}

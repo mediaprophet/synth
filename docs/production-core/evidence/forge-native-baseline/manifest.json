@@ -1,0 +1,51 @@
+{
+  "forge_schema_version": 2,
+  "crate_version": "0.0.2",
+  "wgpu_api_version": "30.0.0",
+  "naga_api_version": "30.0.0",
+  "kernel_id": "affine-f32",
+  "semantic_hash": "5ad91ac72d82f4b43cb70e65027c2e4ab79ebbfbe2e2b9d599780bf07c5389c7",
+  "source_hash": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e",
+  "schedule": {
+    "workgroup_size": 64,
+    "items_per_invocation": 2,
+    "vector_width": 4
+  },
+  "validation_level": "certified",
+  "validation": {
+    "source_hash": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e",
+    "entry_points": [
+      "affine_f32"
+    ],
+    "binding_count": 3,
+    "naga_validated": true,
+    "native_tool_validated": null
+  },
+  "adapter": {
+    "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+    "vendor": 4318,
+    "device": 11608,
+    "device_type": "DiscreteGpu",
+    "backend": "Dx12",
+    "driver": "32.0.16.2114",
+    "driver_info": ""
+  },
+  "oracle": {
+    "compared": 4099,
+    "mismatch_count": 0,
+    "first_mismatch": null,
+    "max_absolute_error": 0.0,
+    "max_relative_error": 0.0
+  },
+  "timing": {
+    "source": "gpu_timestamp",
+    "sample_count": 30,
+    "minimum_ns": 960,
+    "median_ns": 1088,
+    "p95_ns": 4320
+  },
+  "cache_key": "b8fdb4944ed41810b968b4bebd183df2ad1298bf14813beb844fa303fafe3df9",
+  "vector_seed": 5855044868070917971,
+  "vector_hash": "0a78e7424decb4c1c7c323b8826aae3496658491256f4c3240e730d822df2cfa",
+  "certified_at_unix": 1794811705
+}

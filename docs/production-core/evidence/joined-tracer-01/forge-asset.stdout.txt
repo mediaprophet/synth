@@ -1,0 +1,85 @@
+{
+  "adapter": {
+    "backend": "Dx12",
+    "device": 11608,
+    "device_type": "DiscreteGpu",
+    "driver": "32.0.16.2114",
+    "driver_info": "",
+    "name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+    "vendor": 4318
+  },
+  "asset_phase": {
+    "absolute_tolerance": 1e-6,
+    "bias": 0.25,
+    "compared": 78,
+    "decoded_f32_blake3": "5620d6ee5c499c9459323c01533c20b58a38e8a57a566bf116398094519f1c24",
+    "dispatch_sample_ns": [
+      3520
+    ],
+    "maximum_absolute_error": 2.9802322387695312e-8,
+    "mismatch_count": 0,
+    "outcome": "passed",
+    "output_f32_blake3": "7fb4862b153587fb8c6818838ae1dfa05f99f016dcb3c8c30ef51f32c1e1db9c",
+    "qualification": "one dispatch differential tracer; seeded kernel certification is separate",
+    "reference": "independent scalar f64 multiply then addition",
+    "relative_tolerance": 0.00001,
+    "scale": 2.0,
+    "source_asset_binding": "caller supplied; source-to-decoded-vertices join must be independently verified",
+    "source_asset_sha256": "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d",
+    "vertex_count": 26,
+    "vertices_json_blake3": "d5fd0bb17ca858610c32a9b59598588922ef1c84a40858194bd23b091e5f9ead",
+    "wall_ns": 6636300
+  },
+  "device_admission_wall_ns": 1754160700,
+  "expected_adapter_substring": "NVIDIA",
+  "length": 4099,
+  "limitations": "fixed FP32 affine kernel only; not application, browser, cross-vendor, geometry, or WebGPU CTS qualification; three device slabs plus staging and pipeline allocations are not a total-memory bound",
+  "oracle": {
+    "compared": 4099,
+    "first_mismatch": null,
+    "max_absolute_error": 0.0,
+    "max_relative_error": 0.0,
+    "mismatch_count": 0
+  },
+  "outcome": "passed",
+  "probe": "production_core_affine_baseline",
+  "probe_source_blake3": "ed78b197a1dd5265f6738f4cc30c03c746cab2bc0c2c96d970ce283495097a32",
+  "requested_backend": "dx12",
+  "retained_samples": 30,
+  "schema_version": 1,
+  "semantic_hash": "5ad91ac72d82f4b43cb70e65027c2e4ab79ebbfbe2e2b9d599780bf07c5389c7",
+  "slab_capacity_bytes": 1048576,
+  "source_hash": "a3b66e43cd04f453b067d7ba8fec7a935afb1952bb8fd7ba439768c502b0578e",
+  "stages": [
+    {
+      "stage": "generated",
+      "wall_ns": 1328400
+    },
+    {
+      "stage": "naga_validated",
+      "wall_ns": 4240600
+    },
+    {
+      "stage": "pipeline_created",
+      "wall_ns": 15328300
+    },
+    {
+      "includes": [
+        "oracle_verified",
+        "profiled"
+      ],
+      "note": "oracle and profiling share the existing certification procedure; separate wall times are not measured",
+      "stage": "certified",
+      "wall_ns": 41367100
+    }
+  ],
+  "timing": {
+    "median_ns": 1952,
+    "minimum_ns": 192,
+    "p95_ns": 1984,
+    "sample_count": 30,
+    "source": "gpu_timestamp"
+  },
+  "total_wall_ns": 1885389100,
+  "warmups": 5
+}

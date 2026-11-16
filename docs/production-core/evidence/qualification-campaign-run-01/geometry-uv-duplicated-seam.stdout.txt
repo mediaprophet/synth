@@ -1,0 +1,1 @@
+{"output_directory":"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\qualification-campaign-run-01\\geometry-uv-duplicated-seam","receipt":"geometry-receipt.json","status":"passed"}

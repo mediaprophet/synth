@@ -1,0 +1,1380 @@
+{
+  "version": "0.1",
+  "date": "2026-11-16",
+  "specification": "qualia-etalon-specification-competition-v0.2.md",
+  "specification_sha256": "83cc5f7573199b25696c80d17c988957f8dadd8b212d0cdc4bae383d734d3590",
+  "status": "plan_only",
+  "concurrency": {
+    "total_slots": 4,
+    "coordinator_slots": 1,
+    "execution_and_review_slots": 3,
+    "gpu_slots": 1
+  },
+  "estimate_summary": {
+    "optimistic": {
+      "packet_agent_hours": 140.4,
+      "scheduled_productive_hours": 78.0,
+      "scheduled_days": 9.75
+    },
+    "planning": {
+      "packet_agent_hours": 234,
+      "scheduled_productive_hours": 130.0,
+      "scheduled_days": 16.25
+    },
+    "conservative": {
+      "packet_agent_hours": 421.2,
+      "scheduled_productive_hours": 234.0,
+      "scheduled_days": 29.25
+    }
+  },
+  "packets": [
+    {
+      "id": "P00",
+      "title": "Freeze the release contract and workspace baseline",
+      "tier": "production_core",
+      "owner": "Coordinator",
+      "depends_on": [],
+      "requirements": [
+        "REQ-01",
+        "REQ-05"
+      ],
+      "effort_hours": {
+        "optimistic": 2.4,
+        "planning": 4,
+        "conservative": 7.2
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Planning artifacts only; record repository heads, dirty-file hashes and proposed packet file leases.",
+      "deliverables": [
+        "Core domain/hardware/quality profile; 38-row acceptance matrix; ownership and interface decision log.",
+        "Named mandatory and optional scope, baseline inventory and initial worktree/build-target policy."
+      ],
+      "acceptance": [
+        "Every requirement has a test owner and applicability reason; no mandatory feature silently deferred.",
+        "Freeze candidate thresholds before comparing implementations; select one native adapter and one browser WebGPU route, with actual availability recorded."
+      ],
+      "risk": "The winning specification may change scope. Reconcile competition decisions before dispatch.",
+      "locks": [],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P01",
+      "title": "Qualify existing mathematical and production capabilities",
+      "tier": "production_core",
+      "owner": "QualiaDB + Etalon",
+      "depends_on": [
+        "P00"
+      ],
+      "requirements": [
+        "REQ-03",
+        "REQ-06"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Capability probes and evidence only; no wholesale library audit or rewrite.",
+      "deliverables": [
+        "Refresh source-evidence hashes; inspect audit registry then source; execute targeted existing-library probes.",
+        "Build/test commands, feature flags, baseline failures and measured tool/build latency."
+      ],
+      "acceptance": [
+        "Distinguish library presence, callable production exposure and executed qualification.",
+        "Probe semantic QEM, transfer codec, DDG residual, Forge pipeline and adapter; retain actual outcomes."
+      ],
+      "risk": "Dirty workspaces and stale binary/catalog versions invalidate assumptions.",
+      "locks": [],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P02",
+      "title": "Versioned contracts, identities and result semantics",
+      "tier": "production_core",
+      "owner": "QualiaDB records / Etalon receipts",
+      "depends_on": [
+        "P00"
+      ],
+      "requirements": [
+        "REQ-02",
+        "REQ-07",
+        "REQ-13",
+        "REQ-30",
+        "REQ-34",
+        "REQ-35"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Existing representation/receipt record adapters and dedicated schema tests; coordinator owns shared exports.",
+      "deliverables": [
+        "Asset/quality/transfer/kernel/variant/receipt mappings onto existing types; freeze collapse-event/remap and transfer-admission interfaces for P06/P07 parallel work.",
+        "Canonical serialization, content identities, dependency graph, typed referenced resources, reason codes."
+      ],
+      "acceptance": [
+        "Reject unknown normative fields or negotiate versions; no absent metric serialized as zero.",
+        "Hash changes when semantics, precision or ABI changes; reject mismatched source/target identities."
+      ],
+      "risk": "Do not repurpose CorrespondenceMap9, ClusterDag23 or 64-byte metadata records.",
+      "locks": [
+        "contracts"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P03",
+      "title": "Independent corpus and oracle harness",
+      "tier": "production_core",
+      "owner": "Independent QA",
+      "depends_on": [
+        "P00",
+        "P02"
+      ],
+      "requirements": [
+        "REQ-05",
+        "REQ-28",
+        "REQ-31",
+        "REQ-37"
+      ],
+      "effort_hours": {
+        "optimistic": 6.0,
+        "planning": 10,
+        "conservative": 18.0
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "medium",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "New qualification fixture/harness directories; never modify implementation to force oracle agreement.",
+      "deliverables": [
+        "Hashed, licensed analytic and adversarial fixtures across all eleven corpus families.",
+        "CPU high-precision or analytic references, baseline runner and visual capture recipe; holdout partition."
+      ],
+      "acceptance": [
+        "Known-bad candidate deliberately fails; identity candidate passes relevant tests.",
+        "Oracles differ in derivation or implementation; no same-helper self-comparison.",
+        "Record seeds, scales, nullspaces, conditioning, tolerances and excluded cases."
+      ],
+      "risk": "No external fixture or reference library is trusted without provenance and an explicit role.",
+      "locks": [
+        "qa-fixtures"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P04",
+      "title": "Early end-to-end tracer using existing paths",
+      "tier": "production_core",
+      "owner": "Hypermedia + Synth",
+      "depends_on": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "requirements": [
+        "REQ-02",
+        "REQ-05",
+        "REQ-15",
+        "REQ-29",
+        "REQ-36"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Isolated integration example and tracer tests; existing production entry points only.",
+      "deliverables": [
+        "Small seam-labelled asset through existing simplification, .10d roundtrip, fixed Forge kernel, render and identity-bound receipt.",
+        "Explicit incomplete-core checklist and measured timings for estimate recalibration."
+      ],
+      "acceptance": [
+        "Visually inspect front/side/three-quarter outputs and decoded geometry.",
+        "Observe real validation/pipeline stages; impossible ratio, empty input and unavailable device produce honest status."
+      ],
+      "risk": "This is an integration tracer, not acceptance of later conservative bounds, streaming or full semantics.",
+      "locks": [
+        "production-demo"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P05",
+      "title": "Budget, workspace and cancellation enforcement",
+      "tier": "production_core",
+      "owner": "QualiaDB + Etalon",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "requirements": [
+        "REQ-04",
+        "REQ-15",
+        "REQ-26"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Workspace/admission adapters and bounded queue helpers; no unrelated allocator changes.",
+      "deliverables": [
+        "Budget accounting for construction, validation, compilation, tuning and runtime.",
+        "Caller scratch/capacity, cancellation checkpoints, deterministic ordering policy and partial-output disposal."
+      ],
+      "acceptance": [
+        "Zero/one/maximum/exhausted capacities; cancellation leaves no success-shaped partial asset.",
+        "Instrument hot allocation where prohibited; default cold geometry budget 256 MiB with named overrides."
+      ],
+      "risk": "A budget object does not prove all downstream allocation is accounted for.",
+      "locks": [
+        "resource-adapters"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P06",
+      "title": "Hard semantic and topology collapse admission",
+      "tier": "production_core",
+      "owner": "QualiaDB geometry",
+      "depends_on": [
+        "P01",
+        "P03",
+        "P05"
+      ],
+      "requirements": [
+        "REQ-09",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "effort_hours": {
+        "optimistic": 8.4,
+        "planning": 14,
+        "conservative": 25.2
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "decimate_3.rs and decimate_3_semantic.rs admission/ranking changes plus dedicated tests.",
+      "deliverables": [
+        "Explicit protected labels, topology modes and compatibility checks before collapse.",
+        "Dimensionless cost terms, declared scaling, deterministic tie breaks and constraint-limited termination."
+      ],
+      "acceptance": [
+        "Zero forbidden merges; protected features and orientation survive adversarial collapses; reject a collapse with no admissible required transfer under the P02 contract.",
+        "Boundary penalties never substitute for locks; scale/permutation metamorphic tests.",
+        "Unreachable target ratio returns achieved count and reason without weakening constraints; P08 tests combined admission and actual transfer."
+      ],
+      "risk": "Finite penalties are not hard constraints; exact signs do not imply exact constructions.",
+      "locks": [
+        "decimator"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P07",
+      "title": "Typed attribute and correspondence transfers",
+      "tier": "production_core",
+      "owner": "QualiaDB geometry / codecs",
+      "depends_on": [
+        "P02",
+        "P03",
+        "P05"
+      ],
+      "requirements": [
+        "REQ-08",
+        "REQ-12"
+      ],
+      "effort_hours": {
+        "optimistic": 8.4,
+        "planning": 14,
+        "conservative": 25.2
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Dedicated transfer adapters and UV/corner/skin remapping; read decimator output contract, request shared edits from coordinator.",
+      "deliverables": [
+        "Source/target maps with intensive, extensive, categorical, vector-frame and force-transfer rules.",
+        "UV seam/corner split handling, skin weights, normals/tangents and lawful existing codec use."
+      ],
+      "acceptance": [
+        "Constants and rigid motion; virtual-work transpose identity; conservation where claimed.",
+        "No transfer support crosses protected domains; quantized existing tetra bindings sum to 65535.",
+        "Checker texture, tangent handedness and joint influence fixtures survive encode/decode."
+      ],
+      "risk": "Surface and tetrahedral maps have different schemas; arbitrary sparse maps need their own lawful referenced resource.",
+      "locks": [
+        "transfer"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P08",
+      "title": "Decoded-output geometry bounds and error ledger",
+      "tier": "production_core",
+      "owner": "QualiaDB geometry",
+      "depends_on": [
+        "P03",
+        "P06",
+        "P07"
+      ],
+      "requirements": [
+        "REQ-13",
+        "REQ-14",
+        "REQ-15"
+      ],
+      "effort_hours": {
+        "optimistic": 9.6,
+        "planning": 16,
+        "conservative": 28.8
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Distance/BVH assessment adapters, bounded enclosure route, quantization checks and evidence records.",
+      "deliverables": [
+        "Separate geometric, attribute, quantization, physical and numerical error records.",
+        "Symmetric triangle-surface deviation bracket on the frozen bounded domain, with conservative arithmetic and explicit inconclusive status."
+      ],
+      "acceptance": [
+        "Compare reference to decoded final asset, not just prequantization mesh; exercise combined P06 admission and P07 transfers.",
+        "Document enclosure arithmetic assumptions. Accept G1 only when U <= 1e-3 D and U-L <= 1e-5 D; reject when L > threshold; otherwise unmet width or exhausted budget is inconclusive.",
+        "Test translated large-coordinate, thin-feature, near-threshold and known-distance fixtures; sampled estimates stay labelled estimates."
+      ],
+      "risk": "Highest geometry uncertainty: finite interval containers are insufficient for rigorous outward rounding.",
+      "locks": [
+        "distance-validation"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P09",
+      "title": "Surface operator conventions and true residuals",
+      "tier": "production_core",
+      "owner": "QualiaDB mathematics",
+      "depends_on": [
+        "P01",
+        "P03",
+        "P07"
+      ],
+      "requirements": [
+        "REQ-16",
+        "REQ-17"
+      ],
+      "effort_hours": {
+        "optimistic": 6.0,
+        "planning": 10,
+        "conservative": 18.0
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "DDG/solver adapters and scoped diagnostic fixes; no new intrinsic coarsening engine.",
+      "deliverables": [
+        "Units, sign, boundary conditions, mass, nullspace and transfer contract.",
+        "True algebraic residual instrumentation and scale-aware convergence/rejection reports."
+      ],
+      "acceptance": [
+        "Analytic/nullspace fixtures; residual is ||b-Ax|| under declared norm, not iterate change.",
+        "Check stability of explicit heat routes and sparse scaling; downstream diffusion test.",
+        "Reject unsupported size/conditioning rather than send unbounded dense problems to a local solver."
+      ],
+      "risk": "Existing dense eigensolvers and A-transpose-A SVD are not automatic scalable sparse references.",
+      "locks": [
+        "ddg-adapters"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P10",
+      "title": "Authoritative physical-state interface and evidence",
+      "tier": "production_core",
+      "owner": "QualiaDB physics adapters",
+      "depends_on": [
+        "P03",
+        "P07",
+        "P09"
+      ],
+      "requirements": [
+        "REQ-18",
+        "REQ-19"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Representation/physical-state adapters and small connected reference fixtures; no new general contact solver.",
+      "deliverables": [
+        "Constitutive/load/time/units/authority declarations and visual-to-authoritative state transfer.",
+        "Scoped inversion/contact evidence and explicit unsupported-guarantee rejection."
+      ],
+      "acceptance": [
+        "Visual LOD changes do not replace authoritative solver topology.",
+        "Rest plus deformed-state transfer checks; virtual work and prescribed response tests.",
+        "Independent-tetrahedron XPBD never labelled a race-free connected global solver or universal collision guarantee."
+      ],
+      "risk": "Physical reduction and new feasible nonlinear contact methods belong to optional research.",
+      "locks": [
+        "physical-adapters"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P11",
+      "title": "Coherent cluster hierarchy and cut validator",
+      "tier": "production_core",
+      "owner": "QualiaDB hierarchy",
+      "depends_on": [
+        "P06",
+        "P07"
+      ],
+      "requirements": [
+        "REQ-20"
+      ],
+      "effort_hours": {
+        "optimistic": 7.2,
+        "planning": 12,
+        "conservative": 21.6
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "ClusterDag construction adapters/validation and compatible codec roundtrip tests.",
+      "deliverables": [
+        "Hierarchy with replacement-group coverage, seam/border invariants and bounded storage.",
+        "CPU cut reference and explicit parent/child dependency identities."
+      ],
+      "acceptance": [
+        "No holes, duplicate coverage or unsupported sibling replacement in valid cuts.",
+        "Random legal/illegal cuts, disconnected assets and quantized codec roundtrip.",
+        "Existing 64-vertex/124-triangle and node layout limits stay authoritative."
+      ],
+      "risk": "A per-cluster LOD choice alone is insufficient to prove a valid global cut.",
+      "locks": [
+        "hierarchy"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P12",
+      "title": "Semantic numerical IR and guarded rewrites",
+      "tier": "production_core",
+      "owner": "Etalon Forge",
+      "depends_on": [
+        "P01",
+        "P02",
+        "P05"
+      ],
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-27"
+      ],
+      "effort_hours": {
+        "optimistic": 7.2,
+        "planning": 12,
+        "conservative": 21.6
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Existing KernelSpec and numerical graph extensions; preserve public interfaces where possible.",
+      "deliverables": [
+        "Math/discretization/schedule/ABI/evidence separation over existing IR.",
+        "Units/shapes/assumptions/effects/arithmetic annotations and rewrite proof obligations."
+      ],
+      "acceptance": [
+        "Reject invalid dimensions, undeclared aliasing and domain-invalid simplifications.",
+        "Floating-point rewrite legality distinct from real algebra; record applied rule/assumption trace.",
+        "One reduction, one sparse operator and geometry selection contract exercise the design."
+      ],
+      "risk": "Do not turn cold CAS into an unbounded hot-path optimizer.",
+      "locks": [
+        "forge-ir"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P13",
+      "title": "Bounded portable WGSL lowering",
+      "tier": "production_core",
+      "owner": "Etalon Forge",
+      "depends_on": [
+        "P03",
+        "P12"
+      ],
+      "requirements": [
+        "REQ-26",
+        "REQ-28",
+        "REQ-29",
+        "REQ-31"
+      ],
+      "effort_hours": {
+        "optimistic": 7.2,
+        "planning": 12,
+        "conservative": 21.6
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Existing emit/schedule adapters and kernel execution tests.",
+      "deliverables": [
+        "Checked indices, tail paths, loops, barriers, alias/effect rules and ABI layouts.",
+        "Generated -> Naga -> pipeline -> oracle stages with real execution receipts."
+      ],
+      "acceptance": [
+        "Empty/ragged/max shapes; odd workgroup tails; divergent-barrier rejection; alias counterexamples.",
+        "Host and WGSL layout byte agreement; CPU/GPU comparison and metamorphic tests.",
+        "GPU unavailability is unsupported/skipped evidence, never a pass."
+      ],
+      "risk": "Portable syntax does not establish semantic portability across adapters.",
+      "locks": [
+        "forge-emit"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P14",
+      "title": "Precision routes and backend qualification",
+      "tier": "production_core",
+      "owner": "Etalon numerical execution",
+      "depends_on": [
+        "P13"
+      ],
+      "requirements": [
+        "REQ-27",
+        "REQ-28",
+        "REQ-29"
+      ],
+      "effort_hours": {
+        "optimistic": 6.0,
+        "planning": 10,
+        "conservative": 18.0
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Arithmetic profile/probe and qualified df64 adapter tests; no claim of universal WGSL f64.",
+      "deliverables": [
+        "Ordinary f32 and optional paired-f32 profile admission, ranges and backend identities.",
+        "Numerical boundaries, cancellation/overflow/underflow and reassociation-sensitive probes."
+      ],
+      "acceptance": [
+        "K1 well-conditioned tests plus explicit ill-conditioned refusal/error envelopes.",
+        "Paired f32 must pass its own oracle; failed route disabled while qualified f32 remains available.",
+        "Qualify frozen native and browser routes; unavailable matrix entries remain missing release evidence."
+      ],
+      "risk": "A wider effective mantissa is not IEEE binary64 semantics.",
+      "locks": [
+        "precision"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P15",
+      "title": "Evidence stages and dependency-aware cache",
+      "tier": "production_core",
+      "owner": "Etalon receipts / QualiaDB identities",
+      "depends_on": [
+        "P02",
+        "P13"
+      ],
+      "requirements": [
+        "REQ-29",
+        "REQ-30",
+        "REQ-34",
+        "REQ-35"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "medium",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Manifest/cache adapters and invalidation tests; shared identity schema frozen by P02.",
+      "deliverables": [
+        "Stage-specific receipts tied to input/source/options/ABI/precision/adapter and measurement method.",
+        "Transitive invalidation and canonical cache keys."
+      ],
+      "acceptance": [
+        "Mutate each dependency and observe correct stage invalidation.",
+        "No stale validation promotion, synthetic timing presented as GPU timing, or CRC presented as signature.",
+        "Replay receipts rejects missing hashes and unsupported versions."
+      ],
+      "risk": "A cache hit can preserve obsolete assumptions unless its dependency closure is complete.",
+      "locks": [
+        "evidence-cache"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P16",
+      "title": "Conservative view and deformation selection",
+      "tier": "production_core",
+      "owner": "Etalon selection",
+      "depends_on": [
+        "P08",
+        "P11",
+        "P13"
+      ],
+      "requirements": [
+        "REQ-21"
+      ],
+      "effort_hours": {
+        "optimistic": 6.0,
+        "planning": 10,
+        "conservative": 18.0
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "cull_and_lod adapters and CPU/GPU selection comparisons.",
+      "deliverables": [
+        "Projection conventions, near-plane rules, transformed/deformed bounds and occlusion history policy.",
+        "Selection result tied to a legal cut rather than unrelated independent masks."
+      ],
+      "acceptance": [
+        "Perspective/orthographic and multiview fixtures; two-sided surfaces; camera jumps, near-plane intersections, nonuniform transforms and stale occlusion.",
+        "CPU/GPU selection comparison, no false disappearance in frozen domain.",
+        "Record difference between CPU projected-error and GPU preprojected-error contracts."
+      ],
+      "risk": "Inflated rest bounds alone may not cover a claimed deformation family.",
+      "locks": [
+        "selection"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P17",
+      "title": "Residency, paging and complete fallback cuts",
+      "tier": "production_core",
+      "owner": "Etalon runtime / QualiaDB resources",
+      "depends_on": [
+        "P16"
+      ],
+      "requirements": [
+        "REQ-22"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Residency state machine, bounded queues, fallback selection and tests.",
+      "deliverables": [
+        "Dependency-aware replacement readiness, pinned coarse fallback and eviction rules.",
+        "Device loss/missing-page/exhaustion lifecycle behavior."
+      ],
+      "acceptance": [
+        "Random arrival/eviction permutations preserve complete renderable coverage.",
+        "Never activate a replacement with incomplete dependencies; fallback itself must be resident.",
+        "Memory cap and cancellation tested during simulated inflight transfers; P22 exercises actual device/runtime integration."
+      ],
+      "risk": "Partial refinement may make holes even when each page is individually valid.",
+      "locks": [
+        "residency"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P18",
+      "title": "Compaction and complete bounded draw generation",
+      "tier": "production_core",
+      "owner": "Etalon GPU runtime",
+      "depends_on": [
+        "P13",
+        "P17"
+      ],
+      "requirements": [
+        "REQ-23",
+        "REQ-26"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Selection-to-worklist/indirect submission adapters and execution tests.",
+      "deliverables": [
+        "Mask -> bounded scan/compact -> command generation -> indexed draw path.",
+        "Capacity/overflow records and measured phase costs."
+      ],
+      "acceptance": [
+        "Zero/all/alternating selected, exact capacity and one-over-capacity cases.",
+        "Compare CPU reference lists and actual rendered coverage; no stale indirect arguments.",
+        "Respect dispatch limits, alignment and backend requirements."
+      ],
+      "risk": "Existing mask generation is only the first stage of complete work generation.",
+      "locks": [
+        "draw-generation"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P19",
+      "title": "Immutable quality gates and bounded tuning",
+      "tier": "production_core",
+      "owner": "Etalon tuning",
+      "depends_on": [
+        "P08",
+        "P14",
+        "P15"
+      ],
+      "requirements": [
+        "REQ-32"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "medium",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Fixed-schedule baseline, bounded deterministic candidate enumeration and Pareto reporting.",
+      "deliverables": [
+        "Equal-budget kernel-schedule comparison with frozen quality/resource gates.",
+        "Kernel build/compile/upload/steady costs and break-even accounting; integrated decode/compaction/draw confirmation belongs to P22 after P18."
+      ],
+      "acceptance": [
+        "Invalid fast candidate cannot win; immutable thresholds validated against tampering.",
+        "Budget exhaustion preserves qualified baseline; tie rules reproducible.",
+        "Publish all candidate attempts/failures; optional learned search excluded from core."
+      ],
+      "risk": "Tuning noise and unfair preprocessing can create false wins.",
+      "locks": [
+        "tuning"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P20",
+      "title": "Atomic activation, rollback and state migration",
+      "tier": "production_core",
+      "owner": "Etalon runtime + QualiaDB authority",
+      "depends_on": [
+        "P10",
+        "P15",
+        "P18",
+        "P19"
+      ],
+      "requirements": [
+        "REQ-33"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Variant activation/state migration adapters and fault injection tests.",
+      "deliverables": [
+        "Qualified dependency-set activation at a declared boundary.",
+        "Retained previous configuration, device-loss recovery and quantified transfer/migration semantics."
+      ],
+      "acceptance": [
+        "State-machine fault injection of incomplete assets, invalidated evidence and device loss around activation; P22 performs actual GPU lifecycle integration.",
+        "No mixed-version mesh/shader/transfer set; irreversible consumer policy explicit.",
+        "Reference state retained or migration fails before publication; energy/momentum effects reported when applicable."
+      ],
+      "risk": "Rolling back bytes does not undo already-consumed simulation state.",
+      "locks": [
+        "activation"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P21",
+      "title": "Existing morphism and deterministic production integration",
+      "tier": "production_core",
+      "owner": "Hypermedia + Synth",
+      "depends_on": [
+        "P04",
+        "P20"
+      ],
+      "requirements": [
+        "REQ-02",
+        "REQ-15",
+        "REQ-36"
+      ],
+      "effort_hours": {
+        "optimistic": 4.8,
+        "planning": 8,
+        "conservative": 14.4
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6.1-sol",
+      "reviewer_effort": "high",
+      "write_scope": "Existing simplify arguments/result wiring, tests and isolated showcase; coordinator alone edits shared catalogs/manifests.",
+      "deliverables": [
+        "Actual existing operation exposure, backward compatibility, .hmc packaging and embedded .10d previews.",
+        "Three repeated asset/source builds and documented determinism boundary."
+      ],
+      "acceptance": [
+        "Operation/ontology/dispatch/aliases agree; inventory remains 150 unless explicitly approved change.",
+        "Inspect front/side/three-quarter, wireframe/normals and error overlays.",
+        "Respect create-only outputs, existing format ownership and active MCP build targets."
+      ],
+      "risk": "A library method is not automatically a callable production operation.",
+      "locks": [
+        "production-demo"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P22",
+      "title": "Independent ablations and qualification campaign",
+      "tier": "production_core",
+      "owner": "Independent QA",
+      "depends_on": [
+        "P09",
+        "P10",
+        "P14",
+        "P21"
+      ],
+      "requirements": [
+        "REQ-05",
+        "REQ-31",
+        "REQ-37",
+        "REQ-38"
+      ],
+      "effort_hours": {
+        "optimistic": 7.2,
+        "planning": 12,
+        "conservative": 21.6
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Qualification runners, receipts and report artifacts; implementation fixes go back to their packet owners.",
+      "deliverables": [
+        "B0-B5 relevant comparisons; pinned B6 external reference where feasible.",
+        "Full corpus, heldout poses/views, error-versus-cost curves and ablations."
+      ],
+      "acceptance": [
+        "All failures/exclusions in denominator; identical quality gates and budgets; confirm integrated decode/upload/compaction/draw costs after P18.",
+        "At least five warmups and 30 retained timing samples; more when uncertainty prevents decision.",
+        "Numeric checks plus actual visual review; native/browser feature matrix has no silent skips; exercise real GPU lifecycle/device-loss handling where supported and document injection scope."
+      ],
+      "risk": "Tail guarantees need a justified sample design, not a 30-sample p95.",
+      "locks": [
+        "qa-fixtures"
+      ],
+      "gpu": true,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    },
+    {
+      "id": "P23",
+      "title": "Release gate and reproducible handoff",
+      "tier": "production_core",
+      "owner": "Coordinator + independent reviewer",
+      "depends_on": [
+        "P22"
+      ],
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-07",
+        "REQ-08",
+        "REQ-09",
+        "REQ-10",
+        "REQ-11",
+        "REQ-12",
+        "REQ-13",
+        "REQ-14",
+        "REQ-15",
+        "REQ-16",
+        "REQ-17",
+        "REQ-18",
+        "REQ-19",
+        "REQ-20",
+        "REQ-21",
+        "REQ-22",
+        "REQ-23",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27",
+        "REQ-28",
+        "REQ-29",
+        "REQ-30",
+        "REQ-31",
+        "REQ-32",
+        "REQ-33",
+        "REQ-34",
+        "REQ-35",
+        "REQ-36",
+        "REQ-37",
+        "REQ-38"
+      ],
+      "effort_hours": {
+        "optimistic": 6.0,
+        "planning": 10,
+        "conservative": 18.0
+      },
+      "review_share": 0.2,
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "write_scope": "Release evidence/documentation, frozen manifests and reproduction commands; no unrequested publishing.",
+      "deliverables": [
+        "Complete requirement/test/evidence/reviewer matrix; known limitations and operational runbook.",
+        "Accepted release candidate with exact revisions/file hashes, builds, artifacts and rollback instructions."
+      ],
+      "acceptance": [
+        "All core gates pass on frozen support matrix; no unresolved correctness defects or disguised deferrals.",
+        "Independent clean reproduction of representative end-to-end result.",
+        "Recheck source identity after fixes; invalidate affected evidence and rerun only impacted checks."
+      ],
+      "risk": "Feature complete is not independently accepted; missing hardware evidence prevents that claim.",
+      "locks": [
+        "release"
+      ],
+      "gpu": false,
+      "status": "planned",
+      "executed_tests": [],
+      "evidence_status": "not_executed",
+      "specification": "qualia-etalon-specification-competition-v0.2.md",
+      "author_agent_id": null,
+      "reviewer_agent_id": null,
+      "review_status": "not_started",
+      "launch_rule": "Dependencies accepted, interface version frozen, exact write lease and baseline hashes supplied. Distinct reviewer; review consumes a worker slot.",
+      "stop_rule": "Stop dependent changes on contract conflict; after two failed bounded repair attempts escalate model/design with evidence. Never loosen acceptance thresholds."
+    }
+  ],
+  "optional_tracks": [
+    {
+      "id": "R01",
+      "title": "Intrinsic coarsening",
+      "owner": "QualiaDB",
+      "depends_on": [
+        "P07",
+        "P09",
+        "P23"
+      ],
+      "planning_agent_hours": 70,
+      "acceptance": "Intrinsic triangulation and transfer with explicit representability domains; bounded downstream diffusion/geodesic comparison.",
+      "stop_condition": "No benefit at equal total cost, invalid transfer or scalability failure.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R02",
+      "title": "Spectral preservation",
+      "owner": "QualiaDB",
+      "depends_on": [
+        "R01"
+      ],
+      "planning_agent_hours": 55,
+      "acceptance": "Clustered eigenspace comparison and sparse scalable solver strategy; O1 plus downstream behavior on heldout meshes.",
+      "stop_condition": "Unstable repeated modes, insufficient spectral gaps or preprocessing outweighing benefits.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R03",
+      "title": "Physical reduction and hyperreduction",
+      "owner": "QualiaDB",
+      "depends_on": [
+        "P10",
+        "P23"
+      ],
+      "planning_agent_hours": 120,
+      "acceptance": "One declared constitutive/load family, verified full-order reference, reduced basis and bounded cubature; P1 and scoped feasibility.",
+      "stop_condition": "Heldout load/contact response fails; full model remains authoritative. No general contact solver included.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R04",
+      "title": "Appearance and deformation-aware optimization",
+      "owner": "QualiaDB + Hypermedia",
+      "depends_on": [
+        "P07",
+        "P08",
+        "P23"
+      ],
+      "planning_agent_hours": 70,
+      "acceptance": "Fixed renderer/material/lighting/pose domain, rebaking/correspondence and temporal error measures.",
+      "stop_condition": "Heldout views/poses fail or cost exceeds equal-quality baseline.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R05",
+      "title": "Quad-preserving authoring",
+      "owner": "QualiaDB",
+      "depends_on": [
+        "P06",
+        "P23"
+      ],
+      "planning_agent_hours": 65,
+      "acceptance": "Bounded cold quad-domain optimizer, singularity/feature policy, downstream triangulation and roundtrip.",
+      "stop_condition": "No robust admitted-domain result within work budget; preserve original quad topology.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R06",
+      "title": "Learned proposal search",
+      "owner": "Etalon tuning",
+      "depends_on": [
+        "P19",
+        "P23"
+      ],
+      "planning_agent_hours": 50,
+      "acceptance": "Existing .p64 proposer integration, heldout split and invalid-proposal accounting against equal-budget deterministic search.",
+      "stop_condition": "No reproducible total-cost benefit; use fixed/deterministic baseline.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R07",
+      "title": "Native backend specialization",
+      "owner": "Etalon",
+      "depends_on": [
+        "P14",
+        "P23"
+      ],
+      "planning_agent_hours": 75,
+      "acceptance": "One named extra backend/precision route, same semantic ABI/oracle and isolated fallback.",
+      "stop_condition": "Backend arithmetic or resource contract fails; portable route retained.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    },
+    {
+      "id": "R08",
+      "title": "Generated adaptive predicates",
+      "owner": "Etalon + QualiaDB predicates",
+      "depends_on": [
+        "P12",
+        "P14",
+        "P23"
+      ],
+      "planning_agent_hours": 85,
+      "acceptance": "One bounded predicate family, filtered arithmetic/escalation worklists, exact-sign oracle and exhaustion behavior.",
+      "stop_condition": "Unbounded escalations, backend transformations or unproven signs invalidate route.",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "reviewer_model": "gpt-6-astra",
+      "reviewer_effort": "high",
+      "status": "uncommissioned",
+      "stage_split": "20% feasibility; 60% implementation; 20% independent qualification; re-estimate production scope after feasibility"
+    }
+  ]
+}

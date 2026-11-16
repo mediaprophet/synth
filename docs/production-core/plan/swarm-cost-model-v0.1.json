@@ -1,0 +1,144 @@
+{
+  "as_of": "2026-11-16",
+  "currency": "USD",
+  "unit": "per million tokens",
+  "columns": [
+    "uncached_input",
+    "cached_input",
+    "output_including_reasoning"
+  ],
+  "rates": {
+    "gpt-6-luna": {
+      "standard": [
+        0.1,
+        0.01,
+        0.5
+      ],
+      "fast": [
+        0.2,
+        0.02,
+        1
+      ]
+    },
+    "gpt-6.1-terra": {
+      "standard": [
+        1,
+        0.05,
+        5
+      ],
+      "fast": [
+        2,
+        0.1,
+        10
+      ]
+    },
+    "gpt-6.1-sol": {
+      "standard": [
+        2,
+        0.1,
+        10
+      ],
+      "fast": [
+        4,
+        0.2,
+        20
+      ]
+    },
+    "gpt-6-astra": {
+      "standard": [
+        10,
+        1,
+        50
+      ],
+      "fast": [
+        20,
+        2,
+        100
+      ]
+    }
+  },
+  "token_budget_millions": {
+    "lean": {
+      "gpt-6-luna": [
+        2,
+        0,
+        0.12
+      ],
+      "gpt-6.1-terra": [
+        5,
+        0,
+        0.35
+      ],
+      "gpt-6.1-sol": [
+        10,
+        0,
+        0.7
+      ],
+      "gpt-6-astra": [
+        1,
+        0,
+        0.1
+      ]
+    },
+    "planning": {
+      "gpt-6-luna": [
+        4,
+        0,
+        0.25
+      ],
+      "gpt-6.1-terra": [
+        10,
+        0,
+        0.75
+      ],
+      "gpt-6.1-sol": [
+        25,
+        0,
+        1.8
+      ],
+      "gpt-6-astra": [
+        3,
+        0,
+        0.3
+      ]
+    },
+    "rework": {
+      "gpt-6-luna": [
+        8,
+        0,
+        0.5
+      ],
+      "gpt-6.1-terra": [
+        20,
+        0,
+        1.5
+      ],
+      "gpt-6.1-sol": [
+        50,
+        0,
+        3.6
+      ],
+      "gpt-6-astra": [
+        8,
+        0,
+        0.8
+      ]
+    }
+  },
+  "totals": {
+    "lean": {
+      "standard": 49.01,
+      "fast": 98.02
+    },
+    "planning": {
+      "standard": 127.28,
+      "fast": 254.55
+    },
+    "rework": {
+      "standard": 284.55,
+      "fast": 569.1
+    }
+  },
+  "meaning": "API-equivalent scenario estimates, not Codex invoices, human labor quotes or measured future use. No cache discount assumed. Short-context rates; reprice longer requests. Excludes tools, hardware, subscriptions, tax and optional research.",
+  "source": "https://developers.openai.com/api/docs/pricing"
+}

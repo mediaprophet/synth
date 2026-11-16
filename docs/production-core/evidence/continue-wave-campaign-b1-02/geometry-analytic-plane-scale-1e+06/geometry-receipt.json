@@ -1,0 +1,198 @@
+{
+  "artifacts": [
+    {
+      "bytes": 252,
+      "file": "source.10d",
+      "sha256": "b8f4afebe878dc52284b9023a4699fa7657902ffe54eef52cd427d21cb6351bc"
+    },
+    {
+      "bytes": 252,
+      "file": "simplified.10d",
+      "sha256": "b8f4afebe878dc52284b9023a4699fa7657902ffe54eef52cd427d21cb6351bc"
+    },
+    {
+      "bytes": 1038,
+      "file": "source-attributes.json",
+      "sha256": "47a8fd1b18a52114c4020b5e5333bd11055a69a0c581898fa68a049655e6d019"
+    },
+    {
+      "bytes": 166,
+      "file": "decoded-vertices.json",
+      "sha256": "ea6e2fdc6667323385852d824c0cdfbf481307d83bf822724a6832429483cdd8"
+    },
+    {
+      "bytes": 60,
+      "file": "decoded-triangles.json",
+      "sha256": "33230eb67d5fbef0760a1b3dc917670ec6cc008997e7545f8dfe5b79a64fa83d"
+    },
+    {
+      "bytes": 1038,
+      "file": "attributes.json",
+      "sha256": "47a8fd1b18a52114c4020b5e5333bd11055a69a0c581898fa68a049655e6d019"
+    }
+  ],
+  "fixture": {
+    "consumes_corpus_json": true,
+    "extent_diagonal": 1414213.5623730952,
+    "input_faces": 2,
+    "input_vertices": 4,
+    "name": "analytic-plane-scale-1e+06",
+    "source": "corpus_json",
+    "subpart_tags": [
+      101,
+      202
+    ],
+    "uv_seam": null
+  },
+  "limitations": [
+    "integration tracer only",
+    "labels retained in attributes.json rather than a new .10d section",
+    "non-ReachedTarget reports are a committed prefix, not an accepted asset",
+    "no GPU stage in this executable",
+    "physical_response not measured; P10 PhysicalEvidence was not supplied",
+    "existing infinite-penalty path may reject compatible labels via infinity times zero; see policy probe",
+    "geometric QEM ablation; semantic domain gates were not applied",
+    "collapse-provenance not_supplied; geometric driver has no CollapseTransfer",
+    "operator residual is constant-Neumann ||b-Ax|| on decoded mesh; not qualification"
+  ],
+  "metrics": {
+    "analytic_plane_residual": {
+      "reason": "builtin tilted-plane residual applies only to the two-chart grid",
+      "status": "not_measured"
+    },
+    "collapse_provenance": {
+      "reason": "geometric_qem_has_no_collapse_transfer",
+      "status": "not_supplied",
+      "wire": null
+    },
+    "decoded_locked_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "largest_normalized_collapse_cost": {
+      "kind": "qem_max_error_not_distance",
+      "value": 0.0
+    },
+    "operator_residual": {
+      "condition_estimate": 1.0,
+      "conventions": "cotangent_neumann_natural",
+      "field": "constant_neumann",
+      "free_count": 4,
+      "kind": "algebraic_residual",
+      "norm": "euclidean_two",
+      "note": "DdgReport.residual is iterate change; this field is ||b-Ax|| on free DOFs",
+      "relative": 0.0,
+      "rhs_norm": 0.0,
+      "solution_norm": 2.0,
+      "status": "measured",
+      "value": 0.0
+    },
+    "physical_response": {
+      "reason": "p10_physical_evidence_not_supplied",
+      "status": "not_measured",
+      "wire": null
+    },
+    "simplified_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "source_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 0.0
+    },
+    "symmetric_surface_deviation": {
+      "class": "enclosing_bound",
+      "compared_to": "decoded_final_10d_buffers",
+      "diagonal": 1414213.562373095,
+      "enclosing": {
+        "class": "enclosing_bound",
+        "lower": 0.0,
+        "units": "asset_length",
+        "upper": 2.0097197682007035e-8
+      },
+      "forbidden_semantic_merges": {
+        "class": "measured",
+        "units": "dimensionless",
+        "value": 0.0
+      },
+      "g1": {
+        "decision": "passed",
+        "numerical_note": "IEEE-754 f64 round-to-nearest serial arithmetic; slack is a first-order ulp estimate, not outward rounding",
+        "outward_rounding": false,
+        "profile": "g1",
+        "protected_drift_over_diagonal": 0.00001,
+        "slack": {
+          "class": "measured",
+          "units": "asset_length",
+          "value": 2.0097197682007035e-8
+        },
+        "upper_over_diagonal": 0.001,
+        "upper_threshold": 1414.213562373095,
+        "width_over_diagonal": 0.00001,
+        "width_threshold": 14.142135623730951
+      },
+      "lower": 0.0,
+      "method": "symmetric_triangle_covering_lipschitz_subdivision",
+      "protected_drift": {
+        "reason": "not_supplied",
+        "status": "absent",
+        "wire": null
+      },
+      "reference_domain": "authored_frozen_triangles",
+      "sample": {
+        "class": "sampled_estimate",
+        "units": "asset_length",
+        "value": 0.0
+      },
+      "slack": 2.0097197682007035e-8,
+      "status": "passed",
+      "units": "asset_length",
+      "upper": 2.0097197682007035e-8
+    },
+    "uv01_exact_f32_roundtrip": true
+  },
+  "policy": {
+    "cost_helper_probes": {
+      "finite_cross_label_pair_ranked": true,
+      "infinite_compatible_admission_status": "passed",
+      "infinite_compatible_label_pair_admitted": true,
+      "infinite_cross_label_pair_rejected": true,
+      "locked_endpoint_rejected": true
+    },
+    "driver": "geometric",
+    "protected": "perimeter_and_center_seam",
+    "semantic_transition": "not_applied_geometric_ablation",
+    "transfer_gate": "not_supplied"
+  },
+  "resources": {
+    "admitted_bytes": 0,
+    "decoded_scalar_cap": 65536,
+    "enclosing_work_used": 28,
+    "fixture_faces_cap": 2,
+    "fixture_vertices_cap": 4,
+    "work_used": 0
+  },
+  "result": {
+    "collapses": 0,
+    "driver": "geometric",
+    "faces": 2,
+    "forbidden_label_vertices": 0,
+    "locked_precompile_displacement": 0.0,
+    "mixed_domain_triangles": 0,
+    "protected_vertices_preserved": 0,
+    "target_faces": 2,
+    "termination": "ReachedTarget",
+    "vertices": 4
+  },
+  "schema": "qualia.production-core.geometry-tracer.v1",
+  "status": "passed",
+  "timings_ms": {
+    "admitted_decimate": 0.30469999999999997,
+    "decoded_enclosing_bound": 0.1659,
+    "geometry_probe_total": 2.4104,
+    "seal_and_roundtrip": 0.6246
+  }
+}

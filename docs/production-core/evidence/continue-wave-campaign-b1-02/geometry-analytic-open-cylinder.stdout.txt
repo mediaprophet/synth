@@ -1,0 +1,1 @@
+{"output_directory":"C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder","receipt":"geometry-receipt.json","status":"passed"}

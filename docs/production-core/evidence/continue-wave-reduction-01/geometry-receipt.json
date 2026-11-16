@@ -1,0 +1,215 @@
+{
+  "artifacts": [
+    {
+      "bytes": 796,
+      "file": "source.10d",
+      "sha256": "a01a417f7d4557841049ea30d5acc9eef7e495b0d23db28b446145451c94510a"
+    },
+    {
+      "bytes": 692,
+      "file": "simplified.10d",
+      "sha256": "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d"
+    },
+    {
+      "bytes": 9230,
+      "file": "source-attributes.json",
+      "sha256": "f469ffcda57cae0f13f8894183696d579eaddfd0b3ca57e0176afc6542ce15de"
+    },
+    {
+      "bytes": 1343,
+      "file": "decoded-vertices.json",
+      "sha256": "27e9411767a35a505babe1cd65f883624ba4bce1b0fe42e09b207414b3b92fdd"
+    },
+    {
+      "bytes": 740,
+      "file": "decoded-triangles.json",
+      "sha256": "ea977a0200675d85b99d62b4bf1a20351dddd54cb71c829c9e3d058629d5eb59"
+    },
+    {
+      "bytes": 8000,
+      "file": "attributes.json",
+      "sha256": "88807ad2885ae623c62f5dcc6fba89ba03fbffc7195a92b85ee63c70c87f4e49"
+    },
+    {
+      "bytes": 2096,
+      "file": "collapse-provenance.bin",
+      "sha256": "6cad13d65f888631fe1284f2c66732dd198857bfd7a451fd78459509fad63b4b"
+    },
+    {
+      "bytes": 4630,
+      "file": "collapse-provenance.json",
+      "sha256": "6c21163ab9aea3645190c382914a2097af72d3bb50fb180a9a75929c9cd9bfdb"
+    }
+  ],
+  "fixture": {
+    "consumes_corpus_json": false,
+    "extent_diagonal": 1.0,
+    "input_faces": 32,
+    "input_vertices": 30,
+    "name": "normalized-tilted-two-chart-grid",
+    "source": "builtin",
+    "subpart_tags": [
+      101,
+      202
+    ],
+    "uv_seam": "5 coincident vertex pairs; left u=1 and right u=0; disconnected chart topology"
+  },
+  "limitations": [
+    "integration tracer only",
+    "labels retained in attributes.json rather than a new .10d section",
+    "non-ReachedTarget reports are a committed prefix, not an accepted asset",
+    "no GPU stage in this executable",
+    "physical_response not measured; P10 PhysicalEvidence was not supplied",
+    "existing infinite-penalty path may reject compatible labels via infinity times zero; see policy probe",
+    "collapse-provenance is a hashed QCLN0001 snapshot; hashing is not qualification",
+    "operator residual is constant-Neumann ||b-Ax|| on decoded mesh; not qualification"
+  ],
+  "metrics": {
+    "analytic_plane_residual": {
+      "kind": "vertex_sample",
+      "units": "normalized_world",
+      "value": 2.004827189024436e-17
+    },
+    "collapse_provenance": {
+      "committed_collapses": 4,
+      "files": [
+        "collapse-provenance.bin",
+        "collapse-provenance.json"
+      ],
+      "live": 26,
+      "note": "hashed QCLN0001 snapshot; hashing is not collapse-provenance qualification",
+      "schema": "qualia.collapse-lineage/QCLN0001",
+      "sha256": "6cad13d65f888631fe1284f2c66732dd198857bfd7a451fd78459509fad63b4b",
+      "status": "present"
+    },
+    "decoded_locked_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 7.629641909798332e-6
+    },
+    "largest_normalized_collapse_cost": {
+      "kind": "ranking_cost_not_distance",
+      "value": 0.004691242301551094
+    },
+    "operator_residual": {
+      "condition_estimate": 4.36685711830884,
+      "conventions": "cotangent_neumann_natural",
+      "field": "constant_neumann",
+      "free_count": 26,
+      "kind": "algebraic_residual",
+      "norm": "euclidean_two",
+      "note": "DdgReport.residual is iterate change; this field is ||b-Ax|| on free DOFs",
+      "relative": 7.751710408992441e-16,
+      "rhs_norm": 0.0,
+      "solution_norm": 5.0990195135927845,
+      "status": "measured",
+      "value": 7.751710408992441e-16
+    },
+    "physical_response": {
+      "reason": "p10_physical_evidence_not_supplied",
+      "status": "not_measured",
+      "wire": null
+    },
+    "simplified_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 7.629641909798332e-6
+    },
+    "source_codec_position_error": {
+      "kind": "paired_vertex_max",
+      "units": "normalized_world",
+      "value": 7.629641909798332e-6
+    },
+    "symmetric_surface_deviation": {
+      "class": "enclosing_bound",
+      "compared_to": "decoded_final_10d_buffers",
+      "diagonal": 1.0,
+      "enclosing": {
+        "class": "enclosing_bound",
+        "lower": 2.58386965168066e-6,
+        "units": "asset_length",
+        "upper": 0.0000462898883018322
+      },
+      "forbidden_semantic_merges": {
+        "class": "measured",
+        "units": "dimensionless",
+        "value": 0.0
+      },
+      "g1": {
+        "decision": "inconclusive",
+        "numerical_note": "IEEE-754 f64 round-to-nearest serial arithmetic; slack is a first-order ulp estimate, not outward rounding",
+        "outward_rounding": false,
+        "profile": "g1",
+        "protected_drift_over_diagonal": 0.00001,
+        "slack": {
+          "class": "measured",
+          "units": "asset_length",
+          "value": 2.842170943040401e-14
+        },
+        "upper_over_diagonal": 0.001,
+        "upper_threshold": 0.001,
+        "width_over_diagonal": 0.00001,
+        "width_threshold": 0.00001
+      },
+      "lower": 2.58386965168066e-6,
+      "method": "symmetric_triangle_covering_lipschitz_subdivision",
+      "protected_drift": {
+        "class": "measured",
+        "units": "asset_length",
+        "value": 7.615339169930744e-6
+      },
+      "reference_domain": "authored_frozen_triangles",
+      "sample": {
+        "class": "sampled_estimate",
+        "units": "asset_length",
+        "value": 2.5838696801023695e-6
+      },
+      "slack": 2.842170943040401e-14,
+      "status": "inconclusive",
+      "units": "asset_length",
+      "upper": 0.0000462898883018322
+    },
+    "uv01_exact_f32_roundtrip": true
+  },
+  "policy": {
+    "cost_helper_probes": {
+      "finite_cross_label_pair_ranked": true,
+      "infinite_compatible_admission_status": "passed",
+      "infinite_compatible_label_pair_admitted": true,
+      "infinite_cross_label_pair_rejected": true,
+      "locked_endpoint_rejected": true
+    },
+    "driver": "admitted",
+    "protected": "perimeter_and_center_seam",
+    "semantic_transition": "hard_reject_admitted_domains",
+    "transfer_gate": "p07_collapse_transfer"
+  },
+  "resources": {
+    "admitted_bytes": 42599,
+    "decoded_scalar_cap": 65536,
+    "enclosing_work_used": 7609156,
+    "fixture_faces_cap": 32,
+    "fixture_vertices_cap": 30,
+    "work_used": 964711
+  },
+  "result": {
+    "collapses": 4,
+    "driver": "admitted",
+    "faces": 24,
+    "forbidden_label_vertices": 0,
+    "locked_precompile_displacement": 0.0,
+    "mixed_domain_triangles": 0,
+    "protected_vertices_preserved": 24,
+    "target_faces": 24,
+    "termination": "ReachedTarget",
+    "vertices": 26
+  },
+  "schema": "qualia.production-core.geometry-tracer.v1",
+  "status": "passed",
+  "timings_ms": {
+    "admitted_decimate": 38.6702,
+    "decoded_enclosing_bound": 54690.3819,
+    "geometry_probe_total": 54733.314300000005,
+    "seal_and_roundtrip": 0.9457
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "production-core.browser-baseline/v1",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "secure_context": true,
+  "stages": [
+    "device_created",
+    "shader_compiled",
+    "pipeline_created",
+    "dispatched_readback",
+    "oracle_verified"
+  ],
+  "status": "passed",
+  "limitations": "Fixed affine kernel only; not geometry, rendering, application, timing or cross-vendor qualification.",
+  "adapter": {
+    "vendor": "intel",
+    "architecture": "gen-12lp",
+    "device": "",
+    "description": "",
+    "is_fallback": false
+  },
+  "features": [
+    "bgra8unorm-storage",
+    "clip-distances",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-blendable",
+    "float32-filterable",
+    "indirect-first-instance",
+    "primitive-index",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "subgroup-size-control",
+    "subgroups",
+    "texture-component-swizzle",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-unaligned",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "timestamp-query"
+  ],
+  "wgsl_sha256": "d5a6d8ac4dea817f078ffd0d9f0affeb4b2cdee7254e9b625c4bc6e3ba24bd36",
+  "compilation_messages": [],
+  "count": 4099,
+  "oracle": {
+    "kind": "independent_js_binary64",
+    "count": 0,
+    "max_absolute_error": 0,
+    "known_bad_detected": true
+  },
+  "input_f32_sha256": "e3f4739b53c4a9e11e616f10e5a04f26e85b928ba86d8bea14a958b8c0c5347e",
+  "output_f32_sha256": "2aecbdf771ac6d575558ac1c18d97f22eb359fe748cc81f420d41339a7ce47c9"
+}

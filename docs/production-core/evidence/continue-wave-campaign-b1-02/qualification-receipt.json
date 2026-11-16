@@ -1,0 +1,1546 @@
+{
+  "schema": "production-core.qualification-campaign/v1",
+  "status": "executed_partial_not_qualified",
+  "started_at": "2026-11-16T13:33:12.406103+00:00",
+  "mode": "campaign",
+  "corpus": "C:\\github\\synth\\docs\\production-core\\corpus",
+  "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02",
+  "family_filter": [
+    "analytic_surfaces"
+  ],
+  "geometry_exe": {
+    "path": "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+    "present": true,
+    "sha256": "14cdfa46f755b4351eb78ae890334dd6b886cab74c9ab3219ee99f22326d8ae4",
+    "consumes_corpus_json": true,
+    "builtin_fixture": "normalized-tilted-two-chart-grid",
+    "supported_fixture_ids": [
+      "analytic-plane-scale-1",
+      "empty-mesh",
+      "identity-two-subpart-seam",
+      "impossible-ratio",
+      "mixed-provenance-domains",
+      "uv-duplicated-seam"
+    ],
+    "driver_flag_in_example_source": true,
+    "requested_driver": "geometric",
+    "driver_for_invoke": "geometric",
+    "b1_planned_argv": [
+      "--driver",
+      "geometric"
+    ]
+  },
+  "inspection": {
+    "schema": "production-core.admitted-geometry-probe/v1",
+    "worktrees": {
+      "root": "C:\\github",
+      "synth": "C:\\github\\synth",
+      "qualiaDB": "C:\\github\\qualiaDB",
+      "etalon": "C:\\github\\etalon",
+      "hypermedia": "C:\\github\\hypermedia-production"
+    },
+    "sources": {
+      "example": {
+        "path": "C:\\github\\qualiaDB\\crates\\qualia-core-db\\examples\\production_core_geometry.rs",
+        "present": true,
+        "sha256": "bb3bbf70dc51eecf61bd766c4be723cfecd715e2f24ae2f257c1ce1e2fa82c0e",
+        "required_snippets": {
+          "decimate_semantic_admitted_3": true,
+          "const HEX:": true,
+          "Sha256::digest": true,
+          "--driver": true,
+          "decimate_qem": true
+        },
+        "forbidden_snippets": {
+          "format!(\"{:x}\", Sha256::digest": false
+        }
+      },
+      "admission": {
+        "path": "C:\\github\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic\\admission.rs",
+        "present": true,
+        "sha256": "a6fa9ed58e1aabe73932ded9ef92073dfc43e2102146266422c5a01df55657aa",
+        "required_snippets": {
+          "pub fn decimate_semantic_admitted_3": true
+        },
+        "forbidden_snippets": {}
+      },
+      "semantic_mod": {
+        "path": "C:\\github\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic.rs",
+        "present": true,
+        "sha256": "0fb56b68fbe4df8ab49bfeb1a4373e63a1c478fb831e27fc745f0a62367ea4d9",
+        "required_snippets": {
+          "pub mod admission": true
+        },
+        "forbidden_snippets": {}
+      },
+      "forge_example": {
+        "path": "C:\\github\\etalon\\crates\\etalon-wgsl-forge\\examples\\production_core_probe.rs",
+        "present": true,
+        "sha256": "96663f313ea640eaab33ed82d032fbca85b86d9e5041fa02d693da99e8bc95eb",
+        "required_snippets": {
+          "production_core_probe": true,
+          "AffineF32": true
+        },
+        "forbidden_snippets": {}
+      }
+    },
+    "sha256_lowerhex_history": {
+      "schema": "production-core.sha256-lowerhex-history/v1",
+      "previous_failure": {
+        "error": "E0277",
+        "message": "the trait bound Array<u8, ...>: LowerHex is not satisfied",
+        "example": "crates/qualia-core-db/examples/production_core_geometry.rs",
+        "source_line_then": "format!(\"{:x}\", Sha256::digest(bytes))",
+        "rustc_note": "generic SHA2 digest array does not implement fmt::LowerHex",
+        "log": "qualiaDB/target-production-core/geometry-build-01.log",
+        "long_type": "qualiaDB/target-production-core/debug/examples/production_core_geometry.long-type-10344221273783986174.txt",
+        "cargo_exit": 101,
+        "observed_log_span_utc": [
+          "2026-11-16T06:52:05.969Z",
+          "2026-11-16T07:32:30.054Z"
+        ],
+        "observed_log_span_is_not_full_command_duration": true
+      },
+      "repair": {
+        "location": "examples/production_core_geometry.rs sha256()",
+        "method": "explicit nibble encoding over Sha256::digest(bytes).iter()",
+        "status": "rebuilt",
+        "passing_receipt": "tracer_run_not_qualification",
+        "rebuild_required": false,
+        "binary": "qualiaDB/target-production-core/debug/examples/production_core_geometry.exe",
+        "tracer_receipt": "synth/docs/production-core/evidence/admitted-geometry-run-01/geometry-receipt.json"
+      }
+    },
+    "lowerhex_repair_in_source": true,
+    "previous_build_log": {
+      "path": "C:\\github\\qualiaDB\\target-production-core\\geometry-build-01.log",
+      "present": false,
+      "records_e0277_lowerhex": false
+    },
+    "capabilities": {
+      "admitted_geometry_library": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "public_api": "decimate_3_semantic::admission::decimate_semantic_admitted_3",
+        "parent_export": true,
+        "note": "Source presence is not compilation, execution or qualification."
+      },
+      "admitted_geometry_example": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "source_wired_to_admitted_driver": true,
+        "lowerhex_repair_in_source": true,
+        "executable": "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "note": "Example is the admitted semantic path. Callable means the rebuilt binary exists; inspect does not execute it.",
+        "driver_flag_in_example_source": true
+      },
+      "geometric_qem_driver": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "planned_argv": [
+          "--driver",
+          "geometric"
+        ],
+        "driver_flag_in_example_source": true,
+        "note": "B1 uses --driver geometric when the example argv parser contains --driver. A Driver enum or decimate_qem import is not a callable CLI. Absence keeps B1 not_executed until the coordinator rebuilds."
+      },
+      "etalon_production_core_probe": {
+        "present": true,
+        "callable": false,
+        "executed": false,
+        "qualified": false,
+        "state": "present",
+        "executable": "C:\\github\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+        "prior_native_baseline": "C:\\github\\synth\\docs\\production-core\\evidence\\forge-native-baseline\\probe.json",
+        "note": "Prior native DX12 baseline is separate evidence and is not replayed by inspect."
+      },
+      "producer_glb_smoke": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "executable": "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "prior_attributed_handoff_smoke": "C:\\github\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "note": "Historical packaging smoke is not joined admitted-geometry qualification."
+      }
+    },
+    "documented_commands": [
+      {
+        "id": "qualiadb-production-core-geometry",
+        "title": "QualiaDB example production_core_geometry (admitted semantic path)",
+        "cwd": "C:\\github\\qualiaDB",
+        "notes": [
+          "Example source calls decimate_semantic_admitted_3; this is not a compiled binary.",
+          "Previous cargo build exited 101 on SHA-256 LowerHex formatting; source repair is unbuilt.",
+          "Do not invent a passing geometry receipt. Do not rebuild into synth target or target-studio."
+        ],
+        "build_powershell": [
+          "$env:CARGO_BUILD_JOBS = '1'",
+          "$env:CARGO_INCREMENTAL = '0'",
+          "$env:RUSTFLAGS = '-C debuginfo=0'",
+          "cargo --config .cargo/production-core.toml build --offline --no-default-features -p qualia-core-db --example production_core_geometry --target-dir target-production-core"
+        ],
+        "run_powershell": [
+          "& \"C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir>",
+          "& \"C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --empty",
+          "& \"C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --target-faces 0"
+        ]
+      },
+      {
+        "id": "etalon-production-core-probe",
+        "title": "Etalon production_core_probe",
+        "cwd": "C:\\github\\etalon",
+        "notes": [
+          "Fixed AffineF32 kernel only. Optional --vertices-json requires a real decoded geometry asset.",
+          "Prior native DX12 baseline is separate evidence; this command list is not a GPU replay.",
+          "GPU timestamp samples are not byte-identical across runs."
+        ],
+        "build_powershell": [
+          "$env:CARGO_TARGET_DIR = 'C:\\github\\etalon\\target-production-core'",
+          "cargo build --locked --offline -p etalon-wgsl-forge --example production_core_probe --features gpu-native-dx12"
+        ],
+        "run_powershell": [
+          "$env:ETALON_WGPU_BACKEND = 'dx12'",
+          "& \"C:\\github\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA",
+          "& \"C:\\github\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA --vertices-json <decoded-vertices.json> --asset-sha256 <simplified.10d-sha256>"
+        ]
+      },
+      {
+        "id": "producer-glb-smoke",
+        "title": "Existing producer GLB smoke / joined tracer packaging",
+        "cwd": "C:\\github\\synth",
+        "notes": [
+          "Attributed-handoff-smoke already recorded a packaging pass of a six-vertex fixture.",
+          "Joined tracer produce/preview uses the same cached producer binary identity; source equivalence is not assumed.",
+          "Three HMC repeats test packaging hashes, not three independent GPU timing receipts."
+        ],
+        "historical_smoke": "C:\\github\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "inspect_powershell": [
+          "python \"C:\\github\\synth\\scripts\\production_core\\admitted_geometry_probe.py\" --out <new-create-only-dir> --inspect-only"
+        ],
+        "run_powershell": [
+          "python \"C:\\github\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --inspect-only --out <new-create-only-dir>",
+          "python \"C:\\github\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --geometry-exe \"C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --forge-exe \"C:\\github\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" --synth-exe \"C:\\github\\synth\\target-prod\\debug\\synth.exe\" --out <new-create-only-dir>"
+        ]
+      }
+    ],
+    "determinism_boundary": "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical.",
+    "joined_three_geometry_builds_are_not_three_gpu_runs": true,
+    "gpu_identical_timing_claimed": false,
+    "invented_passing_geometry_receipt": false,
+    "incomplete_core_checklist": [
+      {
+        "item": "geometry_example_rebuilt_after_lowerhex_repair",
+        "status": "done"
+      },
+      {
+        "item": "admitted_geometry_executable",
+        "status": "present"
+      },
+      {
+        "item": "joined_tracer_execution",
+        "status": "executed_not_qualified"
+      },
+      {
+        "item": "p01_p03_accepted",
+        "status": "open"
+      },
+      {
+        "item": "public_hypermedia_simplify_semantic",
+        "status": "compiled_unit_tested"
+      },
+      {
+        "item": "whole_surface_bound",
+        "status": "not_measured"
+      },
+      {
+        "item": "collapse_provenance_qualification",
+        "status": "inspected_not_supplied"
+      },
+      {
+        "item": "operator_or_physical_qualification",
+        "status": "not_executed"
+      },
+      {
+        "item": "final_10d_sealing_independently_decoded",
+        "status": "executed_not_qualified"
+      },
+      {
+        "item": "gpu_timing_byte_identical_across_repeats",
+        "status": "not_claimed"
+      },
+      {
+        "item": "cached_synth_exe_source_equivalence",
+        "status": "not_established"
+      },
+      {
+        "item": "p02_p05_p06_p07_compiled_together",
+        "status": "compiled"
+      }
+    ],
+    "inspect_executed_gpu": false,
+    "inspect_ran_cargo": false,
+    "sha256_lowerhex_encoding": {
+      "algorithm": "explicit_nibble_lowercase_hex",
+      "marker": "production-core-lowerhex-marker",
+      "digest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "hashlib_hexdigest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "note": "Matching Python encodings do not qualify the QualiaDB example."
+    }
+  },
+  "limitations": [
+    "Qualification runner, not full production-core acceptance.",
+    "Mesh fixtures are passed as --corpus-json. The builtin two-chart grid is used only when no corpus JSON is supplied.",
+    "Known-bad published candidates are evaluated by oracle_harness; the geometry exe is not invoked on welded candidates as input meshes.",
+    "Known-bad passing executable output is a corpus defect unless named candidate gates failed.",
+    "B1 --driver geometric is planned when the example argv parser contains --driver; absence keeps B1 not_executed.",
+    "Holdout fixtures are labelled and never used to pick thresholds.",
+    "Maximum-size remains descriptor_only; the 50k mesh is not materialized.",
+    "Unimplemented B0-B5 ablations are not_executed, not zero.",
+    "B0 identity ablation is inspect/CPU only; GPU is not invoked; executed is not qualified.",
+    "Independent QuantizedMesh decode of produced simplified.10d does not trust geometry-receipt.json.",
+    "Collapse provenance snapshot absence is not_supplied, not 0.0.",
+    "CPU wall times are labelled cpu_wall. Synthetic values are never stored as GPU.",
+    "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical."
+  ],
+  "invented_passing_geometry_receipt": false,
+  "gpu_identical_timing_claimed": false,
+  "maximum_size_materialized": false,
+  "holdout_used_for_threshold_selection": false,
+  "visual_capture": "recipe_only_not_executed",
+  "visual_capture_recipe": {
+    "execution_status": "not_executed",
+    "holdout_views": [
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.5,
+            -3.0,
+            0.6
+          ],
+          "up": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "name": "holdout-low"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.15,
+            0.2,
+            0.12
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "holdout-near-oblique"
+      }
+    ],
+    "note": "Recipe only. Screenshots are not generated by fixture publication. Holdout views must not be used to choose thresholds.",
+    "overlays": [
+      "wireframe",
+      "normals",
+      "error"
+    ],
+    "schema": "production-core.visual-capture-recipe/v1",
+    "subject_fixture_ids": [
+      "identity-two-subpart-seam",
+      "uv-duplicated-seam"
+    ],
+    "views": [
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.5,
+            0.5,
+            3.0
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "front"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            3.0,
+            0.5,
+            0.5
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "side"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            2.2,
+            1.6,
+            2.2
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "three-quarter"
+      }
+    ]
+  },
+  "hash_algorithm": "blake3",
+  "hash_algorithm_note": "blake3 used from scripts/production_core/vendor; sha256 also recorded",
+  "fixtures": [
+    {
+      "id": "analytic-plane-scale-1",
+      "family": "analytic_surfaces",
+      "partition": "tune",
+      "file": "analytic-plane-scale-1.json",
+      "seed": 101,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "bfcce07df97f7415f0bbbfacb26972318c3353b141db19916e0d01c89aa96537",
+        "sha256": "c2a861da1a00d661f7530b034ffd505dad5a45048cd357cf61ac72ac122b086d",
+        "blake3": "bfcce07df97f7415f0bbbfacb26972318c3353b141db19916e0d01c89aa96537"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "executed",
+      "execution_action": "invoke",
+      "execution_reason": "admitted example --corpus-json for this published fixture",
+      "consumes_corpus_bytes": true,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "cpu_wall",
+        "wall_seconds": 0.05367669998668134,
+        "gpu": false,
+        "synthetic": false,
+        "source": "python_perf_counter",
+        "note": "CPU wall time. Not a GPU timestamp sample."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "geometry_invocation": {
+        "argv": [
+          "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+          "--out",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1",
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1.json",
+          "--driver",
+          "geometric"
+        ],
+        "status": "executed",
+        "exit_code": 0,
+        "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1",
+        "extra_args": [
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1.json",
+          "--driver",
+          "geometric"
+        ],
+        "builtin_fixture": "normalized-tilted-two-chart-grid",
+        "note": "Execution is not qualification. GPU timing is not produced by this executable."
+      },
+      "geometry_receipt": {
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\geometry-receipt.json",
+        "status": "passed",
+        "builtin_fixture": null,
+        "corpus_fixture": "analytic-plane-scale-1",
+        "corpus_fixture_consumed": true,
+        "gpu_stage": false,
+        "timings": {
+          "kind": "cpu_wall",
+          "wall_seconds": null,
+          "gpu": false,
+          "synthetic": false,
+          "source": "geometry_exe_instant_wall",
+          "note": "CPU wall time. Not a GPU timestamp sample.",
+          "samples_ms": {
+            "admitted_decimate": 0.37110000000000004,
+            "decoded_enclosing_bound": 0.1159,
+            "geometry_probe_total": 1.631,
+            "seal_and_roundtrip": 0.3873
+          },
+          "units": "milliseconds"
+        }
+      },
+      "exe_passed": true,
+      "verdict": {
+        "corpus_success": false,
+        "qualified": false,
+        "in_denominator": true,
+        "reason": "execution is not qualification"
+      },
+      "observed_failed_gates": [],
+      "independent_decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\simplified.10d",
+        "sha256": "c0c7f34ffe187d1eb806d4684a3aa296303b15998fa32f8533295f391279efa2",
+        "bytes": 252,
+        "vertex_count": 4,
+        "triangle_count": 2,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 12,
+            "decoded_count": 4,
+            "sidecar_count": 4,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 2,
+            "sidecar_count": 2,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "f08b81025c32f97931cb1f17ae69458bae53c15f3e485410ddaba66f1d0d369c",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\geometry-receipt.json",
+          "bytes": 6159,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 586500132,
+          "computed": 586500132,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.00045200000749900937,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            1.0,
+            1.0,
+            0.0
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    },
+    {
+      "id": "analytic-plane-scale-1e-06",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-plane-scale-1e-06.json",
+      "seed": 102,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "dabd1362ababf4e682325a95d4fdb5f4fa4eded19c4dabccaca0d02462518b21",
+        "sha256": "c17fc8f7bf17f8da788a079f248d58a952603d938510b03e4cb8e2a1ce697ef3",
+        "blake3": "dabd1362ababf4e682325a95d4fdb5f4fa4eded19c4dabccaca0d02462518b21"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "executed",
+      "execution_action": "invoke",
+      "execution_reason": "admitted example --corpus-json for this published fixture",
+      "consumes_corpus_bytes": true,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "cpu_wall",
+        "wall_seconds": 0.02331590000540018,
+        "gpu": false,
+        "synthetic": false,
+        "source": "python_perf_counter",
+        "note": "CPU wall time. Not a GPU timestamp sample."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "geometry_invocation": {
+        "argv": [
+          "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+          "--out",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06",
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1e-06.json",
+          "--driver",
+          "geometric"
+        ],
+        "status": "executed",
+        "exit_code": 0,
+        "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06",
+        "extra_args": [
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1e-06.json",
+          "--driver",
+          "geometric"
+        ],
+        "builtin_fixture": "normalized-tilted-two-chart-grid",
+        "note": "Execution is not qualification. GPU timing is not produced by this executable."
+      },
+      "geometry_receipt": {
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\geometry-receipt.json",
+        "status": "passed",
+        "builtin_fixture": null,
+        "corpus_fixture": "analytic-plane-scale-1e-06",
+        "corpus_fixture_consumed": true,
+        "gpu_stage": false,
+        "timings": {
+          "kind": "cpu_wall",
+          "wall_seconds": null,
+          "gpu": false,
+          "synthetic": false,
+          "source": "geometry_exe_instant_wall",
+          "note": "CPU wall time. Not a GPU timestamp sample.",
+          "samples_ms": {
+            "admitted_decimate": 0.2845,
+            "decoded_enclosing_bound": 0.1149,
+            "geometry_probe_total": 1.7440000000000002,
+            "seal_and_roundtrip": 0.4375
+          },
+          "units": "milliseconds"
+        }
+      },
+      "exe_passed": true,
+      "verdict": {
+        "corpus_success": false,
+        "qualified": false,
+        "in_denominator": true,
+        "reason": "execution is not qualification"
+      },
+      "observed_failed_gates": [],
+      "independent_decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\simplified.10d",
+        "sha256": "b2af756193788784b93c8c4e55641a45fd3e11be51e494b7ae5d4ae07ee9a148",
+        "bytes": 252,
+        "vertex_count": 4,
+        "triangle_count": 2,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 12,
+            "decoded_count": 4,
+            "sidecar_count": 4,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 2,
+            "sidecar_count": 2,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "2c34460e1af0a86d3e492ca5b21d5fe3dee530e56482c099164ec994dc37bd98",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\geometry-receipt.json",
+          "bytes": 6187,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 2103511441,
+          "computed": 2103511441,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.00041829998372122645,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            9.999999974752427e-07,
+            9.999999974752427e-07,
+            0.0
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    },
+    {
+      "id": "analytic-plane-scale-1e+06",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-plane-scale-1e+06.json",
+      "seed": 103,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "74e3f4fd29dcc07427155fa25449a2648773fe56213b98441a03c973c4aa0476",
+        "sha256": "3b3e906844a385e54796392a8e44595be9936ccae5f6b1d1d7626d39b997b669",
+        "blake3": "74e3f4fd29dcc07427155fa25449a2648773fe56213b98441a03c973c4aa0476"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "executed",
+      "execution_action": "invoke",
+      "execution_reason": "admitted example --corpus-json for this published fixture",
+      "consumes_corpus_bytes": true,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "cpu_wall",
+        "wall_seconds": 0.03275509999366477,
+        "gpu": false,
+        "synthetic": false,
+        "source": "python_perf_counter",
+        "note": "CPU wall time. Not a GPU timestamp sample."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "geometry_invocation": {
+        "argv": [
+          "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+          "--out",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06",
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1e+06.json",
+          "--driver",
+          "geometric"
+        ],
+        "status": "executed",
+        "exit_code": 0,
+        "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06",
+        "extra_args": [
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-plane-scale-1e+06.json",
+          "--driver",
+          "geometric"
+        ],
+        "builtin_fixture": "normalized-tilted-two-chart-grid",
+        "note": "Execution is not qualification. GPU timing is not produced by this executable."
+      },
+      "geometry_receipt": {
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\geometry-receipt.json",
+        "status": "passed",
+        "builtin_fixture": null,
+        "corpus_fixture": "analytic-plane-scale-1e+06",
+        "corpus_fixture_consumed": true,
+        "gpu_stage": false,
+        "timings": {
+          "kind": "cpu_wall",
+          "wall_seconds": null,
+          "gpu": false,
+          "synthetic": false,
+          "source": "geometry_exe_instant_wall",
+          "note": "CPU wall time. Not a GPU timestamp sample.",
+          "samples_ms": {
+            "admitted_decimate": 0.30469999999999997,
+            "decoded_enclosing_bound": 0.1659,
+            "geometry_probe_total": 2.4104,
+            "seal_and_roundtrip": 0.6246
+          },
+          "units": "milliseconds"
+        }
+      },
+      "exe_passed": true,
+      "verdict": {
+        "corpus_success": false,
+        "qualified": false,
+        "in_denominator": true,
+        "reason": "execution is not qualification"
+      },
+      "observed_failed_gates": [],
+      "independent_decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\simplified.10d",
+        "sha256": "b8f4afebe878dc52284b9023a4699fa7657902ffe54eef52cd427d21cb6351bc",
+        "bytes": 252,
+        "vertex_count": 4,
+        "triangle_count": 2,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 12,
+            "decoded_count": 4,
+            "sidecar_count": 4,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 2,
+            "sidecar_count": 2,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "8fc9759720593499900379383ca7ead97659081bd5166c7935b5c635e03d88c3",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\geometry-receipt.json",
+          "bytes": 6154,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 177626982,
+          "computed": 177626982,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.00036310002906247973,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            1000000.0,
+            1000000.0,
+            0.0
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    },
+    {
+      "id": "analytic-sphere-octahedron",
+      "family": "analytic_surfaces",
+      "partition": "tune",
+      "file": "analytic-sphere-octahedron.json",
+      "seed": 104,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "a845130ab21539de6ad0d74b5143b4430eddb33daddab4c575af85b91459a906",
+        "sha256": "d6f63d65b43c0d296eece9e24705065d5a4e25a880604d13792b39478f5baf7b",
+        "blake3": "a845130ab21539de6ad0d74b5143b4430eddb33daddab4c575af85b91459a906"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Octahedron face interiors are not on the unit sphere."
+      ],
+      "execution_status": "executed",
+      "execution_action": "invoke",
+      "execution_reason": "admitted example --corpus-json for this published fixture",
+      "consumes_corpus_bytes": true,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "cpu_wall",
+        "wall_seconds": 0.01940579997608438,
+        "gpu": false,
+        "synthetic": false,
+        "source": "python_perf_counter",
+        "note": "CPU wall time. Not a GPU timestamp sample."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "geometry_invocation": {
+        "argv": [
+          "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+          "--out",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron",
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-sphere-octahedron.json",
+          "--driver",
+          "geometric"
+        ],
+        "status": "executed",
+        "exit_code": 0,
+        "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron",
+        "extra_args": [
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-sphere-octahedron.json",
+          "--driver",
+          "geometric"
+        ],
+        "builtin_fixture": "normalized-tilted-two-chart-grid",
+        "note": "Execution is not qualification. GPU timing is not produced by this executable."
+      },
+      "geometry_receipt": {
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\geometry-receipt.json",
+        "status": "passed",
+        "builtin_fixture": null,
+        "corpus_fixture": "analytic-sphere-octahedron",
+        "corpus_fixture_consumed": true,
+        "gpu_stage": false,
+        "timings": {
+          "kind": "cpu_wall",
+          "wall_seconds": null,
+          "gpu": false,
+          "synthetic": false,
+          "source": "geometry_exe_instant_wall",
+          "note": "CPU wall time. Not a GPU timestamp sample.",
+          "samples_ms": {
+            "admitted_decimate": 0.2253,
+            "decoded_enclosing_bound": 0.40890000000000004,
+            "geometry_probe_total": 1.9198,
+            "seal_and_roundtrip": 0.39580000000000004
+          },
+          "units": "milliseconds"
+        }
+      },
+      "exe_passed": true,
+      "verdict": {
+        "corpus_success": false,
+        "qualified": false,
+        "in_denominator": true,
+        "reason": "execution is not qualification"
+      },
+      "observed_failed_gates": [],
+      "independent_decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\simplified.10d",
+        "sha256": "994820a0286ebcc76a4a27cc3271c058194f4780687b9a4602146b6f5192e14f",
+        "bytes": 316,
+        "vertex_count": 6,
+        "triangle_count": 8,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 18,
+            "decoded_count": 6,
+            "sidecar_count": 6,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 8,
+            "sidecar_count": 8,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "7032ba3afefff3b20cd879a9d5f80807220fc10f1a980ab52ba71eecfea695f7",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\geometry-receipt.json",
+          "bytes": 6295,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 2689613895,
+          "computed": 2689613895,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.00046179996570572257,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "max": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    },
+    {
+      "id": "analytic-open-cylinder",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-open-cylinder.json",
+      "seed": 105,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "4c73cc098f4e60a7fbdfe0210935d3d7504ac45259c18ae986d15dad6c905583",
+        "sha256": "326bd9c330ad8fe19ed613ccc1db1da928134c99808263d0bab7d8a3adef3f41",
+        "blake3": "4c73cc098f4e60a7fbdfe0210935d3d7504ac45259c18ae986d15dad6c905583"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Polygonal chord interiors differ from the analytic cylinder."
+      ],
+      "execution_status": "executed",
+      "execution_action": "invoke",
+      "execution_reason": "admitted example --corpus-json for this published fixture",
+      "consumes_corpus_bytes": true,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "cpu_wall",
+        "wall_seconds": 0.03692280000541359,
+        "gpu": false,
+        "synthetic": false,
+        "source": "python_perf_counter",
+        "note": "CPU wall time. Not a GPU timestamp sample."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "geometry_invocation": {
+        "argv": [
+          "C:\\github\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+          "--out",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder",
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-open-cylinder.json",
+          "--driver",
+          "geometric"
+        ],
+        "status": "executed",
+        "exit_code": 0,
+        "out": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder",
+        "extra_args": [
+          "--corpus-json",
+          "C:\\github\\synth\\docs\\production-core\\corpus\\analytic-open-cylinder.json",
+          "--driver",
+          "geometric"
+        ],
+        "builtin_fixture": "normalized-tilted-two-chart-grid",
+        "note": "Execution is not qualification. GPU timing is not produced by this executable."
+      },
+      "geometry_receipt": {
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\geometry-receipt.json",
+        "status": "passed",
+        "builtin_fixture": null,
+        "corpus_fixture": "analytic-open-cylinder",
+        "corpus_fixture_consumed": true,
+        "gpu_stage": false,
+        "timings": {
+          "kind": "cpu_wall",
+          "wall_seconds": null,
+          "gpu": false,
+          "synthetic": false,
+          "source": "geometry_exe_instant_wall",
+          "note": "CPU wall time. Not a GPU timestamp sample.",
+          "samples_ms": {
+            "admitted_decimate": 0.5511999999999999,
+            "decoded_enclosing_bound": 3.6686,
+            "geometry_probe_total": 8.2729,
+            "seal_and_roundtrip": 0.6837
+          },
+          "units": "milliseconds"
+        }
+      },
+      "exe_passed": true,
+      "verdict": {
+        "corpus_success": false,
+        "qualified": false,
+        "in_denominator": true,
+        "reason": "execution is not qualification"
+      },
+      "observed_failed_gates": [],
+      "independent_decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\simplified.10d",
+        "sha256": "674bc4b2b4b75b9c87414cc94c22439a1a6df0ac2f77df7e4030928eedeae385",
+        "bytes": 824,
+        "vertex_count": 32,
+        "triangle_count": 32,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 96,
+            "decoded_count": 32,
+            "sidecar_count": 32,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 32,
+            "sidecar_count": 32,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "96ea0239d9515f3514cc3f59fcf123248bf79e84c68fb855c6e5ab69fbdfc400",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\geometry-receipt.json",
+          "bytes": 6304,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 1335516725,
+          "computed": 1335516725,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.002511999977286905,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            -1.0,
+            -1.0,
+            -0.5
+          ],
+          "max": [
+            1.0,
+            1.0,
+            0.5
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    }
+  ],
+  "ablations": [
+    {
+      "id": "B0",
+      "title": "identity/no reduction",
+      "purpose": "Reference geometry, semantics, and response.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "gpu": false,
+      "production_no_reduction_path": "not_invoked",
+      "identity_preserved": null,
+      "fixtures": [],
+      "note": "No identity fixtures selected. Absence is not_executed, not a zero error or cost."
+    },
+    {
+      "id": "B1",
+      "title": "existing geometric QEM",
+      "purpose": "Establish value beyond a cheap current route.",
+      "relevance": "required",
+      "execution_status": "executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": {
+        "kind": "cpu_wall",
+        "gpu": false,
+        "synthetic": false
+      },
+      "improvement": null,
+      "gpu": false,
+      "planned_argv": [
+        "--driver",
+        "geometric"
+      ],
+      "driver_flag_in_example_source": true,
+      "production_exe_invoked": true,
+      "note": "Admitted example invoked with --driver geometric. Executed is not qualified; no error/cost zeros invented."
+    },
+    {
+      "id": "B2",
+      "title": "existing semantic QEM under the same hard constraints",
+      "purpose": "Isolate benefit beyond semantic penalties and locks.",
+      "relevance": "required",
+      "execution_status": "executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": {
+        "kind": "cpu_wall",
+        "gpu": false,
+        "synthetic": false
+      },
+      "improvement": null,
+      "gpu": false,
+      "note": "Admitted production_core_geometry.exe invoked on its builtin seam/analytic fixture  Executed is not qualified; no error/cost zeros invented."
+    },
+    {
+      "id": "B3",
+      "title": "current remeshing/anisotropic route",
+      "purpose": "Compare element-quality and geometry objectives.",
+      "relevance": "when_appropriate",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "gpu": false,
+      "note": "Remeshing/anisotropic route was not invoked. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B4",
+      "title": "fixed supported Forge schedule",
+      "purpose": "Measure the value and cost of tuning or generation changes.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "gpu": false,
+      "note": "Forge schedule ablation was not invoked; GPU timing is not synthesized. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B5",
+      "title": "current fine physical/operator model",
+      "purpose": "Establish response and operator errors.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "gpu": false,
+      "note": "Physical/operator model ablation was not invoked. Unimplemented ablations are not_executed, not zero."
+    }
+  ],
+  "collapse_provenance": {
+    "status": "not_supplied",
+    "sha256": null,
+    "bytes": null,
+    "path": null,
+    "searched": [
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\collapse-provenance.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\lineage-snapshot.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\provenance-snapshot.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\collapse-lineage.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\collapse-provenance.bin"
+    ],
+    "qualified": false,
+    "error": null,
+    "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0.",
+    "fixture_not_supplied_count": 5
+  },
+  "whole_surface_bound": {
+    "status": "executed_not_qualified",
+    "class": "enclosing_bound",
+    "qualified": false,
+    "inspected": 11,
+    "enclosing_count": 5,
+    "enclosing_receipts": [
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-open-cylinder\\geometry-receipt.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1\\geometry-receipt.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e+06\\geometry-receipt.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-plane-scale-1e-06\\geometry-receipt.json",
+      "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-campaign-b1-02\\geometry-analytic-sphere-octahedron\\geometry-receipt.json"
+    ],
+    "note": "geometry-receipt reports enclosing_bound class. Execution is not qualification. Evidence directories were not overwritten."
+  },
+  "independent_decode_summary": {
+    "executed": 5,
+    "mismatches": 0,
+    "missing": 0,
+    "failed": 0,
+    "qualified": false,
+    "trusted_geometry_receipt": false
+  },
+  "denominator": {
+    "selected": 5,
+    "in_denominator": 5,
+    "executed": 5,
+    "not_executed": 0,
+    "descriptor_only": 0,
+    "failed_execution": 0,
+    "holdout": 0,
+    "must_fail": 0,
+    "exclusions": 5,
+    "failures_and_exclusions_in_denominator": true,
+    "holdout_in_denominator": true,
+    "holdout_used_for_threshold_selection": false,
+    "note": "Every selected fixture including failures, exclusions, holdout and descriptor-only stays in the denominator."
+  },
+  "threshold_selection": {
+    "performed": false,
+    "used_holdout": false,
+    "note": "This campaign does not search thresholds. Holdout is excluded from any future pick."
+  },
+  "driver_support": {
+    "driver_flag_in_example_source": true,
+    "planned_argv": [
+      "--driver",
+      "geometric"
+    ],
+    "present": true,
+    "callable": true,
+    "executed": true,
+    "qualified": false,
+    "note": "B1 --driver geometric was appended to mesh corpus JSON and at least one fixture executed. Executed is not qualified."
+  },
+  "finished_at": "2026-11-16T13:33:12.642596+00:00",
+  "b2_semantic_example_executed": true
+}

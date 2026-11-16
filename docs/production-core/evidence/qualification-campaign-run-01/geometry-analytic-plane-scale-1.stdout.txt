@@ -1,0 +1,1 @@
+{"output_directory":"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\qualification-campaign-run-01\\geometry-analytic-plane-scale-1","receipt":"geometry-receipt.json","status":"passed"}

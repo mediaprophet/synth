@@ -1,0 +1,1 @@
+{"output_directory":"C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01","receipt":"geometry-receipt.json","status":"passed"}

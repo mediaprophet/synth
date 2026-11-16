@@ -1,0 +1,1915 @@
+{
+  "schema": "production-core.qualification-campaign/v1",
+  "status": "inspected_not_executed",
+  "started_at": "2026-11-16T09:13:53.290939+00:00",
+  "mode": "inspect",
+  "corpus": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\corpus",
+  "out": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\qualification-campaign-inspect-01",
+  "family_filter": null,
+  "geometry_exe": {
+    "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+    "present": true,
+    "sha256": "8bd1c473162ac60f70bfa2f316f398b1ee40a1c3fa797f9f4a2e0230ceaec391",
+    "consumes_corpus_json": false,
+    "builtin_fixture": "normalized-tilted-two-chart-grid",
+    "supported_fixture_ids": [
+      "analytic-plane-scale-1",
+      "empty-mesh",
+      "identity-two-subpart-seam",
+      "impossible-ratio",
+      "mixed-provenance-domains",
+      "uv-duplicated-seam"
+    ]
+  },
+  "inspection": {
+    "schema": "production-core.admitted-geometry-probe/v1",
+    "worktrees": {
+      "root": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core",
+      "synth": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+      "qualiaDB": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+      "etalon": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+      "hypermedia": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\hypermedia-production"
+    },
+    "sources": {
+      "example": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\examples\\production_core_geometry.rs",
+        "present": true,
+        "sha256": "f01c302cfa6c3195f093e8faf4f14db5e7221bd54d64637bd0bb15352cc9488e",
+        "required_snippets": {
+          "decimate_semantic_admitted_3": true,
+          "const HEX:": true,
+          "Sha256::digest": true
+        },
+        "forbidden_snippets": {
+          "format!(\"{:x}\", Sha256::digest": false
+        }
+      },
+      "admission": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic\\admission.rs",
+        "present": true,
+        "sha256": "a6fa9ed58e1aabe73932ded9ef92073dfc43e2102146266422c5a01df55657aa",
+        "required_snippets": {
+          "pub fn decimate_semantic_admitted_3": true
+        },
+        "forbidden_snippets": {}
+      },
+      "semantic_mod": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\crates\\qualia-core-db\\src\\specialized_libs\\computational_geometry\\decimate_3_semantic.rs",
+        "present": true,
+        "sha256": "0fb56b68fbe4df8ab49bfeb1a4373e63a1c478fb831e27fc745f0a62367ea4d9",
+        "required_snippets": {
+          "pub mod admission": true
+        },
+        "forbidden_snippets": {}
+      },
+      "forge_example": {
+        "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\crates\\etalon-wgsl-forge\\examples\\production_core_probe.rs",
+        "present": true,
+        "sha256": "96663f313ea640eaab33ed82d032fbca85b86d9e5041fa02d693da99e8bc95eb",
+        "required_snippets": {
+          "production_core_probe": true,
+          "AffineF32": true
+        },
+        "forbidden_snippets": {}
+      }
+    },
+    "sha256_lowerhex_history": {
+      "schema": "production-core.sha256-lowerhex-history/v1",
+      "previous_failure": {
+        "error": "E0277",
+        "message": "the trait bound Array<u8, ...>: LowerHex is not satisfied",
+        "example": "crates/qualia-core-db/examples/production_core_geometry.rs",
+        "source_line_then": "format!(\"{:x}\", Sha256::digest(bytes))",
+        "rustc_note": "generic SHA2 digest array does not implement fmt::LowerHex",
+        "log": "qualiaDB/target-production-core/geometry-build-01.log",
+        "long_type": "qualiaDB/target-production-core/debug/examples/production_core_geometry.long-type-10344221273783986174.txt",
+        "cargo_exit": 101,
+        "observed_log_span_utc": [
+          "2026-11-16T06:52:05.969Z",
+          "2026-11-16T07:32:30.054Z"
+        ],
+        "observed_log_span_is_not_full_command_duration": true
+      },
+      "repair": {
+        "location": "examples/production_core_geometry.rs sha256()",
+        "method": "explicit nibble encoding over Sha256::digest(bytes).iter()",
+        "status": "source_only_unbuilt",
+        "passing_receipt": "not_invented",
+        "rebuild_required": true
+      }
+    },
+    "lowerhex_repair_in_source": true,
+    "previous_build_log": {
+      "path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\geometry-build-01.log",
+      "present": true,
+      "records_e0277_lowerhex": true
+    },
+    "capabilities": {
+      "admitted_geometry_library": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "public_api": "decimate_3_semantic::admission::decimate_semantic_admitted_3",
+        "parent_export": true,
+        "note": "Source presence is not compilation, execution or qualification."
+      },
+      "admitted_geometry_example": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "source_wired_to_admitted_driver": true,
+        "lowerhex_repair_in_source": true,
+        "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe",
+        "note": "Example is the admitted semantic path. Binary is missing until the LowerHex repair is rebuilt."
+      },
+      "etalon_production_core_probe": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "executable": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe",
+        "prior_native_baseline": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\forge-native-baseline\\probe.json",
+        "note": "Prior native DX12 baseline is separate evidence and is not replayed by inspect."
+      },
+      "producer_glb_smoke": {
+        "present": true,
+        "callable": true,
+        "executed": false,
+        "qualified": false,
+        "state": "callable",
+        "executable": "C:\\github\\synth\\target-prod\\debug\\synth.exe",
+        "prior_attributed_handoff_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "note": "Historical packaging smoke is not joined admitted-geometry qualification."
+      }
+    },
+    "documented_commands": [
+      {
+        "id": "qualiadb-production-core-geometry",
+        "title": "QualiaDB example production_core_geometry (admitted semantic path)",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+        "notes": [
+          "Example source calls decimate_semantic_admitted_3; this is not a compiled binary.",
+          "Previous cargo build exited 101 on SHA-256 LowerHex formatting; source repair is unbuilt.",
+          "Do not invent a passing geometry receipt. Do not rebuild into synth target or target-studio."
+        ],
+        "build_powershell": [
+          "$env:CARGO_BUILD_JOBS = '1'",
+          "$env:CARGO_INCREMENTAL = '0'",
+          "$env:RUSTFLAGS = '-C debuginfo=0'",
+          "cargo --config .cargo/production-core.toml build --offline --no-default-features -p qualia-core-db --example production_core_geometry --target-dir target-production-core"
+        ],
+        "run_powershell": [
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir>",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --empty",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --out <new-create-only-dir> --target-faces 0"
+        ]
+      },
+      {
+        "id": "etalon-production-core-probe",
+        "title": "Etalon production_core_probe",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+        "notes": [
+          "Fixed AffineF32 kernel only. Optional --vertices-json requires a real decoded geometry asset.",
+          "Prior native DX12 baseline is separate evidence; this command list is not a GPU replay.",
+          "GPU timestamp samples are not byte-identical across runs."
+        ],
+        "build_powershell": [
+          "$env:CARGO_TARGET_DIR = 'C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core'",
+          "cargo build --locked --offline -p etalon-wgsl-forge --example production_core_probe --features gpu-native-dx12"
+        ],
+        "run_powershell": [
+          "$env:ETALON_WGPU_BACKEND = 'dx12'",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA",
+          "& \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" <new-create-only-dir> NVIDIA --vertices-json <decoded-vertices.json> --asset-sha256 <simplified.10d-sha256>"
+        ]
+      },
+      {
+        "id": "producer-glb-smoke",
+        "title": "Existing producer GLB smoke / joined tracer packaging",
+        "cwd": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+        "notes": [
+          "Attributed-handoff-smoke already recorded a packaging pass of a six-vertex fixture.",
+          "Joined tracer produce/preview uses the same cached producer binary identity; source equivalence is not assumed.",
+          "Three HMC repeats test packaging hashes, not three independent GPU timing receipts."
+        ],
+        "historical_smoke": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\attributed-handoff-smoke\\receipt.json",
+        "inspect_powershell": [
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\admitted_geometry_probe.py\" --out <new-create-only-dir> --inspect-only"
+        ],
+        "run_powershell": [
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --inspect-only --out <new-create-only-dir>",
+          "python \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\scripts\\production_core\\run_production_core_tracer.py\" --geometry-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB\\target-production-core\\debug\\examples\\production_core_geometry.exe\" --forge-exe \"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\debug\\examples\\production_core_probe.exe\" --synth-exe \"C:\\github\\synth\\target-prod\\debug\\synth.exe\" --out <new-create-only-dir>"
+        ]
+      }
+    ],
+    "determinism_boundary": "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical.",
+    "joined_three_geometry_builds_are_not_three_gpu_runs": true,
+    "gpu_identical_timing_claimed": false,
+    "invented_passing_geometry_receipt": false,
+    "incomplete_core_checklist": [
+      {
+        "item": "geometry_example_rebuilt_after_lowerhex_repair",
+        "status": "not_done"
+      },
+      {
+        "item": "admitted_geometry_executable",
+        "status": "missing"
+      },
+      {
+        "item": "joined_tracer_execution",
+        "status": "not_executed"
+      },
+      {
+        "item": "p01_p03_accepted",
+        "status": "open"
+      },
+      {
+        "item": "public_hypermedia_simplify_semantic",
+        "status": "still_geometric"
+      },
+      {
+        "item": "whole_surface_bound",
+        "status": "not_measured"
+      },
+      {
+        "item": "collapse_provenance_qualification",
+        "status": "not_executed"
+      },
+      {
+        "item": "operator_or_physical_qualification",
+        "status": "not_executed"
+      },
+      {
+        "item": "final_10d_sealing_independently_decoded",
+        "status": "not_executed"
+      },
+      {
+        "item": "gpu_timing_byte_identical_across_repeats",
+        "status": "not_claimed"
+      },
+      {
+        "item": "cached_synth_exe_source_equivalence",
+        "status": "not_established"
+      },
+      {
+        "item": "p02_p05_p06_p07_compiled_together",
+        "status": "uncompiled"
+      }
+    ],
+    "inspect_executed_gpu": false,
+    "inspect_ran_cargo": false,
+    "sha256_lowerhex_encoding": {
+      "algorithm": "explicit_nibble_lowercase_hex",
+      "marker": "production-core-lowerhex-marker",
+      "digest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "hashlib_hexdigest": "cf5dc8066efa3c90d4c7476e067897ae14a8190c064f8211e1d4ad6a0c13c6ad",
+      "note": "Matching Python encodings do not qualify the unbuilt QualiaDB example."
+    }
+  },
+  "limitations": [
+    "Qualification runner, not full production-core acceptance.",
+    "The geometry example does not load corpus JSON; seam/analytic invokes reuse the builtin two-chart grid.",
+    "Known-bad passing executable output is not corpus success unless named gates failed.",
+    "Holdout fixtures are labelled and never used to pick thresholds.",
+    "Maximum-size remains descriptor_only; the 50k mesh is not materialized.",
+    "Unimplemented B0-B5 ablations are not_executed, not zero.",
+    "CPU wall times are labelled cpu_wall. Synthetic values are never stored as GPU.",
+    "The joined tracer checking three geometry asset builds and three HMC builds is not three independent GPU runs with byte-identical timing. Repeated geometry/HMC SHA-256 values test packaging determinism of one fixed Vibe, input and embedded receipt. GPU timestamp samples and wall times are not byte-deterministic receipts and are not claimed identical."
+  ],
+  "invented_passing_geometry_receipt": false,
+  "gpu_identical_timing_claimed": false,
+  "maximum_size_materialized": false,
+  "holdout_used_for_threshold_selection": false,
+  "visual_capture": "recipe_only_not_executed",
+  "visual_capture_recipe": {
+    "execution_status": "not_executed",
+    "holdout_views": [
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.5,
+            -3.0,
+            0.6
+          ],
+          "up": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "name": "holdout-low"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.15,
+            0.2,
+            0.12
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "holdout-near-oblique"
+      }
+    ],
+    "note": "Recipe only. Screenshots are not generated by fixture publication. Holdout views must not be used to choose thresholds.",
+    "overlays": [
+      "wireframe",
+      "normals",
+      "error"
+    ],
+    "schema": "production-core.visual-capture-recipe/v1",
+    "subject_fixture_ids": [
+      "identity-two-subpart-seam",
+      "uv-duplicated-seam"
+    ],
+    "views": [
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            0.5,
+            0.5,
+            3.0
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "front"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            3.0,
+            0.5,
+            0.5
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "side"
+      },
+      {
+        "camera": {
+          "look": [
+            0.5,
+            0.5,
+            0.0
+          ],
+          "position": [
+            2.2,
+            1.6,
+            2.2
+          ],
+          "up": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "name": "three-quarter"
+      }
+    ]
+  },
+  "hash_algorithm": "blake3",
+  "hash_algorithm_note": "blake3 used from scripts/production_core/vendor; sha256 also recorded",
+  "fixtures": [
+    {
+      "id": "analytic-plane-scale-1",
+      "family": "analytic_surfaces",
+      "partition": "tune",
+      "file": "analytic-plane-scale-1.json",
+      "seed": 101,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "bfcce07df97f7415f0bbbfacb26972318c3353b141db19916e0d01c89aa96537",
+        "sha256": "c2a861da1a00d661f7530b034ffd505dad5a45048cd357cf61ac72ac122b086d",
+        "blake3": "bfcce07df97f7415f0bbbfacb26972318c3353b141db19916e0d01c89aa96537"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "analytic-plane-scale-1e-06",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-plane-scale-1e-06.json",
+      "seed": 102,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "dabd1362ababf4e682325a95d4fdb5f4fa4eded19c4dabccaca0d02462518b21",
+        "sha256": "c17fc8f7bf17f8da788a079f248d58a952603d938510b03e4cb8e2a1ce697ef3",
+        "blake3": "dabd1362ababf4e682325a95d4fdb5f4fa4eded19c4dabccaca0d02462518b21"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "analytic-plane-scale-1e+06",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-plane-scale-1e+06.json",
+      "seed": 103,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "74e3f4fd29dcc07427155fa25449a2648773fe56213b98441a03c973c4aa0476",
+        "sha256": "3b3e906844a385e54796392a8e44595be9936ccae5f6b1d1d7626d39b997b669",
+        "blake3": "74e3f4fd29dcc07427155fa25449a2648773fe56213b98441a03c973c4aa0476"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Axis-aligned unit square only; not a general CAD plane tessellation."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "analytic-sphere-octahedron",
+      "family": "analytic_surfaces",
+      "partition": "tune",
+      "file": "analytic-sphere-octahedron.json",
+      "seed": 104,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "a845130ab21539de6ad0d74b5143b4430eddb33daddab4c575af85b91459a906",
+        "sha256": "d6f63d65b43c0d296eece9e24705065d5a4e25a880604d13792b39478f5baf7b",
+        "blake3": "a845130ab21539de6ad0d74b5143b4430eddb33daddab4c575af85b91459a906"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Octahedron face interiors are not on the unit sphere."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "analytic-open-cylinder",
+      "family": "analytic_surfaces",
+      "partition": "test",
+      "file": "analytic-open-cylinder.json",
+      "seed": 105,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "4c73cc098f4e60a7fbdfe0210935d3d7504ac45259c18ae986d15dad6c905583",
+        "sha256": "326bd9c330ad8fe19ed613ccc1db1da928134c99808263d0bab7d8a3adef3f41",
+        "blake3": "4c73cc098f4e60a7fbdfe0210935d3d7504ac45259c18ae986d15dad6c905583"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Polygonal chord interiors differ from the analytic cylinder."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "locked-open-boundary-pivot",
+      "family": "locked_protected",
+      "partition": "test",
+      "file": "locked-open-boundary-pivot.json",
+      "seed": 201,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "3d6b4464427e4cd6d695d8dd9951d7b769e49d3475acbe9c50a5198875da0161",
+        "sha256": "dd92c6680c6b73282541053ea733a203a8987d9ec05978d0dc12565094809c49",
+        "blake3": "3d6b4464427e4cd6d695d8dd9951d7b769e49d3475acbe9c50a5198875da0161"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Constraint-limited termination is not a successful 0-face simplification."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "locked-sharp-crease",
+      "family": "locked_protected",
+      "partition": "tune",
+      "file": "locked-sharp-crease.json",
+      "seed": 202,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "0e14b31e62d9935295d59cd880f070ecf602cd32bbb37e08a9046f90f3126686",
+        "sha256": "1ee373715518f3037d9acd6c7003e450b2eccbceb6b088e16aa1a05a28d06462",
+        "blake3": "0e14b31e62d9935295d59cd880f070ecf602cd32bbb37e08a9046f90f3126686"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "locked-impossible-ratio",
+      "family": "locked_protected",
+      "partition": "test",
+      "file": "locked-impossible-ratio.json",
+      "seed": 203,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "3d16b4470a9d615690e1c05fc10ccfd4d9e80d447965287fd175787e427fae1b",
+        "sha256": "d84d58dbf5c98a82ceeea431e346e2aa83357bfc37f344f2d8454374bc546638",
+        "blake3": "3d16b4470a9d615690e1c05fc10ccfd4d9e80d447965287fd175787e427fae1b"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Failing to reach 50%/25%/10% while honouring locks is not equivalent to meeting that ratio."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "mixed-provenance-domains",
+      "family": "mixed_provenance",
+      "partition": "tune",
+      "file": "mixed-provenance-domains.json",
+      "seed": 301,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "09f46b70a33fc688b5d1921702a00393b3cb5e9a1feccf92e30c82469ba2ba7f",
+        "sha256": "d695bdc5209acb8317c67e44807fd2d0eee9bc3c726265827b23f6e2ad2eab33",
+        "blake3": "09f46b70a33fc688b5d1921702a00393b3cb5e9a1feccf92e30c82469ba2ba7f"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "uv-duplicated-seam",
+      "family": "uv_seam_tangents",
+      "partition": "tune",
+      "file": "uv-duplicated-seam.json",
+      "seed": 401,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "3b929682bd203291a37f83b50f5e5b8086bc7fa48267e3170fa1a912e6d8b3f7",
+        "sha256": "76c4c0adb28d654ce13b0968e81d8c5138ca65af5ab9d21c80a57ee3d4ee248b",
+        "blake3": "3b929682bd203291a37f83b50f5e5b8086bc7fa48267e3170fa1a912e6d8b3f7"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Geometric QEM is not promised to preserve UV seams; this fixture tests the hard seam contract."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "thin-double-sheet",
+      "family": "thin_near_threshold",
+      "partition": "test",
+      "file": "thin-double-sheet.json",
+      "seed": 501,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "0d7295909b4c0c6d2324f397884c3938ae06ff21240d684c43ed7c4db2f978b8",
+        "sha256": "11f38fa7dfc475509d81e85800b3148c5e0529ac24f8c978e720bb4d2da1aeba",
+        "blake3": "0d7295909b4c0c6d2324f397884c3938ae06ff21240d684c43ed7c4db2f978b8"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "thin-ridge-near-g1",
+      "family": "thin_near_threshold",
+      "partition": "test",
+      "file": "thin-ridge-near-g1.json",
+      "seed": 502,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "0b9590296a0c5091afe1287f090c9bf59bac1c3cf7a2f352afc9cd43db8e1abc",
+        "sha256": "4b8a70eeb4dda299279a0058aa6ef90b04a07fb57d0d4879eb9a5c2322ea22e0",
+        "blake3": "0b9590296a0c5091afe1287f090c9bf59bac1c3cf7a2f352afc9cd43db8e1abc"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "thin-near-coplanar-predicate",
+      "family": "thin_near_threshold",
+      "partition": "test",
+      "file": "thin-near-coplanar-predicate.json",
+      "seed": 503,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "e405eea87d46a7f29259b081b3b58f64f608baae38d8cd14e068cc553c3ba49d",
+        "sha256": "04d2a0cf3177f28132d6bbd65716cab256ea699b26db2528b63f8e902874c0da",
+        "blake3": "e405eea87d46a7f29259b081b3b58f64f608baae38d8cd14e068cc553c3ba49d"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "This is a predicate admission fixture, not a mesh simplification input."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "large-origin-small-feature",
+      "family": "large_translated",
+      "partition": "test",
+      "file": "large-origin-small-feature.json",
+      "seed": 601,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "f69d3b6b6661ae181a134e28461606ce1cda319cc08189ec498c5c938ddf0efa",
+        "sha256": "6416cbfa4996978fe613c6c9906d36f480aa65bc002aca45fce6b85a9f9881c3",
+        "blake3": "f69d3b6b6661ae181a134e28461606ce1cda319cc08189ec498c5c938ddf0efa"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "empty-mesh",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "empty-mesh.json",
+      "seed": 701,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "08790da5bada0a2a31fdec4619f3381286c8dfc101544671ff1d4ac6fc8fa0eb",
+        "sha256": "dd5d395639784ee31d439bd549261eceb6d65c83b011677cfc3f244f40f97cc2",
+        "blake3": "08790da5bada0a2a31fdec4619f3381286c8dfc101544671ff1d4ac6fc8fa0eb"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "impossible-ratio",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "impossible-ratio.json",
+      "seed": 702,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "d2b6ac52e0a61ceabb5bc0bcab8170736d7eb8d3db1c0f206dd22d1ca50e1234",
+        "sha256": "b2e99762258848e9ef008e5f513352ee3ceba3371989b29800c81d7c2802462b",
+        "blake3": "d2b6ac52e0a61ceabb5bc0bcab8170736d7eb8d3db1c0f206dd22d1ca50e1234"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "duplicate-face",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "duplicate-face.json",
+      "seed": 703,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "9402ea16dc1f880c018e19515578a19942a1fb2896805eefa323a3a732ae7b84",
+        "sha256": "e71d285d2ee65d0e0732070d4528a605241352e1289d2247393ba690d0612b6a",
+        "blake3": "9402ea16dc1f880c018e19515578a19942a1fb2896805eefa323a3a732ae7b84"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Repair is never implicit; these inputs must be rejected unless an explicitly qualified repair path is selected."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "degenerate-face",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "degenerate-face.json",
+      "seed": 704,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "ddd15463b8203c9e717c085c59dbfa66804bf63c59ab5ffafd542a91fa677cae",
+        "sha256": "be82dbd1a0263abe750b75b369d7b9770049cd65a47be4e9e778ec8d5b436c5b",
+        "blake3": "ddd15463b8203c9e717c085c59dbfa66804bf63c59ab5ffafd542a91fa677cae"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Repair is never implicit; these inputs must be rejected unless an explicitly qualified repair path is selected."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "nonmanifold-edge",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "nonmanifold-edge.json",
+      "seed": 705,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "67eb54900d62ca5bc75c7758ab450b22aac5e567687ffc94f322ca4c9be82e79",
+        "sha256": "0526c38901d4b8b359c12d0d9f6c1551c8c5d170d3561418ef9dca19c8dabd75",
+        "blake3": "67eb54900d62ca5bc75c7758ab450b22aac5e567687ffc94f322ca4c9be82e79"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Repair is never implicit; these inputs must be rejected unless an explicitly qualified repair path is selected."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "inconsistent-orientation",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "inconsistent-orientation.json",
+      "seed": 706,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "6a42698fc6e6d89cb9325f2d364866280d11c915fbf2f0c0aff0b208dbd56a0b",
+        "sha256": "ae2be089a3c9921bb86572b1adcd134e99e4d6ac60dddfff1a6c372670f10e08",
+        "blake3": "6a42698fc6e6d89cb9325f2d364866280d11c915fbf2f0c0aff0b208dbd56a0b"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Repair is never implicit; these inputs must be rejected unless an explicitly qualified repair path is selected."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "disconnected-disks",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "disconnected-disks.json",
+      "seed": 707,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "5e2ca9cc19c38e1c59772ab7b9dc19d8c27e201fa023fab80740871b6a9d3232",
+        "sha256": "e983358a388f1256d3ceaa171ba89e76260367273b083d4687df8d9ea11953b9",
+        "blake3": "5e2ca9cc19c38e1c59772ab7b9dc19d8c27e201fa023fab80740871b6a9d3232"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "worklist-exhausted",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "worklist-exhausted.json",
+      "seed": 708,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "199eb2423db7ada036d9171afd4869908078c850390614a339bf6f0f53d51fc6",
+        "sha256": "802a00b97c180c10fab986ceabf4d092e16cba74e9ac4f46063a3696234a67fd",
+        "blake3": "199eb2423db7ada036d9171afd4869908078c850390614a339bf6f0f53d51fc6"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "worklist-cancelled",
+      "family": "empty_impossible_degenerate",
+      "partition": "test",
+      "file": "worklist-cancelled.json",
+      "seed": 709,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "33258cd36b18d094d242b89bf2e977bdd9d10c7245608558edcf66f6f41d2cbd",
+        "sha256": "c35b552c7157e312151150e9df6ea7608e7881f5acbfcffea9f8e78538d0dd18",
+        "blake3": "33258cd36b18d094d242b89bf2e977bdd9d10c7245608558edcf66f6f41d2cbd"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "known-bad-cross-domain-weld",
+      "family": "known_bad",
+      "partition": "test",
+      "file": "known-bad-cross-domain-weld.json",
+      "seed": 801,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "03704134b5fd5b0770a55da7de20c1ab6a614628ad03a5a1c3010e16a59d28be",
+        "sha256": "48ab91e5535d34c94128f898f3d211859d4e42e3f531bb2dd9384ffe5da5fa74",
+        "blake3": "03704134b5fd5b0770a55da7de20c1ab6a614628ad03a5a1c3010e16a59d28be"
+      },
+      "holdout": false,
+      "must_fail": true,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "verdict": {
+        "must_fail": true,
+        "pass_is_corpus_defect": true,
+        "failing_tests": [
+          "forbidden_semantic_merges",
+          "no_cross_domain_support",
+          "preserve_corner_chart",
+          "preserve_tangent_handedness",
+          "coincident_pairs_are_not_welded"
+        ],
+        "observed_failed_gates": [],
+        "named_gates_failed": false,
+        "in_denominator": true,
+        "qualified": false,
+        "corpus_success": false,
+        "reason": "known-bad remains in the denominator; named production gates were not executed"
+      }
+    },
+    {
+      "id": "known-bad-poisoned-affine",
+      "family": "known_bad",
+      "partition": "test",
+      "file": "known-bad-poisoned-affine.json",
+      "seed": 802,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "a121ed14f5e0938c23d77a51582f617f50008f8d3b2d753c6fd277ae3cc0fad0",
+        "sha256": "bacbf4ea47f286cdc45a5efd3d235d4688dc29969e88433ee9bdac036ceeea54",
+        "blake3": "a121ed14f5e0938c23d77a51582f617f50008f8d3b2d753c6fd277ae3cc0fad0"
+      },
+      "holdout": false,
+      "must_fail": true,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "verdict": {
+        "must_fail": true,
+        "pass_is_corpus_defect": true,
+        "failing_tests": [
+          "independent_affine_oracle",
+          "k1_abs_rel_tolerance"
+        ],
+        "observed_failed_gates": [],
+        "named_gates_failed": false,
+        "in_denominator": true,
+        "qualified": false,
+        "corpus_success": false,
+        "reason": "known-bad remains in the denominator; named production gates were not executed"
+      }
+    },
+    {
+      "id": "known-bad-tetra-inversion",
+      "family": "known_bad",
+      "partition": "test",
+      "file": "known-bad-tetra-inversion.json",
+      "seed": 803,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "c1d8379f4b9e0c6e54ea31d88aabd9eee638120613ccf8dc318e1787922f1a47",
+        "sha256": "051157210e41bccb6b26b63213d33c5e9a19feb19811cfe5964193c59909204e",
+        "blake3": "c1d8379f4b9e0c6e54ea31d88aabd9eee638120613ccf8dc318e1787922f1a47"
+      },
+      "holdout": false,
+      "must_fail": true,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "verdict": {
+        "must_fail": true,
+        "pass_is_corpus_defect": true,
+        "failing_tests": [
+          "accept_when_inversion_forbidden"
+        ],
+        "observed_failed_gates": [],
+        "named_gates_failed": false,
+        "in_denominator": true,
+        "qualified": false,
+        "corpus_success": false,
+        "reason": "known-bad remains in the denominator; named production gates were not executed"
+      }
+    },
+    {
+      "id": "known-bad-infeasible-contact",
+      "family": "known_bad",
+      "partition": "test",
+      "file": "known-bad-infeasible-contact.json",
+      "seed": 804,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "356924ae84e68321bfa90c2b74fa9b71671e655a6b8534146913ab5311ea086f",
+        "sha256": "f30a2fcdc51c9efee34d57dbb29b6353e065eb123afa0ee671b76a78d0868946",
+        "blake3": "356924ae84e68321bfa90c2b74fa9b71671e655a6b8534146913ab5311ea086f"
+      },
+      "holdout": false,
+      "must_fail": true,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Analytic admission fixture, not a general contact simulation. Core excludes a new general contact solver."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "verdict": {
+        "must_fail": true,
+        "pass_is_corpus_defect": true,
+        "failing_tests": [
+          "contact_feasibility",
+          "authoritative_full_model_required"
+        ],
+        "observed_failed_gates": [],
+        "named_gates_failed": false,
+        "in_denominator": true,
+        "qualified": false,
+        "corpus_success": false,
+        "reason": "known-bad remains in the denominator; named production gates were not executed"
+      }
+    },
+    {
+      "id": "identity-two-subpart-seam",
+      "family": "identity",
+      "partition": "tune",
+      "file": "identity-two-subpart-seam.json",
+      "seed": 901,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "904485bf088ac437d212f7b316bd3f1a872e7bf54b6b07c2bfa17501cef80ddd",
+        "sha256": "a7a38d64a05a80a12b0533a950a685c4eed6b188fe74dce883654db27877a4aa",
+        "blake3": "904485bf088ac437d212f7b316bd3f1a872e7bf54b6b07c2bfa17501cef80ddd"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": true,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "identity-affine-k1",
+      "family": "identity",
+      "partition": "test",
+      "file": "identity-affine-k1.json",
+      "seed": 902,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "1c51c487c66795eddfd45147fa93fc5f3f36e332e67f50c8225b4d952a1fa9d4",
+        "sha256": "9a637dd5e54529a61366af2b62074fddbf908e603490e544ac94f4582272ff4a",
+        "blake3": "1c51c487c66795eddfd45147fa93fc5f3f36e332e67f50c8225b4d952a1fa9d4"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": true,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "identity-dirichlet-path",
+      "family": "identity",
+      "partition": "test",
+      "file": "identity-dirichlet-path.json",
+      "seed": 903,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "e0a2f45cec43e85c26bd6264283ed35735e33d50b7af0c634058692f3b838db1",
+        "sha256": "a3564576a948a13dbbf69c3689b58ea26304a382581810237316677babed5402",
+        "blake3": "e0a2f45cec43e85c26bd6264283ed35735e33d50b7af0c634058692f3b838db1"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": true,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Only three nonzero modes exist; no twenty-mode O1 claim."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "identity-constant-neumann-mode",
+      "family": "identity",
+      "partition": "test",
+      "file": "identity-constant-neumann-mode.json",
+      "seed": 904,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "22c4b7e0eca10f8a46b3814f467c8f2e9bb5c7fe33153680ab5d463a7957ee1e",
+        "sha256": "0a3a4c4dd9dde6ec8de2f5709e537a6ca2964a3cc38a6701ab1430729daef684",
+        "blake3": "22c4b7e0eca10f8a46b3814f467c8f2e9bb5c7fe33153680ab5d463a7957ee1e"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": true,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "identity-rigid-tetra",
+      "family": "identity",
+      "partition": "test",
+      "file": "identity-rigid-tetra.json",
+      "seed": 905,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "13d8a1282de573a1af6dcfdb78f7418f4c4b368ac1cd6a857517236413e5da3c",
+        "sha256": "0215e94d6f31265a5b711ff396cde67dd275f043c4ff128c2cf5f0e0865285a5",
+        "blake3": "13d8a1282de573a1af6dcfdb78f7418f4c4b368ac1cd6a857517236413e5da3c"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": true,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false
+    },
+    {
+      "id": "holdout-normalized-cube-sphere",
+      "family": "holdout",
+      "partition": "holdout",
+      "file": "holdout-normalized-cube-sphere.json",
+      "seed": 1001,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "954779a85a793c98ddaa5887b4e4af166a921720fd7797cad42dee6111884b2e",
+        "sha256": "61e8f5f8195c44d7c59e86364589a6a2c655911ab16e5196865d17caec559a27",
+        "blake3": "954779a85a793c98ddaa5887b4e4af166a921720fd7797cad42dee6111884b2e"
+      },
+      "holdout": true,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Face interiors are not on the unit sphere. Holdout tessellation must not tune octahedron thresholds."
+      ],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "holdout_policy": "must_not_be_used_for_tuning_or_threshold_search"
+    },
+    {
+      "id": "holdout-rotated-plane",
+      "family": "holdout",
+      "partition": "holdout",
+      "file": "holdout-rotated-plane.json",
+      "seed": 1002,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "489b2a7d4076d7875f42f11404a1583090eb247005fed3662c25e6682de77e3f",
+        "sha256": "fd71c2593d076b02f5b420acfae6b9d88850a9c8e96d91a54ed7992772d7d3d2",
+        "blake3": "489b2a7d4076d7875f42f11404a1583090eb247005fed3662c25e6682de77e3f"
+      },
+      "holdout": true,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "holdout_policy": "must_not_be_used_for_tuning_or_threshold_search"
+    },
+    {
+      "id": "holdout-camera-near-cut",
+      "family": "holdout",
+      "partition": "holdout",
+      "file": "holdout-camera-near-cut.json",
+      "seed": 1003,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "fb146c8f230fca1d0454e06aedcfac9a782fbbc12ea8627995a21113fbc9b75b",
+        "sha256": "7bc8f174d68a03e1951aedd14450eb4fb0f5843a7fa5263ebcf3ae53b480cca2",
+        "blake3": "fb146c8f230fca1d0454e06aedcfac9a782fbbc12ea8627995a21113fbc9b75b"
+      },
+      "holdout": true,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "holdout_policy": "must_not_be_used_for_tuning_or_threshold_search"
+    },
+    {
+      "id": "holdout-translated-thin-shell",
+      "family": "holdout",
+      "partition": "holdout",
+      "file": "holdout-translated-thin-shell.json",
+      "seed": 1004,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "054bc6da2646db97c638f8a747756e218dbcd48ea55c8c3bdad75b3c61e391e1",
+        "sha256": "5252f0dfe158077b76451083153a779d49604e46913773348b866ae9210cac4c",
+        "blake3": "054bc6da2646db97c638f8a747756e218dbcd48ea55c8c3bdad75b3c61e391e1"
+      },
+      "holdout": true,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [],
+      "execution_status": "not_executed",
+      "execution_action": "skip",
+      "execution_reason": "inspect-only; capabilities recorded without invoking executables",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "holdout_policy": "must_not_be_used_for_tuning_or_threshold_search"
+    },
+    {
+      "id": "maximum-size-descriptor",
+      "family": "maximum_size_descriptor",
+      "partition": "test",
+      "file": "maximum-size-descriptor.json",
+      "seed": 1101,
+      "hashes": {
+        "hash_algorithm": "blake3",
+        "digest": "a94dc70f0585cf5159c18b7d17008d09bf38a95ad52d1f6b5d84463858c30b99",
+        "sha256": "7dd67c596a5a4c19c3b0e4759c4d63e9a28c6617d19c8f6d1709e21124de54f2",
+        "blake3": "a94dc70f0585cf5159c18b7d17008d09bf38a95ad52d1f6b5d84463858c30b99"
+      },
+      "holdout": false,
+      "must_fail": false,
+      "must_pass": false,
+      "in_denominator": true,
+      "used_for_threshold_selection": false,
+      "exclusions": [
+        "Descriptor requires a bounded generator at execution; not a materialized maximum mesh.",
+        "Do not count publication of this JSON file as an executed maximum-size test."
+      ],
+      "execution_status": "descriptor_only",
+      "execution_action": "descriptor_only",
+      "execution_reason": "maximum-size remains a descriptor; 50k-vertex mesh was not materialized",
+      "consumes_corpus_bytes": false,
+      "publication_check": "consistent",
+      "timing": {
+        "kind": "not_executed",
+        "wall_seconds": null,
+        "gpu": false,
+        "synthetic": false,
+        "note": "No timing sample. Absence is not a zero GPU measurement."
+      },
+      "qualified": false,
+      "corpus_success": false,
+      "invented_passing_geometry_receipt": false,
+      "gpu_timing_claimed": false,
+      "materialized": false,
+      "vertex_count": null,
+      "triangle_count": null,
+      "maximum_size": "descriptor_only"
+    }
+  ],
+  "ablations": [
+    {
+      "id": "B0",
+      "title": "identity/no reduction",
+      "purpose": "Reference geometry, semantics, and response.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Identity corpus candidates are publication-checked; no production no-reduction path was compared. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B1",
+      "title": "existing geometric QEM",
+      "purpose": "Establish value beyond a cheap current route.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Hypermedia geometric simplify was not invoked by this campaign. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B2",
+      "title": "existing semantic QEM under the same hard constraints",
+      "purpose": "Isolate benefit beyond semantic penalties and locks.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Admitted semantic example was not invoked for B2. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B3",
+      "title": "current remeshing/anisotropic route",
+      "purpose": "Compare element-quality and geometry objectives.",
+      "relevance": "when_appropriate",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Remeshing/anisotropic route was not invoked. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B4",
+      "title": "fixed supported Forge schedule",
+      "purpose": "Measure the value and cost of tuning or generation changes.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Forge schedule ablation was not invoked; GPU timing is not synthesized. Unimplemented ablations are not_executed, not zero."
+    },
+    {
+      "id": "B5",
+      "title": "current fine physical/operator model",
+      "purpose": "Establish response and operator errors.",
+      "relevance": "required",
+      "execution_status": "not_executed",
+      "compared": false,
+      "qualified": false,
+      "error": null,
+      "cost": null,
+      "timing": null,
+      "improvement": null,
+      "note": "Physical/operator model ablation was not invoked. Unimplemented ablations are not_executed, not zero."
+    }
+  ],
+  "denominator": {
+    "selected": 37,
+    "in_denominator": 37,
+    "executed": 0,
+    "not_executed": 36,
+    "descriptor_only": 1,
+    "failed_execution": 0,
+    "holdout": 4,
+    "must_fail": 4,
+    "exclusions": 17,
+    "failures_and_exclusions_in_denominator": true,
+    "holdout_in_denominator": true,
+    "holdout_used_for_threshold_selection": false,
+    "note": "Every selected fixture including failures, exclusions, holdout and descriptor-only stays in the denominator."
+  },
+  "threshold_selection": {
+    "performed": false,
+    "used_holdout": false,
+    "note": "This campaign does not search thresholds. Holdout is excluded from any future pick."
+  },
+  "finished_at": "2026-11-16T09:13:53.439783+00:00",
+  "b2_semantic_example_executed": false
+}

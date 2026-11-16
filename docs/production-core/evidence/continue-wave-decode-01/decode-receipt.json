@@ -1,0 +1,428 @@
+{
+  "schema": "production-core.integration-wave-p03.decode-receipt/v1",
+  "status": "executed_not_qualified",
+  "qualified": false,
+  "gpu": false,
+  "invented_passing_geometry_receipt": false,
+  "trusted_geometry_receipt": false,
+  "decoder": "pure_python_quantized_mesh_section",
+  "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+  "started_at": "2026-11-16T13:14:53.610291+00:00",
+  "assets": [
+    {
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01",
+      "present": true,
+      "decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\simplified.10d",
+        "sha256": "a01a417f7d4557841049ea30d5acc9eef7e495b0d23db28b446145451c94510a",
+        "bytes": 796,
+        "vertex_count": 30,
+        "triangle_count": 32,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 90,
+            "decoded_count": 30,
+            "sidecar_count": 30,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 32,
+            "sidecar_count": 32,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "fea842530fe981604486798b94eb2f222c5e0047381b8fad4fb70a8d1b50d538",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\geometry-receipt.json",
+          "bytes": 6929,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 3361228362,
+          "computed": 3361228362,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.0017900000093504786,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.6834861040115356,
+            0.6834861040115356,
+            0.25630730390548706
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "present",
+        "sha256": "ea6f20f7ad5de2344ea095caaa748e157ab7c5768ceb952f9648e46c21a71399",
+        "bytes": 5090,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\collapse-provenance.json",
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-identity-01\\collapse-provenance.json"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Snapshot hashed only. Hashing is not collapse-provenance qualification."
+      }
+    },
+    {
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01",
+      "present": true,
+      "decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\simplified.10d",
+        "sha256": "13e7d5c2b70a6f7a469f415f2a02d170039a75b6374f27309e816b0e07cfd72d",
+        "bytes": 692,
+        "vertex_count": 26,
+        "triangle_count": 24,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 78,
+            "decoded_count": 26,
+            "sidecar_count": 26,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 24,
+            "sidecar_count": 24,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "e0481c656071c3de72aeb6b645d4e70a2a9bd47ddb2c38c08eb241d8927d14f6",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\geometry-receipt.json",
+          "bytes": 6956,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 3102738896,
+          "computed": 3102738896,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.0016519000055268407,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.6834861040115356,
+            0.6834861040115356,
+            0.25630730390548706
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "present",
+        "sha256": "6c21163ab9aea3645190c382914a2097af72d3bb50fb180a9a75929c9cd9bfdb",
+        "bytes": 4630,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\collapse-provenance.json",
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-reduction-01\\collapse-provenance.json"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Snapshot hashed only. Hashing is not collapse-provenance qualification."
+      }
+    },
+    {
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01",
+      "present": true,
+      "decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\simplified.10d",
+        "sha256": "aa98c225d0fea859c0ae608edc2cca70e532e2b7fa11d2fa0d4894de58a4c5c0",
+        "bytes": 664,
+        "vertex_count": 24,
+        "triangle_count": 24,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 72,
+            "decoded_count": 24,
+            "sidecar_count": 24,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 24,
+            "sidecar_count": 24,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "05902dafc54ef5175dee6bc2d49987eec038db6425f201d2acc5dc5cd2726d11",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\geometry-receipt.json",
+          "bytes": 6351,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 2334805530,
+          "computed": 2334805530,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.0011838999926112592,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.6834861040115356,
+            0.6834861040115356,
+            0.25630730390548706
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "not_supplied",
+        "sha256": null,
+        "bytes": null,
+        "path": null,
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\collapse-provenance.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\lineage-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\provenance-snapshot.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\collapse-lineage.json",
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-geometric-b1-01\\collapse-provenance.bin"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+      }
+    },
+    {
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01",
+      "present": true,
+      "decode": {
+        "schema": "production-core.independent-10d-decode/v1",
+        "status": "executed",
+        "qualified": false,
+        "decoder": "pure_python_quantized_mesh_section",
+        "layout_source": "qualiaDB/docs/manuals/standards/10d-container-format.md and container_10d/{header,section,mesh_section}.rs QuantizedMesh payload",
+        "trusted_geometry_receipt": false,
+        "gpu": false,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\simplified.10d",
+        "sha256": "c0c7f34ffe187d1eb806d4684a3aa296303b15998fa32f8533295f391279efa2",
+        "bytes": 252,
+        "vertex_count": 4,
+        "triangle_count": 2,
+        "cross_check": {
+          "status": "match",
+          "mismatch": false,
+          "vertices_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\decoded-vertices.json",
+          "triangles_json": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\decoded-triangles.json",
+          "vertices": {
+            "match": true,
+            "compared": 12,
+            "decoded_count": 4,
+            "sidecar_count": 4,
+            "bit_mismatches": 0,
+            "maximum_absolute_error": 0.0,
+            "note": "independent f32 decode compared to decoded-vertices.json after f32 domain narrowing"
+          },
+          "triangles": {
+            "match": true,
+            "decoded_count": 2,
+            "sidecar_count": 2,
+            "mismatches": 0,
+            "note": "independent triangle indices compared to decoded-triangles.json"
+          },
+          "note": "Sidecar JSON is a cross-check only. Counts and positions come from the QuantizedMesh section."
+        },
+        "geometry_receipt": {
+          "status": "present_not_trusted",
+          "sha256": "fc7d133e32e44a6986674a9db5dc4fd7c6fad9d8e55b279ef25b53e446ba3503",
+          "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\geometry-receipt.json",
+          "bytes": 6706,
+          "note": "Hashed as sidecar identity only; result.vertices/faces were not used."
+        },
+        "crc32c": {
+          "descriptor": 586500132,
+          "computed": 586500132,
+          "verified": true,
+          "match": true
+        },
+        "timing": {
+          "kind": "cpu_wall",
+          "wall_seconds": 0.0004411999834701419,
+          "gpu": false,
+          "synthetic": false,
+          "source": "python_perf_counter",
+          "note": "CPU wall time. Not a GPU timestamp sample."
+        },
+        "note": "Independent QuantizedMesh decode. geometry-receipt.json is not a geometry oracle.",
+        "bounds": {
+          "min": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "max": [
+            1.0,
+            1.0,
+            0.0
+          ]
+        },
+        "container": {
+          "version": 2,
+          "flags": 1,
+          "section_count": 2,
+          "quantized_mesh_sections": 1
+        }
+      },
+      "collapse_provenance": {
+        "status": "present",
+        "sha256": "6729eccfc7577f1bc5c0844ca2334a290526b44eac1b6b8fd9121a8f9fb745f1",
+        "bytes": 991,
+        "path": "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\collapse-provenance.json",
+        "searched": [
+          "C:\\github\\synth\\docs\\production-core\\evidence\\continue-wave-analytic-plane-01\\collapse-provenance.json"
+        ],
+        "qualified": false,
+        "error": null,
+        "note": "Snapshot hashed only. Hashing is not collapse-provenance qualification."
+      }
+    }
+  ],
+  "independent_decode": {
+    "present": true,
+    "callable": true,
+    "executed": true,
+    "qualified": false,
+    "state": "executed",
+    "asset_count": 4,
+    "executed_count": 4,
+    "sidecar_mismatches": 0,
+    "note": "Independent decode of existing evidence .10d files. Execution is not qualification."
+  },
+  "collapse_provenance": {
+    "status": "not_supplied",
+    "sha256": null,
+    "bytes": null,
+    "path": null,
+    "searched": [],
+    "qualified": false,
+    "error": null,
+    "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0."
+  },
+  "b0_identity_ablation": {
+    "id": "B0",
+    "title": "identity/no reduction",
+    "purpose": "Reference geometry, semantics, and response.",
+    "relevance": "required",
+    "execution_status": "not_executed",
+    "compared": false,
+    "qualified": false,
+    "error": null,
+    "cost": null,
+    "timing": null,
+    "improvement": null,
+    "gpu": false,
+    "production_no_reduction_path": "not_invoked",
+    "identity_preserved": null,
+    "fixtures": [],
+    "note": "No identity fixtures selected. Absence is not_executed, not a zero error or cost."
+  }
+}

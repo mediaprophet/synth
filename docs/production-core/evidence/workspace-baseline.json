@@ -1,0 +1,416 @@
+{
+  "recorded_at": "2026-11-16T06:41:45.858105+00:00",
+  "repositories": [
+    {
+      "name": "synth",
+      "source": "C:\\github\\synth",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth",
+      "source_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "0d08884612f387685eb96e5ddd0a2085c1f1ff02",
+        "stderr": ""
+      },
+      "worktree_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "0d08884612f387685eb96e5ddd0a2085c1f1ff02",
+        "stderr": ""
+      },
+      "branch": {
+        "command": [
+          "git",
+          "branch",
+          "--show-current"
+        ],
+        "exit_code": 0,
+        "stdout": "codex/geometry-production-core",
+        "stderr": ""
+      },
+      "source_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "M Cargo.lock\n M Cargo.toml\n M src/web_server.rs\n?? .venv-antigravity/\n?? EMF-QAC-RESUME.md\n?? docs/reviews/2026-11-12-asset-quality-audit/additional-mcp-probes.json\n?? docs/reviews/2026-11-12-asset-quality-audit/asset-operations-tests.log\n?? docs/reviews/2026-11-12-asset-quality-audit/binary-inventory.json\n?? docs/reviews/2026-11-12-asset-quality-audit/evidence-sha256.json\n?? docs/reviews/2026-11-12-asset-quality-audit/inventory-summary.json\n?? docs/reviews/2026-11-12-asset-quality-audit/inventory.py\n?? docs/reviews/2026-11-12-asset-quality-audit/latest-asset-run.txt\n?? docs/reviews/2026-11-12-asset-quality-audit/mcp-interface-inventory.csv\n?? docs/reviews/2026-11-12-asset-quality-audit/mcp-probes-raw.json\n?? docs/reviews/2026-11-12-asset-quality-audit/mcp-probes.json\n?? docs/reviews/2026-11-12-asset-quality-audit/mcp-tools.json\n?? docs/reviews/2026-11-12-asset-quality-audit/operation-routes.csv\n?? docs/reviews/2026-11-12-asset-quality-audit/operations.json\n?? docs/reviews/2026-11-12-asset-quality-audit/probe_assets.py\n?? docs/reviews/2026-11-12-asset-quality-audit/probe_interfaces.py\n?? docs/reviews/2026-11-12-asset-quality-audit/run-20261112-103345-dcc594/\n?? docs/reviews/2026-11-12-asset-quality-audit/sdk-providers.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-capabilities.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-gap-review-capabilities.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-gap-review-mcp-tools.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-gap-review-operations.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-mcp-tools.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-operations.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-prod-capabilities.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-prod-mcp-tools.json\n?? docs/reviews/2026-11-12-asset-quality-audit/target-prod-operations.json\n?? docs/reviews/2026-11-12-asset-quality-audit/vector-inspection.json\n?? docs/reviews/2026-11-12-asset-quality-audit/verify_report.py\n?? docs/reviews/2026-11-12-crate-inventory.csv\n?? docs/reviews/2026-11-12-operation-inventory.csv\n?? docs/reviews/VIBESCRIPT-HYPERMEDIA-QAC-EMF-UPDATE-GAPS-2026-11-15.md\n?? docs/reviews/implementation-2026-11-12/antigravity-dependencies-approved-no-isolation.log\n?? docs/reviews/implementation-2026-11-12/antigravity-dependencies-resume.log\n?? docs/reviews/implementation-2026-11-12/build-followup-20261113-retry.log\n?? docs/reviews/implementation-2026-11-12/build-followup-20261113.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume-2.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume-3.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume-4.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume-5-control-updated.log\n?? docs/reviews/implementation-2026-11-12/build-integrated-resume.log\n?? docs/reviews/implementation-2026-11-12/build-portal-implementation-resumed.log\n?? docs/reviews/implementation-2026-11-12/build-portal-local-driver-20261113.log\n?? docs/reviews/implementation-2026-11-12/build-portal-local-providers-20261113.log\n?? docs/reviews/implementation-2026-11-12/build-portal-wasm-control-updated.log\n?? docs/reviews/implementation-2026-11-12/build-runtime-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/build.log\n?? docs/reviews/implementation-2026-11-12/client-run-2.log\n?? docs/reviews/implementation-2026-11-12/client-run.log\n?? docs/reviews/implementation-2026-11-12/clients-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/clients-resume.log\n?? docs/reviews/implementation-2026-11-12/codex-client-preflight.log\n?? docs/reviews/implementation-2026-11-12/codex-client-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/codex-client-resume.log\n?? docs/reviews/implementation-2026-11-12/codex-discovery-implementation.log\n?? docs/reviews/implementation-2026-11-12/codex-discovery.log\n?? docs/reviews/implementation-2026-11-12/codex-existing-server.log\n?? docs/reviews/implementation-2026-11-12/codex-isolated-discovery.log\n?? docs/reviews/implementation-2026-11-12/codex-registration.log\n?? docs/reviews/implementation-2026-11-12/compiled-asset_operations-8133f5b69e571242.log\n?? docs/reviews/implementation-2026-11-12/compiled-authenticated_host-1870526a90607c8b.log\n?? docs/reviews/implementation-2026-11-12/compiled-general_production-7f0dd8efa2c8a74c.log\n?? docs/reviews/implementation-2026-11-12/compiled-profile_authoring-686e260e44999431.log\n?? docs/reviews/implementation-2026-11-12/compiled-synth-ba1a85047281fa25.log\n?? docs/reviews/implementation-2026-11-12/compiled-synth-c2a5738b7afcdcc2.log\n?? docs/reviews/implementation-2026-11-12/compiled-tests-results.json\n?? docs/reviews/implementation-2026-11-12/current-asset_operations-8133f5b69e571242.log\n?? docs/reviews/implementation-2026-11-12/current-asset_production_vibe-e0b3e7a76591d445.log\n?? docs/reviews/implementation-2026-11-12/current-authenticated_host-1870526a90607c8b.log\n?? docs/reviews/implementation-2026-11-12/current-general_production-7f0dd8efa2c8a74c.log\n?? docs/reviews/implementation-2026-11-12/current-native-results.json\n?? docs/reviews/implementation-2026-11-12/current-runtime.txt\n?? docs/reviews/implementation-2026-11-12/current-synth-ba1a85047281fa25.log\n?? docs/reviews/implementation-2026-11-12/current-synth-c2a5738b7afcdcc2.log\n?? docs/reviews/implementation-2026-11-12/emf-implementation-after-refresh.log\n?? docs/reviews/implementation-2026-11-12/emf-implementation-resumed.log\n?? docs/reviews/implementation-2026-11-12/emf-recording-exposure-resume.log\n?? docs/reviews/implementation-2026-11-12/emf-recording-resume.log\n?? docs/reviews/implementation-2026-11-12/fetch-portal-20261113.log\n?? docs/reviews/implementation-2026-11-12/fetch-portal-all-20261113.log\n?? docs/reviews/implementation-2026-11-12/fetch-portal-allowed-20261113.log\n?? docs/reviews/implementation-2026-11-12/final-antigravity.log\n?? docs/reviews/implementation-2026-11-12/final-clients.log\n?? docs/reviews/implementation-2026-11-12/final-emf.log\n?? docs/reviews/implementation-2026-11-12/final-large-source.log\n?? docs/reviews/implementation-2026-11-12/final-precision.log\n?? docs/reviews/implementation-2026-11-12/large-heart-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/portal-bindgen-final-deps.log\n?? docs/reviews/implementation-2026-11-12/portal-bindgen-final.log\n?? docs/reviews/implementation-2026-11-12/portal-browser-final-venv.log\n?? docs/reviews/implementation-2026-11-12/portal-browser-final.log\n?? docs/reviews/implementation-2026-11-12/portal-emf-source-checks.log\n?? docs/reviews/implementation-2026-11-12/portal-emf-status-test.cjs\n?? docs/reviews/implementation-2026-11-12/portal-prepare-final.log\n?? docs/reviews/implementation-2026-11-12/portal-served-browser.log\n?? docs/reviews/implementation-2026-11-12/portal-served-prepare.log\n?? docs/reviews/implementation-2026-11-12/precision-implementation-after-refresh.log\n?? docs/reviews/implementation-2026-11-12/precision-implementation-resumed.log\n?? docs/reviews/implementation-2026-11-12/precision-run.log\n?? docs/reviews/implementation-2026-11-12/profile-final-verification.json\n?? docs/reviews/implementation-2026-11-12/profile-unique-link.log\n?? docs/reviews/implementation-2026-11-12/profile-unique-tests.log\n?? docs/reviews/implementation-2026-11-12/publication/\n?? docs/reviews/implementation-2026-11-12/quality-resume.log\n?? docs/reviews/implementation-2026-11-12/quality-run.log\n?? docs/reviews/implementation-2026-11-12/quality-terrain-cosmos-refinement.log\n?? docs/reviews/implementation-2026-11-12/terrain-shot-south.log\n?? docs/reviews/implementation-2026-11-12/tests-authenticated-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-codecs-implementation-resumed.log\n?? docs/reviews/implementation-2026-11-12/tests-etalon-shadow-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-final-etalon-atl.log\n?? docs/reviews/implementation-2026-11-12/tests-final-etalon-full-download.log\n?? docs/reviews/implementation-2026-11-12/tests-final-etalon-full-j2.log\n?? docs/reviews/implementation-2026-11-12/tests-final-etalon-full.log\n?? docs/reviews/implementation-2026-11-12/tests-final-shadow.log\n?? docs/reviews/implementation-2026-11-12/tests-followup-allowed-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-followup-serial-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-hypermedia.log\n?? docs/reviews/implementation-2026-11-12/tests-implementation-after-refresh.log\n?? docs/reviews/implementation-2026-11-12/tests-implementation-resumed.log\n?? docs/reviews/implementation-2026-11-12/tests-integrated-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-integrated-resume.log\n?? docs/reviews/implementation-2026-11-12/tests-local-web.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-core.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-formats-portal-control-updated.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-formats-portal-isolated.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-formats-portal-state.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-formats-timed.log\n?? docs/reviews/implementation-2026-11-12/tests-resume-formats.log\n?? docs/reviews/implementation-2026-11-12/tests-synth-lib.log\n?? docs/reviews/implementation-2026-11-12/tests-synth.log\n?? docs/reviews/implementation-2026-11-12/tests-web-resume-20261113.log\n?? docs/reviews/implementation-2026-11-12/tests-xtask-target-routing-download.log\n?? docs/reviews/implementation-2026-11-12/tests-xtask-target-routing.log\n?? docs/reviews/implementation-2026-11-12/update_client_assets.py\n?? docs/reviews/implementation-2026-11-12/wire_ui_labels.py\n?? examples/quality/__pycache__/\n?? production/\n?? scripts/__pycache__/\n?? src/bin/webizen_studio.rs\n?? src/web_server/\n?? target-cam/\n?? target-etalon-gpu-prerequisites/\n?? target-etalon-gpu-review/\n?? target-gap-review-formats-portal/\n?? target-gap-review-formats/\n?? target-gap-review-portal-driver/\n?? target-gap-review-python-cache/\n?? target-gap-review-wasm/\n?? target-gap-review/\n?? target-prod/\n?? target-qac-present/\n?? target-qac-project-harness/",
+        "stderr": ""
+      },
+      "worktree_initial_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "modified_tracked_files": [
+        {
+          "path": "Cargo.lock",
+          "sha256": "ec90e7b5cce90f1f9665dfa43f281e57839b50510915db80b1c1a3373acb7b09"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "e370468dcb259971dd579ec3f22c3d28a16a08c869a74deeaba67f83a0e2b79f"
+        },
+        {
+          "path": "src/web_server.rs",
+          "sha256": "c5ff3cc01b4a51d08bd94d5511c9598cf5ce979ec12c9383be41e58616b13b9c"
+        }
+      ],
+      "source_policy": "Read-only original checkout; no dirty source overlays copied to worktree."
+    },
+    {
+      "name": "qualiaDB",
+      "source": "C:\\github\\qualiaDB",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\qualiaDB",
+      "source_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "7f6057a743937173260c1d62d670283214a1d09a",
+        "stderr": ""
+      },
+      "worktree_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "7f6057a743937173260c1d62d670283214a1d09a",
+        "stderr": ""
+      },
+      "branch": {
+        "command": [
+          "git",
+          "branch",
+          "--show-current"
+        ],
+        "exit_code": 0,
+        "stdout": "codex/geometry-production-core",
+        "stderr": ""
+      },
+      "source_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "M Cargo.lock\n M Cargo.toml\n M crates/qualia-core-db/src/domains/geospatial/adapters/dem_adapter.rs\n M crates/qualia-core-db/src/domains/geospatial/dem.rs\n M crates/qualia-core-db/src/render/gpu/animated_upload.rs\n M crates/qualia-core-db/src/render/gpu/ao.rs\n M crates/qualia-core-db/src/render/gpu/instance_visibility.rs\n M crates/qualia-core-db/src/render/gpu/mesh_upload.rs\n M crates/qualia-core-db/src/render/gpu/mod.rs\n M crates/qualia-core-db/src/render/gpu/native_device.rs\n M crates/qualia-core-db/src/render/gpu/portal_gpu/constructors.rs\n M crates/qualia-core-db/src/render/gpu/portal_gpu/init.rs\n M crates/qualia-core-db/src/render/gpu/portal_gpu/lighting_passes.rs\n M crates/qualia-core-db/src/render/gpu/portal_gpu/picking.rs\n M crates/qualia-core-db/src/render/gpu/portal_gpu/render_frame.rs\n M crates/qualia-core-db/src/render/portal/emf_preview.rs\n M crates/qualia-core-db/src/render/portal/mod.rs\n M crates/qualia-core-db/src/render/portal/scene_mesh.rs\n M crates/qualia-core-db/src/render/portal/scene_mesh_tests.rs\n M crates/qualia-etalon-sensing-bridge/Cargo.lock\n M crates/qualia-etalon-sensing-bridge/Cargo.toml\n M tools/accelerator-harness/Cargo.lock\n M tools/accelerator-harness/Cargo.toml\n M tools/accelerator-harness/etalon-revision.txt\n?? crates/qualia-core-db/src/render/gpu/gpu_timing.rs\n?? crates/qualia-core-db/src/render/gpu/gpu_timing_math.rs\n?? crates/qualia-core-db/src/render/gpu/instance_group_upload.rs\n?? crates/qualia-core-db/src/render/gpu/instance_group_visibility.rs\n?? crates/qualia-core-db/src/render/gpu/instance_groups.rs\n?? crates/qualia-core-db/src/render/gpu/instance_groups_tests.rs\n?? crates/qualia-core-db/src/render/gpu/mesh_upload_limits.rs\n?? crates/qualia-core-db/src/render/portal/gpu_timing.rs\n?? crates/qualia-core-db/src/render/portal/instance_groups.rs\n?? crates/qualia-core-db/src/render/portal/scene_frames.rs\n?? crates/qualia-core-db/src/render/portal/scene_frames_tests.rs\n?? crates/qualia-core-db/src/render/portal/scene_loader.rs",
+        "stderr": ""
+      },
+      "worktree_initial_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "modified_tracked_files": [
+        {
+          "path": "Cargo.lock",
+          "sha256": "bd8ca366a0bae343fb2f5d573681779d6cd4c1cbdfcd097c8ce757d6822764e5"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "ab1934e6319de065c44faf4dc9ec9a6a3fa8cdc88737f274ea20705e23fab13f"
+        },
+        {
+          "path": "crates/qualia-core-db/src/domains/geospatial/adapters/dem_adapter.rs",
+          "sha256": "2d29cfc67d81347a1f7c72a396e0ecab5f7d2d06120f936139ff5991e093730d"
+        },
+        {
+          "path": "crates/qualia-core-db/src/domains/geospatial/dem.rs",
+          "sha256": "a60471a35f56673c2f35ecfb07c11058db1e260bba4d7605ceedc407e64ce786"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/animated_upload.rs",
+          "sha256": "a099bf060c4a547679c63ca108236723d918aabc43b0c6ff425165a9469c4144"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/ao.rs",
+          "sha256": "e944cd250cc84cbce56e7f8dc02f4125dc11f6597a232579ce227890cae0a75a"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/instance_visibility.rs",
+          "sha256": "eb28ff40820c950f1dfab237e39d5d635bfab468b4b7764504ec6064f06e63df"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/mesh_upload.rs",
+          "sha256": "87ef6bce25f04f2efc996e0177b83f99200861220c71767b73f45bf22401bd49"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/mod.rs",
+          "sha256": "5452ce080792e29f4a039533f5603c02658109901663c1e707e8b921b1044ff7"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/native_device.rs",
+          "sha256": "9b61983ebaa4371ba47bcd6e70b558530d61e6b87068290aac9bd7ddc47c095d"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/portal_gpu/constructors.rs",
+          "sha256": "b9d1b0073aec53e8e9083b2acb2b50e178ec2d71569f5bb06ecadecb6205b2a3"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/portal_gpu/init.rs",
+          "sha256": "83de111ad4ace2ea2d94d58e887a69b42077dca6707dfe83be8bcfab8c34e68c"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/portal_gpu/lighting_passes.rs",
+          "sha256": "28be61ff3c282815de76df5dec1b390d35071e716cfe90ff464c8eab122c7290"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/portal_gpu/picking.rs",
+          "sha256": "ed1f6f5aa1daf7709312613fbde9397525d79cd2e3a6e080457a22e752889259"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/gpu/portal_gpu/render_frame.rs",
+          "sha256": "e9cf43c8da023164b51335a639cd06a06cf57dc3ef0b33a0415189c07eea8fb7"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/portal/emf_preview.rs",
+          "sha256": "810e51d87cc99341b37ceb67fca8e86b83077e669bae95d15070fd596ba1642d"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/portal/mod.rs",
+          "sha256": "0d6b5fbed642a53dc88c820fb356b0c7f84b7323c1310593936a62cc63ca97dd"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/portal/scene_mesh.rs",
+          "sha256": "3ca49d132d7295a1c91f121e316b4afcc146a991c94ad99aa5e5e290f71eac3c"
+        },
+        {
+          "path": "crates/qualia-core-db/src/render/portal/scene_mesh_tests.rs",
+          "sha256": "765175f9f5840888c00789d0f431ecfb622f84471086bb715b4b565a42c23b39"
+        },
+        {
+          "path": "crates/qualia-etalon-sensing-bridge/Cargo.lock",
+          "sha256": "7647223f1e7b05edcdd802898450aecb9eb439cbb8ecd07433337d0741372a97"
+        },
+        {
+          "path": "crates/qualia-etalon-sensing-bridge/Cargo.toml",
+          "sha256": "d6ed1b38b37bf47117438c1965b0826edc0afa4a85a36c2f9e19a7b0cd3eaacc"
+        },
+        {
+          "path": "tools/accelerator-harness/Cargo.lock",
+          "sha256": "4c60cc838016a89beeb3a9265d3db398706802605f3294825b7bc6d1e1f993e3"
+        },
+        {
+          "path": "tools/accelerator-harness/Cargo.toml",
+          "sha256": "35dc04705105f26d7343799267fd12d4e1ff7ea64625ccc911b3cbbacf8d3d20"
+        },
+        {
+          "path": "tools/accelerator-harness/etalon-revision.txt",
+          "sha256": "bb9bf8f77bc7a1a721d7650338ec4c82f9e385fa8c8ffa9db22461f58c7fb738"
+        }
+      ],
+      "source_policy": "Read-only original checkout; no dirty source overlays copied to worktree."
+    },
+    {
+      "name": "etalon",
+      "source": "C:\\github\\etalon",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon",
+      "source_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "48af56392a13ba7734c438887b58db4a1057f1bd",
+        "stderr": ""
+      },
+      "worktree_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "48af56392a13ba7734c438887b58db4a1057f1bd",
+        "stderr": ""
+      },
+      "branch": {
+        "command": [
+          "git",
+          "branch",
+          "--show-current"
+        ],
+        "exit_code": 0,
+        "stdout": "codex/geometry-production-core",
+        "stderr": ""
+      },
+      "source_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "?? target-container-standards/\n?? target-webizen-gl-check/\n?? target-webizen-tests/",
+        "stderr": ""
+      },
+      "worktree_initial_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "?? crates/etalon-wgsl-forge/examples/",
+        "stderr": ""
+      },
+      "modified_tracked_files": [],
+      "source_policy": "Read-only original checkout; no dirty source overlays copied to worktree."
+    },
+    {
+      "name": "hypermedia-production",
+      "source": "C:\\github\\hypermedia-production",
+      "worktree": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\hypermedia-production",
+      "source_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "8321792cb700cdac90adf1b1ef8accdc039597f1",
+        "stderr": ""
+      },
+      "worktree_head": {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "8321792cb700cdac90adf1b1ef8accdc039597f1",
+        "stderr": ""
+      },
+      "branch": {
+        "command": [
+          "git",
+          "branch",
+          "--show-current"
+        ],
+        "exit_code": 0,
+        "stdout": "codex/geometry-production-core",
+        "stderr": ""
+      },
+      "source_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "M crates/asset-production-vibe/Cargo.toml\n M crates/gpu-command-profiler/Cargo.toml\n M crates/gpu-device-context/Cargo.toml\n M crates/pixel-buffer-output/Cargo.toml\n M crates/vector-compute-renderer/Cargo.toml\n M crates/vector-compute-shaders/Cargo.toml\n M crates/vector-gpu-render-adapter/Cargo.toml\n M crates/vector-hybrid-render-adapter/Cargo.toml\n M crates/vector-hybrid-renderer/Cargo.toml\n M crates/vector-hybrid-shaders/Cargo.toml",
+        "stderr": ""
+      },
+      "worktree_initial_status": {
+        "command": [
+          "git",
+          "status",
+          "--porcelain",
+          "--untracked-files=normal"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "modified_tracked_files": [
+        {
+          "path": "crates/asset-production-vibe/Cargo.toml",
+          "sha256": "cf281860e82adf697691432f34d5864d8806b345a411638df77a5374d20960ce"
+        },
+        {
+          "path": "crates/gpu-command-profiler/Cargo.toml",
+          "sha256": "30b936cb9a233d69a9bce5cef22cffaf021eb215541ba18b6fc65800f30b8b71"
+        },
+        {
+          "path": "crates/gpu-device-context/Cargo.toml",
+          "sha256": "9eaeeedbf25884fccd3da392fa24f3430f5a854fbcf2853c0465668df4148e28"
+        },
+        {
+          "path": "crates/pixel-buffer-output/Cargo.toml",
+          "sha256": "6467f3a7310931e7094a9de7b4c548cf048e4c15010a73c903a09a9fea170ba4"
+        },
+        {
+          "path": "crates/vector-compute-renderer/Cargo.toml",
+          "sha256": "148a28f830e398cbb3cecfa99f53ba9bd583ecdd65f363012c2cae7c6b03f0b8"
+        },
+        {
+          "path": "crates/vector-compute-shaders/Cargo.toml",
+          "sha256": "19e1ae61c80eaeb74ca710e833be4dd71712b7ba9012904002a85f683c7677ef"
+        },
+        {
+          "path": "crates/vector-gpu-render-adapter/Cargo.toml",
+          "sha256": "fb26ef67b1c5ee6474ad68f40e1bb8facad48a8e63bf4f544247ec687713ed85"
+        },
+        {
+          "path": "crates/vector-hybrid-render-adapter/Cargo.toml",
+          "sha256": "4f3980307ea4a7bc6869ccc1b5c522cb9210e93c728edc2183d17d46cb80a737"
+        },
+        {
+          "path": "crates/vector-hybrid-renderer/Cargo.toml",
+          "sha256": "47f48f3e96dc444e807527698c93d2bd4123f3f1b9164a85e34bc991f1a3b8fb"
+        },
+        {
+          "path": "crates/vector-hybrid-shaders/Cargo.toml",
+          "sha256": "95d86b0dd68d628836dcf283193cd59ab2ecd0f3899bfbbd3416ee121767d7a1"
+        }
+      ],
+      "source_policy": "Read-only original checkout; no dirty source overlays copied to worktree."
+    }
+  ],
+  "tools": [
+    {
+      "command": [
+        "rustc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "stderr": ""
+    }
+  ],
+  "hardware_status": "Actual native NVIDIA DX12 and browser Intel WebGPU fixed-affine probes passed; broader qualification pending.",
+  "managed_attachment_status": "Synth managed worktree attached to chat. Three sibling Git worktrees are valid filesystem checkouts; app attach rejected ownerless registration. No metadata workaround attempted.",
+  "native_probe_path": "C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\etalon\\target-production-core\\probe-native-dx12-20261116-01",
+  "browser_probe_path": "evidence/browser-baseline-20261116-065406-847337.json"
+}

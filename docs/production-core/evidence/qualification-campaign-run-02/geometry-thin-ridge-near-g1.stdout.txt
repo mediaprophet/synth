@@ -1,0 +1,1 @@
+{"output_directory":"C:\\Users\\Hp\\.codex\\worktrees\\qualia-etalon-production-core\\synth\\docs\\production-core\\evidence\\qualification-campaign-run-02\\geometry-thin-ridge-near-g1","receipt":"geometry-receipt.json","status":"passed"}

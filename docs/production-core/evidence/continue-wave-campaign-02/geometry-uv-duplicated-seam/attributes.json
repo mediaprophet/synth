@@ -1,0 +1,98 @@
+[
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 101,
+    "uv": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 101,
+    "uv": [
+      1.0,
+      0.0
+    ]
+  },
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 101,
+    "uv": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 202,
+    "uv": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 202,
+    "uv": [
+      1.0,
+      0.0
+    ]
+  },
+  {
+    "affordance_boundary": false,
+    "bifurcation_sensitivity": 0.0,
+    "cluster_border_locked": false,
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "skeleton_joint_id": 0,
+    "subpart_tag": 202,
+    "uv": [
+      1.0,
+      1.0
+    ]
+  }
+]

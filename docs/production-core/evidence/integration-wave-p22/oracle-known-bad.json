@@ -1,0 +1,221 @@
+{
+  "schema": "production-core.p22-known-bad-oracle/v1",
+  "status": "oracle_evaluated_not_qualified",
+  "qualified": false,
+  "gpu": false,
+  "production_exe_invoked": false,
+  "invented_passing_geometry_receipt": false,
+  "note": "Published candidates evaluated by oracle_harness. Geometry exe was not invoked on welded candidates as input meshes.",
+  "fixtures": [
+    {
+      "id": "known-bad-cross-domain-weld",
+      "kind": "representation_candidate",
+      "must_fail": true,
+      "failing_tests": [
+        "forbidden_semantic_merges",
+        "no_cross_domain_support",
+        "preserve_corner_chart",
+        "preserve_tangent_handedness",
+        "coincident_pairs_are_not_welded"
+      ],
+      "observed_failed_gates": [
+        "forbidden_semantic_merges",
+        "coincident_pairs_are_not_welded",
+        "no_cross_domain_support",
+        "preserve_tangent_handedness",
+        "preserve_corner_chart"
+      ],
+      "unevaluated_gates": [],
+      "publication_check": "consistent",
+      "production_exe_invoked": false,
+      "gpu": false,
+      "qualified": false
+    },
+    {
+      "id": "known-bad-poisoned-affine",
+      "kind": "affine_candidate",
+      "must_fail": true,
+      "failing_tests": [
+        "independent_affine_oracle",
+        "k1_abs_rel_tolerance"
+      ],
+      "observed_failed_gates": [
+        "k1_abs_rel_tolerance",
+        "independent_affine_oracle"
+      ],
+      "unevaluated_gates": [],
+      "publication_check": "consistent",
+      "production_exe_invoked": false,
+      "gpu": false,
+      "qualified": false
+    },
+    {
+      "id": "known-bad-tetra-inversion",
+      "kind": "volume_candidate",
+      "must_fail": true,
+      "failing_tests": [
+        "accept_when_inversion_forbidden"
+      ],
+      "observed_failed_gates": [
+        "accept_when_inversion_forbidden"
+      ],
+      "unevaluated_gates": [],
+      "publication_check": "consistent",
+      "production_exe_invoked": false,
+      "gpu": false,
+      "qualified": false
+    },
+    {
+      "id": "known-bad-infeasible-contact",
+      "kind": "contact_candidate",
+      "must_fail": true,
+      "failing_tests": [
+        "contact_feasibility",
+        "authoritative_full_model_required"
+      ],
+      "observed_failed_gates": [
+        "contact_feasibility",
+        "authoritative_full_model_required"
+      ],
+      "unevaluated_gates": [],
+      "publication_check": "consistent",
+      "production_exe_invoked": false,
+      "gpu": false,
+      "qualified": false
+    }
+  ],
+  "collapse_provenance_existing_evidence": [
+    {
+      "status": "not_supplied",
+      "sha256": null,
+      "bytes": null,
+      "path": null,
+      "qualified": false,
+      "error": null,
+      "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0.",
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\admitted-geometry-run-01"
+    },
+    {
+      "status": "not_supplied",
+      "sha256": null,
+      "bytes": null,
+      "path": null,
+      "qualified": false,
+      "error": null,
+      "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0.",
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-1"
+    },
+    {
+      "status": "not_supplied",
+      "sha256": null,
+      "bytes": null,
+      "path": null,
+      "qualified": false,
+      "error": null,
+      "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0.",
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\qualification-campaign-run-02\\geometry-identity-two-subpart-seam"
+    },
+    {
+      "status": "not_supplied",
+      "sha256": null,
+      "bytes": null,
+      "path": null,
+      "qualified": false,
+      "error": null,
+      "note": "Collapse provenance snapshot was not supplied. Absence is not_supplied, not 0.0.",
+      "dir": "C:\\github\\synth\\docs\\production-core\\evidence\\geometry-corpus-analytic-plane-01"
+    }
+  ],
+  "whole_surface_bound_existing_receipts": [
+    {
+      "status": "not_measured",
+      "class": null,
+      "qualified": false,
+      "path": "C:\\github\\synth\\docs\\production-core\\evidence\\admitted-geometry-run-01\\geometry-receipt.json",
+      "sha256": "05dd575d0e18e09624df9dd7688b8892d3537144c9e3ae0b487852b208e0ec55",
+      "note": "geometry-receipt has no enclosing_bound class. Status is not_measured, not 0.0.",
+      "surface_status": "not_measured",
+      "enclosing": null
+    },
+    {
+      "status": "not_measured",
+      "class": null,
+      "qualified": false,
+      "path": "C:\\github\\synth\\docs\\production-core\\evidence\\geometry-corpus-analytic-plane-01\\geometry-receipt.json",
+      "sha256": "e071403c78804cfcde9836744077319c7bfed260432befb0b9a3b98364389e57",
+      "note": "geometry-receipt has no enclosing_bound class. Status is not_measured, not 0.0.",
+      "surface_status": "not_measured",
+      "enclosing": null
+    },
+    {
+      "status": "not_measured",
+      "class": null,
+      "qualified": false,
+      "path": "C:\\github\\synth\\docs\\production-core\\evidence\\joined-tracer-01\\geometry-1\\geometry-receipt.json",
+      "sha256": "a87253a47c55eb3169741d65408c74c8db51f557fb82b8ee379715a33ad2624e",
+      "note": "geometry-receipt has no enclosing_bound class. Status is not_measured, not 0.0.",
+      "surface_status": "not_measured",
+      "enclosing": null
+    },
+    {
+      "status": "not_measured",
+      "class": null,
+      "qualified": false,
+      "path": "C:\\github\\synth\\docs\\production-core\\evidence\\qualification-campaign-run-02\\geometry-identity-two-subpart-seam\\geometry-receipt.json",
+      "sha256": "48650bb94e3f253b81de43a2ad3206c1602ca0f3f2f0222aec4c327fa1fa77f3",
+      "note": "geometry-receipt has no enclosing_bound class. Status is not_measured, not 0.0.",
+      "surface_status": "not_measured",
+      "enclosing": null
+    }
+  ],
+  "incomplete_core_checklist": [
+    {
+      "item": "geometry_example_rebuilt_after_lowerhex_repair",
+      "status": "done"
+    },
+    {
+      "item": "admitted_geometry_executable",
+      "status": "present"
+    },
+    {
+      "item": "joined_tracer_execution",
+      "status": "executed_not_qualified"
+    },
+    {
+      "item": "p01_p03_accepted",
+      "status": "open"
+    },
+    {
+      "item": "public_hypermedia_simplify_semantic",
+      "status": "compiled_unit_tested"
+    },
+    {
+      "item": "whole_surface_bound",
+      "status": "not_measured"
+    },
+    {
+      "item": "collapse_provenance_qualification",
+      "status": "inspected_not_supplied"
+    },
+    {
+      "item": "operator_or_physical_qualification",
+      "status": "not_executed"
+    },
+    {
+      "item": "final_10d_sealing_independently_decoded",
+      "status": "executed_not_qualified"
+    },
+    {
+      "item": "gpu_timing_byte_identical_across_repeats",
+      "status": "not_claimed"
+    },
+    {
+      "item": "cached_synth_exe_source_equivalence",
+      "status": "not_established"
+    },
+    {
+      "item": "p02_p05_p06_p07_compiled_together",
+      "status": "compiled"
+    }
+  ]
+}
