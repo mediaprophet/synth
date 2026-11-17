@@ -33,14 +33,17 @@ jobs:
           - os: ubuntu-22.04
             artifact: synth-linux-x86_64
 
+    env:
+      SYNTH_UPDATE_SEED: ${{ secrets.SYNTH_UPDATE_SEED || vars.SYNTH_UPDATE_SEED }}
     steps:
       - name: Require updater seed
         shell: bash
-        env:
-          SYNTH_UPDATE_SEED: ${{ secrets.SYNTH_UPDATE_SEED }}
         run: |
+          echo "secrets.SYNTH_UPDATE_SEED=${{ secrets.SYNTH_UPDATE_SEED != '' }}"
+          echo "vars.SYNTH_UPDATE_SEED=${{ vars.SYNTH_UPDATE_SEED != '' }}"
+          echo "seed_len=${#SYNTH_UPDATE_SEED}"
           if [ -z "$SYNTH_UPDATE_SEED" ]; then
-            echo "Add repository secret SYNTH_UPDATE_SEED (64 hex chars from synth/.synth/update-seed.hex)." >&2
+            echo "GitHub did not pass SYNTH_UPDATE_SEED. Put 64 hex chars in Settings → Secrets and variables → Actions as secret or variable SYNTH_UPDATE_SEED. Dependabot and Codespaces secrets are not injected here." >&2
             exit 1
           fi
 
@@ -90,8 +93,6 @@ jobs:
       - name: Sign artifact
         working-directory: synth
         shell: bash
-        env:
-          SYNTH_UPDATE_SEED: ${{ secrets.SYNTH_UPDATE_SEED }}
         run: |
           mkdir -p dist
           if [ -f target/release/synth.exe ]; then
