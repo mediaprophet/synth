@@ -1,0 +1,96 @@
+{
+  "schema": "webizen.integration-wave-i6.gpu-receipt/v1",
+  "packet": "I6",
+  "receipt_id": "desktop-chrome-webgpu",
+  "create_only": true,
+  "qualified": false,
+  "accepted_packet": "P00",
+  "execution_status": "executed",
+  "observed_at": "2026-11-17T03:12:11Z",
+  "isolation": "none",
+  "url": "http://127.0.0.1:8800/",
+  "viewport": {
+    "innerWidth": 1280,
+    "innerHeight": 800,
+    "canvas_width": 1280,
+    "canvas_height": 799,
+    "devicePixelRatio": 0.9999999734530078,
+    "media_max_width_900px": false
+  },
+  "requested": "webgpu-or-webgl2",
+  "selected_backend": "webgpu",
+  "selected_backend_source": "window.__webizenNativeInit.selected_backend via portal_gpu_backend()",
+  "init": {
+    "schema": "webizen.native-graphics-init/v1",
+    "state": "ready",
+    "requested": "webgpu-or-webgl2",
+    "selected_backend": "webgpu",
+    "duration_ms": 8614.349999964237,
+    "canvas_width": 1280,
+    "canvas_height": 799
+  },
+  "wasm": {
+    "path": "C:/github/webizen-website/site/pkg/native-world/webizen_world_bg.wasm",
+    "served_url": "/pkg/native-world/webizen_world_bg.wasm",
+    "bytes": 21614966,
+    "sha256": "0086f172d33bbf726b437a4a7e66282eda370b5c6e8244ee79544c6f64dd72f8"
+  },
+  "identity": {
+    "etalon_pin": "143a1d7538ceae867ceab1dc7e43126bc688752f",
+    "qualiadb_head_compiled": "7296c131a410831a143165999b329ba74abd123e",
+    "qualiadb_tracked_dirty": [
+      " M crates/qualia-core-db/src/render/gpu/gpu_timing.rs",
+      " M crates/qualia-core-db/src/render/gpu/portal_gpu/constructors.rs",
+      " M crates/qualia-core-db/src/render/portal/capabilities.rs",
+      " M crates/qualia-core-db/src/render/portal/mod.rs"
+    ],
+    "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+    "hasNavigatorGpu": true,
+    "note": "navigator.gpu presence is recorded only. selected_backend is not inferred from it."
+  },
+  "scene": {
+    "data_scene": "/production/lush-woodland/scene.json",
+    "data_scene_mobile": "/production/lush-woodland/scene-mobile.json",
+    "loaded_weight": "desktop scene.json (WebGPU, viewport wider than 900px)",
+    "world_renderer": "webgpu",
+    "frames": 400,
+    "frames_presented_at_evaluate": 400,
+    "assets_loaded": 77,
+    "assets_refused": 0,
+    "materials_loaded": 76,
+    "material_pipeline": true,
+    "organs_loaded": 77,
+    "total_triangles": 440626,
+    "vertex_count": 258458,
+    "uploaded": true,
+    "scene_success": true,
+    "presents": true
+  },
+  "status_text": "Explore the world. Your chosen path changes the presentation, never your rights.",
+  "server": {
+    "reused_existing": true,
+    "pid": 55180,
+    "command": "python -u C:/github/webizen-website/tooling/world_server.py --port 8800",
+    "bind": "127.0.0.1:8800",
+    "left_running": true
+  },
+  "artifacts": {
+    "screenshot": "desktop-webgpu.png",
+    "screenshot_sha256": "932df893e0b47ce4e4b95a5894aabac23dd388dd053275bcb8e1b1dc6912533f",
+    "screenshot_scale": "css",
+    "console": "desktop-webgpu-console.txt",
+    "snapshot": "desktop-webgpu-snapshot.yml"
+  },
+  "console_summary": {
+    "errors": 1,
+    "warnings": 1,
+    "notes": [
+      "favicon.ico 404",
+      "Chrome powerPreference ignored for requestAdapter on Windows (crbug.com/369219127)"
+    ]
+  },
+  "visual": "Field-studio view presents: gold wagon, wind-up camper, solar arrays, eucalyptus, canopy, UI overlay. Not a reading fallback."
+}

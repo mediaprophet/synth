@@ -1,0 +1,69 @@
+- generic [active]:
+  - link "Skip to world controls" [ref=e1] [cursor=pointer]:
+    - /url: "#native-world-ui"
+  - generic "Interactive native world. Use arrow keys to look around, plus and minus to zoom." [ref=e104]
+  - banner:
+    - link "W. webizen HUMAN CENTRIC COMPUTING" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e4]: W.
+      - generic [ref=e5]:
+        - text: webizen
+        - generic [ref=e6]: HUMAN CENTRIC COMPUTING
+    - navigation "Reading routes" [ref=e7]:
+      - link "Read the world" [ref=e8] [cursor=pointer]:
+        - /url: /publication/reading.html
+      - link "The ecosystem" [ref=e9] [cursor=pointer]:
+        - /url: /atlas/
+      - link "Tests & benchmarks" [ref=e10] [cursor=pointer]:
+        - /url: /lab/
+      - link "The journey" [ref=e11] [cursor=pointer]:
+        - /url: /journey/
+    - generic [ref=e12]: English · AU
+  - main "Explore the living world" [ref=e105]:
+    - heading "A world we share" [level=1] [ref=e106]
+    - generic [ref=e107]:
+      - text: Choose a path
+      - combobox "Choose a path" [ref=e108] [cursor=pointer]:
+        - option "Understand the ecosystem" [selected]
+        - option "Explore the evidence"
+        - option "Make something"
+        - option "Take part"
+    - navigation "Places to explore" [ref=e109]:
+      - button "The living river" [ref=e110] [cursor=pointer]
+      - button "The forest canopy" [ref=e111] [cursor=pointer]
+      - button "The field station" [ref=e112] [cursor=pointer]
+      - button "The field studio" [ref=e113] [cursor=pointer]
+      - button "The living body" [ref=e114] [cursor=pointer]
+      - button "The atelier" [ref=e115] [cursor=pointer]
+      - button "The commons" [ref=e116] [cursor=pointer]
+    - heading "The field studio" [level=2] [ref=e117]
+    - group [ref=e118]:
+      - generic "About this place" [ref=e119] [cursor=pointer]
+    - link "Read about this place" [ref=e120] [cursor=pointer]:
+      - /url: /publication/reading.html#field-studio
+    - navigation "Camera controls" [ref=e121]:
+      - button "Move closer" [ref=e122] [cursor=pointer]: +
+      - button "Move further away" [ref=e123] [cursor=pointer]: "-"
+    - generic [ref=e124]:
+      - checkbox "Reduce motion" [ref=e125]
+      - text: Reduce motion
+    - group [ref=e126]:
+      - generic "Landscape chapters" [ref=e127] [cursor=pointer]
+      - option "Choose a landscape chapter" [selected]
+      - option "Southern Tablelands & Canberra region"
+      - option "South Coast"
+      - option "High country & eastern Victoria"
+      - option "Riverina"
+      - option "Central Victoria"
+      - option "North-west NSW & western slopes"
+      - option "Northern Rivers & far north coast"
+  - status [ref=e128]: Explore the world. Your chosen path changes the presentation, never your rights.
+  - button "Hide the reading and path panel" [expanded] [ref=e129] [cursor=pointer]: Hide panel
+  - group [ref=e130]:
+    - generic "Open the proof laboratory" [ref=e131] [cursor=pointer]
+    - option "Schema.org 30.0 current HTTPS" [selected]
+    - option "Earth, space, rights and benchmark source graph"
+    - option "The ecosystem - 16 module groups explained"
+    - option "Inspect archiveHeld relationships" [selected]
+    - option "Find declared RDF types"
+    - option "Verify an absent public reference subject"

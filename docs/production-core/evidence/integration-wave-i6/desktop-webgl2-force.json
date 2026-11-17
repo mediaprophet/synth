@@ -1,0 +1,95 @@
+{
+  "schema": "webizen.integration-wave-i6.gpu-receipt/v1",
+  "packet": "I6",
+  "receipt_id": "desktop-chrome-webgl2-force",
+  "create_only": true,
+  "qualified": false,
+  "accepted_packet": "P00",
+  "execution_status": "executed",
+  "observed_at": "2026-11-17T03:13:18Z",
+  "isolation": "none",
+  "url": "http://127.0.0.1:8800/?webgl2=1",
+  "probe": "?webgl2=1 is a force-GL probe, not the default path",
+  "viewport": {
+    "innerWidth": 1280,
+    "innerHeight": 800,
+    "canvas_width": 1280,
+    "canvas_height": 799,
+    "devicePixelRatio": 0.9999999734530078,
+    "media_max_width_900px": false
+  },
+  "requested": "webgpu-or-webgl2",
+  "selected_backend": "webgl2",
+  "selected_backend_source": "window.__webizenNativeInit.selected_backend via portal_gpu_backend()",
+  "init": {
+    "schema": "webizen.native-graphics-init/v1",
+    "state": "ready",
+    "requested": "webgpu-or-webgl2",
+    "selected_backend": "webgl2",
+    "duration_ms": 12928.649999976158,
+    "canvas_width": 1280,
+    "canvas_height": 799
+  },
+  "wasm": {
+    "path": "C:/github/webizen-website/site/pkg/native-world/webizen_world_bg.wasm",
+    "served_url": "/pkg/native-world/webizen_world_bg.wasm",
+    "bytes": 21614966,
+    "sha256": "0086f172d33bbf726b437a4a7e66282eda370b5c6e8244ee79544c6f64dd72f8"
+  },
+  "identity": {
+    "etalon_pin": "143a1d7538ceae867ceab1dc7e43126bc688752f",
+    "qualiadb_head_compiled": "7296c131a410831a143165999b329ba74abd123e",
+    "qualiadb_tracked_dirty": [
+      " M crates/qualia-core-db/src/render/gpu/gpu_timing.rs",
+      " M crates/qualia-core-db/src/render/gpu/portal_gpu/constructors.rs",
+      " M crates/qualia-core-db/src/render/portal/capabilities.rs",
+      " M crates/qualia-core-db/src/render/portal/mod.rs"
+    ],
+    "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+    "hasNavigatorGpu": true,
+    "note": "navigator.gpu remained present. Force-GL is the URL probe, not an invented disable of navigator.gpu."
+  },
+  "scene": {
+    "data_scene": "/production/lush-woodland/scene.json",
+    "data_scene_mobile": "/production/lush-woodland/scene-mobile.json",
+    "loaded_weight": "scene-mobile.json because selected_backend is webgl2 (viewport still 1280x800, not a mobile CSS path)",
+    "world_renderer": "webgl2",
+    "frames": 1145,
+    "frames_presented_at_evaluate": 1145,
+    "assets_loaded": 76,
+    "assets_refused": 0,
+    "materials_loaded": 75,
+    "material_pipeline": true,
+    "organs_loaded": 76,
+    "total_triangles": 309098,
+    "vertex_count": 170178,
+    "uploaded": true,
+    "scene_success": true,
+    "presents": true,
+    "labeling_quirk": "world.scene.renderer and world.upload.renderer still string 'webgpu' on this GL boot. Honest adapter name is selected_backend/world.renderer = webgl2. Do not treat the upload label as the live backend."
+  },
+  "status_text": "Explore the world. Your chosen path changes the presentation, never your rights.",
+  "server": {
+    "reused_existing": true,
+    "pid": 55180,
+    "command": "python -u C:/github/webizen-website/tooling/world_server.py --port 8800",
+    "bind": "127.0.0.1:8800",
+    "left_running": true
+  },
+  "artifacts": {
+    "screenshot": "desktop-webgl2-force.png",
+    "screenshot_sha256": "b86111f26ac32f28822c18932f61f20187b188aa1cbc852619dc7d04a26b4e25",
+    "screenshot_scale": "css",
+    "console": "desktop-webgl2-force-console.txt",
+    "snapshot": "desktop-webgl2-force-snapshot.yml"
+  },
+  "console_summary": {
+    "errors": 0,
+    "warnings": 75,
+    "repeated_warning": "GL_INVALID_OPERATION: glTexSubImage2DRobustANGLE: The provided parameters overflow with the provided buffer."
+  },
+  "visual": "Boot succeeded and frames increment. Screenshot shows sky, a winding water band, and the native UI. Habitat meshes visible on the WebGPU receipt (wagon, camper, trees, solar) are not visible in this frame. Recorded as presents=true with incomplete habitat shading, not as a fabricated full-scene pass."
+}

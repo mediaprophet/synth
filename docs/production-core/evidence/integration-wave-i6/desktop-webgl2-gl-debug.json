@@ -1,0 +1,33 @@
+{
+  "schema": "webizen.gl-debug/v1",
+  "page": "http://127.0.0.1:8800/?webgl2=1&gl-debug=1",
+  "backend": "Gl / ANGLE NVIDIA RTX 5070 D3D11",
+  "finding": "BindEmulatedStorage texSubImage2D RGBA32UI 4097x1 into a 65536-byte PIXEL_UNPACK_BUFFER. Needed 4097*16=65552 bytes. Cause: (size+15).div_ceil(16) double-ceils a 16-aligned 65536-byte instance buffer to 4097 texels. CPU still submits 76 groups / 298 instances / 954078 triangles; mesh drawElementsInstanced runs; sky/water draw; habitat instances never land.",
+  "uploads": {
+    "texSubImage2d": 79,
+    "pboBound": 55,
+    "clientMemory": 24,
+    "integerRgba": 55
+  },
+  "unique_failed_upload": {
+    "width": 4097,
+    "height": 1,
+    "format": "RGBA_INTEGER",
+    "type": "UNSIGNED_INT",
+    "src": "pbo_offset",
+    "pboSize": 65536,
+    "unpackAlignment": 4,
+    "neededBytes": 65552
+  },
+  "draws": {
+    "drawArrays_sky3": true,
+    "drawElementsInstanced": true
+  },
+  "workload": {
+    "prototype_groups": 76,
+    "source_instances": 298,
+    "current_visible_instances": 189,
+    "current_submitted_triangles": 954078
+  },
+  "camera_target": [-22, 5.490921497344971, 28]
+}

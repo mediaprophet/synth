@@ -1,5 +1,29 @@
 # Grok production-core swarm board
 
+## Integration wave 0.0.41.3 (I-packets)
+
+Leases: `integration-wave-0413-leases.md`. Packets:
+`plan/integration-wave-0413-work-packets.md`. Prompts: `plan/i0413/`.
+
+I1 executed: portal wasm EXIT=0
+(`target-production-core-wasm/logs/cargo-check-qdb-portal-wasm-i1.log`).
+Rustc is free. P00 still the only accepted packet.
+
+| Agent | Packet | Write paths | Status |
+|---|---|---|---|
+| coordinator | I1 | QualiaDB/Etalon wasm rustflags + getrandom | executed EXIT=0 |
+| i2a-portal | I2A | QDB constructors/capabilities/portal getter | source-complete `01a1e734-177c-7480-b176-a38fe5e1dc5d` |
+| i3-simplify | I3 | HM `production_simplify.rs` | source-complete `01a1e734-177c-7480-b176-a3ae6d9df16d` |
+| i4e-warnings | I4E | Etalon acoustic_fdtd / worker_steward / gemv | source-complete `01a1e734-177c-7480-b176-a3ba542c005e` |
+| coordinator | I0 | etalon rev `c0bddc9650b9265d1a5578c251af1ab12896601a` | pushed on `origin/0.0.41.3`; QDB/HM pins follow |
+| i2b-site | I2B | website `graphics.rs` | source-complete `01a1e743-523f-7802-a7b8-42d410e2d225` |
+| i4q-timing | I4Q | QDB `gpu_timing.rs` | source-complete `01a1e743-5240-72b3-a5a2-f94ece14bc91` |
+| i5-retarget | I5 | website path-dep + WASM | complete; texel-fit wasm `33773443` 21625060 bytes |
+| i6-evidence | I6 | create-only receipts | executed WebGPU+force-GL; texel-fit habitat visible; Pixel not_executed |
+| i7-review | I7 | read-only | complete `01a1e781-b127-79a1-95f2-1effedfef43c`; wave not qualified |
+
+## P00–P23 (prior wave)
+
 Date: 16 November 2026. Coordinator: Grok 4.6.
 
 Integrated onto `C:\github` roots. Isolated worktrees remain at

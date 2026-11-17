@@ -1,0 +1,34 @@
+{
+  "schema": "webizen.integration-wave-i6.gpu-receipt/v1",
+  "packet": "I6",
+  "receipt_id": "desktop-chrome-webgpu-disabled",
+  "create_only": true,
+  "qualified": false,
+  "accepted_packet": "P00",
+  "execution_status": "not_executed",
+  "observed_at": "2026-11-17T03:14:00Z",
+  "isolation": "none",
+  "url": null,
+  "viewport": null,
+  "requested": "webgpu-or-webgl2",
+  "selected_backend": null,
+  "selected_backend_source": "window.__webizenNativeInit.selected_backend via portal_gpu_backend()",
+  "wasm": {
+    "path": "C:/github/webizen-website/site/pkg/native-world/webizen_world_bg.wasm",
+    "served_url": "/pkg/native-world/webizen_world_bg.wasm",
+    "bytes": 21614966,
+    "sha256": "0086f172d33bbf726b437a4a7e66282eda370b5c6e8244ee79544c6f64dd72f8"
+  },
+  "why_not_executed": [
+    "Packet I6 Playwright tools are browser_navigate, browser_evaluate, browser_take_screenshot, browser_console_messages, browser_resize, and browser_snapshot. None of them accept Chrome launch flags or a disable-WebGPU feature.",
+    "playwright__browser_tabs isolatedContext creates a fresh storage context. It does not take --disable-features=WebGPU, --disable-webgpu, or equivalent.",
+    "I5 handover already records that desktop Chrome headless previously kept navigator.gpu active despite --disable-features=WebGPU, so a flag-only desktop probe is not a substitute for Pixel 10 Pro XL Chrome.",
+    "Did not delete navigator.gpu in-page: selected_backend is portal_gpu_backend() after PortalGpu adopt, not a navigator.gpu heuristic. A post-load stub would not be an honest disable.",
+    "Did not relaunch the Playwright MCP browser with unsafe run-code. Packet forbids killing other browsers/MCP sessions."
+  ],
+  "not_invented": {
+    "selected_backend": null,
+    "state": null,
+    "note": "Absence is not_executed. Never recorded as 0.0 or as selected_backend webgpu."
+  }
+}

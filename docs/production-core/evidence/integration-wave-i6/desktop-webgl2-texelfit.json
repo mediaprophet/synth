@@ -1,0 +1,26 @@
+{
+  "schema": "webizen.gl-debug/v1",
+  "page": "http://127.0.0.1:8800/?webgl2=1&gl-debug=1&texelfit=1",
+  "wasm_sha256": "33773443AF31EC31B2D87605435CA99D138125A92FB49DF8FFD20AC138473AB1",
+  "wasm_bytes": 21625060,
+  "backend": "webgl2 / ANGLE NVIDIA RTX 5070 D3D11",
+  "overflow_gone": true,
+  "invalid_operation": 0,
+  "angle_overflow": 0,
+  "failed_uploads": 0,
+  "uploads": {
+    "texSubImage2d": 79,
+    "pboBound": 55,
+    "clientMemory": 24,
+    "integerRgba": 55
+  },
+  "last_emulated_storage": {
+    "size": 65536,
+    "texels": 4096,
+    "width": 4096,
+    "height": 1
+  },
+  "habitat_visible": true,
+  "screenshot": "desktop-webgl2-texelfit.png",
+  "notes": "BindEmulatedStorage now uploads 4096 RGBA32UI texels into the 65536-byte instance PBO. Console has zero GL_INVALID_OPERATION. Trees, camper, solar, benches and river are visible on force-GL. Wave still not marked qualified."
+}

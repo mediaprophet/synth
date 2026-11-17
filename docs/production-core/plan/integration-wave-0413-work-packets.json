@@ -1,0 +1,175 @@
+{
+  "version": "0.1",
+  "date": "2026-11-17",
+  "wave": "integration-wave-0413",
+  "status": "s1_source_complete",
+  "policy": "WebGPU preferred; WebGL2 required fallback; ?webgl2=1 is force-GL",
+  "constraints": {
+    "accepted_packets": ["P00"],
+    "isolation": "none",
+    "one_rustc": true,
+    "no_synth_target_rebuild": true,
+    "no_mcp_kill": true,
+    "no_commit": true,
+    "no_qualification": true,
+    "etalon_origin_0412_forbidden": "057545fc"
+  },
+  "heads": {
+    "qualiaDB": "7296c131a410831a143165999b329ba74abd123e",
+    "etalon": "143a1d7538ceae867ceab1dc7e43126bc688752f",
+    "webizen-website": "f6bccf109013f4de625804b95c9d77ca5f4844ad"
+  },
+  "concurrency": {
+    "s1_parallel": ["I2A", "I3", "I4E"],
+    "s2": ["I0", "I2B", "I4Q"],
+    "s3": ["I5"],
+    "s4": ["I6"],
+    "s5": ["I7"]
+  },
+  "packets": [
+    {
+      "id": "I1",
+      "title": "Portal wasm32 getrandom wasm_js cfg",
+      "spawnable": false,
+      "status": "executed",
+      "depends_on": [],
+      "cwd": "C:\\github\\qualiaDB",
+      "cargo": "coordinator_done",
+      "write_scope": "QualiaDB .cargo/config.toml, .cargo/production-core.toml, workspace getrandom; Etalon .cargo/config.toml wasm rustflags",
+      "evidence": "C:\\github\\qualiaDB\\target-production-core-wasm\\logs\\cargo-check-qdb-portal-wasm-i1.log",
+      "acceptance": ["EXIT=0", "getrandom 0.3.3 compiled", "RUSTFLAGS empty during the check"]
+    },
+    {
+      "id": "I0",
+      "title": "Bump git etalon pin to 0.0.41.3",
+      "spawnable": false,
+      "owner": "Coordinator",
+      "status": "ready",
+      "depends_on": ["I1"],
+      "cwd": "C:\\github\\qualiaDB",
+      "cargo": "coordinator",
+      "write_scope": "QualiaDB/Hypermedia/Synth Cargo.toml etalon rev + Cargo.lock",
+      "pin": "143a1d7538ceae867ceab1dc7e43126bc688752f",
+      "do_not_pin": "1cb112dd59de44330f981f6b2d3195ffa2e8514d",
+      "prompt_path": "plan/i0413/I0-pin-bump.md"
+    },
+    {
+      "id": "I2A",
+      "title": "WebGPU then GL retry; expose live backend",
+      "spawnable": true,
+      "status": "ready",
+      "depends_on": ["I1"],
+      "cwd": "C:\\github\\qualiaDB",
+      "cargo": "none",
+      "write_scope": [
+        "crates/qualia-core-db/src/render/gpu/portal_gpu/constructors.rs",
+        "crates/qualia-core-db/src/render/portal/capabilities.rs",
+        "crates/qualia-core-db/src/render/portal/mod.rs"
+      ],
+      "prompt_path": "plan/i0413/I2A-portal-fallback.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i2a/agent-report.md"
+    },
+    {
+      "id": "I2B",
+      "title": "Honest selected_backend from live adapter",
+      "spawnable": true,
+      "status": "ready",
+      "depends_on": ["I2A"],
+      "cwd": "C:\\github\\webizen-website",
+      "cargo": "none",
+      "write_scope": [
+        "native/world-host/src/runtime/graphics.rs",
+        "native/world-host/src/runtime/boot.rs"
+      ],
+      "prompt_path": "plan/i0413/I2B-website-backend.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i2b/agent-report.md"
+    },
+    {
+      "id": "I3",
+      "title": "Use AdmittedSimplify unread fields",
+      "spawnable": true,
+      "status": "ready",
+      "depends_on": [],
+      "cwd": "C:\\github\\hypermedia-production",
+      "cargo": "none",
+      "write_scope": [
+        "crates/asset-production-vibe/src/production_simplify.rs"
+      ],
+      "prompt_path": "plan/i0413/I3-admitted-simplify.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i3/agent-report.md"
+    },
+    {
+      "id": "I4E",
+      "title": "Clear Etalon GPU-check warnings",
+      "spawnable": true,
+      "status": "ready",
+      "depends_on": [],
+      "cwd": "C:\\github\\etalon",
+      "cargo": "none",
+      "write_scope": [
+        "crates/etalon-wgsl-forge/src/numerical/physics/acoustic_fdtd.rs",
+        "crates/etalon-wasm/src/worker_steward.rs",
+        "crates/etalon-inference/src/gpu_resources/gemv.rs"
+      ],
+      "prompt_path": "plan/i0413/I4E-etalon-warnings.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i4e/agent-report.md"
+    },
+    {
+      "id": "I4Q",
+      "title": "Native unused set_adapter_info",
+      "spawnable": true,
+      "status": "ready",
+      "depends_on": ["I2A"],
+      "cwd": "C:\\github\\qualiaDB",
+      "cargo": "none",
+      "write_scope": [
+        "crates/qualia-core-db/src/render/gpu/gpu_timing.rs"
+      ],
+      "prompt_path": "plan/i0413/I4Q-gpu-timing.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i4q/agent-report.md"
+    },
+    {
+      "id": "I5",
+      "title": "Retarget website to github QualiaDB; rebuild WASM",
+      "spawnable": true,
+      "status": "blocked",
+      "depends_on": ["I0", "I2A", "I2B"],
+      "cwd": "C:\\github\\webizen-website",
+      "cargo": "this_packet",
+      "write_scope": [
+        "native/world-host/Cargo.toml",
+        "tooling/native-host/receipt.py",
+        "plans/WEBGL2-MOBILE-HANDOVER.md",
+        "site/pkg/native-world/"
+      ],
+      "prompt_path": "plan/i0413/I5-website-retarget.md",
+      "evidence": "synth/docs/production-core/evidence/integration-wave-i5/agent-report.md"
+    },
+    {
+      "id": "I6",
+      "title": "Create-only WebGPU and WebGL2 receipts",
+      "spawnable": true,
+      "status": "blocked",
+      "depends_on": ["I5"],
+      "cwd": "C:\\github\\webizen-website",
+      "cargo": "none",
+      "write_scope": [
+        "synth/docs/production-core/evidence/integration-wave-i6/"
+      ],
+      "prompt_path": "plan/i0413/I6-evidence.md"
+    },
+    {
+      "id": "I7",
+      "title": "Independent review of I1-I6",
+      "spawnable": true,
+      "status": "blocked",
+      "depends_on": ["I6"],
+      "cwd": "C:\\github\\synth",
+      "cargo": "none",
+      "write_scope": [
+        "synth/docs/production-core/evidence/integration-wave-i7/review.md"
+      ],
+      "prompt_path": "plan/i0413/I7-review.md"
+    }
+  ]
+}
