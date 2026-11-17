@@ -128,6 +128,11 @@ fn production16_profile_is_explicit_bounded_and_invalid_profiles_refuse() {
     assert_eq!(resources.len(),1);
     assert_eq!(resources[0]["key"],"note.txt");
     assert_eq!(resources[0]["bytes"],7);
+    let authoring=backend.call("synth_produce_present",json!({"source":source,"quality_profile":"authoring"})).unwrap();
+    assert_eq!(authoring["receipt"]["limits"]["total_resource_bytes"],256*1024*1024);
+    let defaulted=backend.call("synth_produce_present",json!({"source":source})).unwrap();
+    assert_eq!(defaulted["receipt"]["limits"]["total_resource_bytes"],256*1024*1024);
+    assert_eq!(defaulted["receipt"]["quality_profile"],"production16");
     assert_eq!(backend.call("synth_produce_present",json!({"source":source,"quality_profile":"unlimited"})).unwrap_err().code,"invalid_arguments");
 }
 

@@ -26,7 +26,7 @@ $synth = "C:\github\synth\target-prod\debug\synth.exe"
 $stamp = "$(Get-Date -Format 'yyyyMMdd-HHmmss-ffffff')-$PID-$([guid]::NewGuid().ToString('N').Substring(0,8))"
 $run = "C:\github\synth\target-prod\runs\$stamp"
 New-Item -ItemType Directory -Force -Path (Split-Path $run) | Out-Null
-& $synth produce --profile files --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
+& $synth produce --profile files --quality-profile production16 --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
 Get-ChildItem $run -Filter *.10d | ForEach-Object {
   & $synth preview --asset $_.FullName --out "$run-preview-$($_.BaseName)"
 }

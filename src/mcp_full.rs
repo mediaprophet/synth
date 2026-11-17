@@ -303,7 +303,7 @@ impl StandaloneSynthMcp {
                         },
                         "source_path": {"type":"string", "maxLength":4096, "description":"UTF-8 source file under SYNTH_INPUT_ROOT; provide exactly one of source and source_path."},
                         "profile": {"type": "string", "maxLength": 64},
-                        "quality_profile": {"type":"string","enum":["preview","production16"],"description":"preview uses 16/64/80 MiB resource/aggregate/package budgets; production16 explicitly admits 64/256/320 MiB for true 2k RGBA16. Image work budget is 500 million logical units; mesh size caps are unchanged."},
+                        "quality_profile": {"type":"string","enum":["preview","production16","authoring"],"description":"Default production16/authoring admits 64/256/320 MiB so raw CAD (boolean unions) can stay complicated. preview is the conservative 16/64/80 MiB leftover. Mesh size caps stay 200k/400k. Runtime cost uses hypermedia.manifold.simplify mode=optimize; that does not replace or degrade the source solid."},
                         "inputs": {"type": "array", "maxItems": ProductionLimits::default().resources,
                             "items": {"type": "object", "additionalProperties": false,
                                 "required": ["key", "kind", "path"], "properties": {

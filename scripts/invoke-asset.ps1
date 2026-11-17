@@ -4,7 +4,7 @@ param(
     [ValidateSet('none','mesh','rgba','rgb','audio','profile')][string]$Encode = 'none',
     [string]$Key = 'result.10d', [string]$InputManifest, [string]$Name = 'asset',
     [string]$Synth = $env:SYNTH_BIN, [string]$RunsDir, [switch]$Preview,
-    [ValidateSet('preview','production16')][string]$QualityProfile = 'preview'
+    [ValidateSet('preview','production16','authoring')][string]$QualityProfile = 'production16'
 )
 $ErrorActionPreference = 'Stop'
 function ConvertTo-VibeLiteral {

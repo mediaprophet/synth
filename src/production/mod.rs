@@ -92,17 +92,23 @@ impl ProductionLimits {
     }
 
     /// Explicit bounded native profiles shared by CLI and MCP admission.
+    ///
+    /// `production16` / `authoring` is the CAD envelope: leftover aggregate
+    /// admits conforming boolean scratch (~90 MiB class) so raw solids can stay
+    /// unioned and dense. `preview` stays the conservative 64 MiB leftover.
+    /// Runtime tessellation cost is `hypermedia.manifold.simplify` `mode=optimize`,
+    /// which must not replace or open the source solid.
     pub fn for_quality_profile(profile: &str) -> Result<Self, String> {
         let mut limits = Self::default();
         match profile {
             "preview" => {},
-            "production16" => {
+            "production16" | "authoring" => {
                 limits.resource_bytes = 64 * 1024 * 1024;
                 limits.total_resource_bytes = 256 * 1024 * 1024;
                 limits.package_bytes = 320 * 1024 * 1024;
                 limits.asset_work_units = 500_000_000;
             },
-            _ => return Err("quality profile must be preview or production16".into()),
+            _ => return Err("quality profile must be preview, production16, or authoring".into()),
         }
         Ok(limits)
     }

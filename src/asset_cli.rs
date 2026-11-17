@@ -7,7 +7,7 @@ use std::{
 };
 use crate::production::{Candidate, ProducerRegistry, ProductionLimits, ProductionSession, Resource};
 
-const USAGE: &str = "synth produce [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] [--quality-profile preview|production16] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
+const USAGE: &str = "synth produce [--profile files] [--quality-profile preview|production16|authoring] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] [--resource-mib N] [--total-mib N] [--package-mib N] --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth produce --reopen SAVED.hmc --out NEW.hmc [--export-dir NEW_DIR] [--present NEW.html]\nsynth present [--profile files] [--quality-profile preview|production16|authoring] --source FILE.vibe [--source EDIT.vibe ...] [--input KEY KIND FILE ...] --out NEW.html\nsynth present --reopen SAVED.hmc --out NEW.html";
 
 enum CommandMode {
     Produce,
@@ -112,7 +112,7 @@ fn parse(args: &[String]) -> Result<Options, String> {
     Ok(Options {
         mode,
         profile,
-        quality_profile: quality_profile.unwrap_or_else(|| "preview".into()),
+        quality_profile: quality_profile.unwrap_or_else(|| "production16".into()),
         sources,
         inputs,
         reopen,
@@ -332,12 +332,16 @@ mod quality_profile_tests {
     use super::*;
     #[test]
     fn help_and_parser_expose_the_shared_bounded_quality_profiles() {
-        assert!(USAGE.contains("--quality-profile preview|production16"));
+        assert!(USAGE.contains("--quality-profile preview|production16|authoring"));
         let options = parse(&["produce","--source","fixture.vibe","--out","fixture.hmc","--quality-profile","production16"].map(String::from)).unwrap();
         assert_eq!(options.quality_profile,"production16");
         let limits = ProductionLimits::for_quality_profile(&options.quality_profile).unwrap();
         assert_eq!(limits.resource_bytes,64*1024*1024);
         assert_eq!(limits.asset_work_units,500_000_000);
+        let authoring = ProductionLimits::for_quality_profile("authoring").unwrap();
+        assert_eq!(authoring.total_resource_bytes, limits.total_resource_bytes);
+        let defaulted = parse(&["produce","--source","fixture.vibe","--out","fixture.hmc"].map(String::from)).unwrap();
+        assert_eq!(defaulted.quality_profile,"production16");
         assert!(ProductionLimits::for_quality_profile("unbounded").is_err());
     }
 }

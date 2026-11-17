@@ -117,7 +117,7 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
         evidence_q42: parsed.evidence_q42.clone(),
     })
     .map_err(|e| ToolError::new("production_rule_blocked", e))?;
-    let limits = ProductionLimits::for_quality_profile(parsed.quality_profile.as_deref().unwrap_or("preview"))
+    let limits = ProductionLimits::for_quality_profile(parsed.quality_profile.as_deref().unwrap_or("production16"))
         .map_err(|error| ToolError::new("invalid_arguments",error))?;
     if parsed.inputs.len() > limits.resources || parsed.preview_assets.len() > 8 {
         return Err(ToolError::new("invalid_arguments", "Input or preview count exceeds budget"));
@@ -227,7 +227,7 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
         "catalog": {"count": crate::production::assets::OPERATIONS.len(), "sha256": digest(&serde_json::to_vec(&crate::production::assets::catalogue()).unwrap())},
         "source_sha256": digest(source.as_bytes()), "inputs": input_records,
         "hmc": {"sha256": candidate.sha256(), "bytes": candidate.bundle().len(), "path": review_hmc},
-        "quality_profile": parsed.quality_profile.as_deref().unwrap_or("preview"),
+        "quality_profile": parsed.quality_profile.as_deref().unwrap_or("production16"),
         "limits": {"resource_bytes":limits.resource_bytes,"total_resource_bytes":limits.total_resource_bytes,"package_bytes":limits.package_bytes,"asset_work_units":limits.asset_work_units,
             "source_bytes":source.len(),"source_available_bytes":admitted.source.submission_bytes,
             "source_reservation_bytes":limits.total_resource_bytes - effective.total_resource_bytes,

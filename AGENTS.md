@@ -67,7 +67,7 @@ CLI (this machine). Do not kill live MCP. Do not rebuild into `C:\github\synth\t
 $synth = "C:\github\synth\target-prod\debug\synth.exe"
 $stamp = "$(Get-Date -Format 'yyyyMMdd-HHmmss-ffffff')-$PID-$([guid]::NewGuid().ToString('N').Substring(0,8))"
 $run = "C:\github\synth\target-prod\runs\$stamp"
-& $synth produce --profile files --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
+& $synth produce --profile files --quality-profile production16 --source <FILE.vibe> --out "$run.hmc" --export-dir $run --present "$run.html"
 C:\github\synth\scripts\produce-preview.ps1 -Source <FILE.vibe> -Name revolve-demo
 ```
 
@@ -93,7 +93,7 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | Knife / bisect | `hypermedia.manifold.bisect_plane` |
 | Clay sculpt / displace | `hypermedia.manifold.evaluate_field` (`expression=clay`, `clay_mode=add\|subtract\|smooth\|pinch`, `brush_center`, `radius`, `strength`, `falloff`) |
 | Catmull–Clark | `hypermedia.manifold.subdivide_catmull_clark` |
-| Decimate / remesh | `hypermedia.manifold.simplify` (`mode=decimate\|remesh\|anisotropic`) |
+| Decimate / remesh / optimise | `hypermedia.manifold.simplify` (`mode=decimate\|remesh\|anisotropic\|semantic\|optimize`) |
 | Import OBJ/STL/GLB | `hypermedia.manifold.import_mesh` |
 | Export DXF | `hypermedia.manifold.project_dxf` |
 | Sweep along spine | `hypermedia.manifold.sweep_assembly_profile` |
@@ -163,9 +163,10 @@ RGBA and sonics are **conversions of the same cells**:
 
 - `evaluate_field` clay brush: `expression=clay` with `clay_mode=add|subtract|smooth|pinch` (add/subtract/smooth along normals; pinch lerps toward `brush_center`). Other expressions remain `radial_wave|height_gradient|curvature_proxy|normal_displace`.
 - `simplify` `mode=anisotropic` uses a per-vertex isotropic(local mean edge) background metric by default; optional `target_edge` or SPD `metric:[m00,m10,m11,m20,m21,m22]` (indefinite metric fail-closes)
-- `boolean_3d` ~50k verts / 100k tris
+- `simplify` `mode=optimize` (alias `optimisation`) reduces tessellation for runtime cost: QualiaDB `simplify_coplanar_regions`, `isotropic_remesh`, then `decimate_semantic_qem_3`. With `domains`/`locks` it tries admitted collapse first. `mode=semantic` / `admitted` stay fail-closed. The source mesh handle stays in the workspace; pack raw and optimised `.10d` as siblings. This is not model degradation.
+- `boolean_3d` 200k verts / 400k tris. Conforming union scratch is ~90 MiB class; produce default `quality_profile=production16` (`authoring`) admits 256 MiB aggregate so raw CAD can stay unioned. `preview` leftover (~64 MiB) cannot.
 - loft 2..=256 sections, identical point counts; `interpolation=linear\|cubic\|nurbs`
-- revolve ≤256 segments; optional `interpolation=nurbs`
+- revolve ≤256 segments; optional `interpolation=nurbs`; optional `caps=true` for a closed solid (boolean_3d)
 - `subdivide_catmull_clark` levels 1..=3, abort above 200k tris
 - `synthesize_maps` max 1024²; typical radiance 1024²; envelopes ~16 MB
 - geodesy sculpt is 2.5D heightfield
@@ -274,12 +275,12 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | ID | Args |
 |---|---|
 | `hypermedia.manifold.extrude` | `profile`, `path:[[x,y,z],...]`, `caps` |
-| `hypermedia.manifold.revolve` | `points:[[radius,height],...]`, `segments`, optional `interpolation=linear\|nurbs` |
+| `hypermedia.manifold.revolve` | `points:[[radius,height],...]`, `segments`, optional `interpolation=linear\|nurbs`, optional `caps` |
 | `hypermedia.manifold.loft` | `a`,`b` or `sections:[[ring],...]`, `interpolation=linear\|cubic\|nurbs`, `samples`, `caps` |
 | `hypermedia.manifold.compile_10d` | `mesh` |
 | `hypermedia.manifold.compile_10d_pbr` | `mesh`, optional `albedo`, `source_10d`, `topology`, `spatial_index`, `camera_*` |
 | `hypermedia.manifold.boolean_3d` | `a`, `b`, `op=union\|intersection\|difference` |
-| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error`, `mode=decimate\|remesh\|anisotropic`, optional `target_edge` or `metric:[6]` |
+| `hypermedia.manifold.simplify` | `mesh`, `target_triangles`, `max_error`, `mode=decimate\|remesh\|anisotropic\|semantic\|optimize`, optional `target_edge` or `metric:[6]` |
 | `hypermedia.manifold.import_mesh` | `input` retained key, `format=obj\|stl\|glb` |
 | `hypermedia.manifold.project_dxf` | `profile` and/or `mesh`, `layer` |
 | `hypermedia.manifold.radial_euler` | `mesh`, Radial-Edge ops SEMV/SFME/JEKV/JVKE/JFKE |
