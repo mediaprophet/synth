@@ -1,0 +1,28 @@
+{
+  "schema": "ecopunk.production-rules/v1",
+  "encyclopedia": "ecopunk",
+  "rules": [
+    {
+      "id": "biosphere-evidence-before-model",
+      "title": "Gather evidence before modelling a living taxon",
+      "when": {
+        "domain": "biosphere",
+        "fiction": false
+      },
+      "applies_to_actions": ["model", "produce", "compile_botanical_organ_10d", "fspm_vascular_grow", "assemble_corpus"],
+      "allowed_without_evidence": ["compile_q42", "query_sparql", "query_graph", "ingest_ontology", "parse_rdf", "list_ontologies"],
+      "require": [
+        "Consult ecopunk/docs/planning/data-sources/ before modelling.",
+        "Fetch or bind the taxon’s authority sources (ALA, NSL, GBIF, traits, ecology).",
+        "Seal sourced Turtle/N3 to a .q42 with synth_compile_q42.",
+        "Query the vault (query_sparql vault_path) so the corpus is inspectable.",
+        "Only then invoke botanical/FSPM/assemble morphisms inside synth_produce_present."
+      ],
+      "evidence": {
+        "q42": true,
+        "taxon_path": "ecopunk/entities/taxa/{taxon}/"
+      },
+      "block_code": "production_rule_blocked"
+    }
+  ]
+}

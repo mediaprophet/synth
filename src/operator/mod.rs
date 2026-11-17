@@ -12,7 +12,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-const EMBEDDED_RULES: &str = include_str!("../../../ecopunk/docs/production-rules.json");
+const EMBEDDED_RULES: &str = include_str!("production-rules.json");
 const MAX_EVENT_BYTES: u64 = 256 * 1024;
 const MAX_EVENTS: usize = 120;
 
