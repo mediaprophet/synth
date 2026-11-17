@@ -60,6 +60,7 @@ pub fn launch_with_cancellation(
     host.try_lock()
         .map_err(|_| "Synth host is busy")?
         .inspect()?;
+    crate::operator::branding::claim_toolkit_identity();
     let environment = bootstrap_environment()?;
     let portal_url =
         spawn_background_server(None).unwrap_or_else(|_| "http://127.0.0.1:8787".to_owned());
@@ -88,6 +89,7 @@ pub fn launch_with_cancellation(
 pub fn launch_standalone_environment(
     cancellation: Option<Arc<AtomicBool>>,
 ) -> Result<(), String> {
+    crate::operator::branding::claim_toolkit_identity();
     let environment = bootstrap_environment()?;
     let portal_url =
         spawn_background_server(None).unwrap_or_else(|_| "http://127.0.0.1:8787".to_owned());

@@ -1,11 +1,42 @@
 //! Compiled Webizen AI Synth marks used by the operator page, tray, and installers.
+//!
+//! Aether (Dioxus fork) reads `AETHER_APP_TITLE` / `AETHER_PRODUCT_NAME` for the
+//! desktop window when the app has not passed a `WindowBuilder`. Claim those
+//! before `Config::new()` so the toolkit never falls back to "Aether App".
 pub const APP_DISPLAY_NAME: &str = "Webizen AI Synth";
+pub const APP_BUNDLE_ID: &str = "au.webizen.synth";
+pub const APP_PUBLISHER: &str = "Webizen AI";
 pub const ICON_PNG: &[u8] = include_bytes!("../../assets/branding/icon-256.png");
 pub const ICON_64_PNG: &[u8] = include_bytes!("../../assets/branding/icon-64.png");
 pub const ICON_32_PNG: &[u8] = include_bytes!("../../assets/branding/icon-32.png");
 pub const ICON_ICO: &[u8] = include_bytes!("../../assets/branding/icon.ico");
 pub const EMBLEM_SVG: &[u8] = include_bytes!("../../assets/branding/emblem.svg");
 pub const BANNER_PNG: &[u8] = include_bytes!("../../assets/branding/banner.png");
+
+/// Tell the Aether toolkit which application it is hosting.
+pub fn claim_toolkit_identity() {
+    std::env::set_var("AETHER_APP_TITLE", APP_DISPLAY_NAME);
+    std::env::set_var("AETHER_PRODUCT_NAME", APP_DISPLAY_NAME);
+}
+
+/// WebView2 / WebKit profile directory for this app, not next to `synth.exe`.
+pub fn webview_data_dir() -> Option<std::path::PathBuf> {
+    let base = if cfg!(windows) {
+        std::env::var_os("LOCALAPPDATA").map(std::path::PathBuf::from)
+    } else if cfg!(target_os = "macos") {
+        std::env::var_os("HOME").map(|home| {
+            std::path::PathBuf::from(home).join("Library").join("Application Support")
+        })
+    } else {
+        std::env::var_os("XDG_DATA_HOME")
+            .map(std::path::PathBuf::from)
+            .or_else(|| {
+                std::env::var_os("HOME")
+                    .map(|home| std::path::PathBuf::from(home).join(".local").join("share"))
+            })
+    }?;
+    Some(base.join(APP_DISPLAY_NAME))
+}
 
 pub fn asset(name: &str) -> Option<(&'static str, &'static [u8])> {
     match name {

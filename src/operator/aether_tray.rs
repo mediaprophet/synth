@@ -1,39 +1,84 @@
-//! Webizen AI Synth operator window + OS tray icon and menu.
-//! Uses the Aether desktop toolkit. `tray-icon` is Windows, macOS, and Linux.
+//! Webizen AI Synth as an Aether desktop application.
+//!
+//! Aether is a Dioxus-fork toolkit: `LaunchBuilder`, `Config`, window, native
+//! menu, tray, and `app().shutdown()`. This module is the app that fills those
+//! in. Toolkit placeholders ("Aether App", fallback 460×460 icon, demo Quit
+//! tray) stay unused.
 use super::{branding, snapshot};
 use crate::web_server::open_in_system_browser;
 use aether::desktop::{
     icon_from_memory,
+    muda::{Menu as NativeMenu, MenuItem as NativeMenuItem, PredefinedMenuItem, Submenu},
     trayicon::{
-        menu::{Menu, MenuItem, PredefinedMenuItem},
+        menu::{Menu as TrayMenu, MenuItem as TrayMenuItem, PredefinedMenuItem as TraySeparator},
         init_tray_icon, AetherTrayIcon,
     },
-    use_tray_menu_event_handler, window, Config, WindowBuilder, WindowCloseBehaviour,
+    use_muda_event_handler, use_tray_menu_event_handler, window, Config, LogicalSize,
+    WindowBuilder, WindowCloseBehaviour,
 };
 use aether::prelude::*;
 
-#[derive(Clone)]
-struct TrayMenuIds {
-    show: String,
-    operator: String,
-    studio: String,
-    exit: String,
-}
+const ID_SHOW: &str = "synth-show";
+const ID_OPERATOR: &str = "synth-open-operator";
+const ID_STUDIO: &str = "synth-open-studio";
+const ID_HIDE: &str = "synth-hide-tray";
+const ID_EXIT: &str = "synth-exit";
 
 pub fn launch(studio_url: String) {
+    branding::claim_toolkit_identity();
     let operator_url = format!("{studio_url}/operator");
     std::env::set_var("SYNTH_OPERATOR_STUDIO_URL", &studio_url);
     std::env::set_var("SYNTH_OPERATOR_URL", &operator_url);
+    aether::LaunchBuilder::desktop()
+        .with_cfg(app_config())
+        .launch(operator_root);
+}
+
+fn app_config() -> Config {
+    let window = WindowBuilder::new()
+        .with_title(branding::APP_DISPLAY_NAME)
+        .with_inner_size(LogicalSize::new(760.0, 640.0));
     let mut cfg = Config::new()
-        .with_window(WindowBuilder::new().with_title(branding::APP_DISPLAY_NAME))
+        .with_window(window)
+        .with_menu(app_menu_bar())
+        .with_close_behaviour(WindowCloseBehaviour::WindowHides)
         .with_exits_when_last_window_closes(false)
-        .with_tray_icon_show_window_on_click(true);
+        .with_tray_icon_show_window_on_click(true)
+        .with_background_color((11, 20, 18, 255));
+    if let Some(dir) = branding::webview_data_dir() {
+        cfg = cfg.with_data_directory(dir);
+    }
     if let Ok(icon) = icon_from_memory::<aether::desktop::tao::window::Icon>(branding::ICON_PNG) {
         cfg = cfg.with_icon(icon);
     }
-    aether::LaunchBuilder::desktop()
-        .with_cfg(cfg)
-        .launch(operator_root);
+    cfg
+}
+
+fn app_menu_bar() -> NativeMenu {
+    let menu = NativeMenu::new();
+    let app_menu = Submenu::new(branding::APP_DISPLAY_NAME, true);
+    let _ = app_menu.append_items(&[
+        &NativeMenuItem::with_id(ID_SHOW, "Show window", true, None),
+        &NativeMenuItem::with_id(ID_OPERATOR, "Open operator page", true, None),
+        &NativeMenuItem::with_id(ID_STUDIO, "Open studio", true, None),
+        &PredefinedMenuItem::separator(),
+        &NativeMenuItem::with_id(ID_HIDE, "Hide to tray", true, None),
+        &PredefinedMenuItem::separator(),
+        &NativeMenuItem::with_id(ID_EXIT, "Exit", true, None),
+    ]);
+    let edit = Submenu::new("Edit", true);
+    let _ = edit.append_items(&[
+        &PredefinedMenuItem::undo(None),
+        &PredefinedMenuItem::redo(None),
+        &PredefinedMenuItem::separator(),
+        &PredefinedMenuItem::cut(None),
+        &PredefinedMenuItem::copy(None),
+        &PredefinedMenuItem::paste(None),
+        &PredefinedMenuItem::separator(),
+        &PredefinedMenuItem::select_all(None),
+    ]);
+    let _ = menu.append_items(&[&app_menu, &edit]);
+    menu
 }
 
 fn studio_url() -> String {
@@ -44,6 +89,8 @@ fn operator_url() -> String {
     std::env::var("SYNTH_OPERATOR_URL").unwrap_or_else(|_| "http://127.0.0.1:8787/operator".into())
 }
 
+/// End the Aether event loop. Synth's HTTP worker is a non-daemon thread, so
+/// follow shutdown with process exit.
 fn exit_operator() {
     aether::desktop::app().shutdown();
     std::thread::spawn(|| {
@@ -52,10 +99,49 @@ fn exit_operator() {
     });
 }
 
+fn show_window() {
+    window().window.set_visible(true);
+    window().window.set_focus();
+}
+
+fn hide_window() {
+    window().window.set_visible(false);
+}
+
+fn dispatch_app_command(id: &str) {
+    match id {
+        ID_SHOW => show_window(),
+        ID_OPERATOR => {
+            show_window();
+            open_in_system_browser(&operator_url());
+        }
+        ID_STUDIO => open_in_system_browser(&studio_url()),
+        ID_HIDE => hide_window(),
+        ID_EXIT => exit_operator(),
+        _ => {}
+    }
+}
+
 fn tray_icon() -> Option<AetherTrayIcon> {
     icon_from_memory::<AetherTrayIcon>(branding::ICON_32_PNG)
         .or_else(|_| icon_from_memory::<AetherTrayIcon>(branding::ICON_64_PNG))
         .ok()
+}
+
+fn tray_menu() -> TrayMenu {
+    let show = TrayMenuItem::with_id(ID_SHOW, "Show Webizen AI Synth", true, None);
+    let operator = TrayMenuItem::with_id(ID_OPERATOR, "Open operator page", true, None);
+    let studio = TrayMenuItem::with_id(ID_STUDIO, "Open studio", true, None);
+    let exit = TrayMenuItem::with_id(ID_EXIT, "Exit", true, None);
+    let menu = TrayMenu::new();
+    let _ = menu.append_items(&[
+        &show,
+        &operator,
+        &studio,
+        &TraySeparator::separator(),
+        &exit,
+    ]);
+    menu
 }
 
 fn operator_root() -> Element {
@@ -67,52 +153,18 @@ fn operator_root() -> Element {
             operator_url()
         )
     });
-    let ids = use_hook(|| {
-        window().set_close_behavior(WindowCloseBehaviour::WindowHides);
-        window().set_title(branding::APP_DISPLAY_NAME);
-        let show = MenuItem::new("Show Webizen AI Synth", true, None);
-        let operator = MenuItem::new("Open operator page", true, None);
-        let studio = MenuItem::new("Open studio", true, None);
-        let exit = MenuItem::new("Exit", true, None);
-        let ids = TrayMenuIds {
-            show: show.id().as_ref().to_string(),
-            operator: operator.id().as_ref().to_string(),
-            studio: studio.id().as_ref().to_string(),
-            exit: exit.id().as_ref().to_string(),
-        };
-        let menu = Menu::new();
-        let _ = menu.append_items(&[
-            &show,
-            &operator,
-            &studio,
-            &PredefinedMenuItem::separator(),
-            &exit,
-        ]);
-        let tray = init_tray_icon(menu, tray_icon());
+    use_hook(|| {
+        let tray = init_tray_icon(tray_menu(), tray_icon());
         let _ = tray.set_tooltip(Some(branding::APP_DISPLAY_NAME));
-        ids
+    });
+    use_tray_menu_event_handler(move |event| {
+        dispatch_app_command(event.id.as_ref());
+    });
+    use_muda_event_handler(move |event| {
+        dispatch_app_command(event.id().as_ref());
     });
     let studio = studio_url();
     let operator = operator_url();
-    {
-        let studio = studio.clone();
-        let operator = operator.clone();
-        let ids = ids.clone();
-        use_tray_menu_event_handler(move |event| {
-            let id = event.id.as_ref();
-            if id == ids.show {
-                window().window.set_visible(true);
-                window().window.set_focus();
-            } else if id == ids.operator {
-                window().window.set_visible(true);
-                open_in_system_browser(&operator);
-            } else if id == ids.studio {
-                open_in_system_browser(&studio);
-            } else if id == ids.exit {
-                exit_operator();
-            }
-        });
-    }
     let emblem = branding::emblem_data_uri();
     let banner = branding::banner_data_uri();
     rsx! {
@@ -126,7 +178,7 @@ fn operator_root() -> Element {
                 }
                 img { src: "{banner}", style: "width:280px; height:98px; border-radius:10px; border:1px solid #1e3330;", alt: "Webizen AI Synth banner" }
             }
-            p { style: "color:#8fb5a7;", "Close hides to the tray (look for the emerald Webizen mark). Right-click the tray icon for Show / Operator / Studio / Exit. Left-click restores this window." }
+            p { style: "color:#8fb5a7;", "Close hides to the tray (look for the emerald Webizen mark). The Webizen AI Synth menu and the tray menu both Exit. Left-click the tray icon restores this window." }
             p { style: "color:#fbbf24;", "{message}" }
             div { style: "display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;",
                 button {
@@ -145,7 +197,7 @@ fn operator_root() -> Element {
                 }
                 button {
                     onclick: move |_| {
-                        window().window.set_visible(false);
+                        hide_window();
                         message.set("Hidden to the system tray. Right-click the tray icon to Exit.".into());
                     },
                     "Hide to tray"

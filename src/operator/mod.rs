@@ -1,7 +1,7 @@
 //! Operator shell: production rules, git-tag update check, activity log, browser page.
 //!
-//! The Webizen AI Synth system tray (Windows, macOS, Linux) lives behind `native-ui`
-//! and is built with the Aether desktop toolkit.
+//! The Webizen AI Synth system tray (Windows, macOS, Linux) lives behind `native-ui`.
+//! Aether (Dioxus fork) is the desktop toolkit; `aether_tray` defines this app.
 //! HTTP `/operator` and MCP tools work on every native Synth build.
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -507,10 +507,21 @@ mod tests {
     #[test]
     fn branding_assets_are_nonempty() {
         assert_eq!(branding::APP_DISPLAY_NAME, "Webizen AI Synth");
+        assert_eq!(branding::APP_BUNDLE_ID, "au.webizen.synth");
         assert!(!branding::ICON_32_PNG.is_empty());
         assert!(!branding::ICON_PNG.is_empty());
         assert!(!branding::EMBLEM_SVG.is_empty());
         assert!(branding::asset("icon-32.png").is_some());
+    }
+
+    #[test]
+    fn toolkit_identity_names_the_app() {
+        branding::claim_toolkit_identity();
+        assert_eq!(std::env::var("AETHER_APP_TITLE").unwrap(), "Webizen AI Synth");
+        assert_eq!(
+            std::env::var("AETHER_PRODUCT_NAME").unwrap(),
+            "Webizen AI Synth"
+        );
     }
 
     #[test]

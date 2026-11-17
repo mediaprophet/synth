@@ -1,0 +1,26 @@
+# Webizen AI Synth — application definition for the Aether (Dioxus-fork) toolkit.
+# Aether is the GUI toolkit. This file names the app it hosts.
+
+[application]
+name = "Webizen AI Synth"
+asset_dir = "assets/branding"
+out_dir = "dist"
+
+[web.app]
+title = "Webizen AI Synth"
+
+[bundle]
+identifier = "au.webizen.synth"
+publisher = "Webizen AI"
+icon = [
+  "assets/branding/icon-32.png",
+  "assets/branding/icon-64.png",
+  "assets/branding/icon-128.png",
+  "assets/branding/icon-256.png",
+]
+category = "DeveloperTool"
+short_description = "Webizen AI Synth operator and asset studio"
+long_description = """
+Webizen AI Synth is the VibeScript asset-production application.
+Aether is the desktop toolkit it is built with.
+"""
