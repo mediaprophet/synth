@@ -39,15 +39,24 @@ case "$OS" in
       done
     fi
     test -n "$MAKENSIS"
+    # NSIS Icon/MUI bitmaps resolve relative to the .nsi file, not cwd.
+    # Pass Windows absolute paths so Git Bash cwd cannot confuse it.
+    winpath() {
+      if command -v cygpath >/dev/null 2>&1; then
+        cygpath -w "$1"
+      else
+        printf '%s\n' "$1"
+      fi
+    }
     "$MAKENSIS" \
       -DSYNTH_VERSION="$VERSION" \
       -DSYNTH_VI_VERSION="$vi_version" \
-      -DSYNTH_BIN="dist\\$ARTIFACT" \
-      -DSYNTH_OUT="dist\\$installer" \
-      -DSYNTH_ICON="assets\\branding\\icon.ico" \
-      -DSYNTH_SIDEBAR="assets\\branding\\installer-sidebar.bmp" \
-      -DSYNTH_HEADER="assets\\branding\\installer-header.bmp" \
-      "packaging\\windows\\synth.nsi" >&2
+      -DSYNTH_BIN="$(winpath "$DIST/$ARTIFACT")" \
+      -DSYNTH_OUT="$(winpath "$DIST/$installer")" \
+      -DSYNTH_ICON="$(winpath "$ICON")" \
+      -DSYNTH_SIDEBAR="$(winpath "$ROOT/assets/branding/installer-sidebar.bmp")" \
+      -DSYNTH_HEADER="$(winpath "$ROOT/assets/branding/installer-header.bmp")" \
+      "$(winpath "$ROOT/packaging/windows/synth.nsi")" >&2
     echo "$installer"
     ;;
   macos)
