@@ -280,10 +280,10 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_update".into(),
-                description: "Check GitHub tags or verify/apply a signed release artifact. Signatures are Ed25519 over SHA-256 (context synth.release.sha256.v1). action=apply copies to a sibling path and never overwrites a locked synth.exe. sign/keygen stay on the CLI.".into(),
+                description: "Check GitHub Releases, download+verify+apply the latest signed portable (action=upgrade), or verify/apply a local artifact. Signatures are Ed25519 over SHA-256 (context synth.release.sha256.v1). upgrade/apply copy to a sibling synth.new.exe and never overwrite a locked synth.exe. sign/keygen stay on the CLI.".into(),
                 input_schema: object(
                     json!({
-                        "action": {"type":"string","enum":["check","verify","apply"]},
+                        "action": {"type":"string","enum":["check","upgrade","verify","apply"]},
                         "artifact": {"type":"string","maxLength":4096},
                         "sig": {"type":"string","maxLength":4096},
                         "dest": {"type":"string","maxLength":4096,"description":"Directory to copy a verified artifact into. Defaults to the running binary's parent."}

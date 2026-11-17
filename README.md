@@ -17,11 +17,12 @@ Tagged, signed installers and portable binaries: <https://github.com/mediaprophe
 - Linux: `webizen-ai-synth_*_amd64.deb`
 
 ```text
+synth update upgrade
 synth update verify --artifact synth-windows-x86_64.exe
 synth update apply --artifact synth-windows-x86_64.exe
 ```
 
-Apply copies next to the running binary and never overwrites a locked `synth.exe`. See `docs/install.md`.
+The operator page and tray **Upgrade** button run `synth update upgrade`. Apply copies next to the running binary and never overwrites a locked `synth.exe`. See `docs/install.md`.
 
 ## Architecture
 

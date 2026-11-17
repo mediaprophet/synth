@@ -245,6 +245,7 @@ fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs(
     assert_eq!(status["schema"], "synth.operator-status/v1");
     assert_eq!(status["encyclopedia"], "ecopunk");
     assert_eq!(status["update"]["auto_replace"], false);
+    assert!(status["update"]["github"].is_null());
     assert_eq!(
         status["update"]["signing"]["context"],
         "synth.release.sha256.v1"
@@ -253,6 +254,7 @@ fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs(
     let check = mcp.call("synth_update", json!({"action":"check"})).unwrap();
     assert_eq!(check["auto_replace"], false);
     assert_eq!(check["signing"]["public_key_hex"].as_str().unwrap().len(), 64);
+    assert!(check["github"].is_object());
 }
 
 #[cfg(not(target_arch = "wasm32"))]

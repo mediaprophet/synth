@@ -298,10 +298,11 @@ pub fn update_status(fetch_remote: bool) -> Value {
         "head": head,
         "local_tags": local_tags,
         "remote_latest_tag": remote_latest,
-        "policy": "Never overwrite a locked synth.exe. Drop the MCP stdio child (/mcps reload), rebuild into target-prod, copy sidecar synth-mcp.exe. Webizen AI Synth tray uses --features native-ui. Signed GitHub Releases: synth update verify / apply.",
+        "policy": "Never overwrite a locked synth.exe. Drop the MCP stdio child (/mcps reload), rebuild into target-prod, copy sidecar synth-mcp.exe. Webizen AI Synth tray uses --features native-ui. Signed GitHub Releases: Upgrade button, synth update upgrade, or verify / apply.",
         "auto_replace": false,
         "releases_url": update::RELEASES_URL,
-        "signing": update::signing_info()
+        "signing": update::signing_info(),
+        "github": update::github_release_status(fetch_remote)
     })
 }
 
@@ -328,7 +329,7 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
         "jobs": jobs::summary(),
         "platforms": ["windows", "macos", "linux"],
         "tray": if cfg!(feature = "native-ui") {
-            "Webizen AI Synth system tray (Windows, macOS, Linux). Close hides the window; left-click restores. Right-click for Show / Operator / Studio / Exit."
+            "Webizen AI Synth system tray (Windows, macOS, Linux). Close hides the window; left-click restores. Right-click for Show / Operator / Studio / Upgrade / Exit."
         } else {
             "Build with --features native-ui for the Webizen AI Synth system tray. Browser /operator is the headless shell."
         }
@@ -363,16 +364,18 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 </div>
 <img class="banner" src="/operator/banner.png" alt="Webizen AI Synth banner"/>
 </div>
-<p>Webizen AI Synth system tray (Windows / macOS / Linux) plus this page. Close hides to the emerald tray mark; right-click that icon for Show / Operator / Studio / Exit. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk. The operator ticks due jobs every few seconds.</p>
+<p>Webizen AI Synth system tray (Windows / macOS / Linux) plus this page. Close hides to the emerald tray mark; right-click that icon for Show / Operator / Studio / Upgrade / Exit. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk. The operator ticks due jobs every few seconds.</p>
 <div id="live" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0;"></div>
 <p>
 <button onclick="location.href='/'">Studio</button>
+<button id="upgrade-btn" onclick="upgrade()" style="background:#134e4a;color:#99f6e4;border:1px solid #2dd4bf;">Upgrade</button>
 <button onclick="refresh(true)">Check remote tags</button>
 <button onclick="shutdown()" style="background:#2c1618;color:#fca5a5;border:1px solid #ef4444;">Exit</button>
 <a href="https://github.com/mediaprophet/synth/releases">GitHub Releases</a>
 </p>
 <h2>Install / update</h2>
-<p>Prefer the signed installer from GitHub Releases. Portable binary: <code>synth update verify --artifact FILE</code> then <code>synth update apply --artifact FILE</code>. Apply copies to a sibling path and never overwrites a locked <code>synth.exe</code>.</p>
+<p>Upgrade downloads the latest signed portable from GitHub Releases, verifies Ed25519 (<code>synth.release.sha256.v1</code>), and copies it next to this process as <code>synth.new.exe</code> (or the platform equivalent). It never overwrites a locked <code>synth.exe</code>. Prefer the signed installer for a first install. CLI: <code>synth update upgrade</code>, or <code>synth update verify --artifact FILE</code> then <code>synth update apply --artifact FILE</code>.</p>
+<pre id="update">Ready.</pre>
 <h2>Semantic bookmarks</h2>
 <p>Paste an RDF dump, SPARQL endpoint, or landing-page URL. Keys go to <code>.synth/secrets.json</code> (gitignored), never GitHub.</p>
 <p>
@@ -409,9 +412,25 @@ async function refresh(fetchRemote){
       card('TRAY', j.tray || ''),
       card('EVENTS', events),
       card('JOBS', (j.jobs && j.jobs.count) || 0),
-      card('JOBS DUE', (j.jobs && j.jobs.due) || 0)
+      card('JOBS DUE', (j.jobs && j.jobs.due) || 0),
+      card('RELEASE', (j.update && j.update.github && (j.update.github.tag || j.update.github.error)) || (j.update && j.update.remote_latest_tag) || '')
     ].join('');
   }
+}
+async function upgrade(){
+  const btn = document.getElementById('upgrade-btn');
+  const out = document.getElementById('update');
+  if (btn) btn.disabled = true;
+  if (out) out.textContent = 'Downloading the signed GitHub Release… this can take a few minutes. The running synth.exe is never overwritten.';
+  try {
+    const r = await fetch('/api/update', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({action:'upgrade'})});
+    const j = await r.json();
+    if (out) out.textContent = JSON.stringify(j,null,2);
+    refresh(true);
+  } catch (e) {
+    if (out) out.textContent = String(e);
+  }
+  if (btn) btn.disabled = false;
 }
 async function shutdown(){
   await fetch('/api/operator/shutdown', {method:'POST'});
@@ -454,6 +473,7 @@ refresh(false);
 refreshBookmarks();
 refreshJobs();
 setInterval(()=>{refresh(false); refreshBookmarks(); refreshJobs();}, 2500);
+if (location.hash === '#upgrade') upgrade();
 </script>
 </body></html>"#
         .to_owned()
@@ -571,6 +591,7 @@ mod tests {
         assert_eq!(snap["encyclopedia"], "ecopunk");
         assert_eq!(snap["schema"], "synth.operator-status/v1");
         assert_eq!(snap["update"]["auto_replace"], false);
+        assert!(snap["update"]["github"].is_null());
         assert_eq!(
             snap["update"]["signing"]["public_key_hex"],
             update::RELEASE_PUBLIC_KEY_HEX.trim()

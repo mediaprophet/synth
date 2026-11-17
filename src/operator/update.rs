@@ -13,14 +13,22 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
+    io::{Read, Write},
     path::{Path, PathBuf},
+    time::Duration,
 };
 
 pub const RELEASE_SIGN_CONTEXT: &[u8] = b"synth.release.sha256.v1";
 pub const RELEASE_PUBLIC_KEY_HEX: &str = include_str!("../../.synth/update-public.hex");
 pub const RELEASES_URL: &str = "https://github.com/mediaprophet/synth/releases";
+pub const GITHUB_API_LATEST: &str =
+    "https://api.github.com/repos/mediaprophet/synth/releases/latest";
 pub const GITHUB_SECRET_NAME: &str = "SYNTH_UPDATE_SEED";
 const SEED_FILE_NAME: &str = "update-seed.hex";
+const USER_AGENT: &str = "Webizen-AI-Synth/0.1 (https://github.com/mediaprophet/synth)";
+const UPGRADE_MAX_BYTES: u64 = 512 * 1024 * 1024;
+const GITHUB_TIMEOUT: Duration = Duration::from_secs(20);
+const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(300);
 
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default, deny_unknown_fields)]
@@ -266,6 +274,322 @@ fn install_dest(artifact: &Path, dest_dir: Option<&Path>) -> Result<PathBuf, Str
     Ok(dest)
 }
 
+pub fn platform_portable_name() -> &'static str {
+    #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+    {
+        "synth-windows-x86_64.exe"
+    }
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    {
+        "synth-macos-aarch64"
+    }
+    #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+    {
+        "synth-macos-x86_64"
+    }
+    #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+    {
+        "synth-linux-x86_64"
+    }
+    #[cfg(not(any(
+        all(target_os = "windows", target_arch = "x86_64"),
+        all(target_os = "macos", target_arch = "aarch64"),
+        all(target_os = "macos", target_arch = "x86_64"),
+        all(target_os = "linux", target_arch = "x86_64"),
+    )))]
+    {
+        "synth-unknown"
+    }
+}
+
+fn installer_name_matches(name: &str) -> bool {
+    #[cfg(target_os = "windows")]
+    {
+        name == "WebizenAI-Synth-Setup-windows-x86_64.exe"
+    }
+    #[cfg(target_os = "macos")]
+    {
+        name.starts_with("WebizenAI-Synth-macos-") && name.ends_with(".dmg")
+    }
+    #[cfg(target_os = "linux")]
+    {
+        name.starts_with("webizen-ai-synth_") && name.ends_with("_amd64.deb")
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    {
+        false
+    }
+}
+
+fn asset_url(assets: &[Value], name: &str) -> Option<(String, u64)> {
+    for asset in assets {
+        if asset.get("name").and_then(Value::as_str) != Some(name) {
+            continue;
+        }
+        let url = asset.get("browser_download_url").and_then(Value::as_str)?;
+        let size = asset.get("size").and_then(Value::as_u64).unwrap_or(0);
+        return Some((url.to_owned(), size));
+    }
+    None
+}
+
+/// Map a GitHub Releases JSON document onto this platform's signed portable.
+pub fn parse_github_release(body: &Value) -> Result<Value, String> {
+    let tag = body
+        .get("tag_name")
+        .and_then(Value::as_str)
+        .ok_or("GitHub release missing tag_name")?;
+    let html_url = body
+        .get("html_url")
+        .and_then(Value::as_str)
+        .unwrap_or(RELEASES_URL);
+    let assets = body
+        .get("assets")
+        .and_then(Value::as_array)
+        .ok_or("GitHub release missing assets")?;
+    let portable = platform_portable_name();
+    let sig_name = format!("{portable}.sig");
+    let (portable_url, portable_bytes) = asset_url(assets, portable)
+        .ok_or_else(|| format!("latest release {tag} has no {portable}"))?;
+    let (sig_url, _) = asset_url(assets, &sig_name)
+        .ok_or_else(|| format!("latest release {tag} has no {sig_name}"))?;
+    let mut installer = Value::Null;
+    let mut installer_url = Value::Null;
+    for asset in assets {
+        let Some(name) = asset.get("name").and_then(Value::as_str) else {
+            continue;
+        };
+        if !installer_name_matches(name) {
+            continue;
+        }
+        if let Some(url) = asset.get("browser_download_url").and_then(Value::as_str) {
+            installer = json!(name);
+            installer_url = json!(url);
+            break;
+        }
+    }
+    Ok(json!({
+        "tag": tag,
+        "html_url": html_url,
+        "portable": portable,
+        "portable_url": portable_url,
+        "portable_bytes": portable_bytes,
+        "sig": sig_name,
+        "sig_url": sig_url,
+        "installer": installer,
+        "installer_url": installer_url
+    }))
+}
+
+fn fetch_github_latest() -> Result<Value, String> {
+    let agent = ureq::AgentBuilder::new()
+        .timeout(GITHUB_TIMEOUT)
+        .redirects(5)
+        .user_agent(USER_AGENT)
+        .build();
+    let response = agent
+        .get(GITHUB_API_LATEST)
+        .set("User-Agent", USER_AGENT)
+        .set("Accept", "application/vnd.github+json")
+        .set("X-GitHub-Api-Version", "2022-11-28")
+        .call()
+        .map_err(|e| format!("GitHub Releases API: {e}"))?;
+    let mut reader = response.into_reader();
+    let mut buf = Vec::new();
+    let mut chunk = [0u8; 8192];
+    loop {
+        let n = reader
+            .read(&mut chunk)
+            .map_err(|e| format!("GitHub Releases API read: {e}"))?;
+        if n == 0 {
+            break;
+        }
+        if buf.len().saturating_add(n) > 1024 * 1024 {
+            return Err("GitHub Releases API response exceeds 1 MiB".into());
+        }
+        buf.extend_from_slice(&chunk[..n]);
+    }
+    let body: Value =
+        serde_json::from_slice(&buf).map_err(|e| format!("GitHub Releases JSON: {e}"))?;
+    parse_github_release(&body)
+}
+
+/// Latest GitHub Release for this platform. `fetch_remote=false` stays Null so
+/// the operator poll does not hit api.github.com every few seconds.
+pub fn github_release_status(fetch_remote: bool) -> Value {
+    if !fetch_remote {
+        return Value::Null;
+    }
+    match fetch_github_latest() {
+        Ok(v) => v,
+        Err(e) => json!({ "error": e }),
+    }
+}
+
+fn update_cache_dir() -> Result<PathBuf, String> {
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let dir = exe
+        .parent()
+        .ok_or_else(|| "current exe has no parent directory".to_string())?
+        .join("updates");
+    fs::create_dir_all(&dir).map_err(|e| format!("create {}: {e}", dir.display()))?;
+    Ok(dir)
+}
+
+fn upgrade_install_dest() -> Result<PathBuf, String> {
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let dir = exe
+        .parent()
+        .ok_or_else(|| "current exe has no parent directory".to_string())?
+        .to_path_buf();
+    let stem = exe
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("synth");
+    let ext = exe
+        .extension()
+        .and_then(|s| s.to_str())
+        .map(|e| format!(".{e}"))
+        .unwrap_or_default();
+    Ok(dir.join(format!("{stem}.new{ext}")))
+}
+
+fn download_to_file(url: &str, dest: &Path, max_bytes: u64) -> Result<u64, String> {
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("update URL must be http(s)".into());
+    }
+    if let Some(parent) = dest.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("create {}: {e}", parent.display()))?;
+    }
+    let agent = ureq::AgentBuilder::new()
+        .timeout(DOWNLOAD_TIMEOUT)
+        .redirects(8)
+        .user_agent(USER_AGENT)
+        .build();
+    let response = agent
+        .get(url)
+        .set("User-Agent", USER_AGENT)
+        .set("Accept", "application/octet-stream")
+        .call()
+        .map_err(|e| format!("download {url}: {e}"))?;
+    let final_url = response.get_url().to_owned();
+    if !(final_url.starts_with("https://") || final_url.starts_with("http://")) {
+        return Err("redirect left http(s)".into());
+    }
+    if let Some(len) = response
+        .header("Content-Length")
+        .and_then(|s| s.parse::<u64>().ok())
+    {
+        if len > max_bytes {
+            return Err(format!("artifact is {len} bytes; cap is {max_bytes}"));
+        }
+    }
+    let tmp = {
+        let mut name = dest.file_name().unwrap_or_default().to_os_string();
+        name.push(".part");
+        dest.with_file_name(name)
+    };
+    let mut file = fs::File::create(&tmp).map_err(|e| format!("create {}: {e}", tmp.display()))?;
+    let mut reader = response.into_reader();
+    let mut written = 0u64;
+    let mut buf = [0u8; 64 * 1024];
+    loop {
+        let n = reader.read(&mut buf).map_err(|e| {
+            let _ = fs::remove_file(&tmp);
+            format!("read {url}: {e}")
+        })?;
+        if n == 0 {
+            break;
+        }
+        written = written.saturating_add(n as u64);
+        if written > max_bytes {
+            let _ = fs::remove_file(&tmp);
+            return Err(format!("download exceeded {max_bytes} bytes"));
+        }
+        file.write_all(&buf[..n]).map_err(|e| {
+            let _ = fs::remove_file(&tmp);
+            format!("write {}: {e}", tmp.display())
+        })?;
+    }
+    drop(file);
+    fs::rename(&tmp, dest).map_err(|e| format!("rename {}: {e}", dest.display()))?;
+    Ok(written)
+}
+
+/// Download the latest signed portable, verify Ed25519, copy to a sibling
+/// `synth.new.exe` (or platform equivalent). Never overwrites the running exe.
+pub fn upgrade_latest() -> Result<Value, String> {
+    let release = fetch_github_latest()?;
+    let portable_url = release
+        .get("portable_url")
+        .and_then(Value::as_str)
+        .ok_or("GitHub release missing portable_url")?;
+    let sig_url = release
+        .get("sig_url")
+        .and_then(Value::as_str)
+        .ok_or("GitHub release missing sig_url")?;
+    let portable_name = release
+        .get("portable")
+        .and_then(Value::as_str)
+        .unwrap_or_else(|| platform_portable_name());
+    let sig_name = release
+        .get("sig")
+        .and_then(Value::as_str)
+        .map(str::to_owned)
+        .unwrap_or_else(|| format!("{portable_name}.sig"));
+    let cache = update_cache_dir()?;
+    let artifact = cache.join(portable_name);
+    let sig = cache.join(sig_name);
+    let downloaded = download_to_file(portable_url, &artifact, UPGRADE_MAX_BYTES)?;
+    download_to_file(sig_url, &sig, 4096)?;
+    let verified = verify_artifact(&artifact, Some(&sig))?;
+    let new_sha = verified
+        .get("sha256")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_owned();
+    let current_sha = std::env::current_exe()
+        .ok()
+        .and_then(|p| sha256_file(&p).ok())
+        .map(|d| to_hex(&d));
+    if current_sha.as_deref() == Some(new_sha.as_str()) {
+        return Ok(json!({
+            "schema": "synth.update-upgrade/v1",
+            "ok": true,
+            "already_current": true,
+            "tag": release.get("tag"),
+            "sha256": new_sha,
+            "artifact": artifact.display().to_string(),
+            "auto_replace": false,
+            "releases_url": release.get("html_url").cloned().unwrap_or_else(|| json!(RELEASES_URL)),
+            "policy": "Running binary already matches the latest signed portable. The exe was not replaced."
+        }));
+    }
+    let dest = upgrade_install_dest()?;
+    if would_overwrite_running_exe(&dest) {
+        return Err(
+            "refusing to overwrite the running synth.exe; drop the MCP child or copy the sibling .new file"
+                .into(),
+        );
+    }
+    fs::copy(&artifact, &dest).map_err(|e| format!("copy to {}: {e}", dest.display()))?;
+    Ok(json!({
+        "schema": "synth.update-upgrade/v1",
+        "ok": true,
+        "already_current": false,
+        "tag": release.get("tag"),
+        "artifact": artifact.display().to_string(),
+        "installed": dest.display().to_string(),
+        "sha256": new_sha,
+        "bytes": downloaded,
+        "installer": release.get("installer"),
+        "installer_url": release.get("installer_url"),
+        "auto_replace": false,
+        "releases_url": release.get("html_url").cloned().unwrap_or_else(|| json!(RELEASES_URL)),
+        "policy": "Verified sibling written. Exit Webizen AI Synth, then replace the locked synth.exe with the .new file (or run the signed installer). The running exe was not overwritten."
+    }))
+}
+
 /// Copy a verified artifact next to the running binary. Never overwrites a locked exe.
 pub fn apply_artifact(
     artifact: &Path,
@@ -296,6 +620,7 @@ pub fn dispatch(arg: UpdateArg) -> Result<Value, String> {
     let action = arg.action.as_deref().unwrap_or("check").to_ascii_lowercase();
     match action.as_str() {
         "check" => Ok(super::update_status(true)),
+        "upgrade" => upgrade_latest(),
         "verify" => {
             let path = arg
                 .artifact
@@ -319,12 +644,12 @@ pub fn dispatch(arg: UpdateArg) -> Result<Value, String> {
                 .into(),
         ),
         other => Err(format!(
-            "unknown update action `{other}` (check, verify, apply)"
+            "unknown update action `{other}` (check, upgrade, verify, apply)"
         )),
     }
 }
 
-/// `synth update check|verify|apply|sign|keygen`
+/// `synth update check|upgrade|verify|apply|sign|keygen`
 pub fn run_cli(args: &[String]) -> Result<(), String> {
     let action = args.first().map(String::as_str).unwrap_or("check");
     let mut artifact: Option<PathBuf> = None;
@@ -375,12 +700,13 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
         "check" | "--help" | "help" => {
             if action != "check" {
                 println!(
-                    "Usage:\n  synth update check\n  synth update verify --artifact FILE [--sig FILE.sig]\n  synth update apply --artifact FILE [--sig FILE.sig] [--dest DIR]\n  synth update sign --artifact FILE [--seed-file PATH]\n  synth update keygen [--out DIR] [--force]"
+                    "Usage:\n  synth update check\n  synth update upgrade\n  synth update verify --artifact FILE [--sig FILE.sig]\n  synth update apply --artifact FILE [--sig FILE.sig] [--dest DIR]\n  synth update sign --artifact FILE [--seed-file PATH]\n  synth update keygen [--out DIR] [--force]"
                 );
                 return Ok(());
             }
             super::update_status(true)
         }
+        "upgrade" => upgrade_latest()?,
         "verify" => {
             let path = artifact.ok_or("Usage: synth update verify --artifact FILE")?;
             verify_artifact(&path, sig.as_deref())?
@@ -396,7 +722,7 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
         "keygen" => keygen(out.as_deref(), force)?,
         other => {
             return Err(format!(
-                "Unknown `synth update` action `{other}` (check, verify, apply, sign, keygen)"
+                "Unknown `synth update` action `{other}` (check, upgrade, verify, apply, sign, keygen)"
             ))
         }
     };
@@ -473,5 +799,104 @@ mod tests {
             return;
         };
         assert_eq!(public_from_seed(&seed), release_public_key().unwrap());
+    }
+
+    #[test]
+    fn parse_github_release_picks_this_platform_portable_and_sig() {
+        let portable = platform_portable_name();
+        let sig = format!("{portable}.sig");
+        let body = json!({
+            "tag_name": "v0.0.41.8",
+            "html_url": "https://github.com/mediaprophet/synth/releases/tag/v0.0.41.8",
+            "assets": [
+                {
+                    "name": "synth-windows-x86_64.exe",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-windows-x86_64.exe",
+                    "size": 12
+                },
+                {
+                    "name": "synth-windows-x86_64.exe.sig",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-windows-x86_64.exe.sig",
+                    "size": 129
+                },
+                {
+                    "name": "synth-macos-aarch64",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-macos-aarch64",
+                    "size": 11
+                },
+                {
+                    "name": "synth-macos-aarch64.sig",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-macos-aarch64.sig",
+                    "size": 129
+                },
+                {
+                    "name": "synth-macos-x86_64",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-macos-x86_64",
+                    "size": 11
+                },
+                {
+                    "name": "synth-macos-x86_64.sig",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-macos-x86_64.sig",
+                    "size": 129
+                },
+                {
+                    "name": "synth-linux-x86_64",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-linux-x86_64",
+                    "size": 10
+                },
+                {
+                    "name": "synth-linux-x86_64.sig",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/synth-linux-x86_64.sig",
+                    "size": 129
+                },
+                {
+                    "name": "WebizenAI-Synth-Setup-windows-x86_64.exe",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/WebizenAI-Synth-Setup-windows-x86_64.exe",
+                    "size": 20
+                },
+                {
+                    "name": "WebizenAI-Synth-macos-aarch64.dmg",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/WebizenAI-Synth-macos-aarch64.dmg",
+                    "size": 21
+                },
+                {
+                    "name": "webizen-ai-synth_0.0.41.8_amd64.deb",
+                    "browser_download_url": "https://github.com/mediaprophet/synth/releases/download/v0.0.41.8/webizen-ai-synth_0.0.41.8_amd64.deb",
+                    "size": 22
+                }
+            ]
+        });
+        let parsed = parse_github_release(&body).expect("platform assets present");
+        assert_eq!(parsed["tag"], "v0.0.41.8");
+        assert_eq!(parsed["portable"], portable);
+        assert_eq!(parsed["sig"], sig);
+        assert!(parsed["portable_url"].as_str().unwrap().ends_with(portable));
+        assert!(parsed["sig_url"].as_str().unwrap().ends_with(&sig));
+        assert_eq!(parsed["auto_replace"], Value::Null);
+        assert!(parsed["installer"].is_string() || parsed["installer"].is_null());
+    }
+
+    #[test]
+    fn parse_github_release_fails_closed_without_this_platform_sig() {
+        let body = json!({
+            "tag_name": "v0.0.41.8",
+            "html_url": "https://github.com/mediaprophet/synth/releases/tag/v0.0.41.8",
+            "assets": []
+        });
+        let err = parse_github_release(&body).unwrap_err();
+        assert!(err.contains(platform_portable_name()));
+    }
+
+    #[test]
+    fn upgrade_install_dest_is_sibling_new_not_running_exe() {
+        let dest = upgrade_install_dest().expect("exe parent");
+        let exe = std::env::current_exe().unwrap();
+        assert_ne!(dest, exe);
+        assert!(dest
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .contains(".new"));
+        assert!(!would_overwrite_running_exe(&dest));
     }
 }

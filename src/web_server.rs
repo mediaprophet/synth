@@ -7,7 +7,7 @@
 //! - `GET /api/status`
 //! - `GET /operator` (rules, events, git tags, bookmarks; the Webizen AI Synth tray uses this page)
 //! - `GET /api/operator` (`?fetch=1` checks remote git tags; never auto-replaces the exe)
-//! - `GET|POST /api/update` (signed GitHub release check / verify / apply; never overwrites locked exe)
+//! - `GET|POST /api/update` (signed GitHub release check / upgrade / verify / apply; never overwrites locked exe)
 //! - `GET|POST /api/bookmarks` (semantic RDF/SPARQL bookmarks in `.synth/`; secrets never returned)
 //! - `GET|POST /api/jobs` (download / wrap / compile jobs; operator scheduler ticks due jobs)
 //! - `GET /api/capabilities`
@@ -1409,6 +1409,10 @@ mod tests {
         assert!(html.contains("Jobs"));
         assert!(html.contains("GitHub Releases"));
         assert!(html.contains("synth update verify"));
+        assert!(html.contains("id=\"upgrade-btn\""));
+        assert!(html.contains("Upgrade"));
+        assert!(html.contains("/api/update"));
+        assert!(html.contains("action:'upgrade'"));
 
         let api = exchange_raw(
             b"GET /api/operator HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",

@@ -21,6 +21,7 @@ use aether::prelude::*;
 const ID_SHOW: &str = "synth-show";
 const ID_OPERATOR: &str = "synth-open-operator";
 const ID_STUDIO: &str = "synth-open-studio";
+const ID_UPGRADE: &str = "synth-upgrade";
 const ID_HIDE: &str = "synth-hide-tray";
 const ID_EXIT: &str = "synth-exit";
 
@@ -61,6 +62,7 @@ fn app_menu_bar() -> NativeMenu {
         &NativeMenuItem::with_id(ID_SHOW, "Show window", true, None),
         &NativeMenuItem::with_id(ID_OPERATOR, "Open operator page", true, None),
         &NativeMenuItem::with_id(ID_STUDIO, "Open studio", true, None),
+        &NativeMenuItem::with_id(ID_UPGRADE, "Upgrade", true, None),
         &PredefinedMenuItem::separator(),
         &NativeMenuItem::with_id(ID_HIDE, "Hide to tray", true, None),
         &PredefinedMenuItem::separator(),
@@ -116,6 +118,10 @@ fn dispatch_app_command(id: &str) {
             open_in_system_browser(&operator_url());
         }
         ID_STUDIO => open_in_system_browser(&studio_url()),
+        ID_UPGRADE => {
+            show_window();
+            open_in_system_browser(&format!("{}#upgrade", operator_url()));
+        }
         ID_HIDE => hide_window(),
         ID_EXIT => exit_operator(),
         _ => {}
@@ -132,12 +138,14 @@ fn tray_menu() -> TrayMenu {
     let show = TrayMenuItem::with_id(ID_SHOW, "Show Webizen AI Synth", true, None);
     let operator = TrayMenuItem::with_id(ID_OPERATOR, "Open operator page", true, None);
     let studio = TrayMenuItem::with_id(ID_STUDIO, "Open studio", true, None);
+    let upgrade = TrayMenuItem::with_id(ID_UPGRADE, "Upgrade", true, None);
     let exit = TrayMenuItem::with_id(ID_EXIT, "Exit", true, None);
     let menu = TrayMenu::new();
     let _ = menu.append_items(&[
         &show,
         &operator,
         &studio,
+        &upgrade,
         &TraySeparator::separator(),
         &exit,
     ]);
@@ -178,7 +186,7 @@ fn operator_root() -> Element {
                 }
                 img { src: "{banner}", style: "width:280px; height:98px; border-radius:10px; border:1px solid #1e3330;", alt: "Webizen AI Synth banner" }
             }
-            p { style: "color:#8fb5a7;", "Close hides to the tray (look for the emerald Webizen mark). The Webizen AI Synth menu and the tray menu both Exit. Left-click the tray icon restores this window." }
+            p { style: "color:#8fb5a7;", "Close hides to the tray (look for the emerald Webizen mark). The Webizen AI Synth menu and the tray menu both Exit. Left-click the tray icon restores this window. Upgrade opens the operator page and downloads the latest signed GitHub Release next to this process; the running synth.exe is never overwritten." }
             p { style: "color:#fbbf24;", "{message}" }
             div { style: "display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;",
                 button {
@@ -194,6 +202,15 @@ fn operator_root() -> Element {
                         message.set(format!("Opened {studio}"));
                     },
                     "Open studio"
+                }
+                button {
+                    style: "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;",
+                    onclick: move |_| {
+                        let url = format!("{}#upgrade", operator_url());
+                        open_in_system_browser(&url);
+                        message.set("Opened Upgrade on the operator page. The running synth.exe is never overwritten.".into());
+                    },
+                    "Upgrade"
                 }
                 button {
                     onclick: move |_| {
