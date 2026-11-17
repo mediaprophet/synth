@@ -47,7 +47,7 @@ case "$OS" in
       -DSYNTH_ICON="assets\\branding\\icon.ico" \
       -DSYNTH_SIDEBAR="assets\\branding\\installer-sidebar.bmp" \
       -DSYNTH_HEADER="assets\\branding\\installer-header.bmp" \
-      "packaging\\windows\\synth.nsi"
+      "packaging\\windows\\synth.nsi" >&2
     echo "$installer"
     ;;
   macos)
@@ -72,7 +72,7 @@ case "$OS" in
     iconutil -c icns "$iconset" -o "$app/Contents/Resources/AppIcon.icns"
     rm -rf "$iconset"
     rm -f "$DIST/$installer"
-    hdiutil create -volname "Webizen AI Synth" -srcfolder "$app" -ov -format UDZO "$DIST/$installer"
+    hdiutil create -volname "Webizen AI Synth" -srcfolder "$app" -ov -format UDZO "$DIST/$installer" >&2
     echo "$installer"
     ;;
   linux)
@@ -88,7 +88,7 @@ case "$OS" in
     cp "$PNG256" "$stage/usr/share/icons/hicolor/256x256/apps/webizen-ai-synth.png"
     sed "s/SYNTH_VERSION/$VERSION/g" "$ROOT/packaging/linux/control" > "$stage/DEBIAN/control"
     echo "Installed-Size: $(du -sk "$stage/usr" | cut -f1)" >> "$stage/DEBIAN/control"
-    dpkg-deb --root-owner-group --build "$stage" "$DIST/$installer"
+    dpkg-deb --root-owner-group --build "$stage" "$DIST/$installer" >&2
     echo "$installer"
     ;;
   *)
