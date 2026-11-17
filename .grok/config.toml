@@ -1,8 +1,15 @@
 # Project-scoped Grok config. Source of truth: vendor/grok/config.toml
+#
+# Isolated binary: target-prod (150 morphisms). Do not rebuild into
+# target or target-studio.
 
 [mcp_servers.synth]
-command = "C:\\github\\synth\\target-studio\\debug\\synth.exe"
+command = "C:\\github\\synth\\target-prod\\debug\\synth.exe"
 args = ["mcp"]
 enabled = true
 startup_timeout_sec = 60
 tool_timeout_sec = 600
+
+[mcp_servers.synth.env]
+SYNTH_INPUT_ROOT = 'C:\github'
+SYNTH_OUTPUT_ROOT = 'C:\github\synth\production'

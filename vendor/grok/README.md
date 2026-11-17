@@ -2,9 +2,11 @@
 
 Antigravity’s SDK is `vendor/antigravity-sdk-python`. This directory is the Grok equivalent: MCP wiring, a Grok skill, and a JSON invoke helper. It does not add a modeller. Hypermedia morphisms stay in Synth; Grok calls them.
 
+Catalog: **150** morphisms (`OPERATIONS.len() == ontology::MORPHISMS.len() == 150`). Canonical contract: `C:\github\synth\AGENTS.md`.
+
 ## What this gives Grok
 
-- Project-scoped MCP: Grok spawns `synth mcp` over stdio and gets `synth_ontology_morphisms`, `synth_produce_present`, and the QualiaDB tool suite.
+- Project-scoped MCP: Grok spawns `synth mcp` over stdio and gets `synth_ontology_morphisms`, `synth_operations`, `synth_operation_contracts`, `synth_produce_present`, plus the QualiaDB tool suite.
 - A skill that tells Grok to use `locus` / `manifold` / `radiance` / `surface`, then look at PNG previews.
 - `scripts/invoke.ps1` for a single morphism as JSON when you want a one-shot produce without hand-writing a long vibe.
 
@@ -17,26 +19,32 @@ C:\github\.grok\config.toml
 C:\github\synth\.grok\config.toml
 ```
 
-Merge only the Synth server entry, preserving unrelated project settings. In a Grok session rooted at `C:\github`, the server name is `synth`. Tools are `synth__synth_produce_present`, `synth__synth_ontology_morphisms`, and so on.
+Merge only the Synth server entry, preserving unrelated project settings. In a Grok session rooted at `C:\github`, the server name is `synth`. Tools are `synth__synth_produce_present`, `synth__synth_ontology_morphisms`, `synth__synth_operation_contracts`, and so on.
 
 Do not write this into `~/.grok/config.toml` unless you want Synth MCP on every Grok project.
 
-Reload MCP (`/mcps` or a new session) after the files land. This session started with no MCP tools; a reconnect is required.
+Reload MCP (`/mcps` or a new session) after the files land so the spawned child is `target-prod` (150 morphisms). A session that still talks to `target-studio` will advertise 114 in the ontology tool description.
 
 ## Binary
 
-Grok must spawn a *new* stdio `synth mcp` child. Leave the existing `target\debug\synth.exe` MCP process (the long-running one) alone.
-
-Default command in `config.toml` is the preview CLI:
+Grok must spawn a *new* stdio `synth mcp` child. Leave the existing Studio MCP process alone:
 
 ```
-C:\github\synth\target-gap-review\debug\synth.exe mcp
+C:\github\synth\target-studio\debug\synth.exe
 ```
 
-Rebuild that binary without touching the locked MCP exe:
+Do not rebuild into `target` or `target-studio`. Default command in `config.toml` is the isolated preview CLI, measured 2026-11-17:
+
+```
+C:\github\synth\target-prod\debug\synth.exe mcp
+```
+
+`synth operations` on that binary reports `"count": 150`. `target-gap-review` still reports 148; `target-studio` is the locked live Studio process.
+
+Rebuild the isolated binary without touching the locked MCP exe:
 
 ```powershell
-$env:CARGO_TARGET_DIR = "C:\github\synth\target-gap-review"
+$env:CARGO_TARGET_DIR = "C:\github\synth\target-prod"
 Set-Location C:\github\synth
 cargo build --bin synth --features preview
 ```

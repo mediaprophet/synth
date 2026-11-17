@@ -49,7 +49,7 @@ function Assert-ScopedInput {
     throw 'Input path does not reach the admitted root'
 }
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-if ([string]::IsNullOrWhiteSpace($Synth)) { $Synth = Join-Path $repoRoot 'target-gap-review\debug\synth.exe' }
+if ([string]::IsNullOrWhiteSpace($Synth)) { $Synth = Join-Path $repoRoot 'target-prod\debug\synth.exe' }
 if (-not (Test-Path -LiteralPath $Synth -PathType Leaf)) { throw "Build the isolated preview binary first: $Synth" }
 if ([string]::IsNullOrWhiteSpace($RunsDir)) {
     $RunsDir = if ($env:SYNTH_OUTPUT_ROOT) { $env:SYNTH_OUTPUT_ROOT } else { Join-Path $repoRoot 'production' }

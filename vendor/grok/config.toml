@@ -1,9 +1,13 @@
 # Project-scoped Grok config for Synth.
 # Copy to C:\github\.grok\config.toml and C:\github\synth\.grok\config.toml
 # Grok only reads [mcp_servers] / [plugins] / [permission] from project files.
+#
+# Grok spawns a new stdio `synth mcp` child. Do not rebuild into
+# C:\github\synth\target or target-studio (those binaries stay locked).
+# Isolated produce/MCP binary is target-prod (150 morphisms, 15 Nov 2026).
 
 [mcp_servers.synth]
-command = "C:\\github\\synth\\target-gap-review\\debug\\synth.exe"
+command = "C:\\github\\synth\\target-prod\\debug\\synth.exe"
 args = ["mcp"]
 enabled = true
 startup_timeout_sec = 60

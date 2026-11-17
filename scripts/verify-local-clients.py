@@ -8,7 +8,7 @@ import argparse, datetime, hashlib, json, os, struct, subprocess, uuid, zlib
 
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser()
-p.add_argument('--synth',type=Path,default=ROOT/'target-gap-review/debug/synth.exe')
+p.add_argument('--synth',type=Path,default=ROOT/'target-prod/debug/synth.exe')
 args=p.parse_args()
 run=ROOT/'production'/('client-parity-'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8])
 run.mkdir(parents=True)
