@@ -1,4 +1,4 @@
-//! Native Aether Studio & Resident Tray supervision for Synth.
+//! Webizen AI Synth studio window and resident tray, using the Aether toolkit.
 //!
 //! Renders the full 6-pillar Synth Studio & Substantive Capabilities Workbench,
 //! automatically starts the non-conflicting local HTTP browser server (`127.0.0.1:8787`),
@@ -65,7 +65,7 @@ pub fn launch_with_cancellation(
         spawn_background_server(None).unwrap_or_else(|_| "http://127.0.0.1:8787".to_owned());
     let attributes = aether_native::WindowAttributes::default()
         .with_title(format!(
-            "Synth · {} · Studio ({portal_url})",
+            "Webizen AI Synth · {} · Studio ({portal_url})",
             environment.mode.label()
         ))
         .with_surface_size(aether_native::LogicalSize::new(1280, 860));
@@ -83,7 +83,7 @@ pub fn launch_with_cancellation(
     Ok(())
 }
 
-/// Launches the standalone Aether Tray & Studio environment produced by Synth itself
+/// Launches the standalone Webizen AI Synth tray & studio environment produced by Synth itself
 /// (`examples/tray_environment.vibe`) and starts the local browser interface on `127.0.0.1:8787`.
 pub fn launch_standalone_environment(
     cancellation: Option<Arc<AtomicBool>>,
@@ -93,7 +93,7 @@ pub fn launch_standalone_environment(
         spawn_background_server(None).unwrap_or_else(|_| "http://127.0.0.1:8787".to_owned());
     let attributes = aether_native::WindowAttributes::default()
         .with_title(format!(
-            "Synth · {} · {portal_url}",
+            "Webizen AI Synth · {} · {portal_url}",
             environment.mode.label()
         ))
         .with_surface_size(aether_native::LogicalSize::new(1280, 860));
@@ -240,7 +240,7 @@ fn Monitor(props: MonitorProps) -> Element {
                         alt: "Synth Emblem"
                     }
                     div {
-                        h1 { style: "margin: 0; font-size: 21px;", "Synth · Sovereign Asset, Ontology & MCP Studio" }
+                        h1 { style: "margin: 0; font-size: 21px;", "Webizen AI Synth · Sovereign Asset, Ontology & MCP Studio" }
                         p { style: "margin: 4px 0 0 0; color: #8fb5a7; font-size: 12px;", "{displayed.status}" }
                     }
                 }

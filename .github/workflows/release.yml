@@ -28,10 +28,13 @@ jobs:
         include:
           - os: windows-latest
             artifact: synth-windows-x86_64.exe
+            pack_os: windows
           - os: macos-15
             artifact: synth-macos-aarch64
+            pack_os: macos
           - os: ubuntu-22.04
             artifact: synth-linux-x86_64
+            pack_os: linux
 
     env:
       SYNTH_UPDATE_SEED: ${{ secrets.SYNTH_UPDATE_SEED || vars.SYNTH_UPDATE_SEED }}
@@ -103,27 +106,46 @@ jobs:
           cp "$BIN" "dist/${{ matrix.artifact }}"
           "$BIN" update sign --artifact "dist/${{ matrix.artifact }}"
 
+      - name: Install NSIS
+        if: matrix.os == 'windows-latest'
+        run: choco install nsis --no-progress -y
+
+      - name: Package installer
+        working-directory: synth
+        shell: bash
+        run: |
+          installer=$(bash packaging/ci-package.sh "${{ matrix.pack_os }}" "${{ env.RELEASE_TAG }}" "${{ matrix.artifact }}")
+          echo "INSTALLER=$installer" >> "$GITHUB_ENV"
+          if [ -f target/release/synth.exe ]; then
+            BIN=target/release/synth.exe
+          else
+            BIN=target/release/synth
+          fi
+          "$BIN" update sign --artifact "dist/$installer"
+
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: Synth ${{ env.RELEASE_TAG }}
+          name: Webizen AI Synth ${{ env.RELEASE_TAG }}
           body: |
-            Signed Synth CLI + Aether operator tray (Windows, macOS, Linux).
+            Webizen AI Synth — signed installer plus portable CLI (Windows, macOS, Linux).
 
-            Download the binary for your OS, then:
+            Prefer the installer for first install:
 
-            ```
-            synth update verify --artifact <downloaded-file>
-            synth update apply --artifact <downloaded-file>
-            ```
+            - Windows: `WebizenAI-Synth-Setup-windows-x86_64.exe`
+            - macOS: `WebizenAI-Synth-macos-aarch64.dmg`
+            - Linux: `webizen-ai-synth_*_amd64.deb`
 
+            Portable binaries stay available for `synth update verify` / `apply`.
             Apply copies next to the running binary and never overwrites a locked `synth.exe`.
-            First install: download, mark executable on macOS/Linux, run `synth operator` or `synth serve`.
           files: |
             synth/dist/${{ matrix.artifact }}
             synth/dist/${{ matrix.artifact }}.sig
             synth/dist/${{ matrix.artifact }}.sha256
+            synth/dist/${{ env.INSTALLER }}
+            synth/dist/${{ env.INSTALLER }}.sig
+            synth/dist/${{ env.INSTALLER }}.sha256
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

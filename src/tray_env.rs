@@ -1,7 +1,7 @@
 //! Self-hosted Synth Tray & Studio environment produced by Synth itself.
 //!
 //! When Webizen Desktop (`127.0.0.1:8080` / `ws://127.0.0.1:4242`) is not running,
-//! Synth runs locally as a resident Aether tray & studio host, using its own
+//! Synth runs locally as a resident Webizen AI Synth tray & studio host, using its own
 //! VibeScript asset production pipeline (`examples/tray_environment.vibe`) to
 //! construct its tray icons, vector emblem, radiance banner, 10D spatial beacon,
 //! and acoustic readiness cues.
@@ -30,7 +30,7 @@ pub enum HostRuntimeMode {
 impl HostRuntimeMode {
     pub fn label(self) -> &'static str {
         match self {
-            Self::StandaloneTray => "Standalone Resident Tray (Aether)",
+            Self::StandaloneTray => "Webizen AI Synth tray",
             Self::AttachedToWebizenDesktop => "Attached to Webizen Desktop",
         }
     }

@@ -182,7 +182,7 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_environment_bootstrap".into(),
-                description: "Bootstrap Synth's self-produced Aether Tray & Studio environment (examples/tray_environment.vibe), probe Webizen Desktop presence, and scan the local LLM model vault".into(),
+                description: "Bootstrap Webizen AI Synth's self-produced tray & studio environment (examples/tray_environment.vibe), probe Webizen Desktop presence, and scan the local LLM model vault".into(),
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {

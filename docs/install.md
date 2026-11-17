@@ -1,29 +1,27 @@
-# Install Synth
+# Install Webizen AI Synth
 
 Tagged builds live at <https://github.com/mediaprophet/synth/releases>.
 
-Each release ships:
+Prefer the signed installer for first install:
 
-- `synth-windows-x86_64.exe`
-- `synth-macos-aarch64`
-- `synth-linux-x86_64`
+- Windows: `WebizenAI-Synth-Setup-windows-x86_64.exe` (Start Menu + desktop shortcut, user-local, no admin)
+- macOS Apple Silicon: `WebizenAI-Synth-macos-aarch64.dmg` (`Webizen AI Synth.app`)
+- Linux amd64: `webizen-ai-synth_*_amd64.deb`
 
-plus `.sig` (Ed25519 over SHA-256) and `.sha256` sidecars.
+Portable CLI binaries remain in the same release (`synth-windows-x86_64.exe`, `synth-macos-aarch64`, `synth-linux-x86_64`) with `.sig` and `.sha256` sidecars.
 
 ## First install
 
-Download the binary for your OS. On macOS and Linux:
+Run the installer for your OS. On Windows the shortcut launches `synth operator`. On macOS open `Webizen AI Synth.app`. On Debian/Ubuntu:
 
 ```bash
-chmod +x synth-macos-aarch64   # or synth-linux-x86_64
-./synth-linux-x86_64 operator
+sudo dpkg -i webizen-ai-synth_0.0.41.3_amd64.deb
+synth operator
 ```
 
-On Windows, run `synth-windows-x86_64.exe operator`.
+The operator workbench is `http://127.0.0.1:8787/operator`. `synth serve` is the Studio HTTP workbench.
 
-`synth operator` opens the browser workbench at `/operator` and, when built with `native-ui`, the Aether desktop tray.
-
-## Verify and apply a later tag
+## Verify and apply a later portable binary
 
 ```text
 synth update check

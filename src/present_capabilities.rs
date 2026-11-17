@@ -4,7 +4,7 @@
 //! 3. Unified QualiaDB 0.0.41 + Synth MCP Suite (94 Tools)
 //! 4. Admitted Etalon-Vibe SDK Providers (11 Providers, 37 Functions, 5-Field Parity Probe)
 //! 5. Living-World Biological/Anatomical Engine (33 Canonical Pins) & Cosmic Coordinates (OCS v2.2.0)
-//! 6. Local LLM Model Vault (`C:\LLM_files` — `Qwen3.5-4B`, `Gemma-4-E4B`, `NVFP4`, `.p64`/`.gguf`) & Aether Tray Status.
+//! 6. Local LLM Model Vault (`C:\LLM_files` — `Qwen3.5-4B`, `Gemma-4-E4B`, `NVFP4`, `.p64`/`.gguf`) & Webizen AI Synth tray status.
 
 use crate::tray_env::{discover_local_models, probe_webizen_desktop, DiscoveredModel};
 use qualia_mcp::authoring::{AuthoringBackend, AuthoringTool};
@@ -358,14 +358,14 @@ pub fn render_capabilities_panels_html(snap: &FullCapabilitiesSnapshot) -> Strin
     }
     out.push_str("</div></div></div></section>");
 
-    // 4. Local LLM Vault & Resident Aether Tray Panel
+    // 4. Local LLM Vault & Webizen AI Synth tray panel
     let _ = write!(
         &mut out,
         r#"<section id="tab-llm-vault" class="studio-tab hidden space-y-4">
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <div class="text-xs font-mono uppercase text-[var(--muted-foreground)]">Aether Resident Host &amp; Local Model Lifecycle</div>
+        <div class="text-xs font-mono uppercase text-[var(--muted-foreground)]">Webizen AI Synth host &amp; local model lifecycle</div>
         <h2 class="text-base font-semibold">Vault Root: <span class="font-mono text-emerald-300">{vault}</span> ({model_count} Discovered Artifacts)</h2>
       </div>
       <span class="px-3 py-1 rounded-md text-xs font-mono bg-emerald-950/50 border border-emerald-500/50 text-emerald-300">{mode}</span>

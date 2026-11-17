@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Webizen AI Synth
+Comment=Webizen AI Synth operator and asset studio
+Exec=synth operator
+Icon=webizen-ai-synth
+Terminal=false
+Categories=Development;Graphics;
+StartupWMClass=synth

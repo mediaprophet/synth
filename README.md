@@ -1,6 +1,6 @@
-# Synth
+# Webizen AI Synth
 
-Synth is a general-purpose VibeScript asset-production library and application.
+Webizen AI Synth is a general-purpose VibeScript asset-production library and application.
 QualiaDB owns the language runtime, native resource formats and authority;
 Etalon supplies execution providers; Hypermedia supplies shared geometry,
 vector rendering, raster and timeline libraries. Poet remains a separate application.
@@ -8,7 +8,11 @@ Synth does not modify or embed Poet's application, UI or document model.
 
 ## Download
 
-Tagged, signed builds: <https://github.com/mediaprophet/synth/releases>
+Tagged, signed installers and portable binaries: <https://github.com/mediaprophet/synth/releases>
+
+- Windows: `WebizenAI-Synth-Setup-windows-x86_64.exe`
+- macOS: `WebizenAI-Synth-macos-aarch64.dmg`
+- Linux: `webizen-ai-synth_*_amd64.deb`
 
 ```text
 synth update verify --artifact synth-windows-x86_64.exe

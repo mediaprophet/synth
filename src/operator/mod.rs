@@ -1,6 +1,7 @@
 //! Operator shell: production rules, git-tag update check, activity log, browser page.
 //!
-//! The Aether **desktop** tray (Windows, macOS, Linux) lives behind `native-ui`.
+//! The Webizen AI Synth system tray (Windows, macOS, Linux) lives behind `native-ui`
+//! and is built with the Aether desktop toolkit.
 //! HTTP `/operator` and MCP tools work on every native Synth build.
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -19,7 +20,9 @@ const MAX_EVENTS: usize = 120;
 #[cfg(feature = "native-ui")]
 mod aether_tray;
 pub mod bookmarks;
+pub mod branding;
 pub mod update;
+pub use branding::APP_DISPLAY_NAME;
 
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default, deny_unknown_fields)]
@@ -294,7 +297,7 @@ pub fn update_status(fetch_remote: bool) -> Value {
         "head": head,
         "local_tags": local_tags,
         "remote_latest_tag": remote_latest,
-        "policy": "Never overwrite a locked synth.exe. Drop the MCP stdio child (/mcps reload), rebuild into target-prod, copy sidecar synth-mcp.exe. Aether tray uses --features native-ui. Signed GitHub Releases: synth update verify / apply.",
+        "policy": "Never overwrite a locked synth.exe. Drop the MCP stdio child (/mcps reload), rebuild into target-prod, copy sidecar synth-mcp.exe. Webizen AI Synth tray uses --features native-ui. Signed GitHub Releases: synth update verify / apply.",
         "auto_replace": false,
         "releases_url": update::RELEASES_URL,
         "signing": update::signing_info()
@@ -314,6 +317,8 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
         "synth_tools": crate::mcp_full::StandaloneSynthMcp::synth_tools().len(),
         "input_root": std::env::var("SYNTH_INPUT_ROOT").ok(),
         "output_root": std::env::var("SYNTH_OUTPUT_ROOT").ok(),
+        "app": branding::APP_DISPLAY_NAME,
+        "pid": std::process::id(),
         "encyclopedia": "ecopunk",
         "rules": rules_document(),
         "update": update_status(fetch_remote),
@@ -321,9 +326,9 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
         "bookmarks": bookmarks::summary(),
         "platforms": ["windows", "macos", "linux"],
         "tray": if cfg!(feature = "native-ui") {
-            "aether-desktop tray_icon (Windows, macOS, Linux). Close hides the window; left-click restores."
+            "Webizen AI Synth system tray (Windows, macOS, Linux). Close hides the window; left-click restores. Right-click for Show / Operator / Studio / Exit."
         } else {
-            "Build with --features native-ui for the Aether desktop tray. Browser /operator is the headless shell."
+            "Build with --features native-ui for the Webizen AI Synth system tray. Browser /operator is the headless shell."
         }
     })
 }
@@ -336,22 +341,36 @@ pub fn page_html() -> String {
     r#"<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"/>
-<title>Synth operator</title>
+<title>Webizen AI Synth</title>
+<link rel="icon" href="/operator/icon.png" type="image/png"/>
+<link rel="apple-touch-icon" href="/operator/icon-256.png"/>
 <style>
 body{font:14px/1.45 system-ui,sans-serif;background:#0b1412;color:#d7eee6;margin:0;padding:24px;}
 a{color:#7dd3fc} pre{background:#12211e;padding:12px;border-radius:8px;overflow:auto;max-height:50vh}
 button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6px;padding:7px 12px;margin:0 8px 8px 0;cursor:pointer}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.brand img.emblem{width:48px;height:48px}
+.brand img.banner{width:280px;height:98px;border-radius:10px;border:1px solid #1e3330}
 </style>
 </head><body>
-<h1>Synth operator</h1>
-<p>Aether tray (Windows / macOS / Linux) plus this page. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk.</p>
+<div class="brand">
+<img class="emblem" src="/operator/emblem.svg" alt="Webizen AI Synth"/>
+<div>
+<h1 style="margin:0">Webizen AI Synth</h1>
+<p style="margin:4px 0 0 0;color:#8fb5a7">Operator workbench</p>
+</div>
+<img class="banner" src="/operator/banner.png" alt="Webizen AI Synth banner"/>
+</div>
+<p>Webizen AI Synth system tray (Windows / macOS / Linux) plus this page. Close hides to the emerald tray mark; right-click that icon for Show / Operator / Studio / Exit. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk.</p>
+<div id="live" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0;"></div>
 <p>
 <button onclick="location.href='/'">Studio</button>
 <button onclick="refresh(true)">Check remote tags</button>
+<button onclick="shutdown()" style="background:#2c1618;color:#fca5a5;border:1px solid #ef4444;">Exit</button>
 <a href="https://github.com/mediaprophet/synth/releases">GitHub Releases</a>
 </p>
 <h2>Install / update</h2>
-<p>Download a tagged binary, then <code>synth update verify --artifact FILE</code> and <code>synth update apply --artifact FILE</code>. Apply copies to a sibling path and never overwrites a locked <code>synth.exe</code>.</p>
+<p>Prefer the signed installer from GitHub Releases. Portable binary: <code>synth update verify --artifact FILE</code> then <code>synth update apply --artifact FILE</code>. Apply copies to a sibling path and never overwrites a locked <code>synth.exe</code>.</p>
 <h2>Semantic bookmarks</h2>
 <p>Paste an RDF dump, SPARQL endpoint, or landing-page URL. The agent can fill in a missing data endpoint or mark an API key. Keys go to <code>.synth/secrets.json</code> (gitignored), never GitHub.</p>
 <p>
@@ -361,11 +380,29 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 <pre id="bookmarks">loading…</pre>
 <pre id="status">loading…</pre>
 <script>
+function card(label, value){
+  return '<div style="background:#12211e;border:1px solid #233e38;border-radius:8px;padding:10px 14px;"><p style="margin:0;font-size:11px;color:#8fb5a7;">'+label+'</p><p style="margin:4px 0 0 0;font-size:15px;">'+value+'</p></div>';
+}
 async function refresh(fetchRemote){
   const q = fetchRemote ? '/api/operator?fetch=1' : '/api/operator';
   const r = await fetch(q);
   const j = await r.json();
   document.getElementById('status').textContent = JSON.stringify(j,null,2);
+  const live = document.getElementById('live');
+  if (live) {
+    const events = Array.isArray(j.events) ? j.events.length : 0;
+    live.innerHTML = [
+      card('APP', j.app || 'Webizen AI Synth'),
+      card('PID', j.pid || ''),
+      card('VERSION', j.version || ''),
+      card('MORPHISMS', j.morphisms || ''),
+      card('TRAY', j.tray || ''),
+      card('EVENTS', events)
+    ].join('');
+  }
+}
+async function shutdown(){
+  await fetch('/api/operator/shutdown', {method:'POST'});
 }
 async function refreshBookmarks(){
   const r = await fetch('/api/bookmarks');
@@ -410,17 +447,19 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
     }
     let url = crate::web_server::spawn_background_server(port)?;
     let operator_url = format!("{url}/operator");
-    println!("Synth operator workbench {operator_url}");
-    println!("Studio {url}  (Aether tray on Windows/macOS/Linux with --features native-ui)");
+    println!("{} workbench {operator_url}", branding::APP_DISPLAY_NAME);
+    println!("Studio {url}  (Webizen AI Synth tray on Windows/macOS/Linux with --features native-ui)");
     if open_browser {
         crate::web_server::open_in_system_browser(&operator_url);
     }
     #[cfg(feature = "native-ui")]
     if !headless {
         aether_tray::launch(url);
+        return Ok(());
     }
     #[cfg(not(feature = "native-ui"))]
     let _ = headless;
+    println!("Headless operator running. Ctrl+C exits. Open {operator_url}");
     loop {
         std::thread::sleep(std::time::Duration::from_secs(60));
     }
@@ -466,8 +505,18 @@ mod tests {
     }
 
     #[test]
+    fn branding_assets_are_nonempty() {
+        assert_eq!(branding::APP_DISPLAY_NAME, "Webizen AI Synth");
+        assert!(!branding::ICON_32_PNG.is_empty());
+        assert!(!branding::ICON_PNG.is_empty());
+        assert!(!branding::EMBLEM_SVG.is_empty());
+        assert!(branding::asset("icon-32.png").is_some());
+    }
+
+    #[test]
     fn snapshot_names_ecopunk() {
         let snap = snapshot();
+        assert_eq!(snap["app"], "Webizen AI Synth");
         assert_eq!(snap["encyclopedia"], "ecopunk");
         assert_eq!(snap["schema"], "synth.operator-status/v1");
         assert_eq!(snap["update"]["auto_replace"], false);

@@ -3,7 +3,7 @@ name = "synth"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-description = "General-purpose VibeScript asset production over QualiaDB"
+description = "Webizen AI Synth — VibeScript asset production over QualiaDB"
 
 [[bin]]
 name = "synth"
@@ -34,6 +34,9 @@ qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optiona
 aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "third-party-renderer", "desktop"], optional = true }
 aether-native = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
 futures-timer = { version = "=3.0.4", optional = true }
+
+[build-dependencies]
+winresource = "0.1"
 
 [features]
 default = []

@@ -5,7 +5,7 @@
 //! the project workbench (`GET /project`), QualiaPortal WASM (`GET /qualia/` from
 //! `C:\\github\\qualiaDB\\docs`), and live JSON endpoints:
 //! - `GET /api/status`
-//! - `GET /operator` (rules, events, git tags, bookmarks; Aether tray uses this page)
+//! - `GET /operator` (rules, events, git tags, bookmarks; the Webizen AI Synth tray uses this page)
 //! - `GET /api/operator` (`?fetch=1` checks remote git tags; never auto-replaces the exe)
 //! - `GET|POST /api/update` (signed GitHub release check / verify / apply; never overwrites locked exe)
 //! - `GET|POST /api/bookmarks` (semantic RDF/SPARQL bookmarks in `.synth/`; secrets never returned)
@@ -726,6 +726,27 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         return write_html_coi(stream, crate::operator::page_html().as_bytes());
     }
     #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" {
+        if let Some(name) = path.strip_prefix("/operator/") {
+            if let Some((mime, bytes)) = crate::operator::branding::asset(name) {
+                return write_http_response(stream, "200 OK", mime, bytes);
+            }
+        }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "POST" && path == "/api/operator/shutdown" {
+        std::thread::spawn(|| {
+            std::thread::sleep(std::time::Duration::from_millis(150));
+            std::process::exit(0);
+        });
+        return write_http_response(
+            stream,
+            "200 OK",
+            "application/json",
+            br#"{"ok":true,"stopping":true}"#,
+        );
+    }
+    #[cfg(not(target_arch = "wasm32"))]
     if method == "GET" && path == "/api/operator" {
         let fetch = raw_path.contains("fetch=1") || raw_path.contains("fetch=true");
         let payload = crate::operator::snapshot_with_fetch(fetch);
@@ -1351,7 +1372,11 @@ mod tests {
             "/operator must stay 200, got {header}"
         );
         let html = std::str::from_utf8(body).unwrap_or("");
-        assert!(html.contains("Synth operator"));
+        assert!(html.contains("Webizen AI Synth"));
+        assert!(html.contains("/operator/emblem.svg"));
+        assert!(html.contains("/operator/icon.png"));
+        assert!(html.contains("/api/operator/shutdown"));
+        assert!(html.contains("system tray"));
         assert!(html.contains("/api/operator"));
         assert!(html.contains("/api/bookmarks"));
         assert!(html.contains("Semantic bookmarks"));
