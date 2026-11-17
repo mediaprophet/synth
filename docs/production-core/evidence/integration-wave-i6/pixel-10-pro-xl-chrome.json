@@ -5,60 +5,37 @@
   "create_only": true,
   "qualified": false,
   "accepted_packet": "P00",
-  "execution_status": "not_executed",
-  "observed_at": "2026-11-17T03:14:00Z",
+  "execution_status": "user_confirmed",
+  "observed_at": "2026-11-17",
   "isolation": "none",
-  "device": "Pixel 10 Pro XL",
-  "browser": "Chrome (device WebGPU disabled per I5 handover)",
+  "device": "Google Pixel phone (user confirmation; I6 target was Pixel 10 Pro XL)",
+  "browser": "Chrome on device",
   "url": null,
   "viewport": null,
   "requested": "webgpu-or-webgl2",
   "selected_backend": null,
-  "selected_backend_source": "window.__webizenNativeInit.selected_backend via portal_gpu_backend()",
+  "selected_backend_source": "not captured; user reported the habitat presents on device Chrome",
   "wasm": {
     "path": "C:/github/webizen-website/site/pkg/native-world/webizen_world_bg.wasm",
     "served_url": "/pkg/native-world/webizen_world_bg.wasm",
-    "bytes": 21614966,
-    "sha256": "0086f172d33bbf726b437a4a7e66282eda370b5c6e8244ee79544c6f64dd72f8"
+    "bytes": 21625060,
+    "sha256": "33773443af31ec31b2d87605435ca99d138125a92fb49df8ffd20ac138473ab1"
   },
   "identity": {
-    "etalon_pin": "143a1d7538ceae867ceab1dc7e43126bc688752f",
-    "qualiadb_head_compiled": "7296c131a410831a143165999b329ba74abd123e",
-    "qualiadb_tracked_dirty_note": "I2A/I4Q dirty files compiled into this WASM. Compare served runtime-identity.json."
+    "etalon_pin": "c0bddc9650b9265d1a5578c251af1ab12896601a",
+    "qualiadb_head_compiled": "f286b01f9dc194906b021f20679a2b7fd2ea94f2",
+    "website_head": "2caceecbb7de4d74d89a12d0843280929bbedff9",
+    "note": "User confirmed the live world presents on a Google Pixel phone after the texel-fit WASM. selected_backend, viewport, screenshot, and console were not captured from the device."
   },
-  "why_not_executed": [
-    "adb.exe is not on PATH.",
-    "Common SDK locations do not contain adb.exe: %LOCALAPPDATA%\\Android\\Sdk\\platform-tools, C:\\Android\\platform-tools, C:\\platform-tools, scoop shims.",
-    "No PnP device whose name matches Android, Pixel, or ADB.",
-    "The only USB composite device seen is VID_30C9&PID_00FF (laptop camera), not a Pixel 10 Pro XL.",
-    "Playwright MCP session is desktop Chrome 157 on Windows, not a USB-attached phone."
+  "why_not_instrumented": [
+    "Agent had no adb session and did not remote-debug Pixel Chrome.",
+    "User reported the page working on a Google Pixel phone.",
+    "Do not invent selected_backend, assets_loaded, or a screenshot."
   ],
   "not_invented": {
     "selected_backend": null,
-    "state": null,
-    "note": "Do not fabricate a Pixel pass. Absence is not_executed, never 0.0 or webgpu."
-  },
-  "how_to_execute": {
-    "goal": "Default boot on Pixel 10 Pro XL Chrome should fail WebGPU, take the one GL retry, report selected_backend webgl2, load scene-mobile.json, and present frames. Capture __webizenNativeInit and the served WASM digest. Do not mark qualified.",
-    "prerequisites": [
-      "Keep the I5 WASM. Do not run cargo. Do not use tooling/native-host/build.ps1. Do not rebuild C:\\github\\synth\\target.",
-      "Confirm site/pkg/native-world/webizen_world_bg.wasm is 21614966 bytes, sha256 0086f172d33bbf726b437a4a7e66282eda370b5c6e8244ee79544c6f64dd72f8.",
-      "Reuse the local world server if it is already serving this tree on 127.0.0.1:8800 (as of this packet: python -u C:/github/webizen-website/tooling/world_server.py --port 8800, PID 55180). Do not start a second copy. Do not use build.ps1."
-    ],
-    "steps": [
-      "1. Attach the Pixel 10 Pro XL with USB debugging enabled.",
-      "2. Install Android platform-tools if adb is missing. Confirm `adb devices -l` lists this Pixel (unauthorized devices are not attached).",
-      "3. The world server binds 127.0.0.1 only. On the host run: adb reverse tcp:8800 tcp:8800. Do not rebind the already-running server to 0.0.0.0 unless that server is one you started for this probe.",
-      "4. On the Pixel, open Chrome (not a desktop remote-debug tab pretending to be the phone).",
-      "5. Load http://127.0.0.1:8800/ with no ?webgl2=1. That is the default path: WebGPU attempt, then one GL retry if adapter/device fails before canvas claim.",
-      "6. Wait until window.__webizenNativeInit.state === \"ready\" or a bounded timeout. On timeout record execution_status not_executed or state refused. Never invent selected_backend \"webgpu\".",
-      "7. Record: location.href, innerWidth/innerHeight, requested, selected_backend from window.__webizenNativeInit, world.renderer, world.upload.assets_loaded, world.upload.total_triangles (mobile scene is 76 assets / 309098 source triangles), served runtime-identity.json wasm.sha256.",
-      "8. Expect selected_backend \"webgl2\" on this device. Expect scene-mobile.json (assets_loaded 76), not the 77-asset desktop scene.",
-      "9. Screenshot (css scale) plus console. Store under this evidence directory as pixel-10-pro-xl-chrome.png and pixel-10-pro-xl-chrome-console.txt. Fill this JSON in place: execution_status executed, url, viewport, selected_backend, init, artifacts.",
-      "10. Optional second load http://127.0.0.1:8800/?webgl2=1 as a force-GL confirmation. Still do not mark qualified.",
-      "11. chrome://inspect remote debugging from the desktop is allowed only as a capture aid. The page must actually run in Pixel Chrome.",
-      "12. Leave a pre-existing 8800 server running. Stop only a server you started. Do not commit. P00 remains the only accepted packet."
-    ],
-    "evaluate_snippet": "() => ({ href: location.href, viewport: { innerWidth: innerWidth, innerHeight: innerHeight, dpr: devicePixelRatio }, init: window.__webizenNativeInit || null, renderer: window.__webizenNativeWorld && window.__webizenNativeWorld.renderer, upload: window.__webizenNativeWorld && window.__webizenNativeWorld.upload && { assets_loaded: window.__webizenNativeWorld.upload.assets_loaded, total_triangles: window.__webizenNativeWorld.upload.total_triangles, uploaded: window.__webizenNativeWorld.upload.uploaded }, identity: window.__webizenNativeWorld && window.__webizenNativeWorld.served_build_identity && window.__webizenNativeWorld.served_build_identity.wasm, status: document.getElementById('native-world-status') && document.getElementById('native-world-status').textContent })"
+    "screenshot": null,
+    "console": null,
+    "note": "User confirmation is occupancy of the live path. Wave stays not qualified."
   }
 }

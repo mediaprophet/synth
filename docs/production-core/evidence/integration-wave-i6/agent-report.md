@@ -2,7 +2,7 @@
 
 Packet: **I6**. Date: 17 November 2026.
 Workspace: `C:\github\webizen-website`. Isolation `none`.
-Status: create-only GPU receipts. Desktop WebGPU and `?webgl2=1` executed. WebGPU-disabled desktop and Pixel 10 Pro XL Chrome `not_executed`.
+Status: create-only GPU receipts. Desktop WebGPU and `?webgl2=1` executed. Pixel phone `user_confirmed` (habitat presents; no `__webizenNativeInit` capture). WebGPU-disabled desktop still `not_executed`.
 Not qualified. P00 is the only accepted packet.
 
 ## Objective

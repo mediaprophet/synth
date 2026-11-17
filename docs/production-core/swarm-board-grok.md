@@ -19,7 +19,7 @@ Rustc is free. P00 still the only accepted packet.
 | i2b-site | I2B | website `graphics.rs` | source-complete `01a1e743-523f-7802-a7b8-42d410e2d225` |
 | i4q-timing | I4Q | QDB `gpu_timing.rs` | source-complete `01a1e743-5240-72b3-a5a2-f94ece14bc91` |
 | i5-retarget | I5 | website path-dep + WASM | complete; texel-fit wasm `33773443` 21625060 bytes |
-| i6-evidence | I6 | create-only receipts | executed WebGPU+force-GL; texel-fit habitat visible; Pixel not_executed |
+| i6-evidence | I6 | create-only receipts | executed WebGPU+force-GL; texel-fit habitat visible; Pixel user_confirmed (no device capture); not qualified |
 | i7-review | I7 | read-only | complete `01a1e781-b127-79a1-95f2-1effedfef43c`; wave not qualified |
 
 ## P00–P23 (prior wave)
