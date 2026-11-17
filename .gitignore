@@ -6,3 +6,9 @@
 *.dll
 .env
 /production/webizen-swarm/
+**/.synth/secrets.json
+**/.synth/secrets.*.json
+**/.synth/*.key
+**/.synth/*.pem
+**/.synth/update-seed.hex
+**/.synth/*-seed.hex

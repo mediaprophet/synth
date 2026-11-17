@@ -19,12 +19,11 @@ use std::{
 mod production;
 #[path = "mcp_full/contracts.rs"]
 mod contracts;
-
-#[derive(Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-struct MorphismsArg {
-    category: Option<String>,
-}
+#[path = "mcp_full/catalog.rs"]
+mod catalog;
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "mcp_full/q42.rs"]
+mod q42;
 
 
 /// Convert `qualia_mcp::stable_mcp_tools()` descriptors into `AuthoringTool` entries.
@@ -163,18 +162,18 @@ impl StandaloneSynthMcp {
             AuthoringTool {
                 name: "synth_ontology_morphisms".into(),
                 description: format!(
-                    "Inspect the {} asset production morphisms, their Domain -> Codomain signatures, AgenticUtility teleology, and NQuin48 contracts",
+                    "Inspect the {} asset production morphisms (paged: category, id, offset, limit, detail=ids|summary|full). Default 40 summaries.",
                     crate::production::assets::OPERATIONS.len()
                 ),
-                input_schema: object(json!({"category": {"type": "string", "maxLength": 64}}), vec![]),
+                input_schema: object(catalog::filter_schema(), vec![]),
             },
             AuthoringTool {
                 name: "synth_operations".into(),
                 description: format!(
-                    "List the {} admitted shared-library asset operations and ontological contracts from the live catalogue",
+                    "List the {} admitted shared-library asset operations (paged: category, id, offset, limit, detail=ids|summary|full). Default 40 summaries so Grok MCP does not overflow.",
                     crate::production::assets::OPERATIONS.len()
                 ),
-                input_schema: object(json!({}), vec![]),
+                input_schema: object(catalog::filter_schema(), vec![]),
             },
             AuthoringTool {
                 name: "synth_profiles".into(),
@@ -188,12 +187,93 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_operation_contracts".into(),
-                description: "Inspect execution host, handle lifetime and explicit encoded/record output recipes. Recipes declare field extraction and encoding; never infer output types from namespaces.".into(),
-                input_schema: object(json!({}), vec![]),
+                description: "Inspect execution host, handle lifetime and explicit encoded/record output recipes (paged). Recipes declare field extraction and encoding; never infer output types from namespaces.".into(),
+                input_schema: object(catalog::filter_schema(), vec![]),
+            },
+            AuthoringTool {
+                name: "synth_compile_q42".into(),
+                description: "Parse Turtle/N3/N-Triples (or copy an existing .q42) from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
+                input_schema: {
+                    let mut schema = object(
+                    json!({
+                        "source_path": {"type":"string","maxLength":4096,"description":"TTL/N3/NT/Q42 file under SYNTH_INPUT_ROOT"},
+                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline Turtle when the agent fetched a datasource"},
+                        "format": {"type":"string","enum":["ttl","turtle","n3","nt","ntriples","q42"]},
+                        "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
+                        "ingest_to_graph": {"type":"boolean"},
+                        "context_iri": {"type":"string","maxLength":1024}
+                    }),
+                    vec!["out_q42"],
+                    );
+                    schema["oneOf"] = json!([{ "required": ["source_path", "out_q42"] }, { "required": ["rdf_data", "out_q42"] }]);
+                    schema
+                },
+            },
+            AuthoringTool {
+                name: "synth_operator_status".into(),
+                description: "Operator snapshot: Ecopunk production rules, recent MCP events, local git describe/tags. Pass fetch=true to ls-remote origin tags. Never auto-replaces a locked synth.exe. Browser: GET /operator.".into(),
+                input_schema: object(
+                    json!({
+                        "fetch": {"type":"boolean","description":"Also git ls-remote --tags origin. Reports only; never overwrites the running binary."}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_production_rules".into(),
+                description: "Evaluate Ecopunk production rules. Biosphere non-fiction taxa require sourced .q42 evidence before model/produce. compile_q42 and graph queries are the evidence path and stay allowed. Encyclopedia is Ecopunk.".into(),
+                input_schema: object(
+                    json!({
+                        "domain": {"type":"string","maxLength":64},
+                        "taxon": {"type":"string","maxLength":128},
+                        "fiction": {"type":"boolean"},
+                        "action": {"type":"string","maxLength":64},
+                        "evidence_q42": {"type":"string","maxLength":4096}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_bookmarks".into(),
+                description: "Semantic bookmarks for RDF dumps, SPARQL endpoints, and similar datasources. Store public metadata in .synth/bookmarks.json. Agent enrichment: data_endpoint when the user pasted a landing page, requires_api_key / api_key_env when auth is needed. action=set_secret writes .synth/secrets.json (gitignored); list/get never return secret values. Agent fetches HTTP; compile with synth_compile_q42.".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["list","get","upsert","forget","set_secret"]},
+                        "id": {"type":"string","maxLength":96},
+                        "url": {"type":"string","maxLength":2048,"description":"http(s) landing page, SPARQL endpoint, or RDF dump. Credential query params are stripped."},
+                        "title": {"type":"string","maxLength":256},
+                        "kind": {"type":"string","enum":["sparql","rdf","rest","csv","page"]},
+                        "data_endpoint": {"type":"string","maxLength":2048},
+                        "formats": {"type":"array","maxItems":8,"items":{"type":"string","maxLength":32}},
+                        "requires_api_key": {"type":"boolean"},
+                        "api_key_env": {"type":"string","maxLength":128,"description":"Name of the env var or secret slot. Not the key itself."},
+                        "auth": {"type":"string","maxLength":32},
+                        "licence": {"type":"string","maxLength":256},
+                        "notes": {"type":"string","maxLength":8192},
+                        "agent_notes": {"type":"string","maxLength":8192},
+                        "domain": {"type":"string","maxLength":64},
+                        "tags": {"type":"array","maxItems":16,"items":{"type":"string","maxLength":64}},
+                        "secret": {"type":"string","maxLength":4096,"description":"Only with action=set_secret. Written to gitignored .synth/secrets.json."}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_update".into(),
+                description: "Check GitHub tags or verify/apply a signed release artifact. Signatures are Ed25519 over SHA-256 (context synth.release.sha256.v1). action=apply copies to a sibling path and never overwrites a locked synth.exe. sign/keygen stay on the CLI.".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["check","verify","apply"]},
+                        "artifact": {"type":"string","maxLength":4096},
+                        "sig": {"type":"string","maxLength":4096},
+                        "dest": {"type":"string","maxLength":4096,"description":"Directory to copy a verified artifact into. Defaults to the running binary's parent."}
+                    }),
+                    vec![],
+                ),
             },
             AuthoringTool {
                 name: "synth_produce_present".into(),
-                description: "Execute Hypermedia asset operations inside one bounded ProductionSession. Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. Handles expire after source evaluation. Return hashes, absolute resource paths and optional native review receipts.".into(),
+                description: "Execute Hypermedia asset operations inside one bounded ProductionSession. Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. Handles expire after source evaluation. Return hashes, absolute resource paths and optional native review receipts. Biosphere non-fiction (domain=biosphere, fiction=false) requires evidence_q42 or ecopunk/entities/taxa/{taxon}/*.q42.".into(),
                 input_schema: {
                     let mut schema = object(
                     json!({
@@ -223,7 +303,11 @@ impl StandaloneSynthMcp {
                             "type": "string",
                             "maxLength": 96,
                             "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.html$"
-                        }
+                        },
+                        "domain": {"type":"string","maxLength":64,"description":"Encyclopedia domain. biosphere + fiction=false gates geometry until evidence .q42 exists."},
+                        "taxon": {"type":"string","maxLength":128,"description":"Ecopunk taxon id, e.g. corymbia-aparrerinja"},
+                        "fiction": {"type":"boolean"},
+                        "evidence_q42": {"type":"string","maxLength":4096,"description":"Path to a sealed evidence .q42 (under SYNTH_INPUT_ROOT or absolute)"}
                     }),
                     vec![],
                     );
@@ -237,7 +321,7 @@ impl StandaloneSynthMcp {
 
 impl AuthoringBackend for StandaloneSynthMcp {
     fn instructions(&self) -> Option<String> {
-        Some(format!("Synth exposes {} asset morphisms through synth_operations and synth_ontology_morphisms. Execute them using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. Handles live only within one source evaluation. Use synth_operation_contracts for explicit output recipes and emit encoded resources via asset.files. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/receipt destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
+        Some(format!("Synth exposes {} asset morphisms through paged synth_operations / synth_ontology_morphisms / synth_operation_contracts (default 40 summaries; pass category, id, offset, limit, detail=full). Execute morphisms using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. QualiaDB graph tools are on this same server: query_sparql, query_graph, ingest_ontology, parse_rdf, parse_json, parse_csv, serialize_rdf. Compile sourced Turtle/N3 into .q42 with synth_compile_q42 then query_sparql vault_path. Bookmark RDF/SPARQL/landing URLs with synth_bookmarks (public .synth/bookmarks.json; secrets in gitignored .synth/secrets.json). Check or apply signed GitHub Releases with synth_update (never overwrites a locked synth.exe). Biosphere non-fiction taxa (encyclopedia=Ecopunk) require that evidence .q42 before modelling; synth_production_rules and synth_operator_status report the gate. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/Q42 destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
     }
     fn tools(&self) -> Vec<AuthoringTool> {
         let mut all = Self::synth_tools();
@@ -246,22 +330,46 @@ impl AuthoringBackend for StandaloneSynthMcp {
     }
 
     fn call(&mut self, name: &str, args: Value) -> Result<Value, ToolError> {
-        match name {
+        let result = match name {
             "synth_capabilities" | "synth.capabilities" => {
                 crate::vibe_runtime::inspect().map_err(|e| ToolError::new("capabilities_failed", e))
             }
             "synth_ontology_categories" | "synth.ontology.categories" => {
                 Ok(crate::production::assets::ontology::categories_json())
             }
-            "synth_ontology_morphisms" | "synth.ontology.morphisms" => {
-                let parsed: MorphismsArg = serde_json::from_value(args)
-                    .map_err(|_| ToolError::new("invalid_arguments", "Invalid category filter"))?;
-                Ok(crate::production::assets::ontology::morphisms_json(
-                    parsed.category.as_deref(),
-                ))
+            "synth_ontology_morphisms" | "synth.ontology.morphisms" => catalog::morphisms(args),
+            "synth_operations" | "synth.operations" => catalog::operations(args),
+            "synth_operation_contracts" => catalog::contracts(args),
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_compile_q42" | "synth.compile.q42" => q42::compile(self, args),
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_operator_status" | "synth.operator.status" => {
+                let fetch = args.get("fetch").and_then(Value::as_bool).unwrap_or(false);
+                Ok(crate::operator::snapshot_with_fetch(fetch))
             }
-            "synth_operations" | "synth.operations" => Ok(crate::production::assets::catalogue()),
-            "synth_operation_contracts" => Ok(contracts::catalogue()),
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_production_rules" | "synth.production.rules" => {
+                let req: crate::operator::RuleRequest = serde_json::from_value(args)
+                    .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_production_rules arguments: {e}")))?;
+                Ok(json!({
+                    "rules": crate::operator::rules_json(),
+                    "decision": crate::operator::evaluate_rules(&req).to_json(),
+                }))
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_bookmarks" | "synth.bookmarks" => {
+                let req: crate::operator::bookmarks::BookmarkArg = serde_json::from_value(args)
+                    .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_bookmarks arguments: {e}")))?;
+                crate::operator::bookmarks::dispatch(req)
+                    .map_err(|e| ToolError::new("bookmark_failed", e))
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_update" | "synth.update" => {
+                let req: crate::operator::update::UpdateArg = serde_json::from_value(args)
+                    .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_update arguments: {e}")))?;
+                crate::operator::update::dispatch(req)
+                    .map_err(|e| ToolError::new("update_failed", e))
+            }
             "synth_profiles" | "synth.profiles" => {
                 let profiles: Vec<Value> = ProducerRegistry::with_builtins()
                     .profiles()
@@ -279,7 +387,13 @@ impl AuthoringBackend for StandaloneSynthMcp {
             _ => dispatch_qualia_engine_tool(name, &args).unwrap_or_else(|| {
                 Err(ToolError::new("unknown_tool", "Tool is not in the advertised catalog; use underscore tool names"))
             }),
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let detail = result.as_ref().err().map(|e| e.message.as_str());
+            crate::operator::record_event(name, result.is_ok(), detail);
         }
+        result
     }
 }
 
@@ -373,6 +487,30 @@ mod tests {
         );
 
         let tools = StandaloneSynthMcp::synth_tools();
+        assert!(
+            tools.iter().any(|t| t.name == "synth_compile_q42"),
+            "synth_compile_q42 must be advertised so sourced RDF can seal to .q42"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_operation_contracts"),
+            "synth_operation_contracts must be advertised"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_operator_status"),
+            "synth_operator_status must be advertised"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_production_rules"),
+            "synth_production_rules must be advertised"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_bookmarks"),
+            "synth_bookmarks must be advertised for RDF/SPARQL semantic bookmarks"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_update"),
+            "synth_update must be advertised for signed GitHub releases"
+        );
         let morphisms = tools
             .iter()
             .find(|t| t.name == "synth_ontology_morphisms")
@@ -390,17 +528,31 @@ mod tests {
 
         let mut mcp = StandaloneSynthMcp::default();
         let live_ops = mcp.call("synth_operations", json!({})).unwrap();
-        let live_ops_arr = live_ops["operations"].as_array().unwrap();
-        assert_eq!(live_ops_arr.len(), 150);
         assert_eq!(live_ops["count"], 150);
+        assert_eq!(live_ops["returned"], 40);
+        assert_eq!(live_ops["limit"], 40);
+        assert_eq!(live_ops["next_offset"], 40);
+        assert_eq!(live_ops["operations"].as_array().unwrap().len(), 40);
+        let live_ops_full = mcp
+            .call("synth_operations", json!({"detail": "full", "limit": 150}))
+            .unwrap();
+        let live_ops_arr = live_ops_full["operations"].as_array().unwrap();
+        assert_eq!(live_ops_arr.len(), 150);
         assert!(packing_ids_present(live_ops_arr));
         let live_morphisms = mcp
             .call("synth_ontology_morphisms", json!({}))
             .unwrap();
         assert_eq!(live_morphisms["count"], 150);
-        assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 150);
+        assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 40);
+        let live_morphisms_full = mcp
+            .call(
+                "synth_ontology_morphisms",
+                json!({"detail": "full", "limit": 150}),
+            )
+            .unwrap();
+        assert_eq!(live_morphisms_full["morphisms"].as_array().unwrap().len(), 150);
         assert!(packing_ids_present(
-            live_morphisms["morphisms"].as_array().unwrap()
+            live_morphisms_full["morphisms"].as_array().unwrap()
         ));
 
         let mcp_tools = catalogue_json();

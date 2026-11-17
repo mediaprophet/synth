@@ -21,6 +21,10 @@ struct ProduceArg {
     receipt_json: Option<String>,
     #[serde(default)] inputs: Vec<InputBinding>,
     #[serde(default)] preview_assets: Vec<String>,
+    domain: Option<String>,
+    taxon: Option<String>,
+    fiction: Option<bool>,
+    evidence_q42: Option<String>,
 }
 
 pub(super) struct InputRoot { configured: PathBuf, canonical: PathBuf }
@@ -33,7 +37,7 @@ impl InputRoot {
         Ok(Self { configured: root.to_owned(), canonical: root.canonicalize().map_err(|_| "Input root cannot be resolved")? })
     }
 
-    fn read(&self, requested: &str, max: usize) -> Result<(PathBuf, Vec<u8>), ToolError> {
+    pub(super) fn read(&self, requested: &str, max: usize) -> Result<(PathBuf, Vec<u8>), ToolError> {
         let refused = |message| ToolError::new("native_input_refused", message);
         if requested.len() > 4096 || self.configured.canonicalize().ok().as_ref() != Some(&self.canonical) {
             return Err(refused("Input root changed or input path exceeds budget"));
@@ -104,6 +108,15 @@ fn destination(mcp: &StandaloneSynthMcp, name: Option<&str>, ext: &str) -> Resul
 pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, ToolError> {
     let parsed: ProduceArg = serde_json::from_value(args)
         .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_produce_present arguments: {e}")))?;
+    #[cfg(not(target_arch = "wasm32"))]
+    crate::operator::enforce_produce(&crate::operator::RuleRequest {
+        domain: parsed.domain.clone(),
+        taxon: parsed.taxon.clone(),
+        fiction: parsed.fiction,
+        action: Some("produce".into()),
+        evidence_q42: parsed.evidence_q42.clone(),
+    })
+    .map_err(|e| ToolError::new("production_rule_blocked", e))?;
     let limits = ProductionLimits::for_quality_profile(parsed.quality_profile.as_deref().unwrap_or("preview"))
         .map_err(|error| ToolError::new("invalid_arguments",error))?;
     if parsed.inputs.len() > limits.resources || parsed.preview_assets.len() > 8 {

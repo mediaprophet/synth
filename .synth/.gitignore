@@ -1,0 +1,7 @@
+# Private updater seed and bookmark secrets. The public key (update-public.hex) is committed.
+update-seed.hex
+*-seed.hex
+secrets.json
+secrets.*.json
+*.key
+*.pem

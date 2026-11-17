@@ -5,6 +5,8 @@ pub mod agent;
 pub mod cli;
 mod host;
 pub mod mcp_full;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod operator;
 #[cfg(feature = "native-ui")]
 pub mod native_ui;
 pub mod present;

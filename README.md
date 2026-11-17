@@ -6,6 +6,17 @@ Etalon supplies execution providers; Hypermedia supplies shared geometry,
 vector rendering, raster and timeline libraries. Poet remains a separate application.
 Synth does not modify or embed Poet's application, UI or document model.
 
+## Download
+
+Tagged, signed builds: <https://github.com/mediaprophet/synth/releases>
+
+```text
+synth update verify --artifact synth-windows-x86_64.exe
+synth update apply --artifact synth-windows-x86_64.exe
+```
+
+Apply copies next to the running binary and never overwrites a locked `synth.exe`. See `docs/install.md`.
+
 ## Architecture
 
 The same production pipeline handles every registered producer:

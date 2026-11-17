@@ -5,6 +5,10 @@
 //! the project workbench (`GET /project`), QualiaPortal WASM (`GET /qualia/` from
 //! `C:\\github\\qualiaDB\\docs`), and live JSON endpoints:
 //! - `GET /api/status`
+//! - `GET /operator` (rules, events, git tags, bookmarks; Aether tray uses this page)
+//! - `GET /api/operator` (`?fetch=1` checks remote git tags; never auto-replaces the exe)
+//! - `GET|POST /api/update` (signed GitHub release check / verify / apply; never overwrites locked exe)
+//! - `GET|POST /api/bookmarks` (semantic RDF/SPARQL bookmarks in `.synth/`; secrets never returned)
 //! - `GET /api/capabilities`
 //! - `POST /api/produce`
 //! - `POST /api/mcp/call`
@@ -717,6 +721,56 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     if method == "GET" && website::handles(&path) {
         return website::serve(stream, &path, range_header.as_deref());
     }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && (path == "/operator" || path == "/operator/") {
+        return write_html_coi(stream, crate::operator::page_html().as_bytes());
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && path == "/api/operator" {
+        let fetch = raw_path.contains("fetch=1") || raw_path.contains("fetch=true");
+        let payload = crate::operator::snapshot_with_fetch(fetch);
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && path == "/api/update" {
+        let fetch = raw_path.contains("fetch=1") || raw_path.contains("fetch=true");
+        let payload = crate::operator::update_status(fetch);
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "POST" && path == "/api/update" {
+        let payload = match serde_json::from_slice::<crate::operator::update::UpdateArg>(body) {
+            Ok(arg) => crate::operator::update::dispatch(arg)
+                .unwrap_or_else(|error| json!({ "ok": false, "error": error })),
+            Err(err) => json!({ "ok": false, "error": format!("Invalid update JSON: {err}") }),
+        };
+        let bytes = serde_json::to_vec(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && path == "/api/bookmarks" {
+        let payload = crate::operator::bookmarks::dispatch(
+            crate::operator::bookmarks::BookmarkArg {
+                action: Some("list".into()),
+                ..crate::operator::bookmarks::BookmarkArg::default()
+            },
+        )
+        .unwrap_or_else(|error| json!({ "ok": false, "error": error }));
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "POST" && path == "/api/bookmarks" {
+        let payload = match serde_json::from_slice::<crate::operator::bookmarks::BookmarkArg>(body) {
+            Ok(arg) => crate::operator::bookmarks::dispatch(arg)
+                .unwrap_or_else(|error| json!({ "ok": false, "error": error })),
+            Err(err) => json!({ "ok": false, "error": format!("Invalid bookmark JSON: {err}") }),
+        };
+        let bytes = serde_json::to_vec(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
     match (method.as_str(), path.as_str()) {
         ("GET", "/" | "/index.html") => {
             let html = render_root_studio_html()?;
@@ -1284,6 +1338,85 @@ mod tests {
         let html = std::str::from_utf8(body).unwrap_or("");
         assert!(html.contains("/qualia/js/qualia-shell.js"));
         assert!(html.contains("webgpu-snapshot"));
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn operator_page_and_api_are_200() {
+        let page =
+            exchange_raw(b"GET /operator HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+        let (header, body) = http_split(&page);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "/operator must stay 200, got {header}"
+        );
+        let html = std::str::from_utf8(body).unwrap_or("");
+        assert!(html.contains("Synth operator"));
+        assert!(html.contains("/api/operator"));
+        assert!(html.contains("/api/bookmarks"));
+        assert!(html.contains("Semantic bookmarks"));
+        assert!(html.contains("GitHub Releases"));
+        assert!(html.contains("synth update verify"));
+
+        let api = exchange_raw(
+            b"GET /api/operator HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+        );
+        let (header, body) = http_split(&api);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "/api/operator must stay 200, got {header}"
+        );
+        let json: serde_json::Value = serde_json::from_slice(body).expect("operator JSON");
+        assert_eq!(json["schema"], "synth.operator-status/v1");
+        assert_eq!(json["encyclopedia"], "ecopunk");
+        assert_eq!(json["update"]["auto_replace"], false);
+        assert_eq!(
+            json["update"]["signing"]["public_key_hex"],
+            crate::operator::update::RELEASE_PUBLIC_KEY_HEX.trim()
+        );
+        assert!(json["bookmarks"].is_object());
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn bookmarks_http_upserts_sparql_url_without_storing_query_secrets() {
+        let root = std::env::temp_dir().join(format!(
+            "synth-http-bookmarks-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&root).unwrap();
+        std::env::set_var("SYNTH_BOOKMARK_ROOT", root.to_str().unwrap());
+        let body = br#"{"action":"upsert","url":"https://query.wikidata.org/sparql?token=nope"}"#;
+        let req = format!(
+            "POST /api/bookmarks HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            body.len(),
+            std::str::from_utf8(body).unwrap()
+        );
+        let resp = exchange_raw(req.as_bytes());
+        let (header, resp_body) = http_split(&resp);
+        assert!(
+            header.starts_with("HTTP/1.1 200 OK"),
+            "/api/bookmarks POST must stay 200, got {header}"
+        );
+        let json: serde_json::Value = serde_json::from_slice(resp_body).expect("bookmark JSON");
+        assert_eq!(json["ok"], true);
+        assert_eq!(json["item"]["kind"], "sparql");
+        assert_eq!(json["item"]["url"], "https://query.wikidata.org/sparql");
+        assert_eq!(json["item"]["requires_api_key"], true);
+        let listed = exchange_raw(
+            b"GET /api/bookmarks HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+        );
+        let (_, listed_body) = http_split(&listed);
+        let listed_json: serde_json::Value = serde_json::from_slice(listed_body).unwrap();
+        let text = listed_json.to_string();
+        assert!(!text.contains("nope"));
+        assert_eq!(listed_json["count"], 1);
+        std::env::remove_var("SYNTH_BOOKMARK_ROOT");
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

@@ -140,7 +140,7 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
             "\n",
             r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
             "\n",
-            r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"synth_operations","arguments":{}}}"#,
+            r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"synth_operations","arguments":{"detail":"full","limit":150}}}"#,
             "\n"
         );
         let mut wire=Vec::new();
@@ -161,6 +161,7 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
     let result=&reply["result"];
     assert_eq!(result["isError"],false);
     assert_eq!(result["structuredContent"]["count"],150);
+    assert_eq!(result["structuredContent"]["returned"],150);
     assert_eq!(result["structuredContent"]["operations"].as_array().unwrap().len(),150);
     let text:Value=serde_json::from_str(result["content"][0]["text"].as_str().unwrap()).unwrap();
     assert_eq!(text,result["structuredContent"],"both actual MCP payload representations remain complete");
@@ -169,4 +170,120 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
     assert_eq!(refused["error"]["code"],-32603);
     assert_eq!(refused["error"]["message"],"Result exceeds configured limit; inspect operation state");
     assert!(refused.get("result").is_none(),"no partial catalogue is advertised as a success");
+    fn exchange_default(limits: ProtocolLimits) -> Value {
+        let input = concat!(
+            r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"catalogue-budget-test","version":"1"}}}"#,
+            "\n",
+            r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
+            "\n",
+            r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"synth_operations","arguments":{}}}"#,
+            "\n"
+        );
+        let mut wire=Vec::new();
+        qualia_mcp::authoring::serve(std::io::Cursor::new(input.as_bytes()),&mut wire,StandaloneSynthMcp::default(),limits).unwrap();
+        let replies:Vec<Value>=wire.split(|byte|*byte==b'\n').filter(|line|!line.is_empty())
+            .map(|line|serde_json::from_slice(line).unwrap()).collect();
+        replies.into_iter().find(|reply|reply["id"]==2).unwrap()
+    }
+    let paged=exchange_default(small);
+    assert!(paged.get("error").is_none(),"{paged}");
+    assert_eq!(paged["result"]["structuredContent"]["count"],150);
+    assert_eq!(paged["result"]["structuredContent"]["returned"],40);
+    assert_eq!(paged["result"]["structuredContent"]["limit"],40);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn compile_q42_seals_turtle_and_refuses_overwrite() {
+    let fixture = Fixture::new();
+    std::fs::write(fixture.0.join("taxon.ttl"), b"@prefix ex: <http://example.org/> .\nex:Corymbia a ex:Taxon .\n").unwrap();
+    let mut mcp = fixture.backend();
+    let sealed = mcp.call("synth_compile_q42", json!({
+        "source_path": "taxon.ttl",
+        "out_q42": "taxon.q42",
+        "ingest_to_graph": true,
+        "context_iri": "urn:ecopunk:test:taxon"
+    })).unwrap();
+    assert_eq!(sealed["quin_count"], 1);
+    assert!(sealed["lex_terms"].as_u64().unwrap() >= 3);
+    assert_eq!(sealed["sha256"].as_str().unwrap().len(), 64);
+    assert!(Path::new(sealed["path"].as_str().unwrap()).is_file());
+    assert!(sealed["graph_quin_count"].as_u64().unwrap() >= 1);
+    let again = mcp.call("synth_compile_q42", json!({
+        "source_path": "taxon.ttl",
+        "out_q42": "taxon.q42"
+    })).unwrap_err();
+    assert_eq!(again.code, "native_output_refused");
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs() {
+    let fixture = Fixture::new();
+    let mut mcp = fixture.backend();
+    let blocked = mcp.call("synth_produce_present", json!({
+        "source": r#"let mut asset = {files:[{key:"ok.bin",kind:"bin",bytes:[1]}]};"#,
+        "domain": "biosphere",
+        "taxon": "corymbia-aparrerinja",
+        "fiction": false
+    })).unwrap_err();
+    assert_eq!(blocked.code, "production_rule_blocked");
+
+    let ok = mcp.call("synth_produce_present", json!({
+        "source": r#"let mut asset = {files:[{key:"ok.bin",kind:"bin",bytes:[1]}]};"#
+    })).unwrap();
+    assert!(ok["receipt"].is_object());
+
+    let rules = mcp.call("synth_production_rules", json!({
+        "domain": "biosphere",
+        "action": "compile_q42"
+    })).unwrap();
+    assert_eq!(rules["decision"]["allowed"], true);
+    assert_eq!(rules["decision"]["encyclopedia"], "ecopunk");
+
+    let status = mcp.call("synth_operator_status", json!({})).unwrap();
+    assert_eq!(status["schema"], "synth.operator-status/v1");
+    assert_eq!(status["encyclopedia"], "ecopunk");
+    assert_eq!(status["update"]["auto_replace"], false);
+    assert_eq!(
+        status["update"]["signing"]["context"],
+        "synth.release.sha256.v1"
+    );
+
+    let check = mcp.call("synth_update", json!({"action":"check"})).unwrap();
+    assert_eq!(check["auto_replace"], false);
+    assert_eq!(check["signing"]["public_key_hex"].as_str().unwrap().len(), 64);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn bookmarks_tool_upserts_and_refuses_inline_secrets_on_upsert() {
+    let root = std::env::temp_dir().join(format!(
+        "synth-mcp-bookmarks-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    std::env::set_var("SYNTH_BOOKMARK_ROOT", root.to_str().unwrap());
+    let mut mcp = StandaloneSynthMcp::default();
+    let created = mcp.call("synth_bookmarks", json!({
+        "action": "upsert",
+        "url": "https://example.org/ontologies/east-coast.ttl",
+        "title": "East coast taxa"
+    })).unwrap();
+    assert_eq!(created["item"]["kind"], "rdf");
+    assert_eq!(created["item"]["data_endpoint"], "https://example.org/ontologies/east-coast.ttl");
+    let err = mcp.call("synth_bookmarks", json!({
+        "action": "upsert",
+        "url": "https://example.org/other.ttl",
+        "secret": "leak"
+    })).unwrap_err();
+    assert_eq!(err.code, "bookmark_failed");
+    let listed = mcp.call("synth_bookmarks", json!({"action":"list"})).unwrap();
+    assert!(!listed.to_string().contains("leak"));
+    std::env::remove_var("SYNTH_BOOKMARK_ROOT");
+    let _ = std::fs::remove_dir_all(&root);
 }

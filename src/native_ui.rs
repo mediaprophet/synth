@@ -205,6 +205,8 @@ fn Monitor(props: MonitorProps) -> Element {
     let selected_dom = mcp_domain.read().clone();
     let current_models = models_signal.read().clone();
     let portal_url_click = props.portal_url.clone();
+    let operator_url_display = format!("{}/operator", props.portal_url);
+    let operator_url_click = operator_url_display.clone();
 
     let categories = snap.categories["categories"]
         .as_array()
@@ -251,6 +253,14 @@ fn Monitor(props: MonitorProps) -> Element {
                             message.set(format!("Opened {} in system browser", portal_url_click));
                         },
                         "Open Browser Studio ({props.portal_url})"
+                    }
+                    button {
+                        style: "background: #142523; color: #a7f3d0; border: 1px solid #2b4c46; border-radius: 6px; padding: 7px 12px; cursor: pointer;",
+                        onclick: move |_| {
+                            open_in_system_browser(&operator_url_click);
+                            message.set(format!("Opened {operator_url_click}"));
+                        },
+                        "Operator ({operator_url_display})"
                     }
                     button {
                         style: "background: #132824; color: #a7f3d0; border: 1px solid #10b981; border-radius: 6px; padding: 7px 12px; cursor: pointer;",
