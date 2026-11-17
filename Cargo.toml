@@ -28,6 +28,7 @@ qualia-mcp = { git = "https://github.com/mediaprophet/qualiaDB.git", rev = "1cda
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
+ureq = { version = "2.12", default-features = false, features = ["tls", "gzip"] }
 asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "8321792cb700cdac90adf1b1ef8accdc039597f1" }
 qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optional = true }
 

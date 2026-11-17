@@ -21,6 +21,7 @@ const MAX_EVENTS: usize = 120;
 mod aether_tray;
 pub mod bookmarks;
 pub mod branding;
+pub mod jobs;
 pub mod update;
 pub use branding::APP_DISPLAY_NAME;
 
@@ -324,6 +325,7 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
         "update": update_status(fetch_remote),
         "events": recent_events(),
         "bookmarks": bookmarks::summary(),
+        "jobs": jobs::summary(),
         "platforms": ["windows", "macos", "linux"],
         "tray": if cfg!(feature = "native-ui") {
             "Webizen AI Synth system tray (Windows, macOS, Linux). Close hides the window; left-click restores. Right-click for Show / Operator / Studio / Exit."
@@ -361,7 +363,7 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 </div>
 <img class="banner" src="/operator/banner.png" alt="Webizen AI Synth banner"/>
 </div>
-<p>Webizen AI Synth system tray (Windows / macOS / Linux) plus this page. Close hides to the emerald tray mark; right-click that icon for Show / Operator / Studio / Exit. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk.</p>
+<p>Webizen AI Synth system tray (Windows / macOS / Linux) plus this page. Close hides to the emerald tray mark; right-click that icon for Show / Operator / Studio / Exit. Biosphere non-fiction requires sourced .q42 evidence before modelling. Encyclopedia: Ecopunk. The operator ticks due jobs every few seconds.</p>
 <div id="live" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0;"></div>
 <p>
 <button onclick="location.href='/'">Studio</button>
@@ -372,12 +374,20 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 <h2>Install / update</h2>
 <p>Prefer the signed installer from GitHub Releases. Portable binary: <code>synth update verify --artifact FILE</code> then <code>synth update apply --artifact FILE</code>. Apply copies to a sibling path and never overwrites a locked <code>synth.exe</code>.</p>
 <h2>Semantic bookmarks</h2>
-<p>Paste an RDF dump, SPARQL endpoint, or landing-page URL. The agent can fill in a missing data endpoint or mark an API key. Keys go to <code>.synth/secrets.json</code> (gitignored), never GitHub.</p>
+<p>Paste an RDF dump, SPARQL endpoint, or landing-page URL. Keys go to <code>.synth/secrets.json</code> (gitignored), never GitHub.</p>
 <p>
 <input id="bm-url" type="url" placeholder="https://query.wikidata.org/sparql" style="width:min(520px,90%);padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px"/>
 <button onclick="addBookmark()">Bookmark URL</button>
 </p>
 <pre id="bookmarks">loading…</pre>
+<h2>Jobs</h2>
+<p>Download into <code>.synth/inbox</code> (staging), wrap PROV/DCT/DCAT, compile Turtle to <code>.q42</code>. One-shot unless you set an interval. Scheduler runs in this operator process.</p>
+<p>
+<input id="job-url" type="url" placeholder="https://w3id.org/tern/ontologies/tern.ttl" style="width:min(520px,90%);padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px"/>
+<button onclick="addJob()">Add ingest job</button>
+<button onclick="runDue()">Run due jobs</button>
+</p>
+<pre id="jobs">loading…</pre>
 <pre id="status">loading…</pre>
 <script>
 function card(label, value){
@@ -397,7 +407,9 @@ async function refresh(fetchRemote){
       card('VERSION', j.version || ''),
       card('MORPHISMS', j.morphisms || ''),
       card('TRAY', j.tray || ''),
-      card('EVENTS', events)
+      card('EVENTS', events),
+      card('JOBS', (j.jobs && j.jobs.count) || 0),
+      card('JOBS DUE', (j.jobs && j.jobs.due) || 0)
     ].join('');
   }
 }
@@ -418,9 +430,30 @@ async function addBookmark(){
   document.getElementById('bookmarks').textContent = JSON.stringify(j,null,2);
   refreshBookmarks();
 }
+async function refreshJobs(){
+  const r = await fetch('/api/jobs');
+  const j = await r.json();
+  document.getElementById('jobs').textContent = JSON.stringify(j,null,2);
+}
+async function addJob(){
+  const url = document.getElementById('job-url').value.trim();
+  if(!url) return;
+  const r = await fetch('/api/jobs', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({action:'add', url, kind:'ingest'})});
+  const j = await r.json();
+  document.getElementById('job-url').value = '';
+  document.getElementById('jobs').textContent = JSON.stringify(j,null,2);
+  refreshJobs();
+}
+async function runDue(){
+  const r = await fetch('/api/jobs', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({action:'run_due'})});
+  const j = await r.json();
+  document.getElementById('jobs').textContent = JSON.stringify(j,null,2);
+  refreshJobs();
+}
 refresh(false);
 refreshBookmarks();
-setInterval(()=>{refresh(false); refreshBookmarks();}, 2500);
+refreshJobs();
+setInterval(()=>{refresh(false); refreshBookmarks(); refreshJobs();}, 2500);
 </script>
 </body></html>"#
         .to_owned()
@@ -446,6 +479,7 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
         i += 1;
     }
     let url = crate::web_server::spawn_background_server(port)?;
+    jobs::spawn_scheduler();
     let operator_url = format!("{url}/operator");
     println!("{} workbench {operator_url}", branding::APP_DISPLAY_NAME);
     println!("Studio {url}  (Webizen AI Synth tray on Windows/macOS/Linux with --features native-ui)");
@@ -491,6 +525,12 @@ mod tests {
             ..RuleRequest::default()
         });
         assert!(ok.allowed);
+        let ingest = evaluate_rules(&RuleRequest {
+            domain: Some("biosphere".into()),
+            action: Some("ingest".into()),
+            ..RuleRequest::default()
+        });
+        assert!(ingest.allowed);
     }
 
     #[test]
@@ -535,5 +575,7 @@ mod tests {
             snap["update"]["signing"]["public_key_hex"],
             update::RELEASE_PUBLIC_KEY_HEX.trim()
         );
+        assert!(snap["jobs"].is_object());
+        assert_eq!(snap["jobs"]["schema"], "synth.jobs/v1");
     }
 }

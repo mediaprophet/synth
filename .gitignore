@@ -12,3 +12,4 @@
 **/.synth/*.pem
 **/.synth/update-seed.hex
 **/.synth/*-seed.hex
+**/.synth/inbox/

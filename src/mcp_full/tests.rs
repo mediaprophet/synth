@@ -287,3 +287,44 @@ fn bookmarks_tool_upserts_and_refuses_inline_secrets_on_upsert() {
     std::env::remove_var("SYNTH_BOOKMARK_ROOT");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn jobs_tool_adds_compile_job_and_seals_local_turtle() {
+    let stamp = format!(
+        "{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    );
+    let root = std::env::temp_dir().join(format!("synth-mcp-jobs-{stamp}"));
+    let input = root.join("in");
+    let output = root.join("out");
+    std::fs::create_dir_all(&input).unwrap();
+    std::fs::create_dir_all(&output).unwrap();
+    std::fs::write(input.join("taxon.ttl"), b"@prefix ex: <http://example.org/> .\nex:Job a ex:Taxon .\n").unwrap();
+    std::env::set_var("SYNTH_BOOKMARK_ROOT", root.to_str().unwrap());
+    std::env::set_var("SYNTH_INPUT_ROOT", input.to_str().unwrap());
+    std::env::set_var("SYNTH_OUTPUT_ROOT", output.to_str().unwrap());
+    let mut mcp = StandaloneSynthMcp::default();
+    let created = mcp.call("synth_jobs", json!({
+        "action": "add",
+        "id": "mcp-local",
+        "kind": "compile",
+        "source_path": "taxon.ttl",
+        "title": "MCP local compile"
+    })).unwrap();
+    assert_eq!(created["item"]["kind"], "compile");
+    let ran = mcp.call("synth_jobs", json!({
+        "action": "run",
+        "id": "mcp-local"
+    })).unwrap();
+    assert_eq!(ran["ok"], true);
+    assert!(ran["quin_count"].as_u64().unwrap() >= 1);
+    std::env::remove_var("SYNTH_BOOKMARK_ROOT");
+    std::env::remove_var("SYNTH_INPUT_ROOT");
+    std::env::remove_var("SYNTH_OUTPUT_ROOT");
+    let _ = std::fs::remove_dir_all(&root);
+}

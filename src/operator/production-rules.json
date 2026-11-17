@@ -10,7 +10,7 @@
         "fiction": false
       },
       "applies_to_actions": ["model", "produce", "compile_botanical_organ_10d", "fspm_vascular_grow", "assemble_corpus"],
-      "allowed_without_evidence": ["compile_q42", "query_sparql", "query_graph", "ingest_ontology", "parse_rdf", "list_ontologies"],
+      "allowed_without_evidence": ["compile_q42", "query_sparql", "query_graph", "ingest_ontology", "parse_rdf", "list_ontologies", "fetch", "ingest", "compile", "job"],
       "require": [
         "Consult ecopunk/docs/planning/data-sources/ before modelling.",
         "Fetch or bind the taxon’s authority sources (ALA, NSL, GBIF, traits, ecology).",

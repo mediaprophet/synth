@@ -1,8 +1,8 @@
 //! Semantic bookmarks for RDF / SPARQL / similar datasources.
 //!
 //! Public metadata lives in `.synth/bookmarks.json`. API keys and tokens live in
-//! `.synth/secrets.json`, which is gitignored. Synth does not fetch remote URLs;
-//! the agent probes pages, then upserts enrichment (`data_endpoint`, auth, notes).
+//! `.synth/secrets.json`, which is gitignored. Fetching is a Synth job
+//! (`synth job` / `synth_jobs`); bookmarks stay the public register.
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -18,7 +18,7 @@ const MAX_BOOKMARKS: usize = 256;
 const MAX_URL: usize = 2048;
 const MAX_NOTES: usize = 8192;
 const MAX_SECRET: usize = 4096;
-const GITIGNORE: &str = "# Local secrets. Never commit to GitHub.\nsecrets.json\nsecrets.*.json\n*.key\n*.pem\nupdate-seed.hex\n*-seed.hex\n";
+const GITIGNORE: &str = "# Local secrets and acquisition inbox. Never commit to GitHub.\nsecrets.json\nsecrets.*.json\n*.key\n*.pem\nupdate-seed.hex\n*-seed.hex\ninbox/\n";
 
 const SECRET_QUERY_KEYS: &[&str] = &[
     "api_key",
@@ -397,7 +397,7 @@ fn public_list(dir: &Path) -> Value {
         "secrets_path": dir.join("secrets.json").display().to_string(),
         "count": items.len(),
         "items": items,
-        "policy": "Secrets stay in .synth/secrets.json (gitignored). Never commit API keys. Agent fetches HTTP; Synth compiles local bytes via synth_compile_q42.",
+        "policy": "Secrets stay in .synth/secrets.json (gitignored). Never commit API keys. Fetch with synth job / synth_jobs into .synth/inbox, then compile via synth_compile_q42.",
     })
 }
 
@@ -431,6 +431,24 @@ pub fn summary() -> Value {
             "needs_secret": [],
         }),
     }
+}
+
+pub fn get_bookmark(id: &str) -> Result<Option<Bookmark>, String> {
+    let dir = store_dir()?;
+    let store = load_store(&dir);
+    Ok(store.items.into_iter().find(|b| b.id == id))
+}
+
+pub fn secret_value(id: &str) -> Result<Option<String>, String> {
+    let dir = store_dir()?;
+    let secrets = load_secrets(&dir);
+    Ok(secrets.keys.get(id).and_then(|e| {
+        if e.value.is_empty() {
+            None
+        } else {
+            Some(e.value.clone())
+        }
+    }))
 }
 
 pub fn dispatch(arg: BookmarkArg) -> Result<Value, String> {

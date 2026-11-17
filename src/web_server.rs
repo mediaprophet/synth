@@ -9,6 +9,7 @@
 //! - `GET /api/operator` (`?fetch=1` checks remote git tags; never auto-replaces the exe)
 //! - `GET|POST /api/update` (signed GitHub release check / verify / apply; never overwrites locked exe)
 //! - `GET|POST /api/bookmarks` (semantic RDF/SPARQL bookmarks in `.synth/`; secrets never returned)
+//! - `GET|POST /api/jobs` (download / wrap / compile jobs; operator scheduler ticks due jobs)
 //! - `GET /api/capabilities`
 //! - `POST /api/produce`
 //! - `POST /api/mcp/call`
@@ -148,6 +149,8 @@ pub fn serve_blocking(preferred_port: Option<u16>, open_browser: bool) -> Result
     let url = format!("http://127.0.0.1:{port}");
     println!("Synth Studio & Capabilities Workbench listening on {url}");
     println!("(Non-conflicting with Webizen Desktop ports 8080 / 4242 / 9001)");
+    #[cfg(not(target_arch = "wasm32"))]
+    crate::operator::jobs::spawn_scheduler();
     if let Some(project) = project::current() {
         println!(
             "Project workbench: {url}/project  ({})",
@@ -792,6 +795,28 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         let bytes = serde_json::to_vec(&payload).map_err(|e| e.to_string())?;
         return write_http_response(stream, "200 OK", "application/json", &bytes);
     }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && path == "/api/jobs" {
+        let payload = crate::operator::jobs::dispatch(
+            crate::operator::jobs::JobArg {
+                action: Some("list".into()),
+                ..crate::operator::jobs::JobArg::default()
+            },
+        )
+        .unwrap_or_else(|error| json!({ "ok": false, "error": error }));
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "POST" && path == "/api/jobs" {
+        let payload = match serde_json::from_slice::<crate::operator::jobs::JobArg>(body) {
+            Ok(arg) => crate::operator::jobs::dispatch(arg)
+                .unwrap_or_else(|error| json!({ "ok": false, "error": error })),
+            Err(err) => json!({ "ok": false, "error": format!("Invalid job JSON: {err}") }),
+        };
+        let bytes = serde_json::to_vec(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
     match (method.as_str(), path.as_str()) {
         ("GET", "/" | "/index.html") => {
             let html = render_root_studio_html()?;
@@ -1380,6 +1405,8 @@ mod tests {
         assert!(html.contains("/api/operator"));
         assert!(html.contains("/api/bookmarks"));
         assert!(html.contains("Semantic bookmarks"));
+        assert!(html.contains("/api/jobs"));
+        assert!(html.contains("Jobs"));
         assert!(html.contains("GitHub Releases"));
         assert!(html.contains("synth update verify"));
 
@@ -1400,6 +1427,7 @@ mod tests {
             crate::operator::update::RELEASE_PUBLIC_KEY_HEX.trim()
         );
         assert!(json["bookmarks"].is_object());
+        assert!(json["jobs"].is_object());
     }
 
     #[cfg(not(target_arch = "wasm32"))]

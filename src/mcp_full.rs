@@ -235,7 +235,7 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_bookmarks".into(),
-                description: "Semantic bookmarks for RDF dumps, SPARQL endpoints, and similar datasources. Store public metadata in .synth/bookmarks.json. Agent enrichment: data_endpoint when the user pasted a landing page, requires_api_key / api_key_env when auth is needed. action=set_secret writes .synth/secrets.json (gitignored); list/get never return secret values. Agent fetches HTTP; compile with synth_compile_q42.".into(),
+                description: "Semantic bookmarks for RDF dumps, SPARQL endpoints, and similar datasources. Store public metadata in .synth/bookmarks.json. Agent enrichment: data_endpoint when the user pasted a landing page, requires_api_key / api_key_env when auth is needed. action=set_secret writes .synth/secrets.json (gitignored); list/get never return secret values. Fetch with synth_jobs into .synth/inbox; compile with synth_compile_q42.".into(),
                 input_schema: object(
                     json!({
                         "action": {"type":"string","enum":["list","get","upsert","forget","set_secret"]},
@@ -254,6 +254,26 @@ impl StandaloneSynthMcp {
                         "domain": {"type":"string","maxLength":64},
                         "tags": {"type":"array","maxItems":16,"items":{"type":"string","maxLength":64}},
                         "secret": {"type":"string","maxLength":4096,"description":"Only with action=set_secret. Written to gitignored .synth/secrets.json."}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_jobs".into(),
+                description: "Downloader and scheduler. Fetch http(s) into .synth/inbox (gitignored staging), wrap PROV/DCT/DCAT, compile Turtle to .q42. action=add|list|get|run|run_due|enable|disable|forget. kind=fetch|ingest|compile. Operator ticks due jobs; synth mcp does not start the scheduler. Max 16 MiB. Secrets stay in .synth/secrets.json.".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["list","get","add","upsert","forget","enable","disable","run","run_due"]},
+                        "id": {"type":"string","maxLength":96},
+                        "kind": {"type":"string","enum":["fetch","ingest","compile"]},
+                        "title": {"type":"string","maxLength":256},
+                        "url": {"type":"string","maxLength":2048,"description":"http(s) dump, SPARQL endpoint, or landing URL. Credential query params are rejected."},
+                        "bookmark_id": {"type":"string","maxLength":96,"description":"Reuse a semantic bookmark URL / data_endpoint / secret."},
+                        "source_path": {"type":"string","maxLength":4096,"description":"Local file under SYNTH_INPUT_ROOT for kind=compile."},
+                        "query": {"type":"string","maxLength":32768,"description":"Optional SPARQL CONSTRUCT/DESCRIBE body (POST)."},
+                        "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
+                        "interval_secs": {"type":"integer","minimum":0,"description":"0 = run once (manual or first due). Repeat uses max(interval, 60)."},
+                        "enabled": {"type":"boolean"}
                     }),
                     vec![],
                 ),
@@ -321,7 +341,7 @@ impl StandaloneSynthMcp {
 
 impl AuthoringBackend for StandaloneSynthMcp {
     fn instructions(&self) -> Option<String> {
-        Some(format!("Synth exposes {} asset morphisms through paged synth_operations / synth_ontology_morphisms / synth_operation_contracts (default 40 summaries; pass category, id, offset, limit, detail=full). Execute morphisms using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. QualiaDB graph tools are on this same server: query_sparql, query_graph, ingest_ontology, parse_rdf, parse_json, parse_csv, serialize_rdf. Compile sourced Turtle/N3 into .q42 with synth_compile_q42 then query_sparql vault_path. Bookmark RDF/SPARQL/landing URLs with synth_bookmarks (public .synth/bookmarks.json; secrets in gitignored .synth/secrets.json). Check or apply signed GitHub Releases with synth_update (never overwrites a locked synth.exe). Biosphere non-fiction taxa (encyclopedia=Ecopunk) require that evidence .q42 before modelling; synth_production_rules and synth_operator_status report the gate. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/Q42 destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
+        Some(format!("Synth exposes {} asset morphisms through paged synth_operations / synth_ontology_morphisms / synth_operation_contracts (default 40 summaries; pass category, id, offset, limit, detail=full). Execute morphisms using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. QualiaDB graph tools are on this same server: query_sparql, query_graph, ingest_ontology, parse_rdf, parse_json, parse_csv, serialize_rdf. Compile sourced Turtle/N3 into .q42 with synth_compile_q42 then query_sparql vault_path. Bookmark RDF/SPARQL/landing URLs with synth_bookmarks (public .synth/bookmarks.json; secrets in gitignored .synth/secrets.json). Fetch those URLs with synth_jobs (inbox .synth/inbox, PROV/DCT wrap, optional .q42). The operator scheduler ticks due jobs; synth mcp does not auto-run them. Check or apply signed GitHub Releases with synth_update (never overwrites a locked synth.exe). Biosphere non-fiction taxa (encyclopedia=Ecopunk) require that evidence .q42 before modelling; synth_production_rules and synth_operator_status report the gate. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/Q42 destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
     }
     fn tools(&self) -> Vec<AuthoringTool> {
         let mut all = Self::synth_tools();
@@ -362,6 +382,13 @@ impl AuthoringBackend for StandaloneSynthMcp {
                     .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_bookmarks arguments: {e}")))?;
                 crate::operator::bookmarks::dispatch(req)
                     .map_err(|e| ToolError::new("bookmark_failed", e))
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_jobs" | "synth.jobs" => {
+                let req: crate::operator::jobs::JobArg = serde_json::from_value(args)
+                    .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_jobs arguments: {e}")))?;
+                crate::operator::jobs::dispatch(req)
+                    .map_err(|e| ToolError::new("job_failed", e))
             }
             #[cfg(not(target_arch = "wasm32"))]
             "synth_update" | "synth.update" => {
@@ -506,6 +533,10 @@ mod tests {
         assert!(
             tools.iter().any(|t| t.name == "synth_bookmarks"),
             "synth_bookmarks must be advertised for RDF/SPARQL semantic bookmarks"
+        );
+        assert!(
+            tools.iter().any(|t| t.name == "synth_jobs"),
+            "synth_jobs must be advertised for the downloader and scheduler"
         );
         assert!(
             tools.iter().any(|t| t.name == "synth_update"),
