@@ -69,7 +69,7 @@ pub(super) fn catalogue() -> Value {
     let recipes = output_recipes();
     json!({"schema":"synth.operation-contracts/v1", "count":operations.len(), "operations": operations,
         "fallback":"operation_specific means consult the codomain and implementation contract; no namespace-based export inference is permitted",
-        "production_profiles":[{"id":"preview","resource_mib":16,"aggregate_mib":64,"package_mib":80,"logical_work_units":50000000},{"id":"production16","resource_mib":64,"aggregate_mib":256,"package_mib":320,"logical_work_units":500000000,"raster_max_dimension":2048,"precision":"RGBA16 UNORM with sRGB/linear PNG metadata"},{"id":"png-sequence","operation":"hypermedia.chronicle.capture_deterministic_movie","frames":64,"raster_max_dimension":2048,"precision":"congruent RGBA8 or RGBA16 frames","timing":"exact rational manifest, optional sample-aligned PCM WAV"}],
+        "production_profiles":[{"id":"preview","resource_mib":16,"aggregate_mib":64,"package_mib":80,"logical_work_units":50000000},{"id":"production16","resource_mib":128,"aggregate_mib":2048,"package_mib":2304,"logical_work_units":2000000000,"raster_max_dimension":2048,"precision":"RGBA16 UNORM with sRGB/linear PNG metadata"},{"id":"png-sequence","operation":"hypermedia.chronicle.capture_deterministic_movie","frames":64,"raster_max_dimension":2048,"precision":"congruent RGBA8 or RGBA16 frames","timing":"exact rational manifest, optional sample-aligned PCM WAV"}],
         "resource_type":{"type":"encoded_resource", "export_binding":{"key":"output.ext","resource":"$encoded"}},
         "output_recipes": recipes,
         "recipes": recipes})

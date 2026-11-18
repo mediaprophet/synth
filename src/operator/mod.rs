@@ -314,7 +314,9 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
     json!({
         "schema": "synth.operator-status/v1",
         "binary": std::env::current_exe().ok().map(|p| p.display().to_string()),
-        "version": env!("CARGO_PKG_VERSION"),
+        "version": crate::agent_index::RELEASE_VERSION,
+        "role": crate::agent_index::ROLE,
+        "runtime": crate::agent_index::RUNTIME,
         "morphisms": crate::production::assets::OPERATIONS.len(),
         "synth_tools": crate::mcp_full::StandaloneSynthMcp::synth_tools().len(),
         "input_root": std::env::var("SYNTH_INPUT_ROOT").ok(),

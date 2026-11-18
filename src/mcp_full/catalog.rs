@@ -16,6 +16,7 @@ pub(super) struct CatalogArg {
     pub offset: Option<u64>,
     pub limit: Option<u64>,
     pub detail: Option<String>,
+    pub q: Option<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -83,9 +84,17 @@ fn envelope(
             Detail::Full => "full",
         },
         "filter_category": category,
-        "hint": "Pass detail=full and a category or id for one morphism contract. Default page is 40 summaries so the RPC stays inside Grok's result budget.",
+        "hint": "Pass q=xpbd (or nla, ik, navmesh, gis, n3) to search. Pass detail=full and a category or id for one morphism contract. Default page is 40 summaries so the RPC stays inside Grok's result budget. synth_find is the agent entry point.",
         items_key: items,
     })
+}
+
+fn query_tokens(parsed: &CatalogArg) -> Vec<String> {
+    parsed
+        .q
+        .as_deref()
+        .map(crate::agent_index::parse_tokens)
+        .unwrap_or_default()
 }
 
 pub(super) fn operations(args: Value) -> Result<Value, ToolError> {
@@ -100,6 +109,7 @@ pub(super) fn operations(args: Value) -> Result<Value, ToolError> {
                 .as_deref()
                 .is_none_or(|cat| m.category == cat)
                 && parsed.id.as_deref().is_none_or(|id| m.id == id)
+                && crate::agent_index::morphism_matches(m, &query_tokens(&parsed))
         })
         .collect();
     let (start, end, next, limit) = page_bounds(morphisms.len(), parsed.offset, parsed.limit)?;
@@ -150,6 +160,7 @@ pub(super) fn morphisms(args: Value) -> Result<Value, ToolError> {
                 .as_deref()
                 .is_none_or(|cat| m.category == cat)
                 && parsed.id.as_deref().is_none_or(|id| m.id == id)
+                && crate::agent_index::morphism_matches(m, &query_tokens(&parsed))
         })
         .collect();
     let (start, end, next, limit) = page_bounds(morphisms.len(), parsed.offset, parsed.limit)?;
@@ -203,6 +214,10 @@ pub(super) fn contracts(args: Value) -> Result<Value, ToolError> {
                         .find(|m| m.id == id)
                         .is_some_and(|m| m.category == cat)
                 })
+                && crate::production::assets::ontology::MORPHISMS
+                    .iter()
+                    .find(|m| m.id == id)
+                    .is_some_and(|m| crate::agent_index::morphism_matches(m, &query_tokens(&parsed)))
         })
         .collect();
     let (start, end, next, limit) = page_bounds(filtered.len(), parsed.offset, parsed.limit)?;
@@ -246,8 +261,9 @@ pub(super) fn filter_schema() -> Value {
     json!({
         "category": {"type": "string", "maxLength": 64},
         "id": {"type": "string", "maxLength": 128},
+        "q": {"type": "string", "maxLength": 128, "description": "Keyword search (xpbd, nla, ik, navmesh, gis, n3). Prefer synth_find."},
         "offset": {"type": "integer", "minimum": 0},
         "limit": {"type": "integer", "minimum": 1, "maximum": MAX_PAGE},
-        "detail": {"type": "string", "enum": ["ids", "summary", "full"], "description": "Default summary, 40 rows. Use detail=full with category or id; the unpaged 150-op dump overflows Grok MCP."}
+        "detail": {"type": "string", "enum": ["ids", "summary", "full"], "description": "Default summary, 40 rows. Use detail=full with category, id, or q; the unpaged 150-op dump overflows Grok MCP."}
     })
 }

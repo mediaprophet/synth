@@ -31,7 +31,7 @@ fn source_path_and_inline_share_admission_and_exact_replay() {
     assert_eq!(std::fs::read(fixture.0.join("path-export/.synth/source.vibe")).unwrap(), source.as_bytes());
     assert_eq!(path["receipt"]["limits"]["source_bytes"], source.len());
     assert_eq!(path["receipt"]["limits"]["source_work_units"], source.len() * 4);
-    assert_eq!(path["receipt"]["limits"]["effective_asset_work_units"], 50_000_000u64 - source.len() as u64 * 4);
+    assert_eq!(path["receipt"]["limits"]["effective_asset_work_units"], 2_000_000_000u64 - source.len() as u64 * 4);
     assert_eq!(backend.call("synth_produce_present", json!({})).unwrap_err().code, "invalid_arguments");
     assert_eq!(backend.call("synth_produce_present", json!({"source":"x","source_path":"source.vibe"})).unwrap_err().code, "invalid_arguments");
     assert_eq!(backend.call("synth_produce_present", json!({"source_path":"../outside.vibe"})).unwrap_err().code, "native_input_refused");
@@ -84,7 +84,10 @@ fn input_admission_rejects_unconfigured_outside_traversal_and_unknown_keys_befor
 fn wrong_host_error_reaches_mcp_is_error_and_initialize_names_production_host() {
     let mut server = qualia_mcp::authoring::AuthoringServer::new(StandaloneSynthMcp::default(), comprehensive_protocol_limits()).unwrap();
     let init = server.process(&json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"fixture","version":"1"}}}).to_string()).unwrap();
-    assert!(init["result"]["instructions"].as_str().unwrap().contains("synth_produce_present"));
+    let instructions = init["result"]["instructions"].as_str().unwrap();
+    assert!(instructions.contains("synth_produce_present"));
+    assert!(instructions.contains("synth_find"));
+    assert!(instructions.contains("development tool"));
     server.process(r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#);
     let response = server.process(&json!({"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"vibe_invoke","arguments":{"id":"hypermedia.locus.construct","args":{"shape":"circle"}}}}).to_string()).unwrap();
     assert_eq!(response["result"]["isError"],true);
@@ -120,18 +123,18 @@ fn production16_profile_is_explicit_bounded_and_invalid_profiles_refuse() {
     let source=r#"let mut asset={files:[{key:"note.txt",kind:"txt",text:"bounded"}]};"#;
     let mut backend=StandaloneSynthMcp::default();
     let result=backend.call("synth_produce_present",json!({"source":source,"quality_profile":"production16"})).unwrap();
-    assert_eq!(result["receipt"]["limits"]["resource_bytes"],64*1024*1024);
-    assert_eq!(result["receipt"]["limits"]["total_resource_bytes"],256*1024*1024);
-    assert_eq!(result["receipt"]["limits"]["package_bytes"],320*1024*1024);
-    assert_eq!(result["receipt"]["limits"]["asset_work_units"],500_000_000);
+    assert_eq!(result["receipt"]["limits"]["resource_bytes"],128*1024*1024);
+    assert_eq!(result["receipt"]["limits"]["total_resource_bytes"],2u64*1024*1024*1024);
+    assert_eq!(result["receipt"]["limits"]["package_bytes"],2u64*1024*1024*1024+256*1024*1024);
+    assert_eq!(result["receipt"]["limits"]["asset_work_units"],2_000_000_000);
     let resources=result["receipt"]["resources"].as_array().unwrap();
     assert_eq!(resources.len(),1);
     assert_eq!(resources[0]["key"],"note.txt");
     assert_eq!(resources[0]["bytes"],7);
     let authoring=backend.call("synth_produce_present",json!({"source":source,"quality_profile":"authoring"})).unwrap();
-    assert_eq!(authoring["receipt"]["limits"]["total_resource_bytes"],256*1024*1024);
+    assert_eq!(authoring["receipt"]["limits"]["total_resource_bytes"],2u64*1024*1024*1024);
     let defaulted=backend.call("synth_produce_present",json!({"source":source})).unwrap();
-    assert_eq!(defaulted["receipt"]["limits"]["total_resource_bytes"],256*1024*1024);
+    assert_eq!(defaulted["receipt"]["limits"]["total_resource_bytes"],2u64*1024*1024*1024);
     assert_eq!(defaulted["receipt"]["quality_profile"],"production16");
     assert_eq!(backend.call("synth_produce_present",json!({"source":source,"quality_profile":"unlimited"})).unwrap_err().code,"invalid_arguments");
 }
@@ -199,12 +202,12 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
-fn compile_q42_seals_turtle_and_refuses_overwrite() {
+fn compile_q42_seals_n3_and_refuses_overwrite() {
     let fixture = Fixture::new();
-    std::fs::write(fixture.0.join("taxon.ttl"), b"@prefix ex: <http://example.org/> .\nex:Corymbia a ex:Taxon .\n").unwrap();
+    std::fs::write(fixture.0.join("taxon.n3"), b"@prefix ex: <http://example.org/> .\nex:Corymbia a ex:Taxon .\n").unwrap();
     let mut mcp = fixture.backend();
     let sealed = mcp.call("synth_compile_q42", json!({
-        "source_path": "taxon.ttl",
+        "source_path": "taxon.n3",
         "out_q42": "taxon.q42",
         "ingest_to_graph": true,
         "context_iri": "urn:ecopunk:test:taxon"
@@ -215,7 +218,7 @@ fn compile_q42_seals_turtle_and_refuses_overwrite() {
     assert!(Path::new(sealed["path"].as_str().unwrap()).is_file());
     assert!(sealed["graph_quin_count"].as_u64().unwrap() >= 1);
     let again = mcp.call("synth_compile_q42", json!({
-        "source_path": "taxon.ttl",
+        "source_path": "taxon.n3",
         "out_q42": "taxon.q42"
     })).unwrap_err();
     assert_eq!(again.code, "native_output_refused");
@@ -248,6 +251,8 @@ fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs(
 
     let status = mcp.call("synth_operator_status", json!({})).unwrap();
     assert_eq!(status["schema"], "synth.operator-status/v1");
+    assert_eq!(status["version"], crate::agent_index::RELEASE_VERSION);
+    assert_eq!(status["role"], crate::agent_index::ROLE);
     assert_eq!(status["encyclopedia"], "ecopunk");
     assert_eq!(status["update"]["auto_replace"], false);
     assert!(status["update"]["github"].is_null());

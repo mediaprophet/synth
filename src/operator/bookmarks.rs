@@ -334,6 +334,23 @@ pub fn classify(url: &str) -> (String, Vec<String>, Option<String>, bool) {
             false,
         );
     }
+    if lower.contains("openstreetmap.org")
+        || lower.contains("://osm.org")
+        || lower.contains("www.osm.org")
+        || lower.contains("/planet.osm")
+        || ext == "osm"
+        || ext == "pbf"
+        || lower.contains("opentopography.org")
+        || lower.contains("/stac/")
+        || lower.contains("stac.cloud")
+    {
+        return (
+            "gis".into(),
+            vec!["osm".into(), "geotiff".into(), "stac".into()],
+            Some(without_query.to_owned()),
+            false,
+        );
+    }
     match ext.as_str() {
         "ttl" | "turtle" => (
             "rdf".into(),
@@ -758,6 +775,11 @@ mod tests {
         assert_eq!(kind, "page");
         assert!(ep.is_none());
         assert!(needs);
+        let (kind, formats, ep, needs) = classify("https://www.openstreetmap.org/export");
+        assert_eq!(kind, "gis");
+        assert!(formats.contains(&"osm".to_string()));
+        assert!(ep.is_some());
+        assert!(!needs);
     }
 
     #[test]

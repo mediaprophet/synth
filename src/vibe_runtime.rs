@@ -48,6 +48,7 @@ pub fn inspect() -> Result<Value, String> {
     }
     Ok(json!({
         "schema": "synth.vibe-capabilities/v1",
+        "product": crate::agent_index::product_card(),
         "qualification": "registry admission and SDK-to-Etalon parity dispatch",
         "execution_mode": "standalone-developer-pure-compute",
         "provider_count": registry.active_count(),
@@ -132,6 +133,9 @@ mod tests {
         let report = inspect().unwrap();
         assert_eq!(report["provider_count"], 11);
         assert_eq!(report["sdk_parity_probe"]["passed"], true);
+        assert_eq!(report["product"]["role"], crate::agent_index::ROLE);
+        assert_eq!(report["product"]["version"], crate::agent_index::RELEASE_VERSION);
+        assert_eq!(report["product"]["morphisms"], 150);
     }
 
     #[test]

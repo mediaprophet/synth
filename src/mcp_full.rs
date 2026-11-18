@@ -150,19 +150,24 @@ impl StandaloneSynthMcp {
         };
         vec![
             AuthoringTool {
+                name: "synth_find".into(),
+                description: "Find QualiaDB / Etalon / Hypermedia morphisms and Synth MCP tools by keyword. q=xpbd|nla|ik|navmesh|camera|input|gis|osm|n3|sparql|hmc|q42. Synth is the development tool; QualiaPortal is the visitor runtime.".into(),
+                input_schema: object(crate::agent_index::find_arg_schema(), vec!["q"]),
+            },
+            AuthoringTool {
                 name: "synth_capabilities".into(),
-                description: "Inspect the admitted Vibe SDK providers and execute the SDK-to-Etalon 5-field NQuin48 parity probe".into(),
+                description: "Webizen AI Synth product card (development tool, not the visitor runtime) plus admitted Vibe/Etalon providers and the SDK-to-Etalon NQuin48 parity probe".into(),
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {
                 name: "synth_ontology_categories".into(),
-                description: "Inspect the 12 canonical categories of the Hypermedia/Synth categorical ontology and NQuin48 triple counts".into(),
+                description: "Inspect the 12 Hypermedia/Synth categories (locus manifold surface radiance glyph layout kinetics acoustics electromagnetics geodesy discourse chronicle) with example morphism ids. Use synth_find to search.".into(),
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {
                 name: "synth_ontology_morphisms".into(),
                 description: format!(
-                    "Inspect the {} asset production morphisms (paged: category, id, offset, limit, detail=ids|summary|full). Default 40 summaries.",
+                    "Inspect the {} asset production morphisms (paged: category, id, q, offset, limit, detail=ids|summary|full). Default 40 summaries. q=xpbd searches kinetics.",
                     crate::production::assets::OPERATIONS.len()
                 ),
                 input_schema: object(catalog::filter_schema(), vec![]),
@@ -170,7 +175,7 @@ impl StandaloneSynthMcp {
             AuthoringTool {
                 name: "synth_operations".into(),
                 description: format!(
-                    "List the {} admitted shared-library asset operations (paged: category, id, offset, limit, detail=ids|summary|full). Default 40 summaries so Grok MCP does not overflow.",
+                    "List the {} admitted QualiaDB/Etalon/Hypermedia asset operations (paged: category, id, q, offset, limit, detail=ids|summary|full). Default 40 summaries so Grok MCP does not overflow. Prefer synth_find for keyword lookup.",
                     crate::production::assets::OPERATIONS.len()
                 ),
                 input_schema: object(catalog::filter_schema(), vec![]),
@@ -192,12 +197,12 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_compile_q42".into(),
-                description: "Parse Turtle/N3/N-Triples (or copy an existing .q42) from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
+                description: "Parse N3 (preferred; N3Logic + SHACL), Turtle, or N-Triples — or copy an existing .q42 — from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
                 input_schema: {
                     let mut schema = object(
                     json!({
-                        "source_path": {"type":"string","maxLength":4096,"description":"TTL/N3/NT/Q42 file under SYNTH_INPUT_ROOT"},
-                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline Turtle when the agent fetched a datasource"},
+                        "source_path": {"type":"string","maxLength":4096,"description":"N3/TTL/NT/Q42 file under SYNTH_INPUT_ROOT. Prefer .n3."},
+                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline N3 (preferred) or Turtle when the agent fetched a datasource"},
                         "format": {"type":"string","enum":["ttl","turtle","n3","nt","ntriples","q42"]},
                         "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
                         "ingest_to_graph": {"type":"boolean"},
@@ -235,14 +240,14 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_bookmarks".into(),
-                description: "Semantic bookmarks for RDF dumps, SPARQL endpoints, and similar datasources. Store public metadata in .synth/bookmarks.json. Agent enrichment: data_endpoint when the user pasted a landing page, requires_api_key / api_key_env when auth is needed. action=set_secret writes .synth/secrets.json (gitignored); list/get never return secret values. Fetch with synth_jobs into .synth/inbox; compile with synth_compile_q42.".into(),
+                description: "Semantic bookmarks for N3/RDF dumps, SPARQL endpoints, and GIS sources (OSM/DEM/STAC later). Store public metadata in .synth/bookmarks.json. Agent enrichment: data_endpoint when the user pasted a landing page, requires_api_key / api_key_env when auth is needed. action=set_secret writes .synth/secrets.json (gitignored); list/get never return secret values. Fetch with synth_jobs into .synth/inbox; compile N3 with synth_compile_q42.".into(),
                 input_schema: object(
                     json!({
                         "action": {"type":"string","enum":["list","get","upsert","forget","set_secret"]},
                         "id": {"type":"string","maxLength":96},
                         "url": {"type":"string","maxLength":2048,"description":"http(s) landing page, SPARQL endpoint, or RDF dump. Credential query params are stripped."},
                         "title": {"type":"string","maxLength":256},
-                        "kind": {"type":"string","enum":["sparql","rdf","rest","csv","page"]},
+                        "kind": {"type":"string","enum":["sparql","rdf","gis","rest","csv","page"]},
                         "data_endpoint": {"type":"string","maxLength":2048},
                         "formats": {"type":"array","maxItems":8,"items":{"type":"string","maxLength":32}},
                         "requires_api_key": {"type":"boolean"},
@@ -260,7 +265,7 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_jobs".into(),
-                description: "Downloader and scheduler. Fetch http(s) into .synth/inbox (gitignored staging), wrap PROV/DCT/DCAT, compile Turtle to .q42. action=add|list|get|run|run_due|enable|disable|forget. kind=fetch|ingest|compile. Operator ticks due jobs; synth mcp does not start the scheduler. Max 16 MiB. Secrets stay in .synth/secrets.json.".into(),
+                description: "Downloader and scheduler. Fetch http(s) into .synth/inbox (gitignored staging), wrap PROV/DCT/DCAT, compile N3/Turtle to .q42. action=add|list|get|run|run_due|enable|disable|forget. kind=fetch|ingest|compile. GIS/OSM/DEM/STAC ingest is opt-in later; geodesy morphisms bake maps now. Operator ticks due jobs; synth mcp does not start the scheduler. Max 16 MiB. Secrets stay in .synth/secrets.json.".into(),
                 input_schema: object(
                     json!({
                         "action": {"type":"string","enum":["list","get","add","upsert","forget","enable","disable","run","run_due"]},
@@ -293,7 +298,7 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_produce_present".into(),
-                description: "Execute Hypermedia asset operations inside one bounded ProductionSession. Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. Handles expire after source evaluation. Return hashes, absolute resource paths and optional native review receipts. Biosphere non-fiction (domain=biosphere, fiction=false) requires evidence_q42 or ecopunk/entities/taxa/{taxon}/*.q42.".into(),
+                description: "Execute QualiaDB/Etalon/Hypermedia asset operations inside one bounded ProductionSession (development tool, not the visitor runtime). Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. New scene assets are extra HMC/.10d/.q42 files; the host does not rebuild. Handles expire after source evaluation. Biosphere non-fiction (domain=biosphere, fiction=false) requires evidence_q42 or ecopunk/entities/taxa/{taxon}/*.q42.".into(),
                 input_schema: {
                     let mut schema = object(
                     json!({
@@ -303,7 +308,7 @@ impl StandaloneSynthMcp {
                         },
                         "source_path": {"type":"string", "maxLength":4096, "description":"UTF-8 source file under SYNTH_INPUT_ROOT; provide exactly one of source and source_path."},
                         "profile": {"type": "string", "maxLength": 64},
-                        "quality_profile": {"type":"string","enum":["preview","production16","authoring"],"description":"Default production16/authoring admits 64/256/320 MiB so raw CAD (boolean unions) can stay complicated. preview is the conservative 16/64/80 MiB leftover. Mesh size caps stay 200k/400k. Runtime cost uses hypermedia.manifold.simplify mode=optimize; that does not replace or degrade the source solid."},
+                        "quality_profile": {"type":"string","enum":["preview","production16","authoring"],"description":"Default production16/authoring admits a 128 MiB packed .10d ring, 2 GiB aggregate, and 2304 MiB package so raw CAD (boolean unions) can stay complicated. The 128 MiB ring is the graphics-container exception; it is not the 42 MiB Q42 Sentinel and it is not the p64/LLM VRAM ledger (6 GiB default). preview is the conservative 16/64/80 MiB leftover. Mesh size caps stay 200k/400k. Runtime cost uses hypermedia.manifold.simplify mode=optimize; that does not replace or degrade the source solid."},
                         "inputs": {"type": "array", "maxItems": ProductionLimits::default().resources,
                             "items": {"type": "object", "additionalProperties": false,
                                 "required": ["key", "kind", "path"], "properties": {
@@ -341,7 +346,10 @@ impl StandaloneSynthMcp {
 
 impl AuthoringBackend for StandaloneSynthMcp {
     fn instructions(&self) -> Option<String> {
-        Some(format!("Synth exposes {} asset morphisms through paged synth_operations / synth_ontology_morphisms / synth_operation_contracts (default 40 summaries; pass category, id, offset, limit, detail=full). Execute morphisms using capability.invoke inside synth_produce_present source (production AssetHost); vibe_invoke/vibe_catalog use a separate generic Poet snapshot. QualiaDB graph tools are on this same server: query_sparql, query_graph, ingest_ontology, parse_rdf, parse_json, parse_csv, serialize_rdf. Compile sourced Turtle/N3 into .q42 with synth_compile_q42 then query_sparql vault_path. Bookmark RDF/SPARQL/landing URLs with synth_bookmarks (public .synth/bookmarks.json; secrets in gitignored .synth/secrets.json). Fetch those URLs with synth_jobs (inbox .synth/inbox, PROV/DCT wrap, optional .q42). The operator scheduler ticks due jobs; synth mcp does not auto-run them. Check or apply signed GitHub Releases with synth_update (never overwrites a locked synth.exe). Biosphere non-fiction taxa (encyclopedia=Ecopunk) require that evidence .q42 before modelling; synth_production_rules and synth_operator_status report the gate. Bind inputs with key/kind/path under SYNTH_INPUT_ROOT; exports/HMC/HTML/Q42 destinations are create-only names under SYNTH_OUTPUT_ROOT. Inspect returned PNG/SVG/native review files before judging quality. Tool names use underscores. Input root configured: {}; output root configured: {}.", crate::production::assets::OPERATIONS.len(), self.input_root.is_some(), self.output_root.is_some()))
+        Some(crate::agent_index::mcp_instructions(
+            self.input_root.is_some(),
+            self.output_root.is_some(),
+        ))
     }
     fn tools(&self) -> Vec<AuthoringTool> {
         let mut all = Self::synth_tools();
@@ -351,11 +359,21 @@ impl AuthoringBackend for StandaloneSynthMcp {
 
     fn call(&mut self, name: &str, args: Value) -> Result<Value, ToolError> {
         let result = match name {
+            "synth_find" | "synth.find" => {
+                let q = args
+                    .get("q")
+                    .and_then(Value::as_str)
+                    .map(str::trim)
+                    .filter(|s| !s.is_empty())
+                    .ok_or_else(|| ToolError::new("invalid_arguments", "q is required (e.g. xpbd, nla, n3, gis)"))?;
+                let limit = args.get("limit").and_then(Value::as_u64).unwrap_or(20) as usize;
+                Ok(crate::agent_index::search(q, limit))
+            }
             "synth_capabilities" | "synth.capabilities" => {
                 crate::vibe_runtime::inspect().map_err(|e| ToolError::new("capabilities_failed", e))
             }
             "synth_ontology_categories" | "synth.ontology.categories" => {
-                Ok(crate::production::assets::ontology::categories_json())
+                Ok(crate::agent_index::categories_for_agents())
             }
             "synth_ontology_morphisms" | "synth.ontology.morphisms" => catalog::morphisms(args),
             "synth_operations" | "synth.operations" => catalog::operations(args),
@@ -515,6 +533,10 @@ mod tests {
 
         let tools = StandaloneSynthMcp::synth_tools();
         assert!(
+            tools.iter().any(|t| t.name == "synth_find"),
+            "synth_find must be advertised so agents can keyword-search morphisms"
+        );
+        assert!(
             tools.iter().any(|t| t.name == "synth_compile_q42"),
             "synth_compile_q42 must be advertised so sourced RDF can seal to .q42"
         );
@@ -558,6 +580,16 @@ mod tests {
         assert!(!operations_tool.description.contains("145"));
 
         let mut mcp = StandaloneSynthMcp::default();
+        let found = mcp.call("synth_find", json!({"q": "xpbd"})).unwrap();
+        assert_eq!(found["schema"], "synth.find/v1");
+        assert!(found["morphisms"].as_array().unwrap().iter().any(|m| {
+            m["id"] == "hypermedia.kinetics.step_island_xpbd"
+        }));
+        let ops_q = mcp
+            .call("synth_operations", json!({"q": "xpbd", "limit": 20}))
+            .unwrap();
+        assert!(ops_q["count"].as_u64().unwrap() >= 1);
+        assert!(ops_q["count"].as_u64().unwrap() < 150);
         let live_ops = mcp.call("synth_operations", json!({})).unwrap();
         assert_eq!(live_ops["count"], 150);
         assert_eq!(live_ops["returned"], 40);

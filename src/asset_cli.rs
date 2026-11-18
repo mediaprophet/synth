@@ -336,8 +336,8 @@ mod quality_profile_tests {
         let options = parse(&["produce","--source","fixture.vibe","--out","fixture.hmc","--quality-profile","production16"].map(String::from)).unwrap();
         assert_eq!(options.quality_profile,"production16");
         let limits = ProductionLimits::for_quality_profile(&options.quality_profile).unwrap();
-        assert_eq!(limits.resource_bytes,64*1024*1024);
-        assert_eq!(limits.asset_work_units,500_000_000);
+        assert_eq!(limits.resource_bytes,128*1024*1024);
+        assert_eq!(limits.asset_work_units,2_000_000_000);
         let authoring = ProductionLimits::for_quality_profile("authoring").unwrap();
         assert_eq!(authoring.total_resource_bytes, limits.total_resource_bytes);
         let defaulted = parse(&["produce","--source","fixture.vibe","--out","fixture.hmc"].map(String::from)).unwrap();

@@ -35,7 +35,7 @@ fn infer_format(explicit: Option<&str>, path: Option<&str>) -> Result<&'static s
             "q42" => Ok("q42"),
             other => Err(ToolError::new(
                 "invalid_arguments",
-                format!("unsupported RDF format {other}; use ttl, n3, nt, or q42"),
+                format!("unsupported RDF format {other}; prefer n3, or use ttl, nt, or q42"),
             )),
         };
     }
@@ -49,7 +49,7 @@ fn infer_format(explicit: Option<&str>, path: Option<&str>) -> Result<&'static s
         "q42" => Ok("q42"),
         other => Err(ToolError::new(
             "invalid_arguments",
-            format!("cannot infer format from extension .{other}; pass format=ttl"),
+            format!("cannot infer format from extension .{other}; pass format=n3"),
         )),
     }
 }

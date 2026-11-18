@@ -1,6 +1,7 @@
 //! General-purpose VibeScript authoring, pluggable asset production and native HMC packaging.
 //! Domain-specific generators implement [`production::AssetProducer`].
 pub mod agent;
+pub mod agent_index;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod cli;
 mod host;

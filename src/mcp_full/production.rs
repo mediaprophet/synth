@@ -92,7 +92,7 @@ fn binary_identity() -> Result<Value, ToolError> {
         if count == 0 { break; }
         hash.update(&buffer[..count]);
     }
-    Ok(json!({"version": env!("CARGO_PKG_VERSION"), "path": path, "sha256": format!("{:x}", hash.finalize())}))
+    Ok(json!({"version": crate::agent_index::RELEASE_VERSION, "path": path, "sha256": format!("{:x}", hash.finalize())}))
 }
 fn write_new(path: &Path, bytes: &[u8]) -> Result<(), ToolError> {
     let mut file = fs::OpenOptions::new().write(true).create_new(true).open(path)

@@ -8,14 +8,16 @@ use std::{
 };
 use webizen_render::VolumetricRenderer;
 
-const MAX_ASSET_BYTES: usize = 42 * 1024 * 1024;
+/// Packed `.10d` graphics asset ring (128 MiB). Distinct from the 42 MiB Q42 Sentinel
+/// and from the p64/LLM VRAM ledger (6 GiB default).
+const MAX_ASSET_BYTES: usize = 128 * 1024 * 1024;
 const PREVIEW_SIDE: u32 = 2048;
 const MAX_TOTAL_OUTPUT_BYTES: usize = 64 * 1024 * 1024;
 
 fn read_asset(path: &Path) -> Result<Vec<u8>, String> {
     let meta = fs::symlink_metadata(path).map_err(|e| format!("asset metadata: {e}"))?;
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > MAX_ASSET_BYTES as u64 {
-        return Err("--asset must be an ordinary `.10d` file within the 42 MiB bound".into());
+        return Err("--asset must be an ordinary `.10d` file within the 128 MiB graphics ring".into());
     }
     let mut bytes = Vec::new();
     fs::File::open(path)
@@ -24,7 +26,7 @@ fn read_asset(path: &Path) -> Result<Vec<u8>, String> {
         .read_to_end(&mut bytes)
         .map_err(|e| e.to_string())?;
     if bytes.is_empty() || bytes.len() > MAX_ASSET_BYTES {
-        return Err("asset grew beyond the selected 42 MiB profile".into());
+        return Err("asset grew beyond the 128 MiB graphics ring".into());
     }
     Ok(bytes)
 }

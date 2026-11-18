@@ -1,11 +1,14 @@
 # Webizen AI Synth
 
 Webizen AI Synth is a general-purpose VibeScript asset-production library and application.
-The desktop operator and studio are Aether applications: Aether is a Dioxus-fork
-toolkit (`Aether.toml`, `LaunchBuilder`, `Config`, menus, tray); this repo is the app.
-QualiaDB owns the language runtime, native resource formats and authority;
-Etalon supplies execution providers; Hypermedia supplies shared geometry,
-vector rendering, raster and timeline libraries. Poet remains a separate application.
+It is the **development tool** (produce, preview, compile). QualiaPortal plus the
+world host is the visitor runtime. The desktop operator and studio are Aether
+applications: Aether is a Dioxus-fork toolkit (`Aether.toml`, `LaunchBuilder`,
+`Config`, menus, tray); this repo is the app. QualiaDB owns the language runtime,
+native resource formats, SPARQL, N3Logic, SHACL and authority; Etalon supplies
+execution providers; Hypermedia supplies shared geometry, vector rendering, raster,
+kinetics and timeline libraries. Agents look up those capacities with `synth find`
+/ MCP `synth_find` (`q=xpbd`). Poet remains a separate application.
 Synth does not modify or embed Poet's application, UI or document model.
 
 ## Download

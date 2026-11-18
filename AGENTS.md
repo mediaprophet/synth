@@ -2,11 +2,15 @@
 
 Read this file before claiming a tool is missing, before re-auditing the kernel, and before writing a `.vibe`.
 
-Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, and CPU geometry libraries. Etalon supplies render/signal providers. A `.vibe` names the work.
+**Webizen AI Synth 0.0.41.11 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+
+**Find work with `synth_find`.** Pass `q=xpbd`, `q=nla`, `q=ik`, `q=navmesh`, `q=camera`, `q=input`, `q=gis`, `q=osm`, `q=n3`, `q=sparql`, `q=hmc`. CLI: `synth find xpbd`. MCP: `synth_find`. The 150 morphisms are QualiaDB + Etalon + Hypermedia; they are not a third engine.
+
+Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, SPARQL, N3Logic, SHACL, and CPU geometry libraries. Etalon supplies render/signal/sim providers. A `.vibe` names the work. Author logic as **N3** (N3Logic + SHACL); `synth_compile_q42` seals `.q42`; `query_sparql` runs over admitted Q42 ontologies. Add scene assets as **external HMC / `.10d` / `.q42` files** — the host does not rebuild. GIS maps bake through `hypermedia.geodesy.*` now; OSM/DEM/STAC ingest is opt-in later via `synth_jobs` and bookmarks `kind=gis`.
 
 **The 150 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
 
-Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Grep this file and `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` first.
+Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Call `synth_find` first, then grep this file and `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`.
 
 ---
 
@@ -43,7 +47,7 @@ $audit = 'C:\github\_swarm\target-rust-audit\debug\audit.exe'
 
 **Agent protocol:** before implementing, renaming, or claiming a function does not exist, grep `audit-docs/FUNCTIONS.md` and the matching `audit-docs/modules/*.md`. If it appears, it exists at the listed `path:line` — read that source. Absence from the index means absence from the tree as of the generation timestamp.
 
-Live list from a built Synth binary: `synth operations`, MCP `synth__synth_operations`, `synth__synth_ontology_morphisms`. Catalog tools are paged (default 40 summaries; pass `category`, `id`, `offset`, `limit`, `detail=ids|summary|full`). A running MCP binary can be older than this catalog; trust this file and `operations_catalog.rs` over a stale tool description that still says 114. After rebuilding `target-prod`, reload `/mcps` so Grok picks up `synth_compile_q42`, paged contracts, `synth_operator_status`, `synth_production_rules`, `synth_bookmarks`, `synth_jobs`, and `synth_update`. Operator workbench: `synth operator` (Webizen AI Synth system tray on Windows/macOS/Linux with `--features native-ui`). Aether is the Dioxus-fork toolkit; `Aether.toml` + `src/operator/aether_tray.rs` define the app. `GET /operator`. Tagged installs: `docs/install.md` and GitHub Releases (`synth update verify` / `apply`).
+Live list from a built Synth binary: `synth find <keyword>`, `synth operations`, MCP `synth__synth_find`, `synth__synth_operations`, `synth__synth_ontology_morphisms`. Catalog tools are paged (default 40 summaries; pass `category`, `id`, `q`, `offset`, `limit`, `detail=ids|summary|full`). A running MCP binary can be older than this catalog; trust this file and `operations_catalog.rs` over a stale tool description that still says 114. After rebuilding `target-prod`, reload `/mcps` so Grok picks up `synth_find`, `synth_compile_q42`, paged contracts, `synth_operator_status`, `synth_production_rules`, `synth_bookmarks`, `synth_jobs`, and `synth_update`. Operator workbench: `synth operator` (Webizen AI Synth system tray on Windows/macOS/Linux with `--features native-ui`). Aether is the Dioxus-fork toolkit; `Aether.toml` + `src/operator/aether_tray.rs` define the app. `GET /operator`. Tagged installs: `docs/install.md` and GitHub Releases (`synth update verify` / `apply`).
 
 Stale Synth docs that under-count and caused the missing-tool loop:
 
@@ -73,7 +77,7 @@ C:\github\synth\scripts\produce-preview.ps1 -Source <FILE.vibe> -Name revolve-de
 
 `--out`, `--export-dir`, `--present`, and `preview --out` are create-only. Two `synth produce` HMCs of the same source must match SHA-256. Unknown argument keys fail closed (`fields()`). Historical `synth.*` and short `manifold.*` names resolve through `canonical_morphism_id`.
 
-MCP (when connected): `synth__synth_ontology_morphisms`, `synth__synth_operations`, `synth__synth_operation_contracts` (paged; default 40 summaries), `synth__synth_produce_present`, `synth__synth_compile_q42`, `synth__synth_operator_status`, `synth__synth_production_rules`, `synth__synth_bookmarks`, `synth__synth_jobs`, `synth__synth_capabilities`, plus QualiaDB graph tools on the same server (`query_sparql`, `query_graph`, `ingest_ontology`, `parse_rdf`). Search with `search_tool` for `synth`. Compile sourced Turtle/N3 (file under `SYNTH_INPUT_ROOT` or inline `rdf_data`) with `synth_compile_q42` to a create-only `.q42` under `SYNTH_OUTPUT_ROOT`, then `query_sparql` with `vault_path`. Bookmark RDF dumps, SPARQL endpoints, or landing pages with `synth_bookmarks` (`action=upsert` plus later `data_endpoint` / `requires_api_key` / `agent_notes`). Fetch with `synth_jobs` (`kind=fetch|ingest|compile`) into gitignored `.synth/inbox` (PROV/DCT/DCAT wrap, optional `.q42`, max 16 MiB). CLI: `synth job add URL` / `synth job run ID` / `synth job run-due`. The operator ticks due jobs; `synth mcp` does not start the scheduler. Do not invent an HTTP CAS. Public metadata is `.synth/bookmarks.json` and `.synth/jobs.json`; API keys use `action=set_secret` → `.synth/secrets.json` (gitignored). CLI: `synth bookmark add URL`. Biosphere encyclopedia sources live in Ecopunk (`C:\github\ecopunk`). Non-fiction biosphere taxa (`domain=biosphere`, `fiction=false`) require that evidence `.q42` (or `ecopunk/entities/taxa/{taxon}/*.q42`) before `synth_produce_present`; `compile_q42` and graph queries stay allowed. `synth operator` / `GET /operator` is the Webizen AI Synth tray + browser shell (Windows/macOS/Linux; Aether is the toolkit). `synth update` checks tags, and the operator/tray **Upgrade** button (or `synth update upgrade`) downloads the latest signed GitHub Release portable, verifies Ed25519 over SHA-256 (`synth.release.sha256.v1`), and copies to a sibling `synth.new.exe`; it never overwrites a locked exe. The updater seed is gitignored `.synth/update-seed.hex` / GitHub secret `SYNTH_UPDATE_SEED`; the public key is `.synth/update-public.hex`.
+MCP (when connected): `synth__synth_find` (`q=xpbd`), `synth__synth_ontology_morphisms`, `synth__synth_operations`, `synth__synth_operation_contracts` (paged; default 40 summaries; `q` searches), `synth__synth_produce_present`, `synth__synth_compile_q42`, `synth__synth_operator_status`, `synth__synth_production_rules`, `synth__synth_bookmarks`, `synth__synth_jobs`, `synth__synth_capabilities`, plus QualiaDB graph tools on the same server (`query_sparql`, `query_graph`, `ingest_ontology`, `parse_rdf`). Search with `search_tool` for `synth`. Compile sourced N3 (preferred; file under `SYNTH_INPUT_ROOT` or inline `rdf_data`) with `synth_compile_q42` to a create-only `.q42` under `SYNTH_OUTPUT_ROOT`, then `query_sparql` with `vault_path`. Bookmark RDF dumps, SPARQL endpoints, or landing pages with `synth_bookmarks` (`action=upsert` plus later `data_endpoint` / `requires_api_key` / `agent_notes`). Fetch with `synth_jobs` (`kind=fetch|ingest|compile`) into gitignored `.synth/inbox` (PROV/DCT/DCAT wrap, optional `.q42`, max 16 MiB). CLI: `synth job add URL` / `synth job run ID` / `synth job run-due`. The operator ticks due jobs; `synth mcp` does not start the scheduler. Do not invent an HTTP CAS. Public metadata is `.synth/bookmarks.json` and `.synth/jobs.json`; API keys use `action=set_secret` → `.synth/secrets.json` (gitignored). CLI: `synth bookmark add URL`. Biosphere encyclopedia sources live in Ecopunk (`C:\github\ecopunk`). Non-fiction biosphere taxa (`domain=biosphere`, `fiction=false`) require that evidence `.q42` (or `ecopunk/entities/taxa/{taxon}/*.q42`) before `synth_produce_present`; `compile_q42` and graph queries stay allowed. `synth operator` / `GET /operator` is the Webizen AI Synth tray + browser shell (Windows/macOS/Linux; Aether is the toolkit). `synth update` checks tags, and the operator/tray **Upgrade** button (or `synth update upgrade`) downloads the latest signed GitHub Release portable, verifies Ed25519 over SHA-256 (`synth.release.sha256.v1`), and copies to a sibling `synth.new.exe`; it never overwrites a locked exe. The updater seed is gitignored `.synth/update-seed.hex` / GitHub secret `SYNTH_UPDATE_SEED`; the public key is `.synth/update-public.hex`.
 
 A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hypermedia.manifold.compile_vertebrate_anatomy_10d` for a recognisable heart / lung / eye: that morphism emits a comparative ellipsoid.
 
@@ -115,7 +119,14 @@ A named organ is a vibe that lofts / revolves / booleans parts. Do not call `hyp
 | EMF volume | `hypermedia.electromagnetics.compile_emf` |
 | EMF preview PNG | `render_spectral_slice` or `raymarch_vox0_dda` then `encode_rgba_png` |
 | Terrain | `hypermedia.geodesy.sculpt_terrain`, `compile_m64` |
-| IK / NLA / XPBD | `kinetics.solve_two_bone_ik`, `evaluate_nla_channelbag`, `step_island_xpbd` |
+| IK / NLA / XPBD | `hypermedia.kinetics.solve_two_bone_ik`, `evaluate_nla_channelbag`, `step_island_xpbd` |
+| Ray / sweep / hit | `hypermedia.kinetics.query_direct_space` |
+| NavMesh / ORCA | `hypermedia.kinetics.navigate_funnel_orca` |
+| Input map | `hypermedia.layout.route_input_action` |
+| Diegetic HUD | `hypermedia.layout.project_diegetic_surface` |
+| Camera look-at albedo | `hypermedia.manifold.compile_10d_pbr` `camera_position` / `camera_target` |
+| GIS / terrain / m64 | `hypermedia.geodesy.sculpt_terrain`, `compile_m64`, `hypermedia.locus.transcode_geospatial_vector` |
+| N3 → Q42 | MCP `synth_compile_q42` then `query_sparql` |
 
 ---
 
@@ -127,7 +138,7 @@ Implemented in `manifold_ops.rs`. Seals quantized mesh, area-weighted normals, o
 
 Albedo sampling order:
 
-1. Godot-style `Camera3D` look-at (`camera_position`, `camera_target`, `camera_up`, `camera_fov`, `camera_near`) for facing, in-frame pixels. Use this for a 3/4 photograph. Do not resample a photograph through auto-unwrap UVs.
+1. QualiaDB `Camera3D` look-at (`camera_position`, `camera_target`, `camera_up`, `camera_fov`, `camera_near`) for facing, in-frame pixels. Use this for a 3/4 photograph. Do not resample a photograph through auto-unwrap UVs.
 2. Authored `source_10d` UV01 (from `unwrap_slim`) when present. Vertex-count mismatch **fails closed**.
 3. Auto-`unwrap_slim` when albedo is present and `source_10d` is absent.
 4. Spherical centroid UV only when there is no camera and no atlas.
@@ -164,7 +175,7 @@ RGBA and sonics are **conversions of the same cells**:
 - `evaluate_field` clay brush: `expression=clay` with `clay_mode=add|subtract|smooth|pinch` (add/subtract/smooth along normals; pinch lerps toward `brush_center`). Other expressions remain `radial_wave|height_gradient|curvature_proxy|normal_displace`.
 - `simplify` `mode=anisotropic` uses a per-vertex isotropic(local mean edge) background metric by default; optional `target_edge` or SPD `metric:[m00,m10,m11,m20,m21,m22]` (indefinite metric fail-closes)
 - `simplify` `mode=optimize` (alias `optimisation`) reduces tessellation for runtime cost: QualiaDB `simplify_coplanar_regions`, `isotropic_remesh`, then `decimate_semantic_qem_3`. With `domains`/`locks` it tries admitted collapse first. `mode=semantic` / `admitted` stay fail-closed. The source mesh handle stays in the workspace; pack raw and optimised `.10d` as siblings. This is not model degradation.
-- `boolean_3d` 200k verts / 400k tris. Conforming union scratch is ~90 MiB class; produce default `quality_profile=production16` (`authoring`) admits 256 MiB aggregate so raw CAD can stay unioned. `preview` leftover (~64 MiB) cannot.
+- `boolean_3d` 200k verts / 400k tris. Conforming union scratch is ~90 MiB class; produce default `quality_profile=production16` (`authoring`) admits a 128 MiB packed `.10d` ring and 2 GiB aggregate so raw CAD can stay unioned. The 128 MiB ring is the graphics-container exception; it is not the 42 MiB Q42 Sentinel and it is not the p64/LLM VRAM ledger (6 GiB default). `preview` leftover (~64 MiB) cannot. Runtime cost still uses `simplify` `mode=optimize`.
 - loft 2..=256 sections, identical point counts; `interpolation=linear\|cubic\|nurbs`
 - revolve ≤256 segments; optional `interpolation=nurbs`; optional `caps=true` for a closed solid (boolean_3d)
 - `subdivide_catmull_clark` levels 1..=3, abort above 200k tris
@@ -376,7 +387,7 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.layout.typeset_paged_foliation` | multi-column, LaTeX math, CSL bibliography |
 | `hypermedia.layout.compile_dataflow_nodegraph` | typed NodeNetwork + morph frame |
 
-### kinetics (15)
+### kinetics (16)
 
 | ID | Args |
 |---|---|
@@ -395,6 +406,7 @@ Arguments are the ontology `arguments:` strings. Handles are session-local unles
 | `hypermedia.kinetics.drape_orthotropic_garment` | textile + pinned vertices |
 | `hypermedia.kinetics.simulate_causal_block_diagram` | causal blocks, RK4 |
 | `hypermedia.kinetics.schedule_cpm_evm_montecarlo` | task network, trials, Gantt SVG |
+| `hypermedia.kinetics.evaluate_mobility_fracture_risk` | clinical mobility / fracture-risk screen |
 
 ### acoustics (9)
 

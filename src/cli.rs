@@ -8,8 +8,19 @@ mod native_preview;
 pub fn run() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let result = if args.is_empty() || args.as_slice() == ["--help"] {
-        println!("Synth commands:\n  capabilities  Inspect the admitted Vibe SDK providers\n  ontology      Inspect the category-theoretic ontology taxonomy and morphisms\n  operations    List shared-library asset operations and ontological contracts\n  profiles      List available production profiles\n  mcp           Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio (stdio writes require SYNTH_OUTPUT_ROOT; HTTP /api/mcp/call never takes it)\n  mcp-tools     Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env           Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve         Run the local Synth Studio HTTP workbench on a non-conflicting port (default: 8787). QualiaDB demo at / ; current project at /project when --project DIR is set\n  operator      Webizen AI Synth operator at /operator (rules, events, git tags, bookmarks, jobs). System tray on Windows/macOS/Linux with --features native-ui\n  bookmark      Semantic datasource bookmarks in .synth/ (RDF/SPARQL URLs; secrets stay gitignored)\n  job           Download / wrap / compile jobs with a scheduler (operator ticks due jobs; inbox is .synth/inbox)\n  update        Check GitHub tags; verify/apply a signed release (never overwrites a locked synth.exe)\n  tray          Launch the Webizen AI Synth resident tray & studio (requires native-ui feature)\n  produce       Generate or strictly reopen an asset HMC\n  present       Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview       Render .10d PNGs and interactive HTML turntable (requires preview feature)");
+        println!("Synth commands:\n  find          Search QualiaDB/Etalon/Hypermedia morphisms and MCP tools (synth find xpbd)\n  capabilities  Inspect the admitted Vibe SDK providers and the product card (development tool)\n  ontology      Inspect the category-theoretic ontology taxonomy and morphisms\n  operations    List shared-library asset operations and ontological contracts\n  profiles      List available production profiles\n  mcp           Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio (stdio writes require SYNTH_OUTPUT_ROOT; HTTP /api/mcp/call never takes it)\n  mcp-tools     Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env           Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve         Run the local Synth Studio HTTP workbench on a non-conflicting port (default: 8787). QualiaDB demo at / ; current project at /project when --project DIR is set\n  operator      Webizen AI Synth operator at /operator (rules, events, git tags, bookmarks, jobs). System tray on Windows/macOS/Linux with --features native-ui\n  bookmark      Semantic datasource bookmarks in .synth/ (N3/RDF/SPARQL/GIS URLs; secrets stay gitignored)\n  job           Download / wrap / compile jobs with a scheduler (operator ticks due jobs; inbox is .synth/inbox)\n  update        Check GitHub tags; verify/apply a signed release (never overwrites a locked synth.exe)\n  tray          Launch the Webizen AI Synth resident tray & studio (requires native-ui feature)\n  produce       Generate or strictly reopen an asset HMC\n  present       Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview       Render .10d PNGs and interactive HTML turntable (requires preview feature)");
         asset_cli::run(&["--help".into()])
+    } else if args.first().is_some_and(|arg| arg == "find") {
+        let q = args[1..].join(" ");
+        if q.trim().is_empty() {
+            Err("Usage: synth find <keyword>   e.g. synth find xpbd".into())
+        } else {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&crate::agent_index::search(&q, 20)).unwrap()
+            );
+            Ok(())
+        }
     } else if args.as_slice() == ["capabilities"] {
         crate::vibe_runtime::inspect().and_then(|report| {
             println!(

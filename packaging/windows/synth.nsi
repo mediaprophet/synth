@@ -1,8 +1,8 @@
 !ifndef SYNTH_VERSION
-  !define SYNTH_VERSION "0.1.0"
+  !define SYNTH_VERSION "0.0.41.11"
 !endif
 !ifndef SYNTH_VI_VERSION
-  !define SYNTH_VI_VERSION "0.1.0.0"
+  !define SYNTH_VI_VERSION "0.0.41.11"
 !endif
 !ifndef SYNTH_BIN
   !define SYNTH_BIN "dist\synth-windows-x86_64.exe"
