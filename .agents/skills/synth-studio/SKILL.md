@@ -5,7 +5,7 @@ description: Produce Synth / Hypermedia assets from Antigravity. Use when making
 
 # Synth Studio for Antigravity
 
-Webizen AI Synth 0.0.41.11 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio. A `.vibe` names the work. Do not add a Rust compiler per species or organ.
+Webizen AI Synth 0.0.41.12 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio. A `.vibe` names the work. Do not add a Rust compiler per species or organ.
 
 Always-on digest: `C:\github\synth\GEMINI.md`. House rules: `C:\github\synth\AGENTS.md`. **Category tables:** `C:\github\synth\agent-instructions/<category>.md` (index `agent-instructions/README.md`). Open only the category you are producing.
 

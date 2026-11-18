@@ -25,7 +25,7 @@ async def main() -> None:
 
     server = synth_server()
     prompt = (
-        "You are producing with Webizen AI Synth 0.0.41.11, the development tool. "
+        "You are producing with Webizen AI Synth 0.0.41.12, the development tool. "
         "Call synth_find with q=xpbd. Then open agent-instructions/kinetics.md "
         "(index agent-instructions/README.md; house rules AGENTS.md). "
         "Invoke morphisms with capability.invoke inside synth_produce_present. "

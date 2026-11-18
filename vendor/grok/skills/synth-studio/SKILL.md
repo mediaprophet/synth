@@ -5,7 +5,7 @@ description: Produce Synth / Hypermedia assets from Grok. Use when making 3D mod
 
 # Synth Studio for Grok
 
-Webizen AI Synth 0.0.41.11 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio (locus, manifold, radiance, surface, kinetics, geodesy). A `.vibe` names the work. Grok does not add a Rust compiler per species or organ.
+Webizen AI Synth 0.0.41.12 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio (locus, manifold, radiance, surface, kinetics, geodesy). A `.vibe` names the work. Grok does not add a Rust compiler per species or organ.
 
 **Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then open `C:\github\synth\agent-instructions\<category>.md` (index `agent-instructions/README.md`; house rules `AGENTS.md`). Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not re-audit the kernel in place of calling a morphism that is already listed.
 

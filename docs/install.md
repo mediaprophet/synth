@@ -15,7 +15,7 @@ Portable CLI binaries remain in the same release (`synth-windows-x86_64.exe`, `s
 Run the installer for your OS. On Windows the shortcut launches `synth operator`. On macOS open `Webizen AI Synth.app`. On Debian/Ubuntu:
 
 ```bash
-sudo dpkg -i webizen-ai-synth_0.0.41.11_amd64.deb
+sudo dpkg -i webizen-ai-synth_0.0.41.12_amd64.deb
 synth operator
 ```
 

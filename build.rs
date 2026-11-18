@@ -7,8 +7,8 @@ fn main() {
         res.set("FileDescription", "Webizen AI Synth operator");
         res.set("LegalCopyright", "Apache-2.0");
         res.set("CompanyName", "Webizen AI");
-        res.set("FileVersion", "0.0.41.11");
-        res.set("ProductVersion", "0.0.41.11");
+        res.set("FileVersion", "0.0.41.12");
+        res.set("ProductVersion", "0.0.41.12");
         if let Err(err) = res.compile() {
             println!("cargo:warning=winresource: {err}");
         }
