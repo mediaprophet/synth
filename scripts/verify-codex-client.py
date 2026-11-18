@@ -27,8 +27,8 @@ def sha(data):
 def expected_operations(path):
     source = path.read_text(encoding="utf-8").split("];", 1)[0]
     ids = re.findall(r'\(\s*"((?:hypermedia|qualia)\.[a-z0-9_.]+)"', source)
-    if len(ids) != 148 or len(set(ids)) != 148:
-        raise ValueError("local authoritative catalogue is not 148 unique operations")
+    if len(ids) != 150 or len(set(ids)) != 150:
+        raise ValueError("local authoritative catalogue is not 150 unique operations")
     return set(ids)
 
 
@@ -152,22 +152,24 @@ def main():
                 raise RuntimeError("Registered Synth server is absent from the Codex inventory")
             tools = target.get("tools", {})
             names = list(tools) if isinstance(tools, dict) else [t.get("name") for t in tools]
-            if "synth_operations" not in names:
-                raise RuntimeError("Codex did not discover synth_operations")
+            if "synth_find" not in names or "synth_operations" not in names:
+                raise RuntimeError("Codex did not discover synth_find / synth_operations")
             result = {"server": args.server, "tool_count": len(names), "tool_names": names,
                       "desktop_proxy": args.proxy, "existing_chat": args.thread,
                       "catalog_verified": False, "fixture_verified": False,
                       "visual_acceptance": "not assessed"}
             if args.thread:
-                reply = tool("synth_operations", {})
+                reply = tool("synth_operations", {"limit": 150, "detail": "ids"})
                 (args.out / "operations.json").write_text(json.dumps(reply, indent=2), encoding="utf-8")
                 catalog = tool_payload(reply)
                 operations = catalog.get("operations")
-                if not isinstance(operations, list) or len(operations) != 148:
-                    raise RuntimeError("Codex catalog does not contain 148 operation records")
-                ids = [item.get("id") for item in operations if isinstance(item, dict)]
-                if len(ids) != 148 or len(set(ids)) != 148 or set(ids) != expected or catalog.get("count") != 148:
-                    raise RuntimeError("Codex catalog IDs/count differ from authoritative 148-operation source")
+                if catalog.get("count") != 150:
+                    raise RuntimeError("Codex catalog count is not 150")
+                ids = [item.get("id") for item in operations if isinstance(item, dict)] if isinstance(operations, list) else []
+                if not ids:
+                    ids = list(catalog.get("ids") or [])
+                if len(ids) != 150 or len(set(ids)) != 150 or set(ids) != expected:
+                    raise RuntimeError("Codex catalog IDs/count differ from authoritative 150-operation source")
                 result["catalog_verified"] = True
                 result["catalog_count"] = len(ids)
             if source is not None:
@@ -196,7 +198,7 @@ def main():
                 if repeat.get("status") == "error":
                     raise RuntimeError("Codex repeat production failed: " + json.dumps(repeat))
                 receipt = first.get("receipt")
-                if not isinstance(receipt, dict) or receipt.get("source_sha256") != sha(source_bytes) or receipt.get("catalog", {}).get("count") != 148:
+                if not isinstance(receipt, dict) or receipt.get("source_sha256") != sha(source_bytes) or receipt.get("catalog", {}).get("count") != 150:
                     raise RuntimeError("Codex receipt does not match source bytes/catalog")
                 if receipt.get("binary", {}).get("sha256", "").lower() != sha(args.synth.read_bytes()):
                     raise RuntimeError("registered server binary does not match requested CLI binary")

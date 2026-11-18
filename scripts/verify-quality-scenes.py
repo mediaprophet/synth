@@ -7,7 +7,7 @@ from pathlib import Path
 import argparse, datetime, hashlib, json, shutil, subprocess, uuid
 
 parser=argparse.ArgumentParser()
-parser.add_argument('--synth',type=Path,default=Path(__file__).resolve().parents[1]/'target-gap-review/debug/synth.exe')
+parser.add_argument('--synth',type=Path,default=Path(__file__).resolve().parents[1]/'target-prod/debug/synth.exe')
 parser.add_argument('--output-root',type=Path)
 parser.add_argument('--domain',action='append',choices=['biology','biology-cell','anatomy','flora','flora-branch','fauna','terrain','cosmos','interface'])
 args=parser.parse_args()

@@ -1,10 +1,17 @@
 {
   "mcpServers": {
-    "synth-qualia": {
-      "command": "c:/github/synth/target/debug/synth.exe",
+    "synth": {
+      "command": "C:\\github\\synth\\target-prod\\debug\\synth-mcp.exe",
       "args": ["mcp"],
       "env": {
-        "QUALIA_LLM_VAULT": "C:\\LLM_files"
+        "SYNTH_INPUT_ROOT": "C:\\github",
+        "SYNTH_OUTPUT_ROOT": "C:\\github\\synth\\production"
+      },
+      "tools": {
+        "synth_find": { "eager": true },
+        "synth_produce_present": { "eager": true },
+        "synth_compile_q42": { "eager": true },
+        "synth_operation_contracts": { "eager": true }
       }
     }
   }

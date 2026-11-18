@@ -1,6 +1,6 @@
 # Local stdio template. Select a validated isolated binary before registration.
 [mcp_servers.synth-local]
-command = 'C:\github\synth\production\review-runtime-20261113-122833\synth.exe'
+command = 'C:\github\synth\target-prod\debug\synth-mcp.exe'
 args = ['mcp']
 environment_id = 'local'
 enabled = true

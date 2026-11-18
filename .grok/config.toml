@@ -1,10 +1,11 @@
 # Project-scoped Grok config. Source of truth: vendor/grok/config.toml
 #
-# Isolated binary: target-prod (150 morphisms). Do not rebuild into
+# Isolated binary: target-prod. MCP command is synth-mcp.exe while
+# synth.exe is locked by the previous stdio child. Do not rebuild into
 # target or target-studio.
 
 [mcp_servers.synth]
-command = "C:\\github\\synth\\target-prod\\debug\\synth.exe"
+command = "C:\\github\\synth\\target-prod\\debug\\synth-mcp.exe"
 args = ["mcp"]
 enabled = true
 startup_timeout_sec = 60

@@ -1,6 +1,9 @@
 /target/
 /target-studio/
-/vendor/
+/.venv-antigravity/
+**/__pycache__/
+/vendor/antigravity-sdk-python/
+/vendor/antigravity/__pycache__/
 *.pdb
 *.exe
 *.dll

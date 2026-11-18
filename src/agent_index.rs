@@ -102,8 +102,38 @@ const TOOLS: &[ToolHit] = &[
     },
     ToolHit {
         name: "synth_capabilities",
-        haystack: "capabilities providers etalon vibe sdk role runtime",
+        haystack: "capabilities providers etalon vibe sdk role runtime product",
         invoke: "Product card plus Vibe/Etalon provider registry.",
+    },
+    ToolHit {
+        name: "synth_ontology_categories",
+        haystack: "categories locus manifold kinetics geodesy twelve",
+        invoke: "Twelve category summaries plus example morphism ids.",
+    },
+    ToolHit {
+        name: "synth_profiles",
+        haystack: "profile producer files quality production16 preview authoring",
+        invoke: "Registered AssetProducer profiles.",
+    },
+    ToolHit {
+        name: "synth_environment_bootstrap",
+        haystack: "tray studio environment llm vault p64 gguf bootstrap",
+        invoke: "Tray/studio bootstrap plus local LLM vault scan.",
+    },
+    ToolHit {
+        name: "synth_operator_status",
+        haystack: "operator status tray aether tags git upgrade",
+        invoke: "Operator snapshot. fetch=true ls-remote origin tags. Browser GET /operator.",
+    },
+    ToolHit {
+        name: "synth_production_rules",
+        haystack: "biosphere taxon evidence encyclopedia ecopunk fiction",
+        invoke: "Biosphere non-fiction taxa need evidence .q42 before produce.",
+    },
+    ToolHit {
+        name: "synth_update",
+        haystack: "update upgrade release github signed ed25519 installer",
+        invoke: "action=check|upgrade|verify|apply. Never overwrites a locked synth.exe.",
     },
 ];
 
@@ -131,6 +161,10 @@ const NOTES: &[Note] = &[
     Note {
         tokens: &["xpbd", "physics", "nla", "ik", "navmesh", "camera", "input"],
         text: "Kinetics, layout, and Camera3D compile live as catalog morphisms. Invoke them with capability.invoke inside synth_produce_present.",
+    },
+    Note {
+        tokens: &["antigravity", "gemini", "codex", "grok", "client", "mcp", "agents", "category"],
+        text: "Adapters: vendor/grok, vendor/codex, vendor/antigravity. Antigravity IDE reads .agents/mcp_config.json and ~/.gemini/config/mcp_config.json. Canonical contract is AGENTS.md; GEMINI.md is the always-on digest. Category tables live in agent-instructions/<category>.md.",
     },
 ];
 
@@ -393,5 +427,25 @@ mod tests {
             .unwrap()
             .iter()
             .any(|t| t["name"] == "synth_produce_present"));
+    }
+
+    #[test]
+    fn find_operator_and_update_and_antigravity() {
+        let op = search("operator", 20);
+        assert!(op["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|t| t["name"] == "synth_operator_status"));
+        let up = search("upgrade", 20);
+        assert!(up["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|t| t["name"] == "synth_update"));
+        let ag = search("antigravity", 20);
+        assert!(ag["notes"].as_array().unwrap().iter().any(|n| {
+            n.as_str().unwrap().contains("vendor/antigravity")
+        }));
     }
 }

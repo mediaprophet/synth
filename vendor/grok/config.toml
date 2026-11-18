@@ -4,10 +4,13 @@
 #
 # Grok spawns a new stdio `synth mcp` child. Do not rebuild into
 # C:\github\synth\target or target-studio (those binaries stay locked).
-# Isolated produce/MCP binary is target-prod (150 morphisms, 15 Nov 2026).
+# Isolated produce/MCP binary is target-prod. Grok MCP uses synth-mcp.exe
+# (paged catalog + synth_compile_q42) because Windows locks synth.exe while
+# the previous stdio child is alive. Produce CLI can keep using synth.exe
+# once that lock is gone and the sidecar is copied over.
 
 [mcp_servers.synth]
-command = "C:\\github\\synth\\target-prod\\debug\\synth.exe"
+command = "C:\\github\\synth\\target-prod\\debug\\synth-mcp.exe"
 args = ["mcp"]
 enabled = true
 startup_timeout_sec = 60

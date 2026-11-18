@@ -82,27 +82,17 @@ parity dispatch. `synth profiles` lists the CLI's available asset producers.
 Registration does not mean every possible engine operation is exposed.
 
 `synth ontology` and `synth operations` inspect the category-theoretic ontology
-and the **114 general-purpose production morphisms** across **12 canonical
-categories** (`locus`, `manifold`, `surface`, `radiance`, `glyph`, `layout`,
-`kinetics`, `acoustics`, `electromagnetics`, `geodesy`, `discourse`, and
-`chronicle`) bound to the source host via `HypermediaOntologyProvider` (`342`
-5-field parity-verified `NQuin48` triples). They generate 2D profiles/splines/
-booleans/fillets/RMF frames/SVG, BiDi/MSDF typography and 2D/diegetic Webizen UI
-layout sheets, extruded/revolved/lofted/CSG/QEM/Radial-Edge B-Rep/SubD/SDF-brick/
-FSPM-botany `.10d` PBR manifolds and `.dxf` drawings, SLIM UV/MikkTSpace/Cycles
-BSDF surfaces, rendered/graded/LUT/PSD/Kuwahara/Cryptomatte/SDFGI/Light-Tree
-radiance lattices, `.emf` (`Q42EMF64`) electromagnetic field volumes, Amanatides-Woo
-DDA raymarches, and 38D metameric null-space projections, `.m64` (`m64\0`)
-planetary terrain/strata/continuum/XPBD containers, PGA MotorFTI/two-bone IK/
-island XPBD/DirectSpaceState/NavMesh Funnel+ORCA/NLA/Lottie kinetics, 32-bus DAG/
-PGA spatialized/biquad-filtered WAV/AAC audio, ISO-BMFF H.264 `.mp4` clips and
-60Hz spatial motor packets, and PDF/DOCX/PPTX/chart-SVG/telemetry/fiduciary
-discourse documents.
+and the **150 general-purpose production morphisms** across **12 canonical
+categories** plus `qualia.species.assemble_corpus` (`locus`, `manifold`,
+`surface`, `radiance`, `glyph`, `layout`, `kinetics`, `acoustics`,
+`electromagnetics`, `geodesy`, `discourse`, `chronicle`) bound to the source
+host via `HypermediaOntologyProvider` (`450` 5-field parity-verified `NQuin48`
+triples). Agents look them up with `synth find` / MCP `synth_find`, then open
+[`agent-instructions/<category>.md`](agent-instructions/README.md). House rules:
+[`AGENTS.md`](AGENTS.md). Antigravity digest: [`GEMINI.md`](GEMINI.md).
 All canonical operation identifiers use category-theoretic naming with zero
-`-craft` legacy names while preserving backward-compatible aliases. See
-[`docs/asset-operations.md`](docs/asset-operations.md) and
-`../hypermedia-production/migration/categorical-ontology-audit-20261107.md` for
-full contracts and bounds.
+`-craft` legacy names while preserving backward-compatible aliases. Stale
+`docs/asset-operations.md` (114) is superseded.
 
 ## Build and use
 
@@ -113,13 +103,15 @@ recorded sibling revisions. It does not obtain project-specific source.
 
 ```powershell
 ./scripts/prepare-dependencies.ps1
-cargo build --locked --bin synth -j 1
-./target/debug/synth.exe capabilities
-./target/debug/synth.exe profiles
-./target/debug/synth.exe operations
-./target/debug/synth.exe produce --source ./examples/production.vibe --out ./target/production.hmc --export-dir ./target/production-export
-./target/debug/synth.exe produce --source ./examples/assets.vibe --out ./target/assets.hmc --export-dir ./target/assets-export
-./target/debug/synth.exe produce --reopen ./target/assets.hmc --out ./target/assets-reopened.hmc
+# This workstation: live MCP locks target/ and target-studio/. Isolated tree:
+$env:CARGO_TARGET_DIR = "C:\github\synth\target-prod"
+cargo build --locked --bin synth -j 1 --features preview
+$synth = "C:\github\synth\target-prod\debug\synth.exe"
+& $synth capabilities
+& $synth profiles
+& $synth operations
+# --out / --export-dir / --present are create-only. Unique names every run.
+# Agents: synth find <keyword> then agent-instructions/<category>.md (AGENTS.md).
 ```
 
 Output parents must exist; output files and export directories must be new.

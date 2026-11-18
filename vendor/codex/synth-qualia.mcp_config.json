@@ -1,10 +1,9 @@
 {
   "mcpServers": {
-    "synth-qualia": {
-      "command": "C:/github/synth/production/review-runtime-20261113-122833/synth.exe",
+    "synth": {
+      "command": "C:/github/synth/target-prod/debug/synth-mcp.exe",
       "args": ["mcp"],
       "env": {
-        "QUALIA_LLM_VAULT": "C:\\LLM_files",
         "SYNTH_INPUT_ROOT": "C:\\github",
         "SYNTH_OUTPUT_ROOT": "C:\\github\\synth\\production"
       }

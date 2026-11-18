@@ -5,13 +5,13 @@ description: Author and review local VibeScript assets with Synth, Hypermedia, Q
 
 # Local Synth production
 
-Read `C:\github\synth\AGENTS.md` before claiming a tool is absent or authoring a `.vibe`. The 148-operation catalog and Hypermedia's `audit-docs/FUNCTIONS.md` are authoritative. QualiaDB owns codecs and geometry; Hypermedia is the studio; Synth is the producer; Etalon supplies render and signal providers. Reuse the existing operation that performs the requested work.
+Read `C:\github\synth\AGENTS.md` before claiming a tool is absent or authoring a `.vibe`. Category tables live in `C:\github\synth\agent-instructions/<category>.md`. The 150-operation catalog and Hypermedia's `audit-docs/FUNCTIONS.md` are authoritative. QualiaDB owns codecs and geometry; Hypermedia is the studio; Synth is the producer; Etalon supplies render and signal providers. Reuse the existing operation that performs the requested work. Find with `synth_find`.
 
 ## Select and discover the executable
 
-Do not overwrite or kill live MCP binaries under `target` or `target-studio`. This integration selects `C:\github\synth\production\review-runtime-20261113-122833\synth.exe`, frozen from a separate build with `--features preview`. Check the executable identity and runtime `operations`, `mcp-tools`, and `capabilities`; counts in older documentation do not establish missing functions.
+Do not overwrite or kill live MCP binaries under `target` or `target-studio`. This integration selects `C:\github\synth\target-prod\debug\synth-mcp.exe`. Check the executable identity and runtime `operations`, `mcp-tools`, and `capabilities`; counts in older documentation do not establish missing functions.
 
-Use `synth_operations`, `synth_ontology_morphisms` and `synth_operation_contracts` to discover execution host, argument contracts, output recipes and handle lifetime. Hypermedia execution belongs to `synth_produce_present` / CLI `produce`. Generic Poet `vibe_invoke` is a different execution host and may return an explicit production routing error. Never infer an encoder from an operation namespace.
+Use `synth_find`, then `synth_operations`, `synth_ontology_morphisms` and `synth_operation_contracts` to discover execution host, argument contracts, output recipes and handle lifetime. Hypermedia execution belongs to `synth_produce_present` / CLI `produce`. Generic Poet `vibe_invoke` is a different execution host and may return an explicit production routing error. Never infer an encoder from an operation namespace.
 
 ## Produce with retained inputs
 
@@ -22,7 +22,7 @@ MCP `synth_produce_present` accepts `source`, `inputs`, `out_hmc`, `export_dir`,
 CLI and common helper:
 
 ```powershell
-$synth = 'C:\github\synth\production\review-runtime-20261113-122833\synth.exe'
+$synth = 'C:\github\synth\target-prod\debug\synth.exe'
 & $synth produce --source <FILE.vibe> --input reference.png png <INPUT.png> --out <NEW.hmc> --export-dir <NEW_DIR>
 C:\github\synth\scripts\invoke-asset.ps1 -Source <FILE.vibe> -InputManifest <INPUTS.json> -Preview
 ```

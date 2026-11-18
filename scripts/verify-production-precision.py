@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse, datetime, hashlib, json, struct, subprocess, uuid, zlib
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
-parser.add_argument('--synth',type=Path,default=ROOT/'target-gap-review/debug/synth.exe')
+parser.add_argument('--synth',type=Path,default=ROOT/'target-prod/debug/synth.exe')
 EXE=parser.parse_args().synth
 run=ROOT/'production'/('precision-'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8]);run.mkdir(parents=True)
 def chunk(tag,data):return struct.pack('>I',len(data))+tag+data+struct.pack('>I',zlib.crc32(tag+data)&0xffffffff)

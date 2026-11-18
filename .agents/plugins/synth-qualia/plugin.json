@@ -4,5 +4,6 @@
     "name": "Timothy Charles Holborn",
     "url": "https://www.linkedin.com/in/ubiquitous/"
   },
-  "repository": "https://github.com/mediaprophet/synth"
+  "repository": "https://github.com/mediaprophet/synth",
+  "description": "Webizen AI Synth 0.0.41.11 MCP: 150 morphisms, synth_find, produce/preview/compile. House rules AGENTS.md; digest GEMINI.md; category tables agent-instructions/."
 }

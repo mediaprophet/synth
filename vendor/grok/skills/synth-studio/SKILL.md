@@ -7,7 +7,7 @@ description: Produce Synth / Hypermedia assets from Grok. Use when making 3D mod
 
 Webizen AI Synth 0.0.41.11 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio (locus, manifold, radiance, surface, kinetics, geodesy). A `.vibe` names the work. Grok does not add a Rust compiler per species or organ.
 
-**Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then read `C:\github\synth\AGENTS.md`. Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not re-audit the kernel in place of calling a morphism that is already listed.
+**Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then open `C:\github\synth\agent-instructions\<category>.md` (index `agent-instructions/README.md`; house rules `AGENTS.md`). Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not re-audit the kernel in place of calling a morphism that is already listed.
 
 Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`. Trust `AGENTS.md` and `operations_catalog.rs` over a connected MCP binary whose tool description still says 114 or 148.
 
@@ -44,7 +44,7 @@ C:\github\synth\vendor\grok\scripts\invoke.ps1 -Morphism hypermedia.manifold.rev
 
 ## Modelling tools to actually call
 
-The four-line subset that used to live here is **not** the catalog. The catalog is **150** morphisms. Call `synth_find` then open `C:\github\synth\AGENTS.md` (mapping table + full ID/args tables). Grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` before saying a function does not exist.
+The four-line subset that used to live here is **not** the catalog. The catalog is **150** morphisms. Call `synth_find` then open `C:\github\synth\agent-instructions\<category>.md`. Grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` before saying a function does not exist.
 
 A named organ (heart, lung, eye) is a vibe that lofts/revolves/booleans those parts. Do not call `hypermedia.manifold.compile_vertebrate_anatomy_10d` for a recognisable organ. That morphism currently emits an ellipsoid.
 
