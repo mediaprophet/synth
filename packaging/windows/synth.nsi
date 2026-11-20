@@ -57,6 +57,8 @@ VIAddVersionKey "ProductVersion" "${SYNTH_VERSION}"
 !insertmacro MUI_LANGUAGE "English"
 
 Section "Install"
+  nsExec::ExecToLog 'taskkill /F /IM synth.exe'
+  Sleep 400
   SetOutPath "$INSTDIR"
   File "/oname=synth.exe" "${SYNTH_BIN}"
   File "/oname=icon.ico" "${SYNTH_ICON}"

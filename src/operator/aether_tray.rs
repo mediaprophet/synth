@@ -154,6 +154,7 @@ fn tray_menu() -> TrayMenu {
 
 fn operator_root() -> Element {
     let mut status = use_signal(|| serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+    let mut gpu_cfg = use_signal(crate::session_admission::load_gpu_selection_config);
     let mut message = use_signal(|| {
         format!(
             "Running · pid {} · {}",
@@ -175,6 +176,7 @@ fn operator_root() -> Element {
     let operator = operator_url();
     let emblem = branding::emblem_data_uri();
     let banner = branding::banner_data_uri();
+    let current_cfg = gpu_cfg.read().clone();
     rsx! {
         div {
             style: "font-family: ui-sans-serif, system-ui; background:#0b1412; color:#d7eee6; min-height:100vh; padding:20px;",
@@ -221,6 +223,7 @@ fn operator_root() -> Element {
                 }
                 button {
                     onclick: move |_| {
+                        gpu_cfg.set(crate::session_admission::load_gpu_selection_config());
                         status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
                         message.set(format!("Running · pid {} · {}", std::process::id(), operator_url()));
                     },
@@ -230,6 +233,94 @@ fn operator_root() -> Element {
                     style: "background:#2c1618; color:#fca5a5; border:1px solid #ef4444; border-radius:6px; padding:7px 12px;",
                     onclick: move |_| exit_operator(),
                     "Exit"
+                }
+            }
+            h2 { "GPU adapter & backend selection" }
+            p { style: "color:#8fb5a7; margin:4px 0 8px 0;",
+                "Active policy: preference = {current_cfg.preference} (reject_igpu = {current_cfg.reject_igpu}), backend = {current_cfg.backend}"
+            }
+            div { style: "display:flex; gap:8px; flex-wrap:wrap; margin:8px 0;",
+                button {
+                    style: if current_cfg.backend == "vulkan" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.backend = "vulkan".into();
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected GPU backend: Vulkan (Discrete GPU)".into());
+                        }
+                    },
+                    "Backend: Vulkan"
+                }
+                button {
+                    style: if current_cfg.backend == "cuda" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.backend = "cuda".into();
+                        c.preference = "discrete-only".into();
+                        c.reject_igpu = true;
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected GPU backend: CUDA (NVIDIA Native Compute + Vulkan Companion)".into());
+                        }
+                    },
+                    "Backend: CUDA (NVIDIA)"
+                }
+                button {
+                    style: if current_cfg.backend == "dx12" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.backend = "dx12".into();
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected GPU backend: DirectX 12".into());
+                        }
+                    },
+                    "Backend: DirectX 12"
+                }
+                button {
+                    style: if current_cfg.backend == "metal" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.backend = "metal".into();
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected GPU backend: Metal".into());
+                        }
+                    },
+                    "Backend: Metal"
+                }
+                button {
+                    style: if current_cfg.preference == "discrete-only" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.preference = "discrete-only".into();
+                        c.reject_igpu = true;
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected Adapter Policy: Discrete GPU Only (On-board iGPU blocked)".into());
+                        }
+                    },
+                    "Discrete GPU Only (Block Intel iGPU)"
+                }
+                button {
+                    style: if current_cfg.preference == "integrated" { "background:#134e4a; color:#99f6e4; border:1px solid #2dd4bf; border-radius:6px; padding:7px 12px;" } else { "" },
+                    onclick: move |_| {
+                        let mut c = gpu_cfg.read().clone();
+                        c.preference = "integrated".into();
+                        c.reject_igpu = false;
+                        if let Ok(_) = crate::session_admission::save_and_apply_gpu_selection_config(c.clone()) {
+                            gpu_cfg.set(c);
+                            status.set(serde_json::to_string_pretty(&snapshot()).unwrap_or_default());
+                            message.set("Selected Adapter Policy: Integrated / Low-Power GPU".into());
+                        }
+                    },
+                    "Allow Integrated GPU"
                 }
             }
             h2 { "Biosphere rule" }
