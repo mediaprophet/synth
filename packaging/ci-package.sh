@@ -81,7 +81,9 @@ case "$OS" in
     iconutil -c icns "$iconset" -o "$app/Contents/Resources/AppIcon.icns"
     rm -rf "$iconset"
     rm -f "$DIST/$installer"
-    hdiutil create -volname "Webizen AI Synth" -srcfolder "$app" -ov -format UDZO "$DIST/$installer" >&2
+    app_mb="$(du -sm "$app" | awk '{print $1}')"
+    dmg_mb=$(( app_mb + 128 ))
+    hdiutil create -volname "Webizen AI Synth" -srcfolder "$app" -size "${dmg_mb}m" -ov -format UDZO "$DIST/$installer" >&2
     echo "$installer"
     ;;
   linux)
