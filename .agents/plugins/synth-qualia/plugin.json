@@ -5,5 +5,5 @@
     "url": "https://www.linkedin.com/in/ubiquitous/"
   },
   "repository": "https://github.com/mediaprophet/synth",
-  "description": "Webizen AI Synth 0.0.41.12 MCP: 150 morphisms, synth_find, produce/preview/compile. House rules AGENTS.md; digest GEMINI.md; category tables agent-instructions/."
+  "description": "Webizen AI Synth 0.0.41.13 MCP: 150 morphisms, synth_find, produce/preview/compile, convert-3d, validate-model. House rules AGENTS.md; digest GEMINI.md; category tables agent-instructions/."
 }
