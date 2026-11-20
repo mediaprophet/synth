@@ -293,7 +293,7 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
             })
             .collect();
         let default_contract =
-            crate::changelog_licensing::DualRegimeLicenseContract::default_sovereign_or_commons(
+            crate::changelog_licensing::DualRegimeLicenseContract::for_regime(
                 parsed.taxon.as_deref().unwrap_or("urn:qualia:synth:asset"),
                 crate::changelog_licensing::LicensingRegimeKind::PermissiveCommonsPaydown,
             );

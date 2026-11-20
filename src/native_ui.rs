@@ -242,7 +242,7 @@ fn Monitor(props: MonitorProps) -> Element {
                         alt: "Synth Emblem"
                     }
                     div {
-                        h1 { style: "margin: 0; font-size: 21px;", "Webizen AI Synth · Sovereign Asset, Ontology & MCP Studio" }
+                        h1 { style: "margin: 0; font-size: 21px;", "Webizen AI Synth · Human-Rights Asset, Ontology & MCP Studio" }
                         p { style: "margin: 4px 0 0 0; color: #8fb5a7; font-size: 12px;", "{displayed.status}" }
                     }
                 }

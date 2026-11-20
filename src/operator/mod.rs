@@ -324,6 +324,7 @@ pub fn snapshot_with_fetch(fetch_remote: bool) -> Value {
         "app": branding::APP_DISPLAY_NAME,
         "pid": std::process::id(),
         "encyclopedia": "ecopunk",
+        "gpu": crate::session_admission::detect_runtime_and_gpu_profile(None),
         "rules": rules_document(),
         "update": update_status(fetch_remote),
         "events": recent_events(),
@@ -378,6 +379,25 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 <h2>Install / update</h2>
 <p>Upgrade downloads the latest signed portable from GitHub Releases, verifies Ed25519 (<code>synth.release.sha256.v1</code>), and copies it next to this process as <code>synth.new.exe</code> (or the platform equivalent). It never overwrites a locked <code>synth.exe</code>. Prefer the signed installer for a first install. CLI: <code>synth update upgrade</code>, or <code>synth update verify --artifact FILE</code> then <code>synth update apply --artifact FILE</code>.</p>
 <pre id="update">Ready.</pre>
+<h2>GPU adapter &amp; backend selection</h2>
+<p>Default is <strong>Discrete GPU only (Reject on-board Intel iGPU)</strong> with <strong>Vulkan</strong> so Synth never throttles or locks up an integrated GPU on hybrid machines. Persists to <code>.synth/gpu-config.json</code>. CLI: <code>synth gpu set --prefer discrete-only --backend vulkan</code>.</p>
+<p>
+<select id="gpu-pref" style="padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px;margin-right:8px;">
+<option value="discrete-only">Discrete GPU Only (Block Intel/On-board iGPU)</option>
+<option value="discrete">Prefer Discrete GPU (Fallback to iGPU if none)</option>
+<option value="integrated">Integrated / Low-Power GPU</option>
+</select>
+<select id="gpu-backend" style="padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px;margin-right:8px;">
+<option value="vulkan">Vulkan (Discrete GPU selection)</option>
+<option value="dx12">DirectX 12 (Windows native)</option>
+<option value="metal">Metal (macOS Apple Silicon)</option>
+<option value="gl">OpenGL / GLES</option>
+<option value="auto">Auto</option>
+</select>
+<input id="gpu-adapter-filter" type="text" placeholder="Optional adapter filter (e.g. RTX, NVIDIA)" style="width:240px;padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px;margin-right:8px;"/>
+<button onclick="saveGpuConfig()" style="background:#134e4a;color:#99f6e4;border:1px solid #2dd4bf;">Apply GPU Selection</button>
+</p>
+<pre id="gpu-status">loading…</pre>
 <h2>Semantic bookmarks</h2>
 <p>Paste an RDF dump, SPARQL endpoint, or landing-page URL. Keys go to <code>.synth/secrets.json</code> (gitignored), never GitHub.</p>
 <p>
@@ -471,7 +491,37 @@ async function runDue(){
   document.getElementById('jobs').textContent = JSON.stringify(j,null,2);
   refreshJobs();
 }
+async function refreshGpu(){
+  const r = await fetch('/api/gpu');
+  const j = await r.json();
+  const el = document.getElementById('gpu-status');
+  if (el) el.textContent = JSON.stringify(j,null,2);
+  if (j.gpu_selection_config) {
+    const p = document.getElementById('gpu-pref');
+    const b = document.getElementById('gpu-backend');
+    const f = document.getElementById('gpu-adapter-filter');
+    if (p && document.activeElement !== p) p.value = j.gpu_selection_config.preference || 'discrete-only';
+    if (b && document.activeElement !== b) b.value = j.gpu_selection_config.backend || 'vulkan';
+    if (f && document.activeElement !== f) f.value = j.gpu_selection_config.adapter_name_filter || '';
+  }
+}
+async function saveGpuConfig(){
+  const preference = document.getElementById('gpu-pref').value;
+  const backend = document.getElementById('gpu-backend').value;
+  const rawFilter = document.getElementById('gpu-adapter-filter').value.trim();
+  const body = {
+    preference,
+    backend,
+    reject_igpu: preference === 'discrete-only',
+    adapter_name_filter: rawFilter ? rawFilter : null
+  };
+  const r = await fetch('/api/gpu', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body)});
+  const j = await r.json();
+  document.getElementById('gpu-status').textContent = JSON.stringify(j,null,2);
+  refresh(false);
+}
 refresh(false);
+refreshGpu();
 refreshBookmarks();
 refreshJobs();
 setInterval(()=>{refresh(false); refreshBookmarks(); refreshJobs();}, 2500);

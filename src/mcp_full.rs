@@ -113,6 +113,7 @@ impl StandaloneSynthMcp {
 
     /// Operator-configured native directory (`SYNTH_OUTPUT_ROOT`). Unset means writes are refused.
     pub fn from_process_env() -> Result<Self, String> {
+        crate::session_admission::init_gpu_policy_on_startup();
         let mut mcp = Self::default();
         match std::env::var("SYNTH_OUTPUT_ROOT") {
             Ok(raw) if !raw.trim().is_empty() => {
@@ -328,6 +329,20 @@ impl StandaloneSynthMcp {
                 ),
             },
             AuthoringTool {
+                name: "synth_gpu".into(),
+                description: "Inspect or select Synth's physical GPU adapter preference (default: discrete-only, refusing Intel/on-board integrated GPUs so the host desktop never throttles or locks up) and graphics backend (default: vulkan; also dx12, metal, gl, auto). Persists in .synth/gpu-config.json.".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["status","list","set"]},
+                        "preference": {"type":"string","description":"discrete-only (default; blocks on-board iGPU), discrete, integrated, or name:<substring>"},
+                        "backend": {"type":"string","enum":["vulkan","dx12","metal","gl","auto","cpu"]},
+                        "reject_igpu": {"type":"boolean","description":"When true (default), strictly refuse DeviceType::IntegratedGpu adapters"},
+                        "adapter_name_filter": {"type":"string","maxLength":128,"description":"Optional substring filter for adapter name (e.g. RTX, NVIDIA)"}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
                 name: "synth_changelog_license".into(),
                 description: "Inspect or update an asset's SVN-style signed revision changelog (.synth/changelog.json) and Dual-Regime Semantic License Contract (.synth/license-contract.json: PermissiveCommonsPaydown vs. PerpetualCreativeRoyalty vs. CC-BY-NC-ND-4.0) (REQ-6).".into(),
                 input_schema: object(
@@ -335,7 +350,7 @@ impl StandaloneSynthMcp {
                         "action": {"type":"string","enum":["inspect","set_license"]},
                         "project_dir": {"type":"string","maxLength":4096},
                         "asset_id": {"type":"string","maxLength":512},
-                        "regime": {"type":"string","enum":["commons_paydown","perpetual_royalty","sovereign_cc_by_nc_nd","sanctuary"]},
+                        "regime": {"type":"string","enum":["commons_paydown","perpetual_royalty","cc_by_nc_nd","qualia_cc_by_nc_nd","sanctuary"]},
                         "target_pool_t_cents": {"type":"integer","minimum":0},
                         "roi_multiplier": {"type":"number","minimum":1.0,"maximum":10.0},
                         "settled_s_cents": {"type":"integer","minimum":0},
@@ -540,6 +555,41 @@ impl StandaloneSynthMcp {
                     "gpu_runtime_profile": crate::session_admission::detect_runtime_and_gpu_profile(backend),
                     "build_identity": crate::session_admission::build_identity_and_drift_report(),
                 }))
+            }
+            "synth_gpu" | "synth.gpu" => {
+                let action = args.get("action").and_then(Value::as_str).unwrap_or("status");
+                let has_updates = args.get("preference").is_some()
+                    || args.get("backend").is_some()
+                    || args.get("reject_igpu").is_some()
+                    || args.get("adapter_name_filter").is_some();
+                if action == "set" || has_updates {
+                    let mut cfg = crate::session_admission::load_gpu_selection_config();
+                    if let Some(p) = args.get("preference").and_then(Value::as_str) {
+                        cfg.preference = p.to_string();
+                        if cfg.preference == "discrete-only" {
+                            cfg.reject_igpu = true;
+                        } else if cfg.preference == "integrated" {
+                            cfg.reject_igpu = false;
+                        }
+                    }
+                    if let Some(b) = args.get("backend").and_then(Value::as_str) {
+                        cfg.backend = b.to_string();
+                    }
+                    if let Some(r) = args.get("reject_igpu").and_then(Value::as_bool) {
+                        cfg.reject_igpu = r;
+                    }
+                    if let Some(f) = args.get("adapter_name_filter") {
+                        cfg.adapter_name_filter = f
+                            .as_str()
+                            .map(str::trim)
+                            .filter(|s| !s.is_empty() && *s != "none")
+                            .map(str::to_string);
+                    }
+                    crate::session_admission::save_and_apply_gpu_selection_config(cfg)
+                        .map_err(|e| ToolError::new("gpu_selection_failed", e))
+                } else {
+                    Ok(crate::session_admission::detect_runtime_and_gpu_profile(None))
+                }
             }
             "synth_changelog_license" | "synth.changelog.license" => {
                 crate::changelog_licensing::dispatch_changelog_license_mcp(args)

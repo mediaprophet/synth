@@ -118,17 +118,188 @@ pub fn build_identity_and_drift_report() -> Value {
     })
 }
 
+/// Persisted GPU Adapter & Backend Policy (`SYNTH_GPU_PREFERENCE`, `QUALIA_RENDER_WGPU_BACKEND`, `SYNTH_REJECT_IGPU`).
+/// Defaults to `discrete-only` (`reject_igpu = true`, `backend = vulkan`) so Synth never throttles
+/// or locks up the on-board Intel integrated GPU on hybrid-GPU machines.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GpuSelectionConfig {
+    pub schema: String,
+    /// `"discrete-only"` (default), `"discrete"`, `"integrated"`, or `"name:<substring>"`
+    pub preference: String,
+    /// `"vulkan"` (default on Windows/Linux), `"dx12"`, `"metal"` (default on macOS), `"gl"`, or `"auto"`
+    pub backend: String,
+    /// When `true` (default), refuses `DeviceType::IntegratedGpu` so the Intel on-board GPU is never locked up.
+    pub reject_igpu: bool,
+    /// Optional adapter name substring filter (e.g. `"RTX"`, `"NVIDIA"`, `"Radeon"`).
+    #[serde(default)]
+    pub adapter_name_filter: Option<String>,
+}
+
+impl Default for GpuSelectionConfig {
+    fn default() -> Self {
+        Self {
+            schema: "synth.gpu-selection-config/v1".into(),
+            preference: "discrete-only".into(),
+            backend: if cfg!(target_os = "macos") {
+                "metal".into()
+            } else {
+                "vulkan".into()
+            },
+            reject_igpu: true,
+            adapter_name_filter: None,
+        }
+    }
+}
+
+fn gpu_config_paths() -> Vec<PathBuf> {
+    let mut paths = Vec::new();
+    if let Ok(root) = std::env::var("SYNTH_OUTPUT_ROOT") {
+        let trimmed = root.trim();
+        if !trimmed.is_empty() {
+            let dir = Path::new(trimmed).join(".synth");
+            let _ = fs::create_dir_all(&dir);
+            paths.push(dir.join("gpu-config.json"));
+        }
+    }
+    let repo_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join(".synth");
+    let _ = fs::create_dir_all(&repo_dir);
+    let repo_cfg = repo_dir.join("gpu-config.json");
+    if !paths.contains(&repo_cfg) {
+        paths.push(repo_cfg);
+    }
+    paths
+}
+
+pub fn load_gpu_selection_config() -> GpuSelectionConfig {
+    for path in gpu_config_paths() {
+        if let Ok(raw) = fs::read_to_string(&path) {
+            if let Ok(cfg) = serde_json::from_str::<GpuSelectionConfig>(&raw) {
+                return cfg;
+            }
+        }
+    }
+    GpuSelectionConfig::default()
+}
+
+pub fn apply_gpu_selection_env(cfg: &GpuSelectionConfig) {
+    let effective_pref = if let Some(ref name) = cfg.adapter_name_filter {
+        let trimmed = name.trim();
+        if !trimmed.is_empty() {
+            format!("name:{trimmed}")
+        } else {
+            cfg.preference.clone()
+        }
+    } else {
+        cfg.preference.clone()
+    };
+    std::env::set_var("SYNTH_GPU_PREFERENCE", &effective_pref);
+    std::env::set_var("QUALIA_GPU_PREFERENCE", &effective_pref);
+    let reject_val = if cfg.reject_igpu || cfg.preference == "discrete-only" {
+        "1"
+    } else {
+        "0"
+    };
+    std::env::set_var("SYNTH_REJECT_IGPU", reject_val);
+    std::env::set_var("QUALIA_REJECT_IGPU", reject_val);
+    let backend = cfg.backend.trim();
+    if !backend.is_empty() {
+        std::env::set_var("QUALIA_RENDER_WGPU_BACKEND", backend);
+        std::env::set_var("QUALIA_WGPU_BACKEND", backend);
+    }
+}
+
+pub fn save_and_apply_gpu_selection_config(mut cfg: GpuSelectionConfig) -> Result<Value, String> {
+    cfg.schema = "synth.gpu-selection-config/v1".into();
+    let pref = cfg.preference.trim().to_ascii_lowercase();
+    if !matches!(
+        pref.as_str(),
+        "discrete-only" | "discrete" | "integrated" | "igpu" | "low-power" | "high-performance"
+    ) && !pref.starts_with("name:")
+    {
+        return Err(format!(
+            "Invalid GPU preference '{}'; expected discrete-only, discrete, integrated, or name:<adapter>",
+            cfg.preference
+        ));
+    }
+    cfg.preference = pref;
+    if cfg.preference == "discrete-only" {
+        cfg.reject_igpu = true;
+    } else if cfg.preference == "integrated" || cfg.preference == "igpu" {
+        cfg.reject_igpu = false;
+    }
+    let backend = cfg.backend.trim().to_ascii_lowercase();
+    if !matches!(
+        backend.as_str(),
+        "auto" | "vulkan" | "vk" | "dx12" | "d3d12" | "metal" | "gl" | "gles" | "cpu"
+    ) {
+        return Err(format!(
+            "Invalid GPU backend '{}'; expected vulkan, dx12, metal, gl, auto, or cpu",
+            cfg.backend
+        ));
+    }
+    cfg.backend = backend;
+    let bytes = serde_json::to_vec_pretty(&cfg).map_err(|e| e.to_string())?;
+    for path in gpu_config_paths() {
+        let _ = fs::write(&path, &bytes);
+    }
+    apply_gpu_selection_env(&cfg);
+    Ok(detect_runtime_and_gpu_profile(Some(&cfg.backend)))
+}
+
+/// Initialize the process environment variables from `.synth/gpu-config.json` (or default `discrete-only`)
+/// before any GPU device is created.
+pub fn init_gpu_policy_on_startup() {
+    let cfg = load_gpu_selection_config();
+    apply_gpu_selection_env(&cfg);
+}
+
+/// Enumerate physical GPU circuits discovered via `qualia_core_db::gpu_context::device_registry`.
+pub fn enumerate_gpu_adapters_json() -> Vec<Value> {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let circuits = qualia_core_db::gpu_context::device_registry::enumerate_circuits();
+        let primary = qualia_core_db::gpu_context::device_registry::primary_circuit_index();
+        let aux = qualia_core_db::gpu_context::device_registry::auxiliary_circuit_index();
+        circuits
+            .iter()
+            .enumerate()
+            .map(|(idx, c)| {
+                let is_igpu = c.caps.is_integrated_gpu();
+                json!({
+                    "index": idx,
+                    "name": c.caps.name,
+                    "vendor_id": format!("0x{:04x}", c.caps.vendor),
+                    "device_id": format!("0x{:04x}", c.caps.device),
+                    "device_type": format!("{:?}", c.caps.device_type),
+                    "backend": c.caps.backend_label(),
+                    "driver": c.caps.driver,
+                    "is_discrete": format!("{:?}", c.caps.device_type) == "DiscreteGpu",
+                    "is_integrated": is_igpu,
+                    "role": if Some(idx) == primary {
+                        "primary-discrete"
+                    } else if Some(idx) == aux {
+                        "auxiliary-integrated"
+                    } else {
+                        "secondary"
+                    }
+                })
+            })
+            .collect()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        Vec::new()
+    }
+}
+
 /// REQ-4.1 & REQ-4.2: Tiered Local GPU & Local Runtime Profile (Port 4242 / 8080 / 8787 + Native Vulkan/CUDA/Metal).
 pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value {
+    let cfg = load_gpu_selection_config();
+    apply_gpu_selection_env(&cfg);
     let (_, local_runtime_8080, local_runtime_4242) = crate::tray_env::probe_webizen_desktop();
 
-    let default_backend = if cfg!(target_os = "macos") {
-        "metal"
-    } else {
-        "vulkan"
-    };
     let selected_backend = match requested_backend.map(str::trim).filter(|s| !s.is_empty()) {
-        Some("auto") | None => default_backend,
+        Some("auto") | None => cfg.backend.as_str(),
         Some(other) => other,
     };
 
@@ -140,11 +311,16 @@ pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value 
         "local-native-gpu-standalone"
     };
 
+    let adapters = enumerate_gpu_adapters_json();
+
     json!({
         "schema": "synth.runtime-gpu-profile/v1",
         "execution_tier": execution_tier,
         "selected_gpu_backend": selected_backend,
-        "supported_backends": ["vulkan", "cuda", "metal", "dx12", "webgpu-wasm", "webgl2-wasm", "cpu"],
+        "gpu_selection_config": cfg,
+        "enumerated_adapters": adapters,
+        "supported_backends": ["vulkan", "dx12", "metal", "gl", "cuda", "webgpu-wasm", "webgl2-wasm", "cpu"],
+        "supported_preferences": ["discrete-only", "discrete", "integrated", "name:<adapter>"],
         "webizen_desktop_probe": {
             "port_4242_ws_online": local_runtime_4242,
             "port_8080_http_online": local_runtime_8080,

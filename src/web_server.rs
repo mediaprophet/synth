@@ -760,6 +760,42 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         );
     }
     #[cfg(not(target_arch = "wasm32"))]
+    if method == "GET" && path == "/api/gpu" {
+        let payload = crate::session_admission::detect_runtime_and_gpu_profile(None);
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if method == "POST" && path == "/api/gpu" {
+        let mut cfg = crate::session_admission::load_gpu_selection_config();
+        let payload = match serde_json::from_slice::<Value>(body) {
+            Ok(val) => {
+                if let Some(p) = val.get("preference").and_then(Value::as_str) {
+                    cfg.preference = p.to_owned();
+                }
+                if let Some(b) = val.get("backend").and_then(Value::as_str) {
+                    cfg.backend = b.to_owned();
+                }
+                if let Some(r) = val.get("reject_igpu").and_then(Value::as_bool) {
+                    cfg.reject_igpu = r;
+                }
+                if val.get("adapter_name_filter").is_some() {
+                    cfg.adapter_name_filter = val
+                        .get("adapter_name_filter")
+                        .and_then(Value::as_str)
+                        .map(str::trim)
+                        .filter(|s| !s.is_empty())
+                        .map(str::to_owned);
+                }
+                crate::session_admission::save_and_apply_gpu_selection_config(cfg)
+                    .unwrap_or_else(|error| json!({ "ok": false, "error": error }))
+            }
+            Err(err) => json!({ "ok": false, "error": format!("Invalid GPU config JSON: {err}") }),
+        };
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
     if method == "GET" && path == "/api/operator" {
         let fetch = raw_path.contains("fetch=1") || raw_path.contains("fetch=true");
         let payload = crate::operator::snapshot_with_fetch(fetch);

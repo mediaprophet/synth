@@ -155,16 +155,26 @@ pub struct AssetChangelog {
 }
 
 /// Dual-Regime Licensing & Obligation Contract (`REQ-6.4`).
+///
+/// Under UDHR Article 27(2) and ICESCR Article 15(1)(c), authors never abandon their
+/// moral rights. Inalienable moral rights and permanent attribution apply across every
+/// regime; the regime governs the material/economic terms (Permissive Commons cost-recovery
+/// paydown so contributors are compensated rather than exploited, ongoing royalties, strict
+/// non-commercial no-derivatives CC-BY-NC-ND-4.0, or non-commodifiable sanctuary protection).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum LicensingRegimeKind {
-    /// Regime A: Finite cost-recovery obligation pool (`pc:Work` -> `pc:Discharged` true commons).
+    /// Regime A: Inalienable moral rights + finite cost-recovery & contributor compensation pool (`pc:Work` -> `pc:Discharged` commons once contributors are paid; moral rights never extinguish).
     PermissiveCommonsPaydown,
-    /// Regime B: Non-extinguishing ongoing royalty splits (`PerpetualCreativeRoyalty`).
+    /// Regime B: Inalienable moral rights + non-extinguishing ongoing royalty splits (`PerpetualCreativeRoyalty`).
     PerpetualCreativeRoyalty,
-    /// Author Moral & Material Rights CC-BY-NC-ND-4.0 (UDHR Art. 27 / ICESCR Art. 15 / Copyright Timothy Charles Holborn).
-    AuthorMoralRightsCcByNcNd4,
-    /// Inalienable biosphere / sanctuary protection (`SPC`).
+    /// Inalienable moral rights + strict Attribution-NonCommercial-NoDerivatives (`CC-BY-NC-ND-4.0`).
+    QualiaCcByNcNd4,
+    /// Inalienable moral rights + non-commodifiable biosphere / sanctuary protection (`SPC`).
     SanctuaryInalienable,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -173,6 +183,9 @@ pub struct DualRegimeLicenseContract {
     pub asset_id: String,
     pub spdx_or_qualia_id: String,
     pub regime: LicensingRegimeKind,
+    /// Inalienable moral rights (UDHR Art. 27(2) / ICESCR Art. 15(1)(c)): always `true`, never abandoned under any regime.
+    #[serde(default = "default_true")]
+    pub inalienable_moral_rights: bool,
     /// Permanent moral attribution (`pc:attributedTo`, never extinguishes).
     pub attributed_to: Vec<String>,
     pub travels_with_artifact: bool,
@@ -191,7 +204,7 @@ pub struct DualRegimeLicenseContract {
     pub currency: String,
     /// Qualifying human-rights / civic uses permitted at no charge (`OP_PERMIT`, never recorded as payment/discharge).
     pub human_rights_no_charge_permitted: bool,
-    /// Whether economic obligation extinguishes into true commons when `S + W >= T`.
+    /// Whether economic cost-recovery obligation extinguishes into the commons when `S + W >= T` (moral rights never extinguish).
     pub extinguishes_on_cost_recovery: bool,
     /// For Regime B (`PerpetualCreativeRoyalty`): derivative / streaming revenue share in basis points (100 bps = 1%).
     pub ongoing_royalty_bps: u16,
@@ -201,11 +214,11 @@ pub struct DualRegimeLicenseContract {
 }
 
 impl DualRegimeLicenseContract {
-    pub fn default_moral_rights_or_commons(asset_id: &str, regime: LicensingRegimeKind) -> Self {
+    pub fn for_regime(asset_id: &str, regime: LicensingRegimeKind) -> Self {
         let (spdx, extinguishes, royalty_bps) = match regime {
             LicensingRegimeKind::PermissiveCommonsPaydown => ("PC-PAYDOWN-1.0", true, 0),
             LicensingRegimeKind::PerpetualCreativeRoyalty => ("PERPETUAL-ROYALTY-1.0", false, 1000),
-            LicensingRegimeKind::AuthorMoralRightsCcByNcNd4 => ("CC-BY-NC-ND-4.0", false, 0),
+            LicensingRegimeKind::QualiaCcByNcNd4 => ("CC-BY-NC-ND-4.0", false, 0),
             LicensingRegimeKind::SanctuaryInalienable => ("SPC-SANCTUARY-1.0", false, 0),
         };
         Self {
@@ -213,6 +226,7 @@ impl DualRegimeLicenseContract {
             asset_id: asset_id.into(),
             spdx_or_qualia_id: spdx.into(),
             regime,
+            inalienable_moral_rights: true,
             attributed_to: vec![
                 "Timothy Charles Holborn <timothy.holborn@gmail.com> (https://www.linkedin.com/in/ubiquitous/)"
                     .into(),
@@ -232,8 +246,15 @@ impl DualRegimeLicenseContract {
         }
     }
 
-    /// Enforce `pc:RoiMultiplierCapShape` (`1.0 <= roi_multiplier <= 10.0`) and `S + W + H <= T`.
+    /// Enforce inalienable moral rights (`UDHR Art. 27(2) / ICESCR Art. 15(1)(c)`),
+    /// `pc:RoiMultiplierCapShape` (`1.0 <= roi_multiplier <= 10.0`), and `S + W + H <= T`.
     pub fn validate(&self) -> Result<(), String> {
+        if !self.inalienable_moral_rights {
+            return Err(
+                "Human-rights violation (UDHR Art. 27(2) / ICESCR Art. 15(1)(c)): moral rights are inalienable and cannot be waived or abandoned"
+                    .into(),
+            );
+        }
         if !self.roi_multiplier.is_finite()
             || self.roi_multiplier < 1.0
             || self.roi_multiplier > 10.0
@@ -457,11 +478,11 @@ pub fn dispatch_changelog_license_mcp(args: Value) -> Result<Value, String> {
                 .unwrap_or("urn:qualia:asset:work");
             let regime = match args.get("regime").and_then(Value::as_str).unwrap_or("commons_paydown") {
                 "perpetual_royalty" => LicensingRegimeKind::PerpetualCreativeRoyalty,
-                "moral_rights_cc_by_nc_nd" | "cc_by_nc_nd" => LicensingRegimeKind::AuthorMoralRightsCcByNcNd4,
+                "cc_by_nc_nd" | "qualia_cc_by_nc_nd" => LicensingRegimeKind::QualiaCcByNcNd4,
                 "sanctuary" => LicensingRegimeKind::SanctuaryInalienable,
                 _ => LicensingRegimeKind::PermissiveCommonsPaydown,
             };
-            let mut contract = DualRegimeLicenseContract::default_moral_rights_or_commons(asset_id, regime);
+            let mut contract = DualRegimeLicenseContract::for_regime(asset_id, regime);
             if let Some(t) = args.get("target_pool_t_cents").and_then(Value::as_u64) {
                 contract.target_pool_t_cents = t;
             }
