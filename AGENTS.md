@@ -22,6 +22,51 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, SPARQL, N3Logic, SHACL, and CPU geometry libraries. Etalon supplies render/signal/sim providers. A `.vibe` names the work. Author logic as **N3** (N3Logic + SHACL); `synth_compile_q42` seals `.q42`; `query_sparql` runs over admitted Q42 ontologies. Add scene assets as **external HMC / `.10d` / `.q42` files** -- the host does not rebuild. GIS maps bake through `hypermedia.geodesy.*` now; OSM/DEM/STAC ingest is opt-in later via `synth_jobs` and bookmarks `kind=gis`.
 
+---
+
+## Core Architectural Invariants (Anti-Drift Rules)
+
+Every agent working in `synth` or `hypermedia-production` must enforce these invariants without exception:
+
+1. **Holographic 10D v2 Primacy (`HOLO` `0x0306`) over Triangle-Soup Drift:**
+   - Every sealed `.10d` container produced by `compile_10d`, `compile_10d_pbr`, or `convert_3d_asset_or_scene_with_license` MUST carry the Holographic Phase-Space section (`FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE = 0x0306` / fourcc `HOLO`, storing `M64HoloRecord` and optional `EulerianWavefieldRecord`).
+   - Do not treat `.10d` as a legacy triangle-mesh wrapper. Continuous fields, SDFs, scale-space harmonic LODs ($k=0..K$, where $k=0$ is the base shape, $k=1..3$ structural details, $k \ge 4$ procedural surface microstructure), Hamiltonian stationary-action trajectories ($\delta S = 0$, saving only canonical anchors $(\mathbf{q}_k, \mathbf{p}_k, t_k)$), and hyperbolic $v=2$ Möbius morphogenesis ($w(z) = \frac{az+b}{cz+d}$) are primary.
+   - When an analytic/holographic `.10d` omits explicit triangle vertices (`vertices.is_empty()`), `qualia-core-db`'s `decode_load_10d` automatically synthesizes a 12-triangle bounding-box proxy lens from the `HOLO` bounds so Etalon's raymarch shader (`holographic_standalone.wgsl`, capped at `< 32` steps to prevent GPU TDR timeouts) renders the continuous field directly.
+   - Legacy v1 `.10d` files are upgraded deterministically via `upgrade_legacy_10d_to_holographic_v2`.
+
+2. **Two-Tier `.10d` Geometry Constituency (`AREF` / `IOVR` / `INST`):**
+   - **Leaf component `.10d` files** hold self-contained holographic phase-space fields, materials, and optional proxy geometry.
+   - **Scene / assembly `.10d` files** compose external assets via the `AREF` (Asset Reference Registry, content-addressed SHA-256 + URI/DID), `IOVR` (Instance Override Table for per-instance material/parameter overrides), and `INST` (PGA Motor $\text{SE}(3)$ Transform Table) sections rather than duplicating leaf geometry.
+
+3. **7-Layer Multi-Scale Computational Hierarchy (`L0`–`L6`, with `L6QuantumPhysics`):**
+   - Every physical/biological/made-world entity and its `yaml-ld-q42` v2 manifest (`manifest.q42.yaml`) maps across the 7 canonical computational strata:
+     - `L0`: Continuum & Classical Field Mechanics
+     - `L1`: Rigid & Articulated Multi-Body Kinetics (PGA / XPBD / SKL2)
+     - `L2`: Soft-Body, Elastoplastic & Fluid Continuum
+     - `L3`: Molecular & Chemical Kinetics
+     - `L4`: Cellular, Tissue & Biological Morphogenesis
+     - `L5`: Ecological, Geomorphic & Planetary Systems
+     - `L6`: **Quantum Physics** (`L6QuantumPhysics` — encompassing quantum dynamics, quantum physics, and quantum chemistry as a subset, including Hamiltonian wavefunctions, electronic structure, and Q-Forge topological pointers).
+
+4. **No-ASCII Policy (UTF-8 / UTF-16 & CBOR / CBOR-LD `CBLD`):**
+   - Textual manifests (`yaml-ld-q42` v2), N3 ontologies, and source files must be strict UTF-8 or UTF-16 (never legacy 7-bit ASCII assumptions).
+   - Binary semantic payloads inside `.10d` and `.q42` containers use deterministic CBOR / CBOR-LD (`SECTION_KIND_SYMBOLIC_RDF_CBOR_LD` / `CBLD` storing `SymbolicRdfCborLdPayload` with 6-column `NQuin` records `[S, P, O, G, T, M]`).
+
+5. **3D Scene/Asset Conversion & Source-Asset Licensing Ontology (`synth convert-3d` / MCP `synth_convert_3d`):**
+   - When converting external 3D formats (`.glb`, `.gltf`, `.obj`, `.stl`) into Holographic 10D v2 `.10d` + `.q42` packages, you MUST supply provenance metadata (`spdx_license`, `attribution`, `source_uri`, `origin_format`, `commercial_allowed`, `derivatives_allowed`, `share_alike_required`, `modifications_summary`).
+   - Conversion validates against `C:\github\qualiaDB\core-ontologies\source-asset-licensing.n3`, rejects incompatible licenses (e.g., `ND` or unattributed sources) fail-closed, seals `SymbolicRdfCborLdPayload` (`CBLD`) + `ProvenanceSection` (`PROV`) + `HOLO` (`0x0306`) into the `.10d`, and emits a companion `.n3` / `.q42` provenance graph.
+
+6. **Sovereign Organization Split (`qualia-poiesis` vs. `intenteco`):**
+   - **Made-world things / manufactured objects (`domain=made_world`):** Governed by `https://github.com/qualia-poiesis`, stored locally under `C:\github\poiesis\<thing-slug>\` (standards website: `C:\github\poiesis\website`).
+   - **Biosphere species / ecological taxa (`domain=biosphere`):** Governed by `https://github.com/intenteco`, stored locally under `C:\github\eco-intent\<species-slug>\`. Non-fiction biosphere taxa (`fiction=false`) require an admitted evidence `.q42` before production (`synth_production_rules`).
+
+7. **Memory Budgets vs. 42 MiB Prolog Sentinel:**
+   - The **42 MiB Prolog Sentinel** applies strictly to `.q42` symbolic reasoning hot-paths (`FixedArena` zero-heap evaluation).
+   - Graphics/scene containers (`.10d`, `.hmc`, `.emf`, `.m64`) and LLM weight vaults (`.p64`) are governed by explicit streaming/container budgets (`production16` admits 128 MiB per `.10d` ring, 2 GiB aggregate resources, and 2,304 MiB package budget).
+
+8. **Webizen Desktop Host Authority vs. Standalone Fallback (`HostRuntimeMode`):**
+   - Synth probes for Webizen Desktop IPC (`SYNTH_WEBIZEN_IPC` / `WEBIZEN_DESKTOP_SOCKET`) at startup (`probe_webizen_desktop()`). When hosted inside Webizen Desktop, runs record `HostRuntimeMode::WebizenDesktopNative`; CLI batch runs record `HeadlessProd`; local operator fallback records `StandaloneFallback` with explicit banner disclosure.
+
 **The 150 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
 
 Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Call `synth_find` first, then read `agent-instructions/<category>.md` and grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`.
@@ -69,6 +114,10 @@ Grok prefixes names `synth__`. Antigravity, Codex, and `synth mcp-tools` use the
 | `synth_jobs` | `kind=fetch\|ingest\|compile` into `.synth/inbox`. Operator ticks due jobs; `synth mcp` does not start the scheduler. |
 | `synth_operator_status` | Tray/operator snapshot. `fetch=true` ls-remote tags. Browser `GET /operator`. |
 | `synth_production_rules` | Biosphere evidence gate. |
+| `synth_validate_model` | Validate deliverable ledger, `yaml-ld-q42` v2 manifest (`L0`–`L6` strata), `.10d` `HOLO` v2 (`0x0306`), and `CBLD` CBOR-LD provenance. |
+| `synth_package_inspect` | Inspect sealed `.hmc` / `.10d` / `.q42` package headers, `HOLO` v2 status, `AREF`/`IOVR`/`INST` constituency, and SHA-256 digests. |
+| `synth_audit_index` | Query or verify `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` function registry. |
+| `synth_convert_3d` | Convert `.glb`/`.gltf`/`.obj`/`.stl` scenes or assets into Holographic 10D v2 `.10d` + `.q42` with mandatory `source-asset-licensing.n3` validation and `CBLD` sealing. |
 | `synth_update` | `check\|upgrade\|verify\|apply` signed GitHub Releases. Never overwrites a locked exe. |
 | `synth_environment_bootstrap` | Tray/studio bootstrap + LLM vault scan. |
 | `query_sparql` / `query_graph` / `ingest_ontology` / `parse_rdf` / `parse_json` / `parse_csv` / `serialize_rdf` / `get_graph_stats` / `list_ontologies` | QualiaDB graph on this same server. Internal SPARQL over admitted Q42 ontologies. No public SPARQL HTTP server. |
@@ -99,6 +148,10 @@ synth bookmark add URL [--title T] [--id ID]
 synth job add URL | run ID | run-due
 synth operator                     # http://127.0.0.1:8787/operator  (tray with --features native-ui)
 synth serve --port 8787 --project DIR
+synth validate-model --dir MODEL_DIR [--ledger LEDGER.json]
+synth package-inspect --path FILE.hmc|FILE.10d|FILE.q42
+synth audit-index [--query KEYWORD]
+synth convert-3d --input SCENE.glb --out-10d OUT.10d [--out-q42 OUT.q42] --license SPDX --attribution TEXT --source-uri URI
 synth update check | upgrade | verify | apply
 ```
 

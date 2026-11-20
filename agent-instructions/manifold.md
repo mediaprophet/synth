@@ -35,9 +35,12 @@
 | `hypermedia.manifold.compile_botanical_organ_10d` | botanical scale 1..=4 (not a human organ) |
 | `hypermedia.manifold.compile_vertebrate_anatomy_10d` | ellipsoid comparative scaffold |
 
-## Produce-path: `compile_10d_pbr`
+## Produce-path: Holographic 10D v2 (`compile_10d`, `compile_10d_pbr`, & `synth_convert_3d`)
 
-Seals quantized mesh, area-weighted normals, optional SurfaceReading albedo, topology, BVH, UV01.
+- **Holographic Phase-Space Primacy (`HOLO` `0x0306`):** `compile_10d`, `compile_10d_pbr`, and `convert_3d_asset_or_scene_with_license` (`synth convert-3d` / MCP `synth_convert_3d`) automatically seal the `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE = 0x0306` (`HOLO`) section containing `M64HoloRecord` and `EulerianWavefieldRecord` alongside quantized mesh, area-weighted normals, optional SurfaceReading albedo, topology, BVH, and UV01.
+- **Scale-Space Harmonic LODs & Proxy Lens Synthesis:** Continuous fields and scale-space harmonics ($k=0..K$, with $k=0$ base envelope, $k=1..3$ structural detail, $k \ge 4$ procedural microstructure) are primary. When an analytic/holographic `.10d` omits explicit triangle vertices (`vertices.is_empty()`), `qualia-core-db`'s `decode_load_10d` synthesizes a 12-triangle bounding-box proxy lens from the `HOLO` bounds for Etalon's `< 32`-step raymarching shader (`holographic_standalone.wgsl`).
+- **Two-Tier Scene Constituency (`AREF` / `IOVR` / `INST`):** Multi-asset scenes and assemblies reference external leaf `.10d` files via `AREF` (Asset Reference Registry), `IOVR` (Instance Override Table), and `INST` (PGA Motor Transform Table).
+- **External 3D Conversion & Licensing (`synth_convert_3d`):** When converting `.glb`/`.gltf`/`.obj`/`.stl` scenes or assets, use `synth convert-3d` / MCP `synth_convert_3d` with mandatory `source-asset-licensing.n3` metadata (`spdx_license`, `attribution`, `source_uri`, `origin_format`), which seals `SymbolicRdfCborLdPayload` (`CBLD`) + `ProvenanceSection` (`PROV`) + `HOLO` (`0x0306`).
 
 Albedo sampling order:
 

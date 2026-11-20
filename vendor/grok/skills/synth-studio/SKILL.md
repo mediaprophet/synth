@@ -12,6 +12,10 @@ Webizen AI Synth 0.0.41.12 is the development tool (produce / preview / compile)
 Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`. Trust `AGENTS.md` and `operations_catalog.rs` over a connected MCP binary whose tool description still says 114 or 148.
 
 Author logic as N3 (N3Logic + SHACL). Add scene assets as external HMC / `.10d` / `.q42` files; the host does not rebuild.
+- **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`).
+- **7-Layer Computational Hierarchy (`L0`–`L6`) & No-ASCII:** `yaml-ld-q42` v2 manifests map across `L0`–`L6` (`L6` = `L6QuantumPhysics`, encompassing quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.
+- **3D Conversion & Licensing (`synth__synth_convert_3d`):** Convert `.glb`/`.gltf`/`.obj`/`.stl` via `synth convert-3d` / MCP `synth__synth_convert_3d` with mandatory `source-asset-licensing.n3` metadata (`spdx_license`, `attribution`, `source_uri`). Validate models with `synth__synth_validate_model` and inspect packages with `synth__synth_package_inspect`.
+- **Orgs:** Made-world things live in `C:\github\poiesis\<thing-slug>\` (`qualia-poiesis`); biosphere species live in `C:\github\eco-intent\<species-slug>\` (`intenteco`).
 
 ## MCP
 

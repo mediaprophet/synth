@@ -14,6 +14,10 @@ Always-on digest: `C:\github\synth\GEMINI.md`. House rules: `C:\github\synth\AGE
 Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`. Trust `AGENTS.md` over a connected MCP binary whose tool description still says 114 or 148.
 
 Author logic as N3 (N3Logic + SHACL). Add scene assets as external HMC / `.10d` / `.q42` files; the host does not rebuild.
+- **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`). Analytic `.10d` containers without explicit triangle soup synthesize a 12-triangle proxy lens on decode for Etalon's `< 32`-step raymarcher.
+- **7-Layer Computational Hierarchy (`L0`–`L6`) & No-ASCII:** `yaml-ld-q42` v2 manifests map across `L0`–`L6` (`L6` = `L6QuantumPhysics`, encompassing quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.
+- **3D Conversion & Licensing (`synth_convert_3d`):** Convert `.glb`/`.gltf`/`.obj`/`.stl` assets or scenes via `synth convert-3d` / MCP `synth_convert_3d` with mandatory `source-asset-licensing.n3` metadata (`spdx_license`, `attribution`, `source_uri`), sealing `CBLD` + `PROV` + `HOLO` (`0x0306`). Validate deliverables with `synth_validate_model` and inspect containers with `synth_package_inspect`.
+- **Orgs:** Made-world things live in `C:\github\poiesis\<thing-slug>\` (`https://github.com/qualia-poiesis`); biosphere species live in `C:\github\eco-intent\<species-slug>\` (`https://github.com/intenteco`).
 
 ## MCP (unprefixed names)
 

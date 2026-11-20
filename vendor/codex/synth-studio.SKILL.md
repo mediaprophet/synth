@@ -7,6 +7,10 @@ description: Author and review local VibeScript assets with Synth, Hypermedia, Q
 
 Read `C:\github\synth\AGENTS.md` before claiming a tool is absent or authoring a `.vibe`. Category tables live in `C:\github\synth\agent-instructions/<category>.md`. The 150-operation catalog and Hypermedia's `audit-docs/FUNCTIONS.md` are authoritative. QualiaDB owns codecs and geometry; Hypermedia is the studio; Synth is the producer; Etalon supplies render and signal providers. Reuse the existing operation that performs the requested work. Find with `synth_find`.
 
+- **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier scene constituency (`AREF`/`IOVR`/`INST`).
+- **7-Layer Hierarchy (`L0`–`L6`) & No-ASCII:** `yaml-ld-q42` v2 manifests map across `L0`–`L6` (`L6` = `L6QuantumPhysics`, encompassing quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.
+- **3D Scene/Asset Conversion & Licensing (`synth_convert_3d`):** Convert external `.glb`/`.gltf`/`.obj`/`.stl` files via `synth convert-3d` / MCP `synth_convert_3d` with mandatory `source-asset-licensing.n3` provenance (`spdx_license`, `attribution`, `source_uri`), sealing `CBLD` + `PROV` + `HOLO` (`0x0306`). Validate deliverables with `synth_validate_model` and inspect packages with `synth_package_inspect`.
+
 ## Select and discover the executable
 
 Do not overwrite or kill live MCP binaries under `target` or `target-studio`. This integration selects `C:\github\synth\target-prod\debug\synth-mcp.exe`. Check the executable identity and runtime `operations`, `mcp-tools`, and `capabilities`; counts in older documentation do not establish missing functions.

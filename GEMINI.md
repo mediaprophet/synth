@@ -30,6 +30,13 @@ Spawn `C:\github\synth\target-prod\debug\synth-mcp.exe mcp` with `SYNTH_INPUT_RO
 | Bookmark GIS/N3 | `synth_bookmarks` (`kind=gis\|rdf\|sparql`) |
 | Fetch | `synth_jobs` (`kind=fetch\|ingest\|compile`) |
 | Contracts | `synth_operation_contracts` |
+| Validate Model (10D v2 / L0-L6) | `synth_validate_model` |
+| Inspect `.hmc` / `.10d` / `.q42` | `synth_package_inspect` |
+| Convert 3D (`.glb`/`.obj`/`.stl` -> `.10d` v2 + license `.q42`) | `synth_convert_3d` |
+| Audit Registry | `synth_audit_index` |
 | Operator | `synth_operator_status` / `GET /operator` |
 
-Present HTML is Antigravity-ready (`<agent-embed>`, Auxiliary Pane). Author logic as **N3**. Add scene assets as external HMC / `.10d` / `.q42`. House rules: `AGENTS.md`. Category files: `agent-instructions/<category>.md`.
+Present HTML is Antigravity-ready (`<agent-embed>`, Auxiliary Pane). Author logic as **N3**. Add scene assets as external HMC / `.10d` / `.q42`.
+- **Holographic 10D v2 Primacy:** Every `.10d` carries `HOLO` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`).
+- **7-Layer Hierarchy & No-ASCII:** `yaml-ld-q42` v2 manifests declare `L0`–`L6` (`L6` = `L6QuantumPhysics` covering quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.
+- **Orgs & Licensing:** Made-world things live under `C:\github\poiesis\<thing-slug>\` (`qualia-poiesis`); biosphere taxa live under `C:\github\eco-intent\<species-slug>\` (`intenteco`). External 3D conversions must validate against `source-asset-licensing.n3` via `synth_convert_3d`. Sovereign repos are strictly `CC BY-NC-ND 4.0`. House rules: `AGENTS.md`. Category files: `agent-instructions/<category>.md`.
