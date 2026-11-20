@@ -323,19 +323,19 @@ impl StandaloneSynthMcp {
                 description: "Inspect multi-agent concurrent production sessions, resource admission slots (SYNTH_OUTPUT_ROOT/.synth/slots.json), and Local GPU / Port 4242 runtime profile (REQ-4 & REQ-5).".into(),
                 input_schema: object(
                     json!({
-                        "gpu_backend": {"type":"string","enum":["auto","vulkan","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]}
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]}
                     }),
                     vec![],
                 ),
             },
             AuthoringTool {
                 name: "synth_gpu".into(),
-                description: "Inspect or select Synth's physical GPU adapter preference (default: discrete-only, refusing Intel/on-board integrated GPUs so the host desktop never throttles or locks up) and graphics backend (default: vulkan; also dx12, metal, gl, auto). Persists in .synth/gpu-config.json.".into(),
+                description: "Inspect or select Synth's physical GPU adapter preference (default: discrete-only, refusing Intel/on-board integrated GPUs so the host desktop never throttles or locks up) and graphics/compute backend (default: vulkan; also cuda, dx12, metal, gl, auto). Persists in .synth/gpu-config.json.".into(),
                 input_schema: object(
                     json!({
                         "action": {"type":"string","enum":["status","list","set"]},
                         "preference": {"type":"string","description":"discrete-only (default; blocks on-board iGPU), discrete, integrated, or name:<substring>"},
-                        "backend": {"type":"string","enum":["vulkan","dx12","metal","gl","auto","cpu"]},
+                        "backend": {"type":"string","enum":["vulkan","cuda","dx12","metal","gl","auto","cpu"]},
                         "reject_igpu": {"type":"boolean","description":"When true (default), strictly refuse DeviceType::IntegratedGpu adapters"},
                         "adapter_name_filter": {"type":"string","maxLength":128,"description":"Optional substring filter for adapter name (e.g. RTX, NVIDIA)"}
                     }),
@@ -440,7 +440,7 @@ impl StandaloneSynthMcp {
                         "session_id": {"type":"string","maxLength":128,"description":"Optional multi-agent session ID for slot lease management"},
                         "agent_id": {"type":"string","maxLength":128,"description":"Optional calling agent ID for slot attribution"},
                         "wait_ms": {"type":"integer","minimum":0,"maximum":15000,"description":"Optional FIFO wait time in ms when production slots are busy"},
-                        "gpu_backend": {"type":"string","enum":["auto","vulkan","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]},
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]},
                         "verify_outputs": {"type":"boolean","description":"Automatically run multi-format output verification (REQ-9.1) on export_dir"}
                     }),
                     vec![],

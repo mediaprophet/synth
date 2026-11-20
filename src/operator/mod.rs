@@ -410,6 +410,7 @@ button{background:#142523;color:#e5f1ea;border:1px solid #2b4c46;border-radius:6
 </select>
 <select id="gpu-backend" style="padding:7px;background:#12211e;color:#d7eee6;border:1px solid #2b4c46;border-radius:6px;margin-right:8px;">
 <option value="vulkan">Vulkan (Discrete GPU selection)</option>
+<option value="cuda">CUDA (NVIDIA Native Compute + Vulkan Companion)</option>
 <option value="dx12">DirectX 12 (Windows native)</option>
 <option value="metal">Metal (macOS Apple Silicon)</option>
 <option value="gl">OpenGL / GLES</option>

@@ -181,7 +181,59 @@ pub fn load_gpu_selection_config() -> GpuSelectionConfig {
     GpuSelectionConfig::default()
 }
 
+pub fn ensure_host_cuda_toolkit_path() {
+    static ONCE: std::sync::OnceLock<()> = std::sync::OnceLock::new();
+    ONCE.get_or_init(|| {
+        let mut cuda_dir = std::env::var_os("CUDA_PATH").map(PathBuf::from);
+        if cuda_dir.as_ref().is_none_or(|p| !p.is_dir()) {
+            #[cfg(windows)]
+            {
+                let base = Path::new(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA");
+                if let Ok(entries) = fs::read_dir(base) {
+                    let mut versions: Vec<PathBuf> = entries
+                        .flatten()
+                        .map(|e| e.path())
+                        .filter(|p| p.is_dir())
+                        .collect();
+                    versions.sort();
+                    if let Some(best) = versions.pop() {
+                        std::env::set_var("CUDA_PATH", &best);
+                        cuda_dir = Some(best);
+                    }
+                }
+            }
+            #[cfg(target_os = "linux")]
+            {
+                let base = Path::new("/usr/local/cuda");
+                if base.is_dir() {
+                    std::env::set_var("CUDA_PATH", base);
+                    cuda_dir = Some(base.to_path_buf());
+                }
+            }
+        }
+        if let Some(cuda) = cuda_dir {
+            let mut prepend = Vec::new();
+            let x64 = cuda.join("bin").join("x64");
+            let bin = cuda.join("bin");
+            if x64.is_dir() {
+                prepend.push(x64);
+            }
+            if bin.is_dir() {
+                prepend.push(bin);
+            }
+            if !prepend.is_empty() {
+                let old = std::env::var_os("PATH").unwrap_or_default();
+                prepend.extend(std::env::split_paths(&old));
+                if let Ok(joined) = std::env::join_paths(prepend) {
+                    std::env::set_var("PATH", joined);
+                }
+            }
+        }
+    });
+}
+
 pub fn apply_gpu_selection_env(cfg: &GpuSelectionConfig) {
+    ensure_host_cuda_toolkit_path();
     let effective_pref = if let Some(ref name) = cfg.adapter_name_filter {
         let trimmed = name.trim();
         if !trimmed.is_empty() {
@@ -203,8 +255,15 @@ pub fn apply_gpu_selection_env(cfg: &GpuSelectionConfig) {
     std::env::set_var("QUALIA_REJECT_IGPU", reject_val);
     let backend = cfg.backend.trim();
     if !backend.is_empty() {
+        std::env::set_var("SYNTH_GPU_BACKEND", backend);
         std::env::set_var("QUALIA_RENDER_WGPU_BACKEND", backend);
         std::env::set_var("QUALIA_WGPU_BACKEND", backend);
+        if backend.eq_ignore_ascii_case("cuda") {
+            std::env::set_var("QUALIA_INFERENCE_MODE", "cuda");
+            std::env::set_var("QUALIA_PREFER_CUDA", "1");
+            #[cfg(not(target_arch = "wasm32"))]
+            qualia_core_db::set_inference_mode(qualia_core_db::InferenceMode::CudaTc);
+        }
     }
 }
 
@@ -230,10 +289,10 @@ pub fn save_and_apply_gpu_selection_config(mut cfg: GpuSelectionConfig) -> Resul
     let backend = cfg.backend.trim().to_ascii_lowercase();
     if !matches!(
         backend.as_str(),
-        "auto" | "vulkan" | "vk" | "dx12" | "d3d12" | "metal" | "gl" | "gles" | "cpu"
+        "auto" | "cuda" | "vulkan" | "vk" | "dx12" | "d3d12" | "metal" | "gl" | "gles" | "cpu"
     ) {
         return Err(format!(
-            "Invalid GPU backend '{}'; expected vulkan, dx12, metal, gl, auto, or cpu",
+            "Invalid GPU backend '{}'; expected cuda, vulkan, dx12, metal, gl, auto, or cpu",
             cfg.backend
         ));
     }
@@ -297,7 +356,45 @@ pub fn enumerate_gpu_adapters_json() -> Vec<Value> {
     }
 }
 
-/// REQ-4.1 & REQ-4.2: Tiered Local GPU & Local Runtime Profile (Port 4242 / 8080 / 8787 + Native Vulkan/DX12/Metal).
+/// Probe NVIDIA CUDA driver (`nvcuda.dll` / `libcuda.so.1`) and Forge NVRTC availability once per process.
+pub fn probe_cuda_status_json() -> Value {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        static CUDA_STATUS: std::sync::OnceLock<Value> = std::sync::OnceLock::new();
+        let mut base = CUDA_STATUS
+            .get_or_init(|| {
+                ensure_host_cuda_toolkit_path();
+                let driver_present = qualia_core_db::etalon_agent::CudaDriverApi::probe().is_some();
+                let forge_caps = qualia_core_db::wgsl_forge::dispatch::caps();
+                json!({
+                    "compiled_with_cuda": cfg!(feature = "cuda"),
+                    "driver_available": driver_present,
+                    "forge_cuda_ready": forge_caps.cuda,
+                    "coopmat_available": forge_caps.coopmat,
+                    "rt_cores_available": forge_caps.rt,
+                    "cuda_path": std::env::var("CUDA_PATH").ok(),
+                })
+            })
+            .clone();
+        if let Value::Object(ref mut map) = base {
+            map.insert(
+                "active_inference_mode".into(),
+                json!(qualia_core_db::active_inference_mode().as_str()),
+            );
+        }
+        base
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        json!({
+            "compiled_with_cuda": false,
+            "driver_available": false,
+            "forge_cuda_ready": false
+        })
+    }
+}
+
+/// REQ-4.1 & REQ-4.2: Tiered Local GPU & Local Runtime Profile (Port 4242 / 8080 / 8787 + Native Vulkan/CUDA/DX12/Metal).
 pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value {
     let cfg = load_gpu_selection_config();
     static DESKTOP_PROBE: std::sync::OnceLock<(bool, bool)> = std::sync::OnceLock::new();
@@ -320,14 +417,16 @@ pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value 
     };
 
     let adapters = enumerate_gpu_adapters_json();
+    let cuda_status = probe_cuda_status_json();
 
     json!({
         "schema": "synth.runtime-gpu-profile/v1",
         "execution_tier": execution_tier,
         "selected_gpu_backend": selected_backend,
         "gpu_selection_config": cfg,
+        "cuda_runtime": cuda_status,
         "enumerated_adapters": adapters,
-        "supported_backends": ["vulkan", "dx12", "metal", "gl", "webgpu-wasm", "webgl2-wasm", "cpu"],
+        "supported_backends": ["vulkan", "cuda", "dx12", "metal", "gl", "webgpu-wasm", "webgl2-wasm", "cpu"],
         "supported_preferences": ["discrete-only", "discrete", "integrated", "name:<adapter>"],
         "webizen_desktop_probe": {
             "port_4242_ws_online": local_runtime_4242,
