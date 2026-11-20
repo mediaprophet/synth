@@ -257,34 +257,39 @@ pub fn init_gpu_policy_on_startup() {
 pub fn enumerate_gpu_adapters_json() -> Vec<Value> {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let circuits = qualia_core_db::gpu_context::device_registry::enumerate_circuits();
-        let primary = qualia_core_db::gpu_context::device_registry::primary_circuit_index();
-        let aux = qualia_core_db::gpu_context::device_registry::auxiliary_circuit_index();
-        circuits
-            .iter()
-            .enumerate()
-            .map(|(idx, c)| {
-                let is_igpu = c.caps.is_integrated_gpu();
-                json!({
-                    "index": idx,
-                    "name": c.caps.name,
-                    "vendor_id": format!("0x{:04x}", c.caps.vendor),
-                    "device_id": format!("0x{:04x}", c.caps.device),
-                    "device_type": format!("{:?}", c.caps.device_type),
-                    "backend": c.caps.backend_label(),
-                    "driver": c.caps.driver,
-                    "is_discrete": format!("{:?}", c.caps.device_type) == "DiscreteGpu",
-                    "is_integrated": is_igpu,
-                    "role": if Some(idx) == primary {
-                        "primary-discrete"
-                    } else if Some(idx) == aux {
-                        "auxiliary-integrated"
-                    } else {
-                        "secondary"
-                    }
-                })
+        static CACHED_ADAPTERS: std::sync::OnceLock<Vec<Value>> = std::sync::OnceLock::new();
+        CACHED_ADAPTERS
+            .get_or_init(|| {
+                let circuits = qualia_core_db::gpu_context::device_registry::enumerate_circuits();
+                let primary = qualia_core_db::gpu_context::device_registry::primary_circuit_index();
+                let aux = qualia_core_db::gpu_context::device_registry::auxiliary_circuit_index();
+                circuits
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, c)| {
+                        let is_igpu = c.caps.is_integrated_gpu();
+                        json!({
+                            "index": idx,
+                            "name": c.caps.name,
+                            "vendor_id": format!("0x{:04x}", c.caps.vendor),
+                            "device_id": format!("0x{:04x}", c.caps.device),
+                            "device_type": format!("{:?}", c.caps.device_type),
+                            "backend": c.caps.backend_label(),
+                            "driver": c.caps.driver,
+                            "is_discrete": format!("{:?}", c.caps.device_type) == "DiscreteGpu",
+                            "is_integrated": is_igpu,
+                            "role": if Some(idx) == primary {
+                                "primary-discrete"
+                            } else if Some(idx) == aux {
+                                "auxiliary-integrated"
+                            } else {
+                                "secondary"
+                            }
+                        })
+                    })
+                    .collect()
             })
-            .collect()
+            .clone()
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -292,11 +297,14 @@ pub fn enumerate_gpu_adapters_json() -> Vec<Value> {
     }
 }
 
-/// REQ-4.1 & REQ-4.2: Tiered Local GPU & Local Runtime Profile (Port 4242 / 8080 / 8787 + Native Vulkan/CUDA/Metal).
+/// REQ-4.1 & REQ-4.2: Tiered Local GPU & Local Runtime Profile (Port 4242 / 8080 / 8787 + Native Vulkan/DX12/Metal).
 pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value {
     let cfg = load_gpu_selection_config();
-    apply_gpu_selection_env(&cfg);
-    let (_, local_runtime_8080, local_runtime_4242) = crate::tray_env::probe_webizen_desktop();
+    static DESKTOP_PROBE: std::sync::OnceLock<(bool, bool)> = std::sync::OnceLock::new();
+    let (local_runtime_8080, local_runtime_4242) = *DESKTOP_PROBE.get_or_init(|| {
+        let (_, r8080, r4242) = crate::tray_env::probe_webizen_desktop();
+        (r8080, r4242)
+    });
 
     let selected_backend = match requested_backend.map(str::trim).filter(|s| !s.is_empty()) {
         Some("auto") | None => cfg.backend.as_str(),
@@ -319,7 +327,7 @@ pub fn detect_runtime_and_gpu_profile(requested_backend: Option<&str>) -> Value 
         "selected_gpu_backend": selected_backend,
         "gpu_selection_config": cfg,
         "enumerated_adapters": adapters,
-        "supported_backends": ["vulkan", "dx12", "metal", "gl", "cuda", "webgpu-wasm", "webgl2-wasm", "cpu"],
+        "supported_backends": ["vulkan", "dx12", "metal", "gl", "webgpu-wasm", "webgl2-wasm", "cpu"],
         "supported_preferences": ["discrete-only", "discrete", "integrated", "name:<adapter>"],
         "webizen_desktop_probe": {
             "port_4242_ws_online": local_runtime_4242,

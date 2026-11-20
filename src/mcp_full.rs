@@ -323,7 +323,7 @@ impl StandaloneSynthMcp {
                 description: "Inspect multi-agent concurrent production sessions, resource admission slots (SYNTH_OUTPUT_ROOT/.synth/slots.json), and Local GPU / Port 4242 runtime profile (REQ-4 & REQ-5).".into(),
                 input_schema: object(
                     json!({
-                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","metal","dx12","webgpu-wasm","webgl2-wasm","cpu"]}
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]}
                     }),
                     vec![],
                 ),
@@ -440,7 +440,7 @@ impl StandaloneSynthMcp {
                         "session_id": {"type":"string","maxLength":128,"description":"Optional multi-agent session ID for slot lease management"},
                         "agent_id": {"type":"string","maxLength":128,"description":"Optional calling agent ID for slot attribution"},
                         "wait_ms": {"type":"integer","minimum":0,"maximum":15000,"description":"Optional FIFO wait time in ms when production slots are busy"},
-                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","metal","dx12","webgpu-wasm","webgl2-wasm","cpu"]},
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","dx12","metal","gl","webgpu-wasm","webgl2-wasm","cpu"]},
                         "verify_outputs": {"type":"boolean","description":"Automatically run multi-format output verification (REQ-9.1) on export_dir"}
                     }),
                     vec![],

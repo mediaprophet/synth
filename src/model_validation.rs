@@ -26,7 +26,7 @@ pub const OUTPUT_VERIFICATION_SCHEMA: &str = "synth.output-verification/v1";
 /// REQ-7.2: 4-Tier Kinematic & Structural LOD Budget (`KLOD0`..`KLOD3`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum KinematicLodTier {
-    /// Hero / Cinema / Full Local GPU (Native Vulkan/CUDA/Metal): up to 256 `SKL2` joints + VBD soft-tissue + Cosserat rods + `PROC1`.
+    /// Hero / Cinema / Full Local GPU (Native Vulkan/DX12/Metal): up to 256 `SKL2` joints + VBD soft-tissue + Cosserat rods + `PROC1`.
     KLOD0,
     /// High / Interactive Native & Desktop WebGPU: up to 128 DQS joints + 8-channel morphs + reduced Cosserat + `PROC1`.
     KLOD1,

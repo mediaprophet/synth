@@ -273,14 +273,35 @@ fn synth_repo() -> PathBuf {
 /// Local git describe plus optional `git ls-remote --tags`. Never replaces a running exe.
 pub fn update_status(fetch_remote: bool) -> Value {
     let repo = synth_repo();
-    let describe = git(&repo, &["describe", "--tags", "--always", "--dirty"]).unwrap_or_else(|| "unknown".into());
-    let head = git(&repo, &["rev-parse", "--short", "HEAD"]);
-    let local_tags = git(&repo, &["tag", "--list", "--sort=-creatordate"])
-        .unwrap_or_default()
-        .lines()
-        .take(8)
-        .map(str::to_owned)
-        .collect::<Vec<_>>();
+    static LOCAL_GIT_INFO: std::sync::OnceLock<(String, Option<String>, Vec<String>)> =
+        std::sync::OnceLock::new();
+    let (describe, head, local_tags) = if fetch_remote {
+        let d = git(&repo, &["describe", "--tags", "--always", "--dirty"])
+            .unwrap_or_else(|| "unknown".into());
+        let h = git(&repo, &["rev-parse", "--short", "HEAD"]);
+        let t = git(&repo, &["tag", "--list", "--sort=-creatordate"])
+            .unwrap_or_default()
+            .lines()
+            .take(8)
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        (d, h, t)
+    } else {
+        LOCAL_GIT_INFO
+            .get_or_init(|| {
+                let d = git(&repo, &["describe", "--tags", "--always", "--dirty"])
+                    .unwrap_or_else(|| "unknown".into());
+                let h = git(&repo, &["rev-parse", "--short", "HEAD"]);
+                let t = git(&repo, &["tag", "--list", "--sort=-creatordate"])
+                    .unwrap_or_default()
+                    .lines()
+                    .take(8)
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                (d, h, t)
+            })
+            .clone()
+    };
     let mut remote_latest = Value::Null;
     if fetch_remote {
         if let Some(raw) = git(&repo, &["ls-remote", "--tags", "--refs", "origin"]) {
