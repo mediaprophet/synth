@@ -30,7 +30,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 ureq = { version = "2.12", default-features = false, features = ["tls", "gzip"] }
-asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "4d8eec146181e6f8644cfa7159001be57de36119" }
+asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "bc8fe0d776c82255f85de2fe4f9ae7f68d7aee7e" }
 qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optional = true }
 
 aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "third-party-renderer", "desktop"], optional = true }

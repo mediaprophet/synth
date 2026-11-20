@@ -56,15 +56,19 @@ Every agent working in `synth` or `hypermedia-production` must enforce these inv
    - When converting external 3D formats (`.glb`, `.gltf`, `.obj`, `.stl`) into Holographic 10D v2 `.10d` + `.q42` packages, you MUST supply provenance metadata (`spdx_license`, `attribution`, `source_uri`, `origin_format`, `commercial_allowed`, `derivatives_allowed`, `share_alike_required`, `modifications_summary`).
    - Conversion validates against `C:\github\qualiaDB\core-ontologies\source-asset-licensing.n3`, rejects incompatible licenses (e.g., `ND` or unattributed sources) fail-closed, seals `SymbolicRdfCborLdPayload` (`CBLD`) + `ProvenanceSection` (`PROV`) + `HOLO` (`0x0306`) into the `.10d`, and emits a companion `.n3` / `.q42` provenance graph.
 
-6. **Sovereign Organization Split (`qualia-poiesis` vs. `intenteco`):**
+6. **Repository Organization Split (`qualia-poiesis` vs. `intenteco`):**
    - **Made-world things / manufactured objects (`domain=made_world`):** Governed by `https://github.com/qualia-poiesis`, stored locally under `C:\github\poiesis\<thing-slug>\` (standards website: `C:\github\poiesis\website`).
    - **Biosphere species / ecological taxa (`domain=biosphere`):** Governed by `https://github.com/intenteco`, stored locally under `C:\github\eco-intent\<species-slug>\`. Non-fiction biosphere taxa (`fiction=false`) require an admitted evidence `.q42` before production (`synth_production_rules`).
 
-7. **Memory Budgets vs. 42 MiB Prolog Sentinel:**
+7. **Human Rights Vocabulary & Moral Rights (UDHR Art. 27 / ICESCR Art. 15):**
+   - Never use the word `"sovereign"`, `"self-sovereign"`, or `"sovereignty"` to describe human-centric authorship, personal data custody, or licensing. In Australia and international contexts, `"sovereign"` is conflated with anti-human-rights `"sovereign citizen"` ideology.
+   - Always use human-rights agreement terminology: **human rights**, **human dignity**, **human agency**, **natural person**, **moral and material interests of the author** (UDHR Article 27(2) / ICESCR Article 15(1)(c)), **inalienable attribution**, **selfhood / sanctuary**, and **Permissive Commons**.
+
+8. **Memory Budgets vs. 42 MiB Prolog Sentinel:**
    - The **42 MiB Prolog Sentinel** applies strictly to `.q42` symbolic reasoning hot-paths (`FixedArena` zero-heap evaluation).
    - Graphics/scene containers (`.10d`, `.hmc`, `.emf`, `.m64`) and LLM weight vaults (`.p64`) are governed by explicit streaming/container budgets (`production16` admits 128 MiB per `.10d` ring, 2 GiB aggregate resources, and 2,304 MiB package budget).
 
-8. **Webizen Desktop Host Authority vs. Standalone Fallback (`HostRuntimeMode`):**
+9. **Webizen Desktop Host Authority vs. Standalone Fallback (`HostRuntimeMode`):**
    - Synth probes for Webizen Desktop IPC (`SYNTH_WEBIZEN_IPC` / `WEBIZEN_DESKTOP_SOCKET`) at startup (`probe_webizen_desktop()`). When hosted inside Webizen Desktop, runs record `HostRuntimeMode::WebizenDesktopNative`; CLI batch runs record `HeadlessProd`; local operator fallback records `StandaloneFallback` with explicit banner disclosure.
 
 **The 150 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.

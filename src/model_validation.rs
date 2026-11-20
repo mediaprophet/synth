@@ -593,8 +593,8 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
     }
 
     let regime = match converted.license_tier {
-        qualia_core_db::render::compile_10d::SourceLicenseTier::SovereignQualiaCcByNcNd => {
-            crate::changelog_licensing::LicensingRegimeKind::SovereignCcByNcNd4
+        qualia_core_db::render::compile_10d::SourceLicenseTier::AuthorMoralRightsQualiaCcByNcNd => {
+            crate::changelog_licensing::LicensingRegimeKind::AuthorMoralRightsCcByNcNd4
         }
         qualia_core_db::render::compile_10d::SourceLicenseTier::PerpetualCreativeRoyalty => {
             crate::changelog_licensing::LicensingRegimeKind::PerpetualCreativeRoyalty
@@ -605,7 +605,7 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
         _ => crate::changelog_licensing::LicensingRegimeKind::PermissiveCommonsPaydown,
     };
     let mut contract =
-        crate::changelog_licensing::DualRegimeLicenseContract::default_sovereign_or_commons(
+        crate::changelog_licensing::DualRegimeLicenseContract::default_moral_rights_or_commons(
             asset_uri, regime,
         );
     contract.spdx_or_qualia_id = spdx_license.to_owned();

@@ -161,8 +161,8 @@ pub enum LicensingRegimeKind {
     PermissiveCommonsPaydown,
     /// Regime B: Non-extinguishing ongoing royalty splits (`PerpetualCreativeRoyalty`).
     PerpetualCreativeRoyalty,
-    /// Sovereign CC-BY-NC-ND-4.0 (Copyright Timothy Charles Holborn).
-    SovereignCcByNcNd4,
+    /// Author Moral & Material Rights CC-BY-NC-ND-4.0 (UDHR Art. 27 / ICESCR Art. 15 / Copyright Timothy Charles Holborn).
+    AuthorMoralRightsCcByNcNd4,
     /// Inalienable biosphere / sanctuary protection (`SPC`).
     SanctuaryInalienable,
 }
@@ -201,11 +201,11 @@ pub struct DualRegimeLicenseContract {
 }
 
 impl DualRegimeLicenseContract {
-    pub fn default_sovereign_or_commons(asset_id: &str, regime: LicensingRegimeKind) -> Self {
+    pub fn default_moral_rights_or_commons(asset_id: &str, regime: LicensingRegimeKind) -> Self {
         let (spdx, extinguishes, royalty_bps) = match regime {
             LicensingRegimeKind::PermissiveCommonsPaydown => ("PC-PAYDOWN-1.0", true, 0),
             LicensingRegimeKind::PerpetualCreativeRoyalty => ("PERPETUAL-ROYALTY-1.0", false, 1000),
-            LicensingRegimeKind::SovereignCcByNcNd4 => ("CC-BY-NC-ND-4.0", false, 0),
+            LicensingRegimeKind::AuthorMoralRightsCcByNcNd4 => ("CC-BY-NC-ND-4.0", false, 0),
             LicensingRegimeKind::SanctuaryInalienable => ("SPC-SANCTUARY-1.0", false, 0),
         };
         Self {
@@ -457,11 +457,11 @@ pub fn dispatch_changelog_license_mcp(args: Value) -> Result<Value, String> {
                 .unwrap_or("urn:qualia:asset:work");
             let regime = match args.get("regime").and_then(Value::as_str).unwrap_or("commons_paydown") {
                 "perpetual_royalty" => LicensingRegimeKind::PerpetualCreativeRoyalty,
-                "sovereign_cc_by_nc_nd" => LicensingRegimeKind::SovereignCcByNcNd4,
+                "moral_rights_cc_by_nc_nd" | "cc_by_nc_nd" => LicensingRegimeKind::AuthorMoralRightsCcByNcNd4,
                 "sanctuary" => LicensingRegimeKind::SanctuaryInalienable,
                 _ => LicensingRegimeKind::PermissiveCommonsPaydown,
             };
-            let mut contract = DualRegimeLicenseContract::default_sovereign_or_commons(asset_id, regime);
+            let mut contract = DualRegimeLicenseContract::default_moral_rights_or_commons(asset_id, regime);
             if let Some(t) = args.get("target_pool_t_cents").and_then(Value::as_u64) {
                 contract.target_pool_t_cents = t;
             }
