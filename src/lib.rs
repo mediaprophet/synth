@@ -2,10 +2,12 @@
 //! Domain-specific generators implement [`production::AssetProducer`].
 pub mod agent;
 pub mod agent_index;
+pub mod changelog_licensing;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod cli;
 mod host;
 pub mod mcp_full;
+pub mod model_validation;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod operator;
 #[cfg(feature = "native-ui")]
@@ -19,6 +21,7 @@ pub mod project;
 pub mod present_capabilities;
 pub mod present_style;
 pub mod production;
+pub mod session_admission;
 pub mod tray_env;
 pub mod vibe_runtime;
 pub mod wasm_lite;

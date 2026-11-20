@@ -52,9 +52,12 @@ fn write_new(path: &Path, bytes: &[u8]) -> Result<(), String> {
 }
 
 pub fn run(args: &[String]) -> Result<(), String> {
+    if args.iter().any(|a| a == "--motion") {
+        return run_auto_motion(args);
+    }
     if args.len() == 6 || args.len() == 10 { return run_shot(args); }
     if (args.len() != 4 && args.len() != 8) || args[0] != "--asset" || args[2] != "--out" || (args.len() == 8 && (args[4] != "--hmc" || args[6] != "--asset-key")) {
-        return Err("Usage: synth preview --asset FILE.10d --out NEW_DIR [--hmc FILE.hmc --asset-key KEY] [or --shot SHOT.json before HMC options]".into());
+        return Err("Usage: synth preview --asset FILE.10d --out NEW_DIR [--motion [--clip ID] [--fps N] [--duration S]] [--hmc FILE.hmc --asset-key KEY] [or --shot SHOT.json]".into());
     }
     let requested_asset_path = PathBuf::from(&args[1]);
     if requested_asset_path.extension().and_then(|s| s.to_str()) != Some("10d") {
@@ -140,6 +143,55 @@ pub fn run(args: &[String]) -> Result<(), String> {
     write_new(&destination.join("index.html"), &html_bytes)?;
     println!("Native review preview written: {}", destination.display());
     Ok(())
+}
+
+/// REQ-2.2: Auto-generate a motion preview shot (`--motion [--clip ID] [--fps N] [--duration S]`).
+fn run_auto_motion(args: &[String]) -> Result<(), String> {
+    let mut asset = None;
+    let mut out = None;
+    let mut clip_id: u64 = 1;
+    let mut fps: usize = 8;
+    let mut duration: f64 = 1.0;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--asset" if i + 1 < args.len() => { asset = Some(args[i + 1].clone()); i += 2; }
+            "--out" if i + 1 < args.len() => { out = Some(args[i + 1].clone()); i += 2; }
+            "--clip" if i + 1 < args.len() => { clip_id = args[i + 1].parse().unwrap_or(1); i += 2; }
+            "--fps" if i + 1 < args.len() => { fps = args[i + 1].parse().unwrap_or(8); i += 2; }
+            "--duration" if i + 1 < args.len() => { duration = args[i + 1].parse().unwrap_or(1.0); i += 2; }
+            "--motion" => { i += 1; }
+            _ => { i += 1; }
+        }
+    }
+    let asset = asset.ok_or("Usage: synth preview --asset FILE.10d --out NEW_DIR --motion [--clip ID] [--fps N] [--duration S]")?;
+    let out = out.ok_or("Usage: synth preview --asset FILE.10d --out NEW_DIR --motion")?;
+    let frame_count = (fps.max(2) as f64 * duration.clamp(0.1, 4.0)).round() as usize;
+    let frame_count = frame_count.clamp(2, 16);
+    let times: Vec<f64> = (0..frame_count)
+        .map(|k| (k as f64 / (frame_count - 1).max(1) as f64) * duration.clamp(0.1, 4.0))
+        .collect();
+    let tmp_shot = std::env::temp_dir().join(format!("synth-auto-shot-{}.json", std::process::id()));
+    let shot_json = json!({
+        "side": 512,
+        "yaw": 35.0,
+        "pitch": 20.0,
+        "clip_id": clip_id,
+        "times": times
+    });
+    fs::write(&tmp_shot, serde_json::to_vec(&shot_json).map_err(|e| e.to_string())?)
+        .map_err(|e| e.to_string())?;
+    let synthetic_args = vec![
+        "--asset".into(),
+        asset,
+        "--out".into(),
+        out,
+        "--shot".into(),
+        tmp_shot.to_string_lossy().to_string(),
+    ];
+    let res = run_shot(&synthetic_args);
+    let _ = fs::remove_file(tmp_shot);
+    res
 }
 
 /// Render a caller-authored shot and optional digest-verified HMC textures.

@@ -25,6 +25,11 @@ struct ProduceArg {
     taxon: Option<String>,
     fiction: Option<bool>,
     evidence_q42: Option<String>,
+    session_id: Option<String>,
+    agent_id: Option<String>,
+    wait_ms: Option<u64>,
+    gpu_backend: Option<String>,
+    verify_outputs: Option<bool>,
 }
 
 pub(super) struct InputRoot { configured: PathBuf, canonical: PathBuf }
@@ -83,16 +88,7 @@ fn is_reparse_point(_: &fs::Metadata) -> bool { false }
 
 fn digest(bytes: &[u8]) -> String { format!("{:x}", Sha256::digest(bytes)) }
 fn binary_identity() -> Result<Value, ToolError> {
-    let path = std::env::current_exe().map_err(|e| ToolError::new("identity_failed", e.to_string()))?;
-    let mut file = fs::File::open(&path).map_err(|e| ToolError::new("identity_failed", e.to_string()))?;
-    let mut hash = Sha256::new();
-    let mut buffer = [0u8; 64 * 1024];
-    loop {
-        let count = file.read(&mut buffer).map_err(|e| ToolError::new("identity_failed", e.to_string()))?;
-        if count == 0 { break; }
-        hash.update(&buffer[..count]);
-    }
-    Ok(json!({"version": crate::agent_index::RELEASE_VERSION, "path": path, "sha256": format!("{:x}", hash.finalize())}))
+    Ok(crate::session_admission::build_identity_and_drift_report())
 }
 fn write_new(path: &Path, bytes: &[u8]) -> Result<(), ToolError> {
     let mut file = fs::OpenOptions::new().write(true).create_new(true).open(path)
@@ -117,8 +113,26 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
         evidence_q42: parsed.evidence_q42.clone(),
     })
     .map_err(|e| ToolError::new("production_rule_blocked", e))?;
-    let limits = ProductionLimits::for_quality_profile(parsed.quality_profile.as_deref().unwrap_or("production16"))
+    let quality_prof = parsed.quality_profile.as_deref().unwrap_or("production16");
+    let limits = ProductionLimits::for_quality_profile(quality_prof)
         .map_err(|error| ToolError::new("invalid_arguments",error))?;
+    let slot_lease = match crate::session_admission::acquire_production_slot(
+        parsed.session_id.as_deref(),
+        parsed.agent_id.as_deref(),
+        None,
+        quality_prof,
+        parsed.wait_ms.unwrap_or(2000),
+    ) {
+        Ok(lease) => lease,
+        Err(wait_payload) => return Ok(wait_payload),
+    };
+    struct SlotReleaseGuard(String);
+    impl Drop for SlotReleaseGuard {
+        fn drop(&mut self) {
+            crate::session_admission::release_production_slot(&self.0);
+        }
+    }
+    let _slot_guard = SlotReleaseGuard(slot_lease.session_id.clone());
     if parsed.inputs.len() > limits.resources || parsed.preview_assets.len() > 8 {
         return Err(ToolError::new("invalid_arguments", "Input or preview count exceeds budget"));
     }
@@ -267,12 +281,73 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
     if !parsed.preview_assets.is_empty() { receipt["review_status"] = json!("rendered_pending_inspection"); }
     if let Some(directory) = &export {
         write_new(&directory.join(".synth/review-completion.json"), &serde_json::to_vec_pretty(&receipt).map_err(|e| ToolError::new("receipt_failed", e.to_string()))?)?;
+        let changed_deltas: Vec<crate::changelog_licensing::ChangedResourceDelta> = candidate
+            .outputs()
+            .iter()
+            .map(|r| crate::changelog_licensing::ChangedResourceDelta {
+                key: r.key.clone(),
+                op: "Added".into(),
+                old_sha256: None,
+                new_sha256: Some(digest(&r.bytes)),
+                bytes: r.bytes.len(),
+            })
+            .collect();
+        let default_contract =
+            crate::changelog_licensing::DualRegimeLicenseContract::default_sovereign_or_commons(
+                parsed.taxon.as_deref().unwrap_or("urn:qualia:synth:asset"),
+                crate::changelog_licensing::LicensingRegimeKind::PermissiveCommonsPaydown,
+            );
+        let _ = crate::changelog_licensing::append_revision_and_license(
+            directory,
+            parsed.taxon.as_deref().unwrap_or("urn:qualia:synth:asset"),
+            "Commit",
+            crate::changelog_licensing::HumanActorRecord::default(),
+            crate::changelog_licensing::SoftwareAgentRecord {
+                agent_id: slot_lease.agent_id.clone(),
+                ..Default::default()
+            },
+            crate::changelog_licensing::HarnessEnvironmentRecord {
+                harness_name: "Webizen AI Synth MCP".into(),
+                synth_version: crate::agent_index::RELEASE_VERSION.into(),
+                synth_binary_sha256: receipt["binary"]["current_exe_sha256"].as_str().map(str::to_owned),
+                gpu_backend: parsed.gpu_backend.clone().unwrap_or_else(|| "auto".into()),
+                quality_profile: quality_prof.to_owned(),
+            },
+            &digest(source.as_bytes()),
+            Some(&candidate.sha256()),
+            changed_deltas,
+            crate::changelog_licensing::RevisionEconomicsTelemetry {
+                asset_work_units: limits.asset_work_units.saturating_sub(effective.asset_work_units),
+                peak_ram_bytes: (limits.total_resource_bytes - effective.total_resource_bytes) as u64,
+                currency: "AUD".into(),
+                work_status: "SelfFunded".into(),
+                ..Default::default()
+            },
+            &default_contract,
+            "Produced asset package via synth_produce_present",
+        );
+    }
+    let gpu_profile = crate::session_admission::detect_runtime_and_gpu_profile(parsed.gpu_backend.as_deref());
+    receipt["gpu_runtime_profile"] = gpu_profile;
+    receipt["session_slot"] = json!(slot_lease);
+    if parsed.verify_outputs == Some(true) {
+        if let Some(directory) = &export {
+            if let Ok(ver_report) = crate::model_validation::verify_multi_format_outputs(json!({
+                "export_dir": directory.to_string_lossy()
+            })) {
+                receipt["output_verification"] = ver_report;
+            }
+        }
     }
     // The initial durable receipt records requested reviews as pending; review receipts are separate create-only files.
     let mut summary = crate::present::session_presentation_summary(&session, html.as_ref().map(|p| p.to_string_lossy()).as_deref())
         .map_err(|e| ToolError::new("summary_failed", e))?;
     summary["saved_hmc"] = json!(hmc);
     summary["strict_replay_verified"] = json!(true);
+    summary["open_annotations_count"] = json!(crate::project::current()
+        .and_then(|p| p.load_annotations().ok())
+        .map(|a| a.iter().filter(|x| !x.addressed).count())
+        .unwrap_or(0));
     summary["receipt"] = receipt;
     Ok(summary)
 }

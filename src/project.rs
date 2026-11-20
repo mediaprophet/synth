@@ -65,6 +65,20 @@ pub struct Annotation {
     pub comment: String,
     #[serde(default)]
     pub links: Vec<AnnotationLink>,
+    #[serde(default)]
+    pub camera_yaw: Option<f32>,
+    #[serde(default)]
+    pub camera_pitch: Option<f32>,
+    #[serde(default)]
+    pub camera_distance: Option<f32>,
+    #[serde(default)]
+    pub time_seconds: Option<f32>,
+    #[serde(default)]
+    pub frame_index: Option<u32>,
+    #[serde(default)]
+    pub screen_pin_uv: Option<[f32; 2]>,
+    #[serde(default)]
+    pub addressed: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -90,9 +104,28 @@ impl Project {
         if !root.is_dir() {
             return Err("project path must be a directory".into());
         }
-        let file_path = root.join("synth.project.json");
-        let parsed: ProjectFile = if file_path.is_file() {
-            let raw = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
+        let yaml_manifest = root.join("manifest.q42.yaml");
+        let yaml_project = root.join("synth.project.yaml");
+        let json_project = root.join("synth.project.json");
+        let parsed: ProjectFile = if yaml_manifest.is_file() || yaml_project.is_file() {
+            let ypath = if yaml_manifest.is_file() {
+                &yaml_manifest
+            } else {
+                &yaml_project
+            };
+            let raw = fs::read(ypath).map_err(|e| e.to_string())?;
+            let cfg = qualia_core_db::q42::yaml_ld_q42::extract_synth_project_from_yaml_ld(&raw)
+                .map_err(|e| format!("{}: {e}", ypath.display()))?;
+            ProjectFile {
+                schema: SCHEMA.into(),
+                name: cfg.name,
+                brief: cfg.brief,
+                sources: cfg.sources,
+                working: cfg.working,
+                delivered: cfg.delivered,
+            }
+        } else if json_project.is_file() {
+            let raw = fs::read_to_string(&json_project).map_err(|e| e.to_string())?;
             serde_json::from_str(&raw).map_err(|e| format!("synth.project.json: {e}"))?
         } else {
             ProjectFile {
@@ -275,6 +308,8 @@ impl Project {
     }
 
     pub fn status_json(&self) -> Result<serde_json::Value, String> {
+        let anns = self.load_annotations()?;
+        let open_count = anns.iter().filter(|a| !a.addressed).count();
         Ok(json!({
             "schema": SCHEMA,
             "name": self.name,
@@ -285,8 +320,75 @@ impl Project {
             "working_files": self.list_lane("working")?,
             "delivered_files": self.list_lane("delivered")?,
             "sources": self.list_sources(),
-            "annotations": self.load_annotations()?,
+            "open_annotations_count": open_count,
+            "annotations": anns,
         }))
+    }
+
+    pub fn mark_annotation_addressed(&self, id: &str) -> Result<bool, String> {
+        let mut items = self.load_annotations()?;
+        let mut found = false;
+        for item in &mut items {
+            if item.id == id {
+                item.addressed = true;
+                found = true;
+            }
+        }
+        if found {
+            let store = AnnotationStore {
+                schema: ANNOTATION_SCHEMA.into(),
+                items,
+            };
+            let bytes = serde_json::to_vec_pretty(&store).map_err(|e| e.to_string())?;
+            fs::write(self.annotation_path(), bytes).map_err(|e| e.to_string())?;
+        }
+        Ok(found)
+    }
+}
+
+pub fn dispatch_annotations_mcp(args: serde_json::Value) -> Result<serde_json::Value, String> {
+    let action = args.get("action").and_then(|v| v.as_str()).unwrap_or("list");
+    let proj = if let Some(dir) = args.get("project_dir").and_then(|v| v.as_str()) {
+        Project::from_root(PathBuf::from(dir))?
+    } else if let Some(p) = current() {
+        p.clone()
+    } else if let Ok(root) = std::env::var("SYNTH_OUTPUT_ROOT") {
+        Project::from_root(PathBuf::from(root.trim()))?
+    } else {
+        return Err("No active project; pass project_dir or attach a project".into());
+    };
+
+    match action {
+        "list" => {
+            let items = proj.load_annotations()?;
+            let open_count = items.iter().filter(|a| !a.addressed).count();
+            Ok(json!({
+                "schema": ANNOTATION_SCHEMA,
+                "project": proj.name,
+                "open_annotations_count": open_count,
+                "items": items
+            }))
+        }
+        "mark_addressed" => {
+            let id = args
+                .get("id")
+                .and_then(|v| v.as_str())
+                .ok_or("id is required for mark_addressed")?;
+            let found = proj.mark_annotation_addressed(id)?;
+            Ok(json!({
+                "status": if found { "addressed" } else { "not_found" },
+                "id": id
+            }))
+        }
+        "add" => {
+            let item: Annotation =
+                serde_json::from_value(args).map_err(|e| format!("annotation args: {e}"))?;
+            let saved = proj.add_annotation(item)?;
+            Ok(json!({"status": "added", "annotation": saved}))
+        }
+        other => Err(format!(
+            "Unknown action `{other}`; expected `list`, `add`, or `mark_addressed`"
+        )),
     }
 }
 
@@ -455,6 +557,13 @@ mod tests {
                 rating: 0,
                 comment: String::new(),
                 links: vec![],
+                camera_yaw: None,
+                camera_pitch: None,
+                camera_distance: None,
+                time_seconds: None,
+                frame_index: None,
+                screen_pin_uv: None,
+                addressed: false,
             })
             .unwrap_err();
         assert!(err.contains("comment"));

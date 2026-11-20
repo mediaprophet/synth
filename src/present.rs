@@ -363,17 +363,82 @@ pub fn render_10d_preview_html(receipt: &Value, views: &[(String, Vec<u8>)]) -> 
       <div class="text-xs font-mono uppercase tracking-wider text-[var(--muted-foreground)]">synth.native-10d-preview/v1 · Volumetric Turntable</div>
       <h1 class="text-lg font-semibold font-mono truncate">{path}</h1>
       <div class="text-xs font-mono text-[var(--muted-foreground)]">SHA-256: {sha} ({source_bytes} B)</div>
+      <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--border)]">
+        <button id="motion-play-btn" onclick="toggleMotionPlay()" class="px-3 py-1 rounded-md text-xs font-mono font-semibold border border-[var(--border)] bg-[var(--primary)] text-[var(--primary-foreground)]">Play Motion</button>
+        <input id="motion-scrubber" type="range" min="0" max="{max_idx}" value="0" oninput="selectView(parseInt(this.value,10))" class="w-48" />
+        <label class="text-xs font-mono text-[var(--muted-foreground)]">FPS:
+          <select id="motion-fps" class="ml-1 px-2 py-0.5 rounded bg-[var(--background)] border border-[var(--border)] text-xs font-mono">
+            <option value="4">4</option>
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+            <option value="24">24</option>
+          </select>
+        </label>
+        <span id="motion-frame-label" class="text-xs font-mono text-[var(--muted-foreground)]">Frame 1 / {total_views}</span>
+      </div>
       <div class="flex flex-wrap gap-2 pt-2">{buttons}</div>
       <div class="pt-2">{panels}</div>
+      <details class="text-xs pt-2"><summary class="cursor-pointer text-[var(--muted-foreground)] font-mono">Annotate Viewport Frame / Pin Feedback for Agent</summary>
+        <div class="mt-2 p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-2">
+          <div class="flex gap-2">
+            <input id="ann-comment" type="text" placeholder="Describe shape/motion/material feedback at this frame..." class="flex-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--card)] text-xs font-mono" />
+            <button onclick="submitViewportAnnotation()" class="px-3 py-1 rounded border border-[var(--border)] bg-[var(--card)] text-xs font-mono">Save Annotation</button>
+          </div>
+          <div id="ann-status" class="text-xs font-mono text-[var(--muted-foreground)]"></div>
+        </div>
+      </details>
       <details class="text-xs pt-2"><summary class="cursor-pointer text-[var(--muted-foreground)] font-mono">Inspect review-receipt.json</summary><pre class="mt-2 p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] overflow-x-auto font-mono text-xs">{receipt_pretty}</pre></details>
     </div>
   </main>
-  <script>function selectView(index) {{ document.querySelectorAll('.view-panel').forEach((el, idx) => {{ el.style.display = idx === index ? '' : 'none'; }}); }}</script>
+  <script>
+    var currentViewIndex = 0;
+    var totalViews = {total_views};
+    var motionTimer = null;
+    function selectView(index) {{
+      currentViewIndex = index;
+      document.querySelectorAll('.view-panel').forEach((el, idx) => {{ el.style.display = idx === index ? '' : 'none'; }});
+      var scrub = document.getElementById('motion-scrubber');
+      if (scrub) scrub.value = index;
+      var lbl = document.getElementById('motion-frame-label');
+      if (lbl) lbl.textContent = 'Frame ' + (index + 1) + ' / ' + totalViews;
+    }}
+    function toggleMotionPlay() {{
+      var btn = document.getElementById('motion-play-btn');
+      if (motionTimer) {{
+        clearInterval(motionTimer);
+        motionTimer = null;
+        if (btn) btn.textContent = 'Play Motion';
+      }} else {{
+        var fpsEl = document.getElementById('motion-fps');
+        var fps = fpsEl ? parseInt(fpsEl.value, 10) || 8 : 8;
+        if (btn) btn.textContent = 'Pause';
+        motionTimer = setInterval(function() {{
+          selectView((currentViewIndex + 1) % Math.max(1, totalViews));
+        }}, Math.max(30, Math.round(1000 / fps)));
+      }}
+    }}
+    function submitViewportAnnotation() {{
+      var comment = (document.getElementById('ann-comment') || {{}}).value || '';
+      var status = document.getElementById('ann-status');
+      var payload = {{ file: '{path}', lane: 'working', frame_index: currentViewIndex, comment: comment, rating: 3 }};
+      fetch('http://127.0.0.1:8787/api/project/annotations', {{
+        method: 'POST',
+        headers: {{ 'Content-Type': 'application/json' }},
+        body: JSON.stringify(payload)
+      }}).then(function(r) {{ return r.json(); }}).then(function() {{
+        if (status) status.textContent = 'Saved annotation at frame ' + currentViewIndex + ' to .synth/annotations.json';
+      }}).catch(function() {{
+        if (status) status.textContent = 'Offline annotation JSON: ' + JSON.stringify(payload);
+      }});
+    }}
+  </script>
 </body>
 </html>
 "#,
         path = escape_html(source_path),
         sha = escape_html(source_sha),
+        max_idx = views.len().saturating_sub(1),
+        total_views = views.len(),
         studio_css = crate::present_style::SYNTH_STUDIO_CSS,
     ))
 }

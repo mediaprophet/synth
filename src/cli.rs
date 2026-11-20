@@ -8,8 +8,83 @@ mod native_preview;
 pub fn run() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let result = if args.is_empty() || args.as_slice() == ["--help"] {
-        println!("Synth commands:\n  find          Search QualiaDB/Etalon/Hypermedia morphisms and MCP tools (synth find xpbd)\n  capabilities  Inspect the admitted Vibe SDK providers and the product card (development tool)\n  ontology      Inspect the category-theoretic ontology taxonomy and morphisms\n  operations    List shared-library asset operations and ontological contracts\n  profiles      List available production profiles\n  mcp           Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio (stdio writes require SYNTH_OUTPUT_ROOT; HTTP /api/mcp/call never takes it)\n  mcp-tools     Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env           Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve         Run the local Synth Studio HTTP workbench on a non-conflicting port (default: 8787). QualiaDB demo at / ; current project at /project when --project DIR is set\n  operator      Webizen AI Synth operator at /operator (rules, events, git tags, bookmarks, jobs). System tray on Windows/macOS/Linux with --features native-ui\n  bookmark      Semantic datasource bookmarks in .synth/ (N3/RDF/SPARQL/GIS URLs; secrets stay gitignored)\n  job           Download / wrap / compile jobs with a scheduler (operator ticks due jobs; inbox is .synth/inbox)\n  update        Check GitHub tags; verify/apply a signed release (never overwrites a locked synth.exe)\n  tray          Launch the Webizen AI Synth resident tray & studio (requires native-ui feature)\n  produce       Generate or strictly reopen an asset HMC\n  present       Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview       Render .10d PNGs and interactive HTML turntable (requires preview feature)");
+        println!("Synth commands:\n  find            Search QualiaDB/Etalon/Hypermedia morphisms and MCP tools (synth find xpbd)\n  capabilities    Inspect the admitted Vibe SDK providers and the product card (development tool)\n  ontology        Inspect the category-theoretic ontology taxonomy and morphisms\n  operations      List shared-library asset operations and ontological contracts\n  profiles        List available production profiles\n  mcp             Run the comprehensive QualiaDB + Synth MCP JSON-RPC 2.0 server over stdio\n  mcp-tools       Print the unified QualiaDB + Synth MCP tool catalogue as JSON\n  env             Bootstrap and inspect Synth's self-produced tray & studio environment\n  serve           Run the local Synth Studio HTTP workbench (default: 8787)\n  operator        Webizen AI Synth operator at /operator\n  bookmark        Semantic datasource bookmarks in .synth/\n  job             Download / wrap / compile jobs with a scheduler\n  update          Check GitHub tags; verify/apply a signed release\n  convert-3d      Convert an existing 3D file (.glb/.gltf, .obj, .stl, legacy .10d) to Holographic .10d v2 + license contract\n  validate-model  Run computational model form validation (REQ-8.1)\n  verify-outputs  Run multi-format output & render verification (REQ-9.1)\n  changelog       Inspect or update signed SVN-style changelog & dual-regime license contract (REQ-6)\n  sessions        Inspect multi-agent resource admission slots & GPU runtime profile (REQ-4 & REQ-5)\n  tray            Launch the Webizen AI Synth resident tray & studio (requires native-ui feature)\n  produce         Generate or strictly reopen an asset HMC\n  present         Generate a self-contained HTML showcase for Antigravity / Browser Preview\n  preview         Render .10d PNGs and interactive HTML turntable/motion scrubber");
         asset_cli::run(&["--help".into()])
+    } else if args.as_slice() == ["--version"] || args.as_slice() == ["version"] {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&crate::session_admission::build_identity_and_drift_report()).unwrap()
+        );
+        Ok(())
+    } else if args.first().is_some_and(|arg| arg == "sessions") {
+        let report = serde_json::json!({
+            "sessions": crate::session_admission::session_admission_status(),
+            "gpu_runtime_profile": crate::session_admission::detect_runtime_and_gpu_profile(None),
+            "build_identity": crate::session_admission::build_identity_and_drift_report(),
+        });
+        println!("{}", serde_json::to_string_pretty(&report).unwrap());
+        Ok(())
+    } else if args.first().is_some_and(|arg| arg == "verify-outputs") {
+        let dir = args.get(1).cloned().unwrap_or_else(|| ".".into());
+        crate::model_validation::verify_multi_format_outputs(serde_json::json!({ "export_dir": dir }))
+            .map(|rep| println!("{}", serde_json::to_string_pretty(&rep).unwrap()))
+    } else if args.first().is_some_and(|arg| arg == "validate-model") {
+        let mut subject = "VascularPlant".to_string();
+        let mut asset_path = None;
+        let mut i = 1;
+        while i < args.len() {
+            match args[i].as_str() {
+                "--class" if i + 1 < args.len() => {
+                    subject = args[i + 1].clone();
+                    i += 2;
+                }
+                "--asset" if i + 1 < args.len() => {
+                    asset_path = Some(args[i + 1].clone());
+                    i += 2;
+                }
+                _ => i += 1,
+            }
+        }
+        crate::model_validation::validate_computational_model_form(serde_json::json!({
+            "subject_class": subject,
+            "asset_10d_path": asset_path
+        }))
+        .map(|rep| println!("{}", serde_json::to_string_pretty(&rep).unwrap()))
+    } else if args.first().is_some_and(|arg| arg == "changelog") {
+        let dir = args.get(1).cloned();
+        crate::changelog_licensing::dispatch_changelog_license_mcp(serde_json::json!({
+            "action": "inspect",
+            "project_dir": dir
+        }))
+        .map(|rep| println!("{}", serde_json::to_string_pretty(&rep).unwrap()))
+    } else if args.first().is_some_and(|arg| arg == "convert-3d") {
+        let mut src = None;
+        let mut out = None;
+        let mut license = None;
+        let mut creator = "Timothy Charles Holborn".to_string();
+        let mut notice = None;
+        let mut uri = "urn:qualia:converted:asset".to_string();
+        let mut i = 1;
+        while i < args.len() {
+            match args[i].as_str() {
+                "--source" if i + 1 < args.len() => { src = Some(args[i + 1].clone()); i += 2; }
+                "--out" if i + 1 < args.len() => { out = Some(args[i + 1].clone()); i += 2; }
+                "--license" if i + 1 < args.len() => { license = Some(args[i + 1].clone()); i += 2; }
+                "--creator" if i + 1 < args.len() => { creator = args[i + 1].clone(); i += 2; }
+                "--attribution" if i + 1 < args.len() => { notice = Some(args[i + 1].clone()); i += 2; }
+                "--uri" if i + 1 < args.len() => { uri = args[i + 1].clone(); i += 2; }
+                _ => i += 1,
+            }
+        }
+        crate::model_validation::convert_3d_scene_or_asset_cli_or_mcp(serde_json::json!({
+            "source_path": src,
+            "out_dir": out,
+            "spdx_license": license,
+            "creator": creator,
+            "attribution_notice": notice,
+            "asset_uri": uri
+        }))
+        .map(|rep| println!("{}", serde_json::to_string_pretty(&rep).unwrap()))
     } else if args.first().is_some_and(|arg| arg == "find") {
         let q = args[1..].join(" ");
         if q.trim().is_empty() {

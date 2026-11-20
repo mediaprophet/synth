@@ -858,6 +858,7 @@ fn guess_content_type(filename: &str, header: &str) -> String {
         "n3" => "text/n3".into(),
         "nt" => "application/n-triples".into(),
         "rdf" | "owl" => "application/rdf+xml".into(),
+        "yaml" | "yml" => "application/yaml".into(),
         "json" | "jsonld" => "application/json".into(),
         "csv" => "text/csv".into(),
         "html" | "htm" => "text/html".into(),
@@ -944,16 +945,26 @@ fn write_snapshot(
     let mut promoted = None;
     let mut quin_count = None;
     if compile {
-        let rdf_bytes = if looks_like_turtle(&fetched.bytes, &fetched.content_type, &payload_name) {
-            let mut combined = wrap.into_bytes();
-            combined.extend_from_slice(b"\n\n# --- fetched graph ---\n\n");
-            combined.extend_from_slice(&fetched.bytes);
-            combined
-        } else {
-            wrap.into_bytes()
-        };
         let dest = run_dir.join("snapshot.q42");
-        let count = compile_ttl_to_q42(&rdf_bytes, &dest, &format!("urn:synth:job:{}", job.id))?;
+        let is_yaml = payload_name.ends_with(".yaml") || payload_name.ends_with(".yml");
+        let count = if is_yaml {
+            compile_yaml_With_wrap_to_q42(
+                &fetched.bytes,
+                wrap.as_bytes(),
+                &dest,
+                &format!("urn:synth:job:{}", job.id),
+            )?
+        } else {
+            let rdf_bytes = if looks_like_turtle(&fetched.bytes, &fetched.content_type, &payload_name) {
+                let mut combined = wrap.into_bytes();
+                combined.extend_from_slice(b"\n\n# --- fetched graph ---\n\n");
+                combined.extend_from_slice(&fetched.bytes);
+                combined
+            } else {
+                wrap.into_bytes()
+            };
+            compile_ttl_to_q42(&rdf_bytes, &dest, &format!("urn:synth:job:{}", job.id))?
+        };
         quin_count = Some(count);
         q42_path = Some(dest.display().to_string());
         if let Some(name) = job.out_q42.as_deref() {
@@ -1001,6 +1012,33 @@ fn compile_ttl_to_q42(bytes: &[u8], dest: &Path, context_iri: &str) -> Result<us
         .map_err(|e| format!("RDF parse failed: {e}"))?;
     if quins.is_empty() {
         return Err("RDF parsed to zero triples; refusing empty Q42 volume".into());
+    }
+    qualia_core_db::q42_volume::write_sorted_quins_volume_with_lex(dest, &quins, &lex, 0)
+        .map_err(|e| format!("Q42 write failed: {e}"))?;
+    Ok(quins.len())
+}
+
+fn compile_yaml_With_wrap_to_q42(
+    yaml_bytes: &[u8],
+    wrap_ttl: &[u8],
+    dest: &Path,
+    context_iri: &str,
+) -> Result<usize, String> {
+    if dest.exists() {
+        return Err("Q42 destination already exists".into());
+    }
+    let ctx = qualia_core_db::q_hash(context_iri);
+    let (mut quins, mut lex, _shape) =
+        qualia_core_db::q42::yaml_ld_q42::compile_yaml_ld_q42_auto(yaml_bytes, ctx, 1)
+            .map_err(|e| format!("yaml-ld-q42 parse failed: {e}"))?;
+    if let Ok((wrap_quins, wrap_lex)) =
+        qualia_core_db::ontology_loader::parse_ttl_bytes_to_quins_and_lex(wrap_ttl, ctx)
+    {
+        quins.extend(wrap_quins);
+        lex.extend(wrap_lex);
+    }
+    if quins.is_empty() {
+        return Err("yaml-ld-q42 parsed to zero NQuins; refusing empty Q42 volume".into());
     }
     qualia_core_db::q42_volume::write_sorted_quins_volume_with_lex(dest, &quins, &lex, 0)
         .map_err(|e| format!("Q42 write failed: {e}"))?;

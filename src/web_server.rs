@@ -136,7 +136,12 @@ pub fn spawn_background_server(preferred_port: Option<u16>) -> Result<String, St
         .name("synth-studio-http".into())
         .spawn(move || {
             for stream in listener.incoming().flatten() {
-                let _ = handle_connection(stream);
+                let _ = thread::Builder::new()
+                    .name("synth-http-worker".into())
+                    .stack_size(16 * 1024 * 1024)
+                    .spawn(move || {
+                        let _ = handle_connection(stream);
+                    });
             }
         })
         .map_err(|e| e.to_string())?;
@@ -163,7 +168,12 @@ pub fn serve_blocking(preferred_port: Option<u16>, open_browser: bool) -> Result
         open_in_system_browser(&url);
     }
     for stream in listener.incoming().flatten() {
-        let _ = handle_connection(stream);
+        let _ = thread::Builder::new()
+            .name("synth-http-worker".into())
+            .stack_size(16 * 1024 * 1024)
+            .spawn(move || {
+                let _ = handle_connection(stream);
+            });
     }
     Ok(())
 }
@@ -939,6 +949,13 @@ fn handle_annotation(body: &[u8]) -> Value {
         rating: req.rating.unwrap_or(0),
         comment: req.comment.unwrap_or_default(),
         links: req.links.unwrap_or_default(),
+        camera_yaw: req.camera_yaw,
+        camera_pitch: req.camera_pitch,
+        camera_distance: req.camera_distance,
+        time_seconds: req.time_seconds,
+        frame_index: req.frame_index,
+        screen_pin_uv: req.screen_pin_uv,
+        addressed: false,
     };
     match project.add_annotation(item) {
         Ok(saved) => json!({ "ok": true, "item": saved }),
@@ -955,6 +972,12 @@ struct AnnotationRequest {
     rating: Option<u8>,
     comment: Option<String>,
     links: Option<Vec<AnnotationLink>>,
+    camera_yaw: Option<f32>,
+    camera_pitch: Option<f32>,
+    camera_distance: Option<f32>,
+    time_seconds: Option<f32>,
+    frame_index: Option<u32>,
+    screen_pin_uv: Option<[f32; 2]>,
 }
 
 fn serve_project_file(

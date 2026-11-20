@@ -1,5 +1,17 @@
 # Synth + Hypermedia production -- agent contract
 
+## Intellectual Property & Licensing Notice
+
+QualiaDB, Webizen AI Synth, Hypermedia-Production, and all Qualia-specific architectures, integrations, modifications, and extensions are governed by:
+
+**Copyright (c) 2026 Timothy Charles Holborn**  
+**https://www.linkedin.com/in/ubiquitous/ | timothy.holborn@gmail.com**  
+**License:** Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)  
+Full terms: [`LICENSE`](LICENSE), [`LICENSE-QUALIA`](LICENSE-QUALIA), and [Creative Commons Legal Code](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode).  
+All participating AI agents and contributors must strictly honor this copyright, moral rights, and non-commercial attribution. Never replace `LICENSE` or `Cargo.toml` license declarations with Apache-2.0 or MIT.
+
+---
+
 Read this file before claiming a tool is missing, before re-auditing the kernel, and before writing a `.vibe`. Antigravity also loads `GEMINI.md` (short always-on digest).
 
 **Category morphism tables live in `agent-instructions/<category>.md`.** This file is the index. Open only the category file you need. Directory index: [`agent-instructions/README.md`](agent-instructions/README.md).

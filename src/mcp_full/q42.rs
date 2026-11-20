@@ -32,10 +32,11 @@ fn infer_format(explicit: Option<&str>, path: Option<&str>) -> Result<&'static s
     if let Some(raw) = explicit {
         return match raw.to_ascii_lowercase().as_str() {
             "ttl" | "turtle" | "n3" | "nt" | "ntriples" => Ok("ttl"),
+            "yaml" | "yml" | "yaml-ld-q42" => Ok("yaml"),
             "q42" => Ok("q42"),
             other => Err(ToolError::new(
                 "invalid_arguments",
-                format!("unsupported RDF format {other}; prefer n3, or use ttl, nt, or q42"),
+                format!("unsupported RDF format {other}; prefer n3 or yaml-ld-q42, or use ttl, nt, or q42"),
             )),
         };
     }
@@ -46,10 +47,11 @@ fn infer_format(explicit: Option<&str>, path: Option<&str>) -> Result<&'static s
         .to_ascii_lowercase();
     match ext.as_str() {
         "ttl" | "turtle" | "n3" | "nt" | "rdf" => Ok("ttl"),
+        "yaml" | "yml" => Ok("yaml"),
         "q42" => Ok("q42"),
         other => Err(ToolError::new(
             "invalid_arguments",
-            format!("cannot infer format from extension .{other}; pass format=n3"),
+            format!("cannot infer format from extension .{other}; pass format=n3 or format=yaml-ld-q42"),
         )),
     }
 }
@@ -110,6 +112,30 @@ pub(super) fn compile(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
             qualia_core_db::daemon_graph::extend_with_ontology_quins_slice(&quins);
         }
         (quins.len(), 0usize, format!("{:x}", Sha256::digest(&bytes)))
+    } else if format == "yaml" {
+        let (quins, lex, _shape) =
+            qualia_core_db::q42::yaml_ld_q42::compile_yaml_ld_q42_auto(&bytes, ctx, 1)
+                .map_err(|e| ToolError::new("execution_failed", format!("yaml-ld-q42 parse failed: {e}")))?;
+        if quins.is_empty() {
+            return Err(ToolError::new(
+                "execution_failed",
+                "yaml-ld-q42 parsed to zero NQuins; refusing empty Q42 volume",
+            ));
+        }
+        let lex_terms = lex.len();
+        qualia_core_db::q42_volume::write_sorted_quins_volume_with_lex(&dest, &quins, &lex, 0)
+            .map_err(|e| ToolError::new("execution_failed", format!("Q42 write failed: {e}")))?;
+        if parsed.ingest_to_graph {
+            qualia_core_db::daemon_graph::extend_with_ontology_quins_slice(&quins);
+        }
+        let written = std::fs::read(&dest).map_err(|e| {
+            ToolError::new("execution_failed", format!("cannot read sealed q42: {e}"))
+        })?;
+        (
+            quins.len(),
+            lex_terms,
+            format!("{:x}", Sha256::digest(&written)),
+        )
     } else {
         let (quins, lex): (Vec<qualia_core_db::NQuin>, HashMap<u64, String>) =
             qualia_core_db::ontology_loader::parse_ttl_bytes_to_quins_and_lex(&bytes, ctx)

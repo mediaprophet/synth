@@ -197,13 +197,13 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_compile_q42".into(),
-                description: "Parse N3 (preferred; N3Logic + SHACL), Turtle, or N-Triples — or copy an existing .q42 — from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
+                description: "Parse N3 (preferred; N3Logic + SHACL), Turtle, N-Triples, or yaml-ld-q42 (.yaml/.yml/.q42.yaml) — or copy an existing .q42 — from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
                 input_schema: {
                     let mut schema = object(
                     json!({
-                        "source_path": {"type":"string","maxLength":4096,"description":"N3/TTL/NT/Q42 file under SYNTH_INPUT_ROOT. Prefer .n3."},
-                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline N3 (preferred) or Turtle when the agent fetched a datasource"},
-                        "format": {"type":"string","enum":["ttl","turtle","n3","nt","ntriples","q42"]},
+                        "source_path": {"type":"string","maxLength":4096,"description":"N3/TTL/NT/YAML-LD-Q42/Q42 file under SYNTH_INPUT_ROOT. Prefer .n3 or .q42.yaml."},
+                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline N3 (preferred), Turtle, or yaml-ld-q42 when the agent fetched a datasource"},
+                        "format": {"type":"string","enum":["ttl","turtle","n3","nt","ntriples","yaml","yml","yaml-ld-q42","q42"]},
                         "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
                         "ingest_to_graph": {"type":"boolean"},
                         "context_iri": {"type":"string","maxLength":1024}
@@ -297,6 +297,95 @@ impl StandaloneSynthMcp {
                 ),
             },
             AuthoringTool {
+                name: "synth_annotations".into(),
+                description: "List, add, or mark addressed spatial/temporal viewport annotations (.synth/annotations.json) so agents can close the visual/motion review feedback loop (REQ-2.4).".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["list","add","mark_addressed"]},
+                        "project_dir": {"type":"string","maxLength":4096},
+                        "id": {"type":"string","maxLength":128},
+                        "lane": {"type":"string","enum":["working","delivered"]},
+                        "file": {"type":"string","maxLength":512},
+                        "comment": {"type":"string","maxLength":8192},
+                        "rating": {"type":"integer","minimum":0,"maximum":5},
+                        "camera_yaw": {"type":"number"},
+                        "camera_pitch": {"type":"number"},
+                        "camera_distance": {"type":"number"},
+                        "time_seconds": {"type":"number"},
+                        "frame_index": {"type":"integer"}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_sessions".into(),
+                description: "Inspect multi-agent concurrent production sessions, resource admission slots (SYNTH_OUTPUT_ROOT/.synth/slots.json), and Local GPU / Port 4242 runtime profile (REQ-4 & REQ-5).".into(),
+                input_schema: object(
+                    json!({
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","metal","dx12","webgpu-wasm","webgl2-wasm","cpu"]}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_changelog_license".into(),
+                description: "Inspect or update an asset's SVN-style signed revision changelog (.synth/changelog.json) and Dual-Regime Semantic License Contract (.synth/license-contract.json: PermissiveCommonsPaydown vs. PerpetualCreativeRoyalty vs. CC-BY-NC-ND-4.0) (REQ-6).".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["inspect","set_license"]},
+                        "project_dir": {"type":"string","maxLength":4096},
+                        "asset_id": {"type":"string","maxLength":512},
+                        "regime": {"type":"string","enum":["commons_paydown","perpetual_royalty","sovereign_cc_by_nc_nd","sanctuary"]},
+                        "target_pool_t_cents": {"type":"integer","minimum":0},
+                        "roi_multiplier": {"type":"number","minimum":1.0,"maximum":10.0},
+                        "settled_s_cents": {"type":"integer","minimum":0},
+                        "upstream_source_license": {"type":"string","maxLength":128}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_validate_model".into(),
+                description: "Validate an asset's computational model parameters (required physical/anatomical/kinetic fields by subject_class, ClaimBasis/EpistemicTier classification, 1..N reference bindings, QUDT bounds, and .10d HOLO/MSTR/CBLD/KLOD0..KLOD3 sections) (REQ-7 & REQ-8).".into(),
+                input_schema: object(
+                    json!({
+                        "subject_class": {"type":"string","enum":["VascularPlant","Flora","VertebrateFauna","HumanAnatomy","MechanicalVehicle","MadeArtefact"]},
+                        "asset_10d_path": {"type":"string","maxLength":4096},
+                        "fields": {"type":"array","items":{"type":"object"}}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_verify_outputs".into(),
+                description: "Run automated multi-format render and output verification (.10d CRC-32C/frustum bounds/KLOD, .png, .svg, .emf, .m64, .q42, .hmc, .mp4, .wav, .qac, .dxf) and return a pass|fail|error matrix (REQ-9).".into(),
+                input_schema: object(
+                    json!({
+                        "export_dir": {"type":"string","maxLength":4096}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_convert_3d".into(),
+                description: "Convert an existing 3D formatted asset or multi-node scene (.glb/.gltf static or living scene with skins/anims/morphs, .obj, .stl, or legacy .10d) into a Holographic .10d v2 Mode-A Archetype + Mode-B scene instances + attested PRV1/CBLD source-licensing & provenance package (Phase 1).".into(),
+                input_schema: object(
+                    json!({
+                        "source_path": {"type":"string","maxLength":4096},
+                        "out_dir": {"type":"string","maxLength":4096},
+                        "format": {"type":"string","enum":["glb","gltf","obj","stl","10d"]},
+                        "asset_uri": {"type":"string","maxLength":1024},
+                        "domain_id": {"type":"integer","minimum":1},
+                        "spdx_license": {"type":"string","maxLength":128,"description":"Mandatory source license identifier (e.g. CC-BY-NC-ND-4.0, CC-BY-4.0, PC-PAYDOWN-1.0)"},
+                        "creator": {"type":"string","maxLength":512},
+                        "attribution_notice": {"type":"string","maxLength":2048,"description":"Mandatory UTF-8 attribution and copyright notice"},
+                        "origin_uri": {"type":"string","maxLength":2048},
+                        "embed_full_source_bytes": {"type":"boolean"}
+                    }),
+                    vec!["source_path","out_dir","spdx_license","attribution_notice"],
+                ),
+            },
+            AuthoringTool {
                 name: "synth_produce_present".into(),
                 description: "Execute QualiaDB/Etalon/Hypermedia asset operations inside one bounded ProductionSession (development tool, not the visitor runtime). Bind local inputs under SYNTH_INPUT_ROOT; save create-only HMC/HTML and export resources under SYNTH_OUTPUT_ROOT. New scene assets are extra HMC/.10d/.q42 files; the host does not rebuild. Handles expire after source evaluation. Biosphere non-fiction (domain=biosphere, fiction=false) requires evidence_q42 or ecopunk/entities/taxa/{taxon}/*.q42.".into(),
                 input_schema: {
@@ -332,7 +421,12 @@ impl StandaloneSynthMcp {
                         "domain": {"type":"string","maxLength":64,"description":"Encyclopedia domain. biosphere + fiction=false gates geometry until evidence .q42 exists."},
                         "taxon": {"type":"string","maxLength":128,"description":"Ecopunk taxon id, e.g. corymbia-aparrerinja"},
                         "fiction": {"type":"boolean"},
-                        "evidence_q42": {"type":"string","maxLength":4096,"description":"Path to a sealed evidence .q42 (under SYNTH_INPUT_ROOT or absolute)"}
+                        "evidence_q42": {"type":"string","maxLength":4096,"description":"Path to a sealed evidence .q42 (under SYNTH_INPUT_ROOT or absolute)"},
+                        "session_id": {"type":"string","maxLength":128,"description":"Optional multi-agent session ID for slot lease management"},
+                        "agent_id": {"type":"string","maxLength":128,"description":"Optional calling agent ID for slot attribution"},
+                        "wait_ms": {"type":"integer","minimum":0,"maximum":15000,"description":"Optional FIFO wait time in ms when production slots are busy"},
+                        "gpu_backend": {"type":"string","enum":["auto","vulkan","cuda","metal","dx12","webgpu-wasm","webgl2-wasm","cpu"]},
+                        "verify_outputs": {"type":"boolean","description":"Automatically run multi-format output verification (REQ-9.1) on export_dir"}
                     }),
                     vec![],
                     );
@@ -358,7 +452,27 @@ impl AuthoringBackend for StandaloneSynthMcp {
     }
 
     fn call(&mut self, name: &str, args: Value) -> Result<Value, ToolError> {
-        let result = match name {
+        let result = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            self.call_inner(name, args)
+        })) {
+            Ok(res) => res,
+            Err(_) => Err(ToolError::new(
+                "internal_panic",
+                format!("Tool `{name}` caught an internal panic; MCP daemon remains online"),
+            )),
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let detail = result.as_ref().err().map(|e| e.message.as_str());
+            crate::operator::record_event(name, result.is_ok(), detail);
+        }
+        result
+    }
+}
+
+impl StandaloneSynthMcp {
+    fn call_inner(&mut self, name: &str, args: Value) -> Result<Value, ToolError> {
+        match name {
             "synth_find" | "synth.find" => {
                 let q = args
                     .get("q")
@@ -415,6 +529,34 @@ impl AuthoringBackend for StandaloneSynthMcp {
                 crate::operator::update::dispatch(req)
                     .map_err(|e| ToolError::new("update_failed", e))
             }
+            "synth_annotations" | "synth.annotations" => {
+                crate::project::dispatch_annotations_mcp(args)
+                    .map_err(|e| ToolError::new("annotations_failed", e))
+            }
+            "synth_sessions" | "synth.sessions" => {
+                let backend = args.get("gpu_backend").and_then(Value::as_str);
+                Ok(json!({
+                    "sessions": crate::session_admission::session_admission_status(),
+                    "gpu_runtime_profile": crate::session_admission::detect_runtime_and_gpu_profile(backend),
+                    "build_identity": crate::session_admission::build_identity_and_drift_report(),
+                }))
+            }
+            "synth_changelog_license" | "synth.changelog.license" => {
+                crate::changelog_licensing::dispatch_changelog_license_mcp(args)
+                    .map_err(|e| ToolError::new("changelog_license_failed", e))
+            }
+            "synth_validate_model" | "synth.validate.model" => {
+                crate::model_validation::validate_computational_model_form(args)
+                    .map_err(|e| ToolError::new("validate_model_failed", e))
+            }
+            "synth_verify_outputs" | "synth.verify.outputs" => {
+                crate::model_validation::verify_multi_format_outputs(args)
+                    .map_err(|e| ToolError::new("verify_outputs_failed", e))
+            }
+            "synth_convert_3d" | "synth.convert.3d" => {
+                crate::model_validation::convert_3d_scene_or_asset_cli_or_mcp(args)
+                    .map_err(|e| ToolError::new("convert_3d_failed", e))
+            }
             "synth_profiles" | "synth.profiles" => {
                 let profiles: Vec<Value> = ProducerRegistry::with_builtins()
                     .profiles()
@@ -432,13 +574,7 @@ impl AuthoringBackend for StandaloneSynthMcp {
             _ => dispatch_qualia_engine_tool(name, &args).unwrap_or_else(|| {
                 Err(ToolError::new("unknown_tool", "Tool is not in the advertised catalog; use underscore tool names"))
             }),
-        };
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            let detail = result.as_ref().err().map(|e| e.message.as_str());
-            crate::operator::record_event(name, result.is_ok(), detail);
         }
-        result
     }
 }
 
@@ -741,6 +877,91 @@ mod tests {
         assert_eq!(win_slash.code, "native_output_refused");
         assert!(!dir.join("escape.hmc").exists());
         assert!(!dir.parent().unwrap().join("escape.hmc").exists());
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn synth_2026_11_requirements_sessions_changelog_validation_verification_and_convert3d_pass() {
+        let dir = unique_dir();
+        let mut mcp = StandaloneSynthMcp::default()
+            .with_output_root(NativeOutputRoot::admit(&dir).unwrap());
+
+        // REQ-1, REQ-4, REQ-5: synth_sessions returns build_identity, gpu_runtime_profile, and session slots
+        let sess = mcp.call("synth_sessions", json!({"gpu_backend": "vulkan"})).unwrap();
+        assert_eq!(sess["build_identity"]["license"], "CC-BY-NC-ND-4.0");
+        assert_eq!(sess["gpu_runtime_profile"]["selected_gpu_backend"], "vulkan");
+        assert_eq!(sess["sessions"]["schema"], "synth.resource-admission-slots/v1");
+
+        // REQ-6: synth_changelog_license sets & validates a Dual-Regime License Contract (SHACL roi_multiplier cap)
+        let lic = mcp
+            .call(
+                "synth_changelog_license",
+                json!({
+                    "action": "set_license",
+                    "project_dir": dir.to_string_lossy(),
+                    "asset_id": "urn:qualia:test:work",
+                    "regime": "commons_paydown",
+                    "target_pool_t_cents": 100000,
+                    "roi_multiplier": 2.5,
+                    "settled_s_cents": 40000
+                }),
+            )
+            .unwrap();
+        assert_eq!(lic["status"], "ok");
+        assert_eq!(lic["remaining_recovery_cents"], 60000);
+        assert_eq!(lic["is_commons_discharged"], false);
+
+        // REQ-8: synth_validate_model checks required fields, ClaimBasis, and ReferenceBindings
+        let form = mcp
+            .call(
+                "synth_validate_model",
+                json!({
+                    "subject_class": "MechanicalVehicle",
+                    "fields": [
+                        {"name": "length_m", "value": 4.95, "qudt_unit": "qudt:Meter", "claim_basis": "Measured", "references": [{"source_id": "spec-01", "kind": "standard"}]},
+                        {"name": "width_m", "value": 1.85, "qudt_unit": "qudt:Meter", "claim_basis": "Measured", "references": [{"source_id": "spec-01", "kind": "standard"}]},
+                        {"name": "height_m", "value": 1.92, "qudt_unit": "qudt:Meter", "claim_basis": "Measured", "references": [{"source_id": "spec-01", "kind": "standard"}]},
+                        {"name": "dry_mass_kg", "value": 2150.0, "qudt_unit": "qudt:Kilogram", "claim_basis": "Measured", "references": [{"source_id": "spec-01", "kind": "standard"}]},
+                        {"name": "youngs_modulus_mpa", "value": 210000.0, "claim_basis": "Derived"},
+                        {"name": "yield_stress_mpa", "value": 350.0, "claim_basis": "Derived"},
+                        {"name": "kinematic_solver_regime", "value": "ArticulatedRigidBodyDca", "claim_basis": "ModelAssumption"},
+                        {"name": "multiscale_strata_l0_l6", "value": ["L0","L1","L2","L5","L6"], "claim_basis": "Described", "references": [{"source_id": "q42-01", "kind": "q42_assertion"}]}
+                    ]
+                }),
+            )
+            .unwrap();
+        assert_eq!(form["status"], "pass");
+        assert_eq!(form["populated_required"], 8);
+
+        // Phase 1 & REQ-9: synth_convert_3d converts an OBJ with CC-BY-NC-ND-4.0 license and synth_verify_outputs passes
+        let obj_path = dir.join("source_tri.obj");
+        std::fs::write(&obj_path, b"v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n").unwrap();
+        let conv_out = dir.join("converted_out");
+        let conv = mcp
+            .call(
+                "synth_convert_3d",
+                json!({
+                    "source_path": obj_path.to_string_lossy(),
+                    "out_dir": conv_out.to_string_lossy(),
+                    "spdx_license": "CC-BY-NC-ND-4.0",
+                    "creator": "Timothy Charles Holborn",
+                    "attribution_notice": "Copyright (c) 2026 Timothy Charles Holborn — CC BY-NC-ND 4.0",
+                    "asset_uri": "urn:qualia:test:converted_tri"
+                }),
+            )
+            .unwrap();
+        assert_eq!(conv["status"], "ok");
+        assert_eq!(conv["changelog_head_rev"], 1);
+
+        let ver = mcp
+            .call(
+                "synth_verify_outputs",
+                json!({ "export_dir": conv_out.to_string_lossy() }),
+            )
+            .unwrap();
+        assert_eq!(ver["overall_technical_status"], "pass");
+        assert!(ver["checked_count"].as_u64().unwrap() >= 1);
+
         let _ = std::fs::remove_dir_all(dir);
     }
 }

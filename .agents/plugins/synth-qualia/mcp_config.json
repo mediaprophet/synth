@@ -1,18 +1,3 @@
 {
-  "mcpServers": {
-    "synth": {
-      "command": "C:\\github\\synth\\target-prod\\debug\\synth-mcp.exe",
-      "args": ["mcp"],
-      "env": {
-        "SYNTH_INPUT_ROOT": "C:\\github",
-        "SYNTH_OUTPUT_ROOT": "C:\\github\\synth\\production"
-      },
-      "tools": {
-        "synth_find": { "eager": true },
-        "synth_produce_present": { "eager": true },
-        "synth_compile_q42": { "eager": true },
-        "synth_operation_contracts": { "eager": true }
-      }
-    }
-  }
+  "mcpServers": {}
 }

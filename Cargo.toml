@@ -2,7 +2,8 @@
 name = "synth"
 version = "0.1.0"
 edition = "2021"
-license = "Apache-2.0"
+authors = ["Timothy Charles Holborn <timothy.holborn@gmail.com>"]
+license-file = "LICENSE"
 description = "Webizen AI Synth — VibeScript asset production over QualiaDB"
 
 [[bin]]
@@ -40,7 +41,7 @@ futures-timer = { version = "=3.0.4", optional = true }
 winresource = "0.1"
 
 [features]
-default = []
+default = ["preview"]
 preview = ["dep:webizen-render"]
 native-ui = ["dep:aether", "dep:aether-native", "dep:futures-timer"]
 atlas = ["dep:qualia-anatomy-pack"]
