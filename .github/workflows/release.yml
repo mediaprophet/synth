@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: mediaprophet/qualiaDB
-          ref: v0.0.41.4
+          ref: 0.0.41.3
           path: qualiaDB
 
       - uses: actions/checkout@v5

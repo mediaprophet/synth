@@ -16,7 +16,7 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 **Category morphism tables live in `agent-instructions/<category>.md`.** This file is the index. Open only the category file you need. Directory index: [`agent-instructions/README.md`](agent-instructions/README.md).
 
-**Webizen AI Synth 0.0.41.14 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+**Webizen AI Synth 0.0.41.15 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
 
 **Find work with `synth_find`.** Pass `q=xpbd`, `q=nla`, `q=ik`, `q=navmesh`, `q=camera`, `q=input`, `q=gis`, `q=osm`, `q=n3`, `q=sparql`, `q=hmc`. CLI: `synth find xpbd`. MCP: `synth_find` (Grok names it `synth__synth_find`). The 150 morphisms are QualiaDB + Etalon + Hypermedia; they are not a third engine.
 
@@ -79,7 +79,7 @@ Do not tell the user a catalog morphism or a rust-audit-indexed function does no
 
 ## First session
 
-1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.14`, 150 morphisms.
+1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.15`, 150 morphisms.
 2. Search: `synth_find` / `synth find <keyword>`.
 3. Open `agent-instructions/<category>.md` for that id (table below). Mapping table in this file is the DCC-name index.
 4. Check `synth_operation_contracts` (`id=` or `q=`) for the typed output recipe. Do not guess encoders from a namespace.
