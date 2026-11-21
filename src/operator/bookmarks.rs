@@ -512,9 +512,36 @@ pub fn dispatch(arg: BookmarkArg) -> Result<Value, String> {
                 return Err("secret exceeds 4096 bytes".into());
             }
             let dir = store_dir()?;
-            let store = load_store(&dir);
+            let mut store = load_store(&dir);
             if !store.items.iter().any(|b| b.id == id) {
-                return Err(format!("Unknown bookmark `{id}` — upsert the URL first"));
+                if id == "bioportal" {
+                    let ts = now_secs();
+                    store.schema = SCHEMA.into();
+                    store.items.push(Bookmark {
+                        id: "bioportal".into(),
+                        url: "https://data.bioontology.org".into(),
+                        kind: "rest".into(),
+                        title: "NCBO BioPortal Biomedical Ontology Repository".into(),
+                        data_endpoint: Some("https://data.bioontology.org".into()),
+                        formats: vec!["rdfxml".into(), "ttl".into(), "jsonld".into()],
+                        requires_api_key: true,
+                        api_key_env: Some(
+                            arg.api_key_env
+                                .clone()
+                                .unwrap_or_else(|| "BIOPORTAL_API_KEY".into()),
+                        ),
+                        auth: "apikey_token".into(),
+                        licence: Some("Per-ontology license (see BioPortal submission metadata)".into()),
+                        notes: Some("BioPortal REST API for biomedical ontologies, class trees, and cross-ontology SKOS/LOOM mappings.".into()),
+                        agent_notes: Some("Authenticate via header Authorization: apikey token=<key>.".into()),
+                        domain: Some("biomedical".into()),
+                        tags: vec!["biomedical".into(), "ontology".into(), "bioportal".into()],
+                        created_at: ts,
+                        updated_at: ts,
+                    });
+                } else {
+                    return Err(format!("Unknown bookmark `{id}` — upsert the URL first"));
+                }
             }
             let mut secrets = load_secrets(&dir);
             secrets.schema = SECRETS_SCHEMA.into();
@@ -526,7 +553,6 @@ pub fn dispatch(arg: BookmarkArg) -> Result<Value, String> {
                 },
             );
             save_secrets(&dir, &secrets)?;
-            let mut store = store;
             if let Some(bm) = store.items.iter_mut().find(|b| b.id == id) {
                 bm.requires_api_key = true;
                 if bm.api_key_env.is_none() {
@@ -726,6 +752,33 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
             dispatch(BookmarkArg {
                 action: Some("get".into()),
                 id: Some(id.clone()),
+                ..BookmarkArg::default()
+            })?
+        }
+        "set-secret" | "set_secret" => {
+            let id = args
+                .get(1)
+                .ok_or("Usage: synth bookmark set-secret ID SECRET [--env ENV_VAR]")?;
+            let secret = args
+                .get(2)
+                .ok_or("Usage: synth bookmark set-secret ID SECRET [--env ENV_VAR]")?;
+            let mut api_key_env = None;
+            let mut i = 3;
+            while i < args.len() {
+                match args[i].as_str() {
+                    "--env" => {
+                        i += 1;
+                        api_key_env = Some(args.get(i).ok_or("--env needs a value")?.clone());
+                    }
+                    other => return Err(format!("Unknown flag `{other}`")),
+                }
+                i += 1;
+            }
+            dispatch(BookmarkArg {
+                action: Some("set_secret".into()),
+                id: Some(id.clone()),
+                secret: Some(secret.clone()),
+                api_key_env,
                 ..BookmarkArg::default()
             })?
         }

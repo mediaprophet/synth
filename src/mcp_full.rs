@@ -23,7 +23,10 @@ mod contracts;
 mod catalog;
 #[cfg(not(target_arch = "wasm32"))]
 #[path = "mcp_full/q42.rs"]
-mod q42;
+pub mod q42;
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "mcp_full/bioportal.rs"]
+pub mod bioportal;
 
 
 /// Convert `qualia_mcp::stable_mcp_tools()` descriptors into `AuthoringTool` entries.
@@ -198,16 +201,17 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_compile_q42".into(),
-                description: "Parse N3 (preferred; N3Logic + SHACL), Turtle, N-Triples, or yaml-ld-q42 (.yaml/.yml/.q42.yaml) — or copy an existing .q42 — from SYNTH_INPUT_ROOT or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
+                description: "Compile OWL/RDF/XML (.owl/.rdf/.xml), N3 (preferred; N3Logic + SHACL), Turtle (.ttl), N-Triples (.nt), N-Quads (.nq), TriG (.trig), JSON-LD (.jsonld), CBOR-LD (.cborld), RDF/JSON (.rj), or yaml-ld-q42 (.yaml/.yml/.q42.yaml) — or copy an existing .q42 — from SYNTH_INPUT_ROOT (streamed up to 4 GiB via QualiaDB) or inline rdf_data, seal a create-only .q42 under SYNTH_OUTPUT_ROOT, optionally ingest the daemon graph. Query with query_sparql vault_path.".into(),
                 input_schema: {
                     let mut schema = object(
                     json!({
-                        "source_path": {"type":"string","maxLength":4096,"description":"N3/TTL/NT/YAML-LD-Q42/Q42 file under SYNTH_INPUT_ROOT. Prefer .n3 or .q42.yaml."},
-                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline N3 (preferred), Turtle, or yaml-ld-q42 when the agent fetched a datasource"},
-                        "format": {"type":"string","enum":["ttl","turtle","n3","nt","ntriples","yaml","yml","yaml-ld-q42","q42"]},
+                        "source_path": {"type":"string","maxLength":4096,"description":"OWL/RDF/XML/N3/TTL/NT/NQ/TriG/JSON-LD/YAML-LD-Q42/Q42 file (including .gz/.zst) under SYNTH_INPUT_ROOT."},
+                        "rdf_data": {"type":"string","maxLength":16777216,"description":"Inline N3 (preferred), OWL/RDF/XML, Turtle, or yaml-ld-q42 when the agent fetched a datasource"},
+                        "format": {"type":"string","enum":["owl","rdf","rdfxml","xml","ttl","turtle","n3","nt","ntriples","nq","nquads","trig","jsonld","json-ld","yaml","yml","yaml-ld-q42","yamlld","cbor","cborld","rj","rdfjson","q42"]},
                         "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
                         "ingest_to_graph": {"type":"boolean"},
-                        "context_iri": {"type":"string","maxLength":1024}
+                        "context_iri": {"type":"string","maxLength":1024},
+                        "segment_mib": {"type":"integer","minimum":1,"description":"Optional max segment size in MiB for multi-segment .q42 volume sets"}
                     }),
                     vec!["out_q42"],
                     );
@@ -260,6 +264,30 @@ impl StandaloneSynthMcp {
                         "domain": {"type":"string","maxLength":64},
                         "tags": {"type":"array","maxItems":16,"items":{"type":"string","maxLength":64}},
                         "secret": {"type":"string","maxLength":4096,"description":"Only with action=set_secret. Written to gitignored .synth/secrets.json."}
+                    }),
+                    vec![],
+                ),
+            },
+            AuthoringTool {
+                name: "synth_bioportal".into(),
+                description: "BioPortal Biomedical Ontology & No-Commodification-of-Life OWL -> Linked References + SHACL Shapes + N3Logic Rules + .q42 pipeline. Uses the API key stored in gitignored .synth/secrets.json (bookmark id='bioportal') or BIOPORTAL_API_KEY. Actions: status, set_api_key, list_local, list_remote, download, mappings, refactor_owl (strips owl:Thing/owl:NamedIndividual, converts owl:Class to skos:Concept linked references, compiles owl:Restriction to SHACL shapes and class/property axioms to N3Logic), compile_biomedical.".into(),
+                input_schema: object(
+                    json!({
+                        "action": {"type":"string","enum":["status","set_api_key","list_local","list_remote","download","mappings","refactor_owl","compile_biomedical"]},
+                        "acronym": {"type":"string","maxLength":64,"description":"BioPortal ontology acronym (e.g. FMA, UBERON, COGAT, AISM, ICF, PHAGE, PMO, SNMI)"},
+                        "q": {"type":"string","maxLength":256,"description":"Optional filter query for list_remote"},
+                        "source_path": {"type":"string","maxLength":4096,"description":"Local OWL/RDF/Turtle ontology file under SYNTH_INPUT_ROOT or ontology/biomedical/"},
+                        "out_dir": {"type":"string","maxLength":4096,"description":"Output directory for refactored _refs.ttl, _shapes.shacl.ttl, _rules.n3, and .q42"},
+                        "out_q42": {"type":"string","maxLength":96,"pattern":"^[A-Za-z0-9_-][A-Za-z0-9._-]*\\.q42$"},
+                        "class_iri": {"type":"string","maxLength":2048,"description":"Class IRI for action=mappings"},
+                        "download_format": {"type":"string","enum":["rdf","owl","ttl","csv"]},
+                        "compile_q42": {"type":"boolean"},
+                        "refactor_owl": {"type":"boolean"},
+                        "ingest_to_graph": {"type":"boolean"},
+                        "segment_mib": {"type":"integer","minimum":1},
+                        "limit": {"type":"integer","minimum":1,"maximum":500},
+                        "api_key": {"type":"string","maxLength":256,"description":"Only with action=set_api_key; written to gitignored .synth/secrets.json"},
+                        "biomedical_dir": {"type":"string","maxLength":4096}
                     }),
                     vec![],
                 ),
@@ -361,12 +389,13 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_validate_model".into(),
-                description: "Validate an asset's computational model parameters (required physical/anatomical/kinetic fields by subject_class, ClaimBasis/EpistemicTier classification, 1..N reference bindings, QUDT bounds, and .10d HOLO/MSTR/CBLD/KLOD0..KLOD3 sections) (REQ-7 & REQ-8).".into(),
+                description: "Validate an asset's computational model parameters (required physical/anatomical/kinetic fields by subject_class, ClaimBasis/EpistemicTier classification, 1..N reference bindings, QUDT bounds, 5-layer topological containment / radial tissue depth d in [0,1] / cavity SDF phi <= -eps / enthesis UV lock, and .10d HOLO/MSTR/CBLD/KLOD0..KLOD3 sections) (REQ-7 & REQ-8).".into(),
                 input_schema: object(
                     json!({
                         "subject_class": {"type":"string","enum":["VascularPlant","Flora","VertebrateFauna","HumanAnatomy","MechanicalVehicle","MadeArtefact"]},
                         "asset_10d_path": {"type":"string","maxLength":4096},
-                        "fields": {"type":"array","items":{"type":"object"}}
+                        "fields": {"type":"array","items":{"type":"object"}},
+                        "topological_layers": {"type":"array","items":{"type":"object"},"description":"Optional radial tissue/botanical layer samples (entity_id, layer_kind, d_min, d_max, max_cavity_sdf_phi_m, cavity_clearance_eps_m, max_enthesis_uv_drift_m, volume_det_f)"}
                     }),
                     vec![],
                 ),
@@ -510,6 +539,10 @@ impl StandaloneSynthMcp {
             #[cfg(not(target_arch = "wasm32"))]
             "synth_compile_q42" | "synth.compile.q42" => q42::compile(self, args),
             #[cfg(not(target_arch = "wasm32"))]
+            "query_sparql" | "synth_query_sparql" | "synth.query.sparql" => {
+                q42::execute_sparql_tool(Some(self), args)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
             "synth_operator_status" | "synth.operator.status" => {
                 let fetch = args.get("fetch").and_then(Value::as_bool).unwrap_or(false);
                 Ok(crate::operator::snapshot_with_fetch(fetch))
@@ -529,6 +562,10 @@ impl StandaloneSynthMcp {
                     .map_err(|e| ToolError::new("invalid_arguments", format!("Invalid synth_bookmarks arguments: {e}")))?;
                 crate::operator::bookmarks::dispatch(req)
                     .map_err(|e| ToolError::new("bookmark_failed", e))
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_bioportal" | "synth.bioportal" => {
+                bioportal::dispatch_mcp(self, args)
             }
             #[cfg(not(target_arch = "wasm32"))]
             "synth_jobs" | "synth.jobs" => {

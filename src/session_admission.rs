@@ -105,6 +105,7 @@ pub fn build_identity_and_drift_report() -> Value {
         "license": "CC-BY-NC-ND-4.0",
         "copyright": "Copyright (c) 2026 Timothy Charles Holborn",
         "current_exe": current_exe,
+        "sha256": current_sha,
         "current_exe_sha256": current_sha,
         "sibling_synth_exe_sha256": sibling_synth_sha,
         "sibling_synth_mcp_exe_sha256": sibling_mcp_sha,

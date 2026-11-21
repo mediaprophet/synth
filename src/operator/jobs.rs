@@ -643,12 +643,20 @@ fn execute_job(job: &Job, run_dir: &Path, started: u64) -> Result<RunMeta, Strin
             write_snapshot(run_dir, job, &fetched, started, true)
         }
         "compile" => {
-            let fetched = if job.source_path.is_some() {
-                read_local(job)?
+            if let Some(rel) = job.source_path.as_deref() {
+                let path = resolve_input_path(rel)?;
+                let len = fs::metadata(&path)
+                    .map(|m| m.len())
+                    .map_err(|e| format!("stat {}: {e}", path.display()))?;
+                if len > MAX_BYTES as u64 {
+                    return execute_streaming_local_compile_job(job, &path, len, run_dir, started);
+                }
+                let fetched = read_local(job)?;
+                write_snapshot(run_dir, job, &fetched, started, true)
             } else {
-                obtain_bytes(job)?
-            };
-            write_snapshot(run_dir, job, &fetched, started, true)
+                let fetched = obtain_bytes(job)?;
+                write_snapshot(run_dir, job, &fetched, started, true)
+            }
         }
         other => Err(format!("Unknown job kind `{other}`")),
     }
@@ -733,13 +741,14 @@ fn file_url(path: &Path) -> String {
 
 fn resolve_input_path(rel: &str) -> Result<PathBuf, String> {
     let raw = Path::new(rel);
-    if raw.is_absolute() {
-        return Err("source_path must be relative to SYNTH_INPUT_ROOT".into());
-    }
     let root = std::env::var("SYNTH_INPUT_ROOT")
         .map_err(|_| "SYNTH_INPUT_ROOT is required to compile a source_path".to_string())?;
     let root = PathBuf::from(root.trim());
-    let joined = root.join(rel);
+    let joined = if raw.is_absolute() {
+        raw.to_path_buf()
+    } else {
+        root.join(rel)
+    };
     let canon = fs::canonicalize(&joined).unwrap_or(joined);
     let root_canon = fs::canonicalize(&root).unwrap_or(root);
     if !canon.starts_with(&root_canon) {
@@ -749,6 +758,81 @@ fn resolve_input_path(rel: &str) -> Result<PathBuf, String> {
         return Err(format!("source_path is not a file: {}", canon.display()));
     }
     Ok(canon)
+}
+
+fn execute_streaming_local_compile_job(
+    job: &Job,
+    source_path: &Path,
+    file_len: u64,
+    run_dir: &Path,
+    started: u64,
+) -> Result<RunMeta, String> {
+    let filename = source_path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("payload.owl")
+        .to_owned();
+    let content_type = guess_content_type(&filename, "");
+    let url = file_url(source_path);
+    let sha = crate::mcp_full::q42::sha256_file(source_path).map_err(|e| e.message)?;
+    let ended = now_secs();
+    let fake_fetched = Fetched {
+        bytes: Vec::new(),
+        content_type: content_type.clone(),
+        url: url.clone(),
+        filename: filename.clone(),
+    };
+    let wrap = wrap_turtle(job, &fake_fetched, &sha, started, ended, &filename);
+    let wrap_path = run_dir.join("wrap.ttl");
+    fs::write(&wrap_path, wrap.as_bytes()).map_err(|e| format!("wrap.ttl: {e}"))?;
+    let manifest = json!({
+        "schema": "synth.job-run/v1",
+        "job_id": job.id,
+        "kind": job.kind,
+        "source_url": url,
+        "content_type": content_type,
+        "bytes": file_len,
+        "sha256": sha,
+        "payload": filename,
+        "streamed_from_source": true,
+        "started_at": started,
+        "ended_at": ended,
+        "licence_note": "Inbox is staging. Review licence and sensitivity before promoting a .q42.",
+    });
+    fs::write(
+        run_dir.join("manifest.json"),
+        serde_json::to_vec_pretty(&manifest).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| format!("manifest.json: {e}"))?;
+
+    let dest = run_dir.join("snapshot.q42");
+    let fmt = crate::mcp_full::q42::infer_compile_format(None, Some(&filename))
+        .map_err(|e| e.message)?;
+    let (count, _lex_terms, _q42_sha) = crate::mcp_full::q42::compile_file_to_q42(
+        source_path,
+        file_len,
+        &dest,
+        fmt,
+        Some(&format!("urn:synth:job:{}", job.id)),
+        false,
+        None,
+        false,
+    )
+    .map_err(|e| e.message)?;
+    let mut promoted = None;
+    if let Some(name) = job.out_q42.as_deref() {
+        promoted = promote_q42(&dest, name)?;
+    }
+    Ok(RunMeta {
+        bytes: file_len as usize,
+        content_type,
+        sha256: Some(sha),
+        source_url: Some(url),
+        wrap_path: Some(wrap_path.display().to_string()),
+        q42_path: Some(dest.display().to_string()),
+        promoted_q42: promoted,
+        quin_count: Some(count),
+    })
 }
 
 fn download(url: &str, query: Option<&str>, secret: Option<&str>) -> Result<Fetched, String> {
@@ -776,7 +860,12 @@ fn download(url: &str, query: Option<&str>, secret: Option<&str>) -> Result<Fetc
         agent.get(url).set("Accept", accept).set("User-Agent", USER_AGENT)
     };
     if let Some(token) = secret {
-        request = request.set("Authorization", &format!("Bearer {token}"));
+        let auth_value = if url.contains("bioontology.org") {
+            format!("apikey token={token}")
+        } else {
+            format!("Bearer {token}")
+        };
+        request = request.set("Authorization", &auth_value);
     }
     let response = if let Some(sparql) = query {
         request.send_string(sparql)
@@ -954,16 +1043,23 @@ fn write_snapshot(
                 &dest,
                 &format!("urn:synth:job:{}", job.id),
             )?
+        } else if looks_like_turtle(&fetched.bytes, &fetched.content_type, &payload_name) {
+            let mut combined = wrap.into_bytes();
+            combined.extend_from_slice(b"\n\n# --- fetched graph ---\n\n");
+            combined.extend_from_slice(&fetched.bytes);
+            compile_ttl_to_q42(&combined, &dest, &format!("urn:synth:job:{}", job.id))?
+        } else if let Ok(crate::mcp_full::q42::ResolvedCompileFormat::Rdf(rdf_fmt, _)) =
+            crate::mcp_full::q42::infer_compile_format(None, Some(&payload_name))
+        {
+            compile_rdf_with_wrap_to_q42(
+                &fetched.bytes,
+                rdf_fmt,
+                wrap.as_bytes(),
+                &dest,
+                &format!("urn:synth:job:{}", job.id),
+            )?
         } else {
-            let rdf_bytes = if looks_like_turtle(&fetched.bytes, &fetched.content_type, &payload_name) {
-                let mut combined = wrap.into_bytes();
-                combined.extend_from_slice(b"\n\n# --- fetched graph ---\n\n");
-                combined.extend_from_slice(&fetched.bytes);
-                combined
-            } else {
-                wrap.into_bytes()
-            };
-            compile_ttl_to_q42(&rdf_bytes, &dest, &format!("urn:synth:job:{}", job.id))?
+            compile_ttl_to_q42(wrap.as_bytes(), &dest, &format!("urn:synth:job:{}", job.id))?
         };
         quin_count = Some(count);
         q42_path = Some(dest.display().to_string());
@@ -1012,6 +1108,34 @@ fn compile_ttl_to_q42(bytes: &[u8], dest: &Path, context_iri: &str) -> Result<us
         .map_err(|e| format!("RDF parse failed: {e}"))?;
     if quins.is_empty() {
         return Err("RDF parsed to zero triples; refusing empty Q42 volume".into());
+    }
+    qualia_core_db::q42_volume::write_sorted_quins_volume_with_lex(dest, &quins, &lex, 0)
+        .map_err(|e| format!("Q42 write failed: {e}"))?;
+    Ok(quins.len())
+}
+
+fn compile_rdf_with_wrap_to_q42(
+    rdf_bytes: &[u8],
+    rdf_fmt: qualia_core_db::query::ingest_job::IngestRdfFormat,
+    wrap_ttl: &[u8],
+    dest: &Path,
+    context_iri: &str,
+) -> Result<usize, String> {
+    if dest.exists() {
+        return Err("Q42 destination already exists".into());
+    }
+    let ctx = qualia_core_db::q_hash(context_iri);
+    let (mut quins, mut lex) =
+        qualia_core_db::ontology_loader::parse_rdf_bytes_to_quins_and_lex(rdf_bytes, rdf_fmt, ctx)
+            .map_err(|e| format!("RDF/OWL parse failed: {e}"))?;
+    if let Ok((wrap_quins, wrap_lex)) =
+        qualia_core_db::ontology_loader::parse_ttl_bytes_to_quins_and_lex(wrap_ttl, ctx)
+    {
+        quins.extend(wrap_quins);
+        lex.extend(wrap_lex);
+    }
+    if quins.is_empty() {
+        return Err("RDF/OWL parsed to zero triples; refusing empty Q42 volume".into());
     }
     qualia_core_db::q42_volume::write_sorted_quins_volume_with_lex(dest, &quins, &lex, 0)
         .map_err(|e| format!("Q42 write failed: {e}"))?;

@@ -42,7 +42,7 @@ impl InputRoot {
         Ok(Self { configured: root.to_owned(), canonical: root.canonicalize().map_err(|_| "Input root cannot be resolved")? })
     }
 
-    pub(super) fn read(&self, requested: &str, max: usize) -> Result<(PathBuf, Vec<u8>), ToolError> {
+    pub(super) fn resolve_path(&self, requested: &str, max: u64) -> Result<(PathBuf, u64), ToolError> {
         let refused = |message| ToolError::new("native_input_refused", message);
         if requested.len() > 4096 || self.configured.canonicalize().ok().as_ref() != Some(&self.canonical) {
             return Err(refused("Input root changed or input path exceeds budget"));
@@ -57,7 +57,7 @@ impl InputRoot {
         if !canonical.starts_with(&self.canonical) || !meta.is_file() || meta.file_type().is_symlink() {
             return Err(refused("Input must be an ordinary file inside SYNTH_INPUT_ROOT and within budget"));
         }
-        if meta.len() > max as u64 {
+        if meta.len() > max {
             return Err(ToolError::new("native_input_refused", format!("Input is {} bytes; available budget is {max} bytes", meta.len())));
         }
         // Reject junctions/symlink ancestors, even those pointing back inside the root.
@@ -70,6 +70,12 @@ impl InputRoot {
             if ancestor.canonicalize().ok().as_ref() == Some(&self.canonical) { break; }
             ancestor = ancestor.parent().ok_or_else(|| refused("Input path does not reach admitted root"))?;
         }
+        Ok((canonical, meta.len()))
+    }
+
+    pub(super) fn read(&self, requested: &str, max: usize) -> Result<(PathBuf, Vec<u8>), ToolError> {
+        let refused = |message| ToolError::new("native_input_refused", message);
+        let (canonical, _) = self.resolve_path(requested, max as u64)?;
         let mut bytes = Vec::new();
         fs::File::open(&canonical).map_err(|_| refused("Input file cannot be opened"))?
             .take(max as u64 + 1).read_to_end(&mut bytes).map_err(|_| refused("Input file cannot be read"))?;

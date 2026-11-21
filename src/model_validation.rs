@@ -119,6 +119,165 @@ pub fn required_fields_for_subject_class(subject_class: &str) -> &'static [&'sta
     }
 }
 
+/// Anatomical, Botanical & Natural-World Topological Containment Layer (`d in [0, 1]`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RadialLayerSample {
+    pub entity_id: String,
+    #[serde(default)]
+    pub ontology_ref: Option<String>,
+    /// Canonical layer name:
+    /// - Anatomy/Fauna: `"periosteum_capsule"` [0.00, 0.08], `"ligament_deep_tendon"` [0.05, 0.20],
+    ///   `"musculature"` [0.15, 0.75], `"subcutis_fascia"` [0.75, 0.92], `"dermis_epidermis"` [0.92, 1.00]
+    /// - Flora/Botanical: `"pith_heartwood"` [0.00, 0.45], `"sapwood_xylem"` [0.45, 0.82],
+    ///   `"cambium_phloem"` [0.82, 0.92], `"periderm_bark_cuticle"` [0.92, 1.00]
+    pub layer_kind: String,
+    pub d_min: f64,
+    pub d_max: f64,
+    #[serde(default)]
+    pub parent_cavity_id: Option<String>,
+    /// Signed distance `phi_parent(p)` in metres (must satisfy `phi <= -epsilon_m` when inside a cavity).
+    #[serde(default)]
+    pub max_cavity_sdf_phi_m: Option<f64>,
+    #[serde(default)]
+    pub cavity_clearance_eps_m: Option<f64>,
+    /// Maximum enthesis or branch-collar UV detachment drift in metres across ROM / allometric sweep (`||p_end - p_uv||`).
+    #[serde(default)]
+    pub max_enthesis_uv_drift_m: Option<f64>,
+    /// Volume preservation determinant `det(F)` under contraction / turgor deformation (target ~ 1.0 for incompressible tissue).
+    #[serde(default)]
+    pub volume_det_f: Option<f64>,
+}
+
+/// Evaluate the 5-Layer Anatomical & Natural-World Topological Invariants:
+/// 1. Cavity SDF negative-distance containment (`phi_cavity <= -epsilon`),
+/// 2. Intrinsic radial tissue depth ordering (`d in [0, 1]`, no muscle-over-skin or xylem-over-bark inversion),
+/// 3. Barycentric UV enthesis / branch-collar zero-detachment lock (`||p_end - p_uv|| <= 1e-4`),
+/// 4. Incompressible soft-tissue / turgor volume preservation (`det(F) in [0.85, 1.15]`).
+pub fn verify_topological_and_radial_invariants(
+    samples: &[RadialLayerSample],
+    violations: &mut Vec<String>,
+) -> Value {
+    let mut cavity_checks = 0usize;
+    let mut radial_checks = 0usize;
+    let mut enthesis_checks = 0usize;
+
+    for s in samples {
+        radial_checks += 1;
+        if !(0.0..=1.0).contains(&s.d_min)
+            || !(0.0..=1.0).contains(&s.d_max)
+            || s.d_min > s.d_max
+        {
+            violations.push(format!(
+                "Topological layer inversion on `{}` (`{}`): normalized radial depth [{:.3}, {:.3}] is outside [0.0, 1.0] or inverted",
+                s.entity_id, s.layer_kind, s.d_min, s.d_max
+            ));
+        }
+        let expected_band = match s.layer_kind.as_str() {
+            "periosteum_capsule" => Some((0.00, 0.12)),
+            "ligament_deep_tendon" => Some((0.03, 0.25)),
+            "musculature" => Some((0.10, 0.80)),
+            "subcutis_fascia" => Some((0.70, 0.95)),
+            "dermis_epidermis" => Some((0.88, 1.00)),
+            "pith_heartwood" => Some((0.00, 0.50)),
+            "sapwood_xylem" => Some((0.40, 0.86)),
+            "cambium_phloem" => Some((0.78, 0.95)),
+            "periderm_bark_cuticle" => Some((0.88, 1.00)),
+            _ => None,
+        };
+        if let Some((lo, hi)) = expected_band {
+            if s.d_min < lo - 1e-3 || s.d_max > hi + 1e-3 {
+                violations.push(format!(
+                    "Radial tissue shell breach on `{}` (`{}`): d=[{:.3}, {:.3}] escapes canonical band [{:.2}, {:.2}] (risk of muscle/ligament rendering over skin or vascular tissue over bark)",
+                    s.entity_id, s.layer_kind, s.d_min, s.d_max, lo, hi
+                ));
+            }
+        }
+        if let Some(phi) = s.max_cavity_sdf_phi_m {
+            cavity_checks += 1;
+            let eps = s.cavity_clearance_eps_m.unwrap_or(0.0005).max(0.0);
+            if phi > -eps {
+                violations.push(format!(
+                    "Cavity SDF containment failure on `{}` (parent `{}`): max(phi_cavity) = {:.5} m > -{:.5} m (viscera/organ escaping enclosing cavity)",
+                    s.entity_id,
+                    s.parent_cavity_id.as_deref().unwrap_or("enclosing_cavity"),
+                    phi,
+                    eps
+                ));
+            }
+        }
+        if let Some(drift) = s.max_enthesis_uv_drift_m {
+            enthesis_checks += 1;
+            if drift > 1e-4 {
+                violations.push(format!(
+                    "Enthesis / branch-collar UV detachment on `{}`: ||p_end - p_bone_UV|| = {:.6} m exceeds 0.1 mm tolerance across ROM/growth sweep",
+                    s.entity_id, drift
+                ));
+            }
+        }
+        if let Some(det_f) = s.volume_det_f {
+            if !(0.85..=1.15).contains(&det_f) {
+                violations.push(format!(
+                    "Volume-preserving deformation violation on `{}`: det(F) = {:.3} outside incompressible biological tissue envelope [0.85, 1.15]",
+                    s.entity_id, det_f
+                ));
+            }
+        }
+    }
+
+    // Pairwise superficial vs deep radial ordering check
+    for i in 0..samples.len() {
+        for j in (i + 1)..samples.len() {
+            let a = &samples[i];
+            let b = &samples[j];
+            let rank = |k: &str| -> Option<u8> {
+                match k {
+                    "periosteum_capsule" | "pith_heartwood" => Some(0),
+                    "ligament_deep_tendon" | "sapwood_xylem" => Some(1),
+                    "musculature" => Some(2),
+                    "subcutis_fascia" | "cambium_phloem" => Some(3),
+                    "dermis_epidermis" | "periderm_bark_cuticle" => Some(4),
+                    _ => None,
+                }
+            };
+            if let (Some(ra), Some(rb)) = (rank(&a.layer_kind), rank(&b.layer_kind)) {
+                if ra < rb && a.d_max > b.d_max + 1e-4 {
+                    violations.push(format!(
+                        "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3})",
+                        a.entity_id, a.layer_kind, a.d_max, b.entity_id, b.layer_kind, b.d_max
+                    ));
+                } else if rb < ra && b.d_max > a.d_max + 1e-4 {
+                    violations.push(format!(
+                        "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3})",
+                        b.entity_id, b.layer_kind, b.d_max, a.entity_id, a.layer_kind, a.d_max
+                    ));
+                }
+            }
+        }
+    }
+
+    json!({
+        "samples_evaluated": samples.len(),
+        "radial_depth_checks": radial_checks,
+        "cavity_sdf_containment_checks": cavity_checks,
+        "enthesis_uv_lock_checks": enthesis_checks,
+        " canonical_radial_coordinate_system": {
+            "anatomy_fauna_d_0_to_1": {
+                "periosteum_capsule": [0.00, 0.08],
+                "ligament_deep_tendon": [0.05, 0.20],
+                "musculature": [0.15, 0.75],
+                "subcutis_fascia": [0.75, 0.92],
+                "dermis_epidermis": [0.92, 1.00]
+            },
+            "flora_botanical_d_0_to_1": {
+                "pith_heartwood": [0.00, 0.45],
+                "sapwood_xylem": [0.45, 0.82],
+                "cambium_phloem": [0.82, 0.92],
+                "periderm_bark_cuticle": [0.92, 1.00]
+            }
+        }
+    })
+}
+
 /// REQ-8.1 & REQ-8.2: Validate an asset's computational model form and optional `.10d` file.
 pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
     let subject_class = args
@@ -173,6 +332,13 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
         }
     }
     let populated_required = required.len().saturating_sub(missing_required.len());
+
+    let radial_samples: Vec<RadialLayerSample> = args
+        .get("topological_layers")
+        .and_then(|v| serde_json::from_value(v.clone()).ok())
+        .unwrap_or_default();
+    let topological_report =
+        verify_topological_and_radial_invariants(&radial_samples, &mut violations);
 
     // If an asset_10d_path is supplied, also inspect its sections, MSTR L0..L6, HOLO, and KLOD readiness
     let mut container_inspection = Value::Null;
@@ -242,6 +408,7 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
         },
         "reference_sources_bound": reference_sources_bound,
         "qudt_and_citation_violations": violations,
+        "topological_and_radial_invariants": topological_report,
         "container_10d_inspection": container_inspection
     }))
 }

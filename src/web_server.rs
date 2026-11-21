@@ -640,7 +640,7 @@ fn handle_mcp_call(body: &[u8]) -> Value {
     let Ok(req) = serde_json::from_slice::<McpCallRequest>(body) else {
         return json!({ "ok": false, "error": "Invalid JSON body for /api/mcp/call" });
     };
-    let mut mcp = crate::mcp_full::StandaloneSynthMcp::default();
+    let mut mcp = crate::mcp_full::StandaloneSynthMcp::from_process_env().unwrap_or_default();
     let args = if req.arguments.is_object() {
         req.arguments
     } else {
@@ -649,6 +649,83 @@ fn handle_mcp_call(body: &[u8]) -> Value {
     match mcp.call(&req.name, args) {
         Ok(res) => json!({ "ok": true, "tool": req.name, "result": res }),
         Err(err) => json!({ "ok": false, "tool": req.name, "error": err }),
+    }
+}
+
+fn parse_query_params(raw_query: &str) -> std::collections::HashMap<String, String> {
+    let mut out = std::collections::HashMap::new();
+    for pair in raw_query.split('&') {
+        if pair.is_empty() {
+            continue;
+        }
+        let (k, v) = pair.split_once('=').unwrap_or((pair, ""));
+        let k_dec = percent_decode(&k.replace('+', " "));
+        let v_dec = percent_decode(&v.replace('+', " "));
+        out.insert(k_dec, v_dec);
+    }
+    out
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn handle_sparql_http(
+    method: &str,
+    raw_path: &str,
+    content_type: Option<&str>,
+    body: &[u8],
+) -> Value {
+    let query_str = raw_path.split_once('?').map(|(_, q)| q).unwrap_or("");
+    let mut params = parse_query_params(query_str);
+    let ct = content_type.unwrap_or("").to_ascii_lowercase();
+
+    let mut args = if method == "POST" && ct.contains("application/json") {
+        serde_json::from_slice::<Value>(body).unwrap_or_else(|_| json!({}))
+    } else {
+        if method == "POST" {
+            if ct.contains("application/x-www-form-urlencoded") {
+                if let Ok(form) = std::str::from_utf8(body) {
+                    params.extend(parse_query_params(form));
+                }
+            } else if let Ok(raw_q) = std::str::from_utf8(body) {
+                if !raw_q.trim().is_empty() && !params.contains_key("query") {
+                    params.insert("query".into(), raw_q.to_owned());
+                }
+            }
+        }
+        json!({})
+    };
+
+    if let Some(obj) = args.as_object_mut() {
+        for (k, v) in &params {
+            match k.as_str() {
+                "query" => {
+                    obj.entry("query").or_insert_with(|| Value::String(v.clone()));
+                }
+                "vault" | "vault_path" | "q42_path" | "default-graph-uri" => {
+                    obj.entry("vault_path").or_insert_with(|| Value::String(v.clone()));
+                }
+                "endpoint" => {
+                    obj.entry("endpoint").or_insert_with(|| Value::String(v.clone()));
+                }
+                "bookmark" | "bookmark_id" => {
+                    obj.entry("bookmark_id").or_insert_with(|| Value::String(v.clone()));
+                }
+                "format" => {
+                    obj.entry("format").or_insert_with(|| Value::String(v.clone()));
+                }
+                "limit" => {
+                    if let Ok(lim) = v.parse::<u64>() {
+                        obj.entry("limit").or_insert_with(|| json!(lim));
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    let mcp = crate::mcp_full::StandaloneSynthMcp::from_process_env().ok();
+    match crate::mcp_full::q42::execute_sparql_tool(mcp.as_ref(), args) {
+        Ok(res) => json!({ "ok": true, "result": res }),
+        Err(err) => json!({ "ok": false, "error": err }),
     }
 }
 
@@ -679,7 +756,9 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
     let Some(body_offset) = header_end else {
         return Err("Incomplete HTTP header".into());
     };
-    let header_str = std::str::from_utf8(&buf[..body_offset]).map_err(|e| e.to_string())?;
+    let header_str = std::str::from_utf8(&buf[..body_offset])
+        .map_err(|e| e.to_string())?
+        .to_owned();
     let first_line = header_str.lines().next().unwrap_or("");
     let mut parts = first_line.split_whitespace();
     let method = parts.next().unwrap_or("GET").to_owned();
@@ -852,6 +931,18 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), String> {
         .unwrap_or_else(|error| json!({ "ok": false, "error": error }));
         let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
         return write_http_response(stream, "200 OK", "application/json", &bytes);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    if (method == "GET" || method == "POST") && (path == "/sparql" || path == "/api/sparql") {
+        let ct = header_value("content-type");
+        let payload = handle_sparql_http(&method, &raw_path, ct.as_deref(), body);
+        let bytes = serde_json::to_vec_pretty(&payload).map_err(|e| e.to_string())?;
+        return write_http_response(
+            stream,
+            "200 OK",
+            "application/sparql-results+json; charset=utf-8",
+            &bytes,
+        );
     }
     #[cfg(not(target_arch = "wasm32"))]
     if method == "POST" && path == "/api/jobs" {

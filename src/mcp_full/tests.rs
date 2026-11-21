@@ -226,6 +226,163 @@ fn compile_q42_seals_n3_and_refuses_overwrite() {
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
+fn compile_q42_processes_owl_and_queries_via_sparql_and_endpoint() {
+    let fixture = Fixture::new();
+    let fma_sample = br#"<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.org/sig/ont/fma.owl#"
+     xml:base="http://purl.org/sig/ont/fma.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:fma="http://purl.org/sig/ont/fma/">
+    <owl:Ontology rdf:about="http://purl.org/sig/ont/fma.owl">
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">5.0.0</owl:versionInfo>
+        <fma:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cornelius Rosse, MD DSc</fma:creator>
+    </owl:Ontology>
+    <owl:Class rdf:about="http://purl.org/sig/ont/fma/fma7088">
+        <rdfs:label xml:lang="en">Heart</rdfs:label>
+        <fma:FMAID rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">7088</fma:FMAID>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.org/sig/ont/fma/fma3734">
+        <rdfs:label xml:lang="en">Aorta</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://purl.org/sig/ont/fma/fma7088"/>
+    </owl:Class>
+</rdf:RDF>"#;
+    std::fs::write(fixture.0.join("fma-sample.owl"), fma_sample).unwrap();
+    let mut mcp = fixture.backend();
+    let sealed = mcp
+        .call(
+            "synth_compile_q42",
+            json!({
+                "source_path": "fma-sample.owl",
+                "out_q42": "fma-sample.q42",
+                "ingest_to_graph": true
+            }),
+        )
+        .unwrap();
+    assert_eq!(sealed["format"], "rdfxml");
+    assert!(sealed["quin_count"].as_u64().unwrap() >= 8);
+    assert!(sealed["lex_terms"].as_u64().unwrap() >= 8);
+
+    // 1. Single-triple range query with FILTER(CONTAINS(LCASE(?label), "heart")) and relative vault_path
+    let filtered = mcp
+        .call(
+            "query_sparql",
+            json!({
+                "vault_path": "fma-sample.q42",
+                "query": "SELECT ?organ ?label WHERE { ?organ <http://www.w3.org/2000/01/rdf-schema#label> ?label . FILTER(CONTAINS(LCASE(?label), \"heart\")) }"
+            }),
+        )
+        .unwrap();
+    assert_eq!(filtered["returned"], 1);
+    assert_eq!(
+        filtered["bindings"][0]["?organ"],
+        "http://purl.org/sig/ont/fma/fma7088"
+    );
+
+    // 2. Multi-triple JOIN query across rdf:type owl:Class and rdfs:label
+    let joined = mcp
+        .call(
+            "query_sparql",
+            json!({
+                "vault_path": "fma-sample.q42",
+                "query": "PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT ?cls ?label WHERE { ?cls a owl:Class . ?cls rdfs:label ?label }"
+            }),
+        )
+        .unwrap();
+    assert_eq!(joined["returned"], 2);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn bioportal_refactor_owl_enforces_no_commodification_and_emits_shacl_and_n3_rules() {
+    let fixture = Fixture::new();
+    let owl_sample = br#"<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.org/sig/ont/fma.owl#"
+     xml:base="http://purl.org/sig/ont/fma.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:fma="http://purl.org/sig/ont/fma/">
+    <owl:ObjectProperty rdf:about="http://purl.org/sig/ont/fma/regional_part_of">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+    </owl:ObjectProperty>
+    <owl:Class rdf:about="http://purl.org/sig/ont/fma/fma7088">
+        <rdfs:label xml:lang="en">Heart</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.org/sig/ont/fma/fma7096">
+        <rdfs:label xml:lang="en">Left ventricle</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://purl.org/sig/ont/fma/fma7088"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/sig/ont/fma/regional_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://purl.org/sig/ont/fma/fma7088"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    <owl:NamedIndividual rdf:about="http://purl.org/sig/ont/fma/commodified_specimen">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    </owl:NamedIndividual>
+</rdf:RDF>"#;
+    std::fs::write(fixture.0.join("fma-refactor.owl"), owl_sample).unwrap();
+    let mut mcp = fixture.backend();
+    let res = mcp
+        .call(
+            "synth_bioportal",
+            json!({
+                "action": "refactor_owl",
+                "source_path": "fma-refactor.owl",
+                "acronym": "FMA_TEST",
+                "compile_q42": true
+            }),
+        )
+        .unwrap();
+    assert_eq!(res["status"], "ok");
+    assert!(res["owl_thing_stripped"].as_u64().unwrap() >= 2);
+    assert!(res["skos_concepts_minted"].as_u64().unwrap() >= 2);
+    assert!(res["shacl_shapes_emitted"].as_u64().unwrap() >= 1);
+    assert!(res["n3_rules_emitted"].as_u64().unwrap() >= 2);
+
+    let refs_text = std::fs::read_to_string(res["refs_ttl"].as_str().unwrap()).unwrap();
+    assert!(
+        !refs_text.contains("http://www.w3.org/2002/07/owl#Thing"),
+        "owl:Thing must be stripped under the No-Commodification-of-Life rule"
+    );
+    assert!(
+        !refs_text.contains("http://www.w3.org/2002/07/owl#NamedIndividual"),
+        "owl:NamedIndividual must be stripped"
+    );
+    assert!(
+        refs_text.contains("http://www.w3.org/2004/02/skos/core#Concept"),
+        "owl:Class must be refactored to skos:Concept linked reference"
+    );
+    let shapes_text = std::fs::read_to_string(res["shapes_shacl_ttl"].as_str().unwrap()).unwrap();
+    assert!(shapes_text.contains("sh:NodeShape"));
+    assert!(shapes_text.contains("sh:qualifiedValueShape"));
+    let rules_text = std::fs::read_to_string(res["rules_n3"].as_str().unwrap()).unwrap();
+    assert!(rules_text.contains("=>"));
+    let shex_text = std::fs::read_to_string(res["shex"].as_str().unwrap()).unwrap();
+    assert!(shex_text.contains("ABSTRACT <BiologicalEntity>"));
+    assert!(shex_text.contains("@<LoadedHmcPayload> OR @<WireframeStub>"));
+
+    let q42_path = res["q42"]["path"].as_str().unwrap();
+    let queried = mcp
+        .call(
+            "query_sparql",
+            json!({
+                "vault_path": q42_path,
+                "query": "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT ?c ?l WHERE { ?c a skos:Concept . ?c rdfs:label ?l }"
+            }),
+        )
+        .unwrap();
+    assert_eq!(queried["returned"], 2);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
 fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs() {
     let fixture = Fixture::new();
     let mut mcp = fixture.backend();

@@ -1,0 +1,33 @@
+{
+  "schema": "synth.semantic-bookmarks/v1",
+  "items": [
+    {
+      "id": "bioportal",
+      "url": "https://bioportal.bioontology.org/ontologies",
+      "kind": "rest",
+      "title": "NCBO BioPortal Biomedical Ontology Repository",
+      "data_endpoint": "https://data.bioontology.org",
+      "formats": [
+        "rdfxml",
+        "owl",
+        "ttl",
+        "n3",
+        "jsonld"
+      ],
+      "requires_api_key": true,
+      "api_key_env": "BIOPORTAL_API_KEY",
+      "auth": "apikey_token",
+      "domain": "biomedical",
+      "notes": "BioPortal REST API (Authorization: apikey token=YOUR_KEY). Endpoints: /ontologies, /ontologies/{ACRONYM}/download?download_format=rdf, /ontologies/{ACRONYM}/classes/{CLASS_IRI}/mappings.",
+      "tags": [
+        "bioportal",
+        "biomedical",
+        "ontology",
+        "n3logic",
+        "shacl"
+      ],
+      "created_at": 1795222500,
+      "updated_at": 1795222500
+    }
+  ]
+}
