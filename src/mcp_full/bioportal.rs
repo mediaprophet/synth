@@ -1002,10 +1002,31 @@ pub fn refactor_owl_to_linked_shacl_n3(
     );
     writeln!(
         shacl_out,
-        "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+        "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
          @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
-         @prefix sh: <http://www.w3.org/ns/shacl#> .\n\
-         @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"
+         @prefix sh:   <http://www.w3.org/ns/shacl#> .\n\
+         @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .\n\
+         @prefix q42:  <https://webizen.org/q42#> .\n\
+         \n\
+         # ── QualiaDB Native SHACL Logic Modality & Topological Extensions (logic_modalities_shacl.rs) ──\n\
+         q42:{acr_upper}_DeonticNoCommodificationShape a sh:NodeShape ;\n\
+             sh:targetClass <http://www.w3.org/2004/02/skos/core#Concept> ;\n\
+             sh:deonticForbid true ;\n\
+             sh:valuesConsentNonCoerced 0.5 ;\n\
+             sh:valuesHarmBelowCeiling 0.0 ;\n\
+             sh:not [ a sh:NodeShape ; sh:class <http://www.w3.org/2002/07/owl#Thing> ] .\n\
+         \n\
+         q42:{acr_upper}_EpistemicClaimShape a sh:NodeShape ;\n\
+             sh:property [ sh:path q42:epistemicOpcode ; sh:datatype xsd:unsignedByte ; sh:minInclusive 32 ; sh:maxInclusive 34 ] ;\n\
+             sh:property [ sh:path q42:certainty ; sh:datatype xsd:unsignedByte ; sh:minInclusive 128 ; sh:maxInclusive 255 ] .\n\
+         \n\
+         q42:{acr_upper}_TopologicalContainmentAndRadialShape a sh:NodeShape ;\n\
+             sh:property [ sh:path q42:radialDepthMin ; sh:datatype xsd:double ; sh:minInclusive 0.0 ; sh:maxInclusive 1.0 ] ;\n\
+             sh:property [ sh:path q42:radialDepthMax ; sh:datatype xsd:double ; sh:minInclusive 0.0 ; sh:maxInclusive 1.0 ] ;\n\
+             sh:property [ sh:path q42:maxCavitySdfPhiM ; sh:datatype xsd:double ; sh:maxExclusive 0.0 ] ;\n\
+             sh:property [ sh:path q42:maxEnthesisUvDriftM ; sh:datatype xsd:double ; sh:minInclusive 0.0 ; sh:maxInclusive 0.0001 ] ;\n\
+             sh:property [ sh:path q42:volumeDetF ; sh:datatype xsd:double ; sh:minInclusive 0.85 ; sh:maxInclusive 1.15 ] ;\n\
+             sh:property [ sh:path q42:rcc8Relation ; sh:in ( \"NTPP\" \"TPP\" \"EQ\" ) ] .\n"
     )
     .map_err(|e| e.to_string())?;
 

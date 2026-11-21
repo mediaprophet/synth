@@ -644,6 +644,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "anvil-core"
+version = "0.1.0"
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2390,6 +2394,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cudarc"
+version = "0.19.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7359bf1de037ddada72729c3acec9b040f3468400c6e9e740b01ba0cd2e89562"
+dependencies = [
+ "libloading 0.9.1",
+]
+
+[[package]]
 name = "cursor-icon"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3225,8 +3238,11 @@ dependencies = [
  "etalon-inference-kernel",
  "etalon-model",
  "etalon-model-io",
+ "etalon-resources",
+ "etalon-wgsl-forge",
  "futures-channel",
  "half",
+ "libc",
  "log",
  "memmap2",
  "rayon",
@@ -3426,6 +3442,7 @@ source = "git+https://github.com/mediaprophet/etalon.git?rev=a8f12b3f769fe7c8f33
 dependencies = [
  "blake3",
  "bytemuck",
+ "cudarc",
  "etalon",
  "etalon-resources",
  "etalon-signal",
@@ -5352,6 +5369,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "libloading"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1832accd5a4ca2795ace4d05d15c4039be15b62d3b950eff99746a990e3cc10"
+dependencies = [
+ "cfg-if",
+ "windows-link",
+]
+
+[[package]]
 name = "libm"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7209,6 +7236,7 @@ version = "0.0.41"
 dependencies = [
  "aead 0.6.1",
  "aes-gcm",
+ "anvil-core",
  "ark-bls12-381",
  "ark-ec",
  "ark-ff",
@@ -7232,6 +7260,7 @@ dependencies = [
  "core_affinity",
  "crossbeam-channel",
  "csv",
+ "cudarc",
  "dashmap",
  "ed25519-dalek",
  "etalon",

@@ -260,7 +260,15 @@ pub fn verify_topological_and_radial_invariants(
         "radial_depth_checks": radial_checks,
         "cavity_sdf_containment_checks": cavity_checks,
         "enthesis_uv_lock_checks": enthesis_checks,
-        " canonical_radial_coordinate_system": {
+        "qualia_shacl_logic_extensions_active": {
+            "total_modality_shapes_registered": qualia_core_db::modalities::logic::LOGIC_MODALITY_SHAPES.len(),
+            "deontic_no_commodification": "DeonticConfigurationShape (sh:deonticForbid, sh:valuesConsentNonCoerced, sh:valuesHarmBelowCeiling)",
+            "epistemic_evidence_tier": "EpistemicConfigurationShape (OP_KNOWS 0x20 / OP_BELIEVES 0x21 certainty >= 128)",
+            "spatio_temporal_containment": "Rcc8ConfigurationShape + AllenIntervalConfigurationShape + LtlConfigurationShape",
+            "geometry_asset_manifest": "GeometryAssetConfiguration (validate_geometry_manifest + SlgOpcode firewall)",
+            "biological_domain": "BiologicalDomainConfiguration (infrastructure_shacl.rs)"
+        },
+        "canonical_radial_coordinate_system": {
             "anatomy_fauna_d_0_to_1": {
                 "periosteum_capsule": [0.00, 0.08],
                 "ligament_deep_tendon": [0.05, 0.20],
@@ -340,6 +348,35 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
     let topological_report =
         verify_topological_and_radial_invariants(&radial_samples, &mut violations);
 
+    // Optional SHACL Turtle + N3/Turtle data validation via QualiaDB's native SHACL + modality extensions compiler
+    let mut shacl_extension_validation = Value::Null;
+    if let (Some(data_ttl), Some(shapes_ttl)) = (
+        args.get("data_ttl").and_then(Value::as_str),
+        args.get("shapes_ttl").and_then(Value::as_str),
+    ) {
+        match qualia_core_db::modalities::logic::shacl::validate_turtle_shapes(data_ttl, shapes_ttl)
+        {
+            Ok(report) => {
+                if !report.conforms {
+                    for res in &report.results {
+                        violations.push(format!(
+                            "SHACL violation on `{}` ({:?}): {}",
+                            res.focus_node,
+                            res.result_path,
+                            res.message.as_deref().unwrap_or("constraint failed")
+                        ));
+                    }
+                }
+                shacl_extension_validation =
+                    serde_json::to_value(&report).unwrap_or_else(|_| json!({"conforms": report.conforms}));
+            }
+            Err(e) => {
+                violations.push(format!("SHACL Turtle compilation failed: {e}"));
+                shacl_extension_validation = json!({"conforms": false, "error": e});
+            }
+        }
+    }
+
     // If an asset_10d_path is supplied, also inspect its sections, MSTR L0..L6, HOLO, and KLOD readiness
     let mut container_inspection = Value::Null;
     if let Some(p_str) = args.get("asset_10d_path").and_then(Value::as_str) {
@@ -409,6 +446,7 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
         "reference_sources_bound": reference_sources_bound,
         "qudt_and_citation_violations": violations,
         "topological_and_radial_invariants": topological_report,
+        "shacl_extension_validation": shacl_extension_validation,
         "container_10d_inspection": container_inspection
     }))
 }

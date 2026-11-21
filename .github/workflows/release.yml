@@ -57,8 +57,14 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: mediaprophet/qualiaDB
-          ref: 0.0.41.3
+          ref: v0.0.41.4
           path: qualiaDB
+
+      - uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/anvil
+          ref: main
+          path: anvil
 
       - uses: actions/checkout@v5
         with:

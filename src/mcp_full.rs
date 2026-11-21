@@ -395,7 +395,9 @@ impl StandaloneSynthMcp {
                         "subject_class": {"type":"string","enum":["VascularPlant","Flora","VertebrateFauna","HumanAnatomy","MechanicalVehicle","MadeArtefact"]},
                         "asset_10d_path": {"type":"string","maxLength":4096},
                         "fields": {"type":"array","items":{"type":"object"}},
-                        "topological_layers": {"type":"array","items":{"type":"object"},"description":"Optional radial tissue/botanical layer samples (entity_id, layer_kind, d_min, d_max, max_cavity_sdf_phi_m, cavity_clearance_eps_m, max_enthesis_uv_drift_m, volume_det_f)"}
+                        "topological_layers": {"type":"array","items":{"type":"object"},"description":"Optional radial tissue/botanical layer samples (entity_id, layer_kind, d_min, d_max, max_cavity_sdf_phi_m, cavity_clearance_eps_m, max_enthesis_uv_drift_m, volume_det_f)"},
+                        "data_ttl": {"type":"string","maxLength":1048576,"description":"Optional Turtle/N3 data graph to validate against shapes_ttl using QualiaDB's native SHACL + modality extensions engine"},
+                        "shapes_ttl": {"type":"string","maxLength":1048576,"description":"Optional SHACL Turtle shapes (supporting sh:deonticObligate/Permit/Forbid, sh:valuesConsentNonCoerced, sh:valuesHarmBelowCeiling, sh:not owl:Thing, etc.)"}
                     }),
                     vec![],
                 ),
