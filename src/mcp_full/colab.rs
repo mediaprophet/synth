@@ -864,7 +864,7 @@ fn model_metadata_for_routine(routine: &str) -> (&'static str, &'static str, &'s
         _ => (
             "qualia-core-db/q42-compiler",
             "Webizen AI Synth QualiaDB Q42 Streaming Compiler",
-            "0.0.41.14",
+            crate::agent_index::RELEASE_VERSION,
         ),
     }
 }
