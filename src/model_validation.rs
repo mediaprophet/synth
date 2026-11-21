@@ -684,9 +684,32 @@ pub fn verify_multi_format_outputs(args: Value) -> Result<Value, String> {
     }))
 }
 
+/// Optional overrides when converting a 3D asset from an automated remote/local pipeline
+/// (such as `synth_colab` running `microsoft/TRELLIS.2-4B` on Google Colab Ultra).
+#[derive(Debug, Clone, Default)]
+pub struct Convert3dProvenanceOverrides {
+    pub human_actor: Option<crate::changelog_licensing::HumanActorRecord>,
+    pub software_agent: Option<crate::changelog_licensing::SoftwareAgentRecord>,
+    pub harness: Option<crate::changelog_licensing::HarnessEnvironmentRecord>,
+    pub economics: Option<crate::changelog_licensing::RevisionEconomicsTelemetry>,
+    pub epistemic_horizon_q42_sha256: Option<String>,
+    pub ovoxel_sidecar_json: Option<Value>,
+    pub summary_override: Option<String>,
+}
+
 /// Phase 1: Convert an existing 3D formatted asset or scene (`.glb`/`.gltf`, `.obj`, `.stl`, or legacy `.10d`)
 /// into a Holographic `.10d` v2 container + Mode-B scene instances + `.synth/license-contract.json` & `.synth/changelog.json`.
 pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String> {
+    convert_3d_with_provenance(args, Convert3dProvenanceOverrides::default())
+}
+
+/// Parameterized 3D conversion pipeline supporting full `SoftwareAgentRecord`,
+/// `HarnessEnvironmentRecord`, `RevisionEconomicsTelemetry`, O-Voxel volumetric sidecar
+/// preservation (`HOLO` `0x0306` + `VOX0`), and companion `.n3` / `manifest.q42.yaml` (`L0`–`L6`) emission.
+pub fn convert_3d_with_provenance(
+    args: Value,
+    overrides: Convert3dProvenanceOverrides,
+) -> Result<Value, String> {
     let source_path_str = args
         .get("source_path")
         .and_then(Value::as_str)
@@ -713,6 +736,10 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
         .unwrap_or("urn:qualia:converted:asset");
     let domain_id = args.get("domain_id").and_then(Value::as_u64).unwrap_or(1) as u32;
 
+    if source_path_str.contains("..") || out_dir_str.contains("..") {
+        return Err("source_path and out_dir must not contain parent traversal ('..')".into());
+    }
+
     let src_path = PathBuf::from(source_path_str);
     let source_bytes = fs::read(&src_path).map_err(|e| format!("Failed to read {}: {e}", src_path.display()))?;
     let ext_hint = args
@@ -735,11 +762,12 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0);
+    let origin_uri = args.get("origin_uri").and_then(Value::as_str).map(str::to_owned);
     let license_attr = SourceLicenseAttribution {
         spdx_license: spdx_license.to_owned(),
         creator_name_or_did: creator.to_owned(),
         attribution_notice_utf8: attribution_notice.to_owned(),
-        origin_uri: args.get("origin_uri").and_then(Value::as_str).map(str::to_owned),
+        origin_uri: origin_uri.clone(),
         timestamp_epoch_s: now,
         embed_full_source_bytes: args
             .get("embed_full_source_bytes")
@@ -766,11 +794,14 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
     let arch_path = out_dir.join(&arch_filename);
     fs::write(&arch_path, &converted.archetype_10d).map_err(|e| e.to_string())?;
 
+    let src_sha = format!("{:x}", Sha256::digest(&source_bytes));
+    let arch_sha = format!("{:x}", Sha256::digest(&converted.archetype_10d));
+
     let mut changed = vec![crate::changelog_licensing::ChangedResourceDelta {
         key: arch_filename.clone(),
         op: "Added".into(),
         old_sha256: None,
-        new_sha256: Some(format!("{:x}", Sha256::digest(&converted.archetype_10d))),
+        new_sha256: Some(arch_sha.clone()),
         bytes: converted.archetype_10d.len(),
     }];
 
@@ -797,6 +828,118 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
         }
     }
 
+    // Persist extracted texture dependencies when present
+    let mut written_textures = Vec::new();
+    if !converted.texture_dependencies.is_empty() {
+        let tex_dir = out_dir.join("textures");
+        fs::create_dir_all(&tex_dir).map_err(|e| e.to_string())?;
+        for (idx, tex) in converted.texture_dependencies.iter().enumerate() {
+            let ext = match tex.mime_type.as_str() {
+                "image/png" => "png",
+                "image/jpeg" | "image/jpg" => "jpg",
+                "image/webp" => "webp",
+                "image/ktx2" => "ktx2",
+                _ => "bin",
+            };
+            let fname = format!("textures/tex_{idx:02}.{ext}");
+            let fpath = out_dir.join(&fname);
+            if !tex.bytes.is_empty() {
+                fs::write(&fpath, &tex.bytes).map_err(|e| e.to_string())?;
+                changed.push(crate::changelog_licensing::ChangedResourceDelta {
+                    key: fname.clone(),
+                    op: "Added".into(),
+                    old_sha256: None,
+                    new_sha256: Some(format!("{:x}", Sha256::digest(&tex.bytes))),
+                    bytes: tex.bytes.len(),
+                });
+                written_textures.push(fname);
+            }
+        }
+    }
+
+    // Persist O-Voxel volumetric sidecar (multi-segment M64HoloRecord clusters + VOX0 DAG nodes) when provided
+    let mut ovoxel_sidecar_path: Option<PathBuf> = None;
+    if let Some(ovoxel_val) = &overrides.ovoxel_sidecar_json {
+        let ovoxel_fname = format!("{stem}.ovoxel.json");
+        let ovoxel_p = out_dir.join(&ovoxel_fname);
+        let ovoxel_bytes = serde_json::to_vec_pretty(ovoxel_val).unwrap_or_default();
+        fs::write(&ovoxel_p, &ovoxel_bytes).map_err(|e| e.to_string())?;
+        changed.push(crate::changelog_licensing::ChangedResourceDelta {
+            key: ovoxel_fname,
+            op: "Added".into(),
+            old_sha256: None,
+            new_sha256: Some(format!("{:x}", Sha256::digest(&ovoxel_bytes))),
+            bytes: ovoxel_bytes.len(),
+        });
+        ovoxel_sidecar_path = Some(ovoxel_p);
+    }
+
+    // Emit companion UTF-8 N3 provenance graph & 7-Layer (L0-L6) manifest.q42.yaml
+    let prov_n3_fname = format!("{stem}-provenance.n3");
+    let prov_n3_path = out_dir.join(&prov_n3_fname);
+    let prov_n3_content = format!(
+        "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+         @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\
+         @prefix prov: <http://www.w3.org/ns/prov#> .\n\
+         @prefix src-lic: <https://ns.webcivics.net/source-asset-licensing/> .\n\n\
+         <{asset_uri}> a src-lic:ConvertedEmbodiment ;\n\
+             src-lic:compiled10dCrc32c {} ;\n\
+             prov:wasDerivedFrom <{asset_uri}#source> .\n\n\
+         <{asset_uri}#source> a src-lic:SourceAssetRecord ;\n\
+             src-lic:sourceFormat \"{}\" ;\n\
+             src-lic:sourceByteLength {} ;\n\
+             src-lic:sourceCrc32c {} ;\n\
+             src-lic:sourceSha256 \"{src_sha}\"^^xsd:hexBinary ;\n\
+             src-lic:hasLicenseTier <{}> ;\n\
+             src-lic:spdxIdentifier \"{spdx_license}\" ;\n\
+             src-lic:attributionNotice \"{}\" .\n",
+        converted.archetype_compiled_digest,
+        ext_hint.as_deref().unwrap_or("glb"),
+        source_bytes.len(),
+        converted.source_digest,
+        converted.license_tier.iri(),
+        attribution_notice.replace('\\', "\\\\").replace('"', "\\\"")
+    );
+    fs::write(&prov_n3_path, prov_n3_content.as_bytes()).map_err(|e| e.to_string())?;
+    changed.push(crate::changelog_licensing::ChangedResourceDelta {
+        key: prov_n3_fname.clone(),
+        op: "Added".into(),
+        old_sha256: None,
+        new_sha256: Some(format!("{:x}", Sha256::digest(prov_n3_content.as_bytes()))),
+        bytes: prov_n3_content.len(),
+    });
+
+    let manifest_fname = "manifest.q42.yaml";
+    let manifest_path = out_dir.join(manifest_fname);
+    let manifest_content = format!(
+        "schema: yaml-ld-q42/v2\n\
+         id: \"{asset_uri}\"\n\
+         archetype_10d: \"{arch_filename}\"\n\
+         provenance_n3: \"{prov_n3_fname}\"\n\
+         holographic_10d_v2:\n\
+           field_kind_holo: \"0x0306\"\n\
+           field_kind_cbld: \"0x0305\"\n\
+           ovoxel_volumetric_sidecar: {}\n\
+         multiscale_strata:\n\
+           L0: \"Continuum & Classical Field Mechanics\"\n\
+           L1: \"Rigid & Articulated Multi-Body Kinetics (PGA / XPBD / SKL2)\"\n\
+           L2: \"Soft-Body, Elastoplastic & Fluid Continuum\"\n\
+           L3: \"Molecular & Chemical Kinetics\"\n\
+           L4: \"Cellular, Tissue & Biological Morphogenesis\"\n\
+           L5: \"Ecological, Geomorphic & Planetary Systems\"\n\
+           L6: \"L6QuantumPhysics (Quantum Dynamics, Quantum Physics & Quantum Chemistry)\"\n",
+        ovoxel_sidecar_path.is_some()
+    );
+    fs::write(&manifest_path, manifest_content.as_bytes()).map_err(|e| e.to_string())?;
+    changed.push(crate::changelog_licensing::ChangedResourceDelta {
+        key: manifest_fname.to_owned(),
+        op: "Added".into(),
+        old_sha256: None,
+        new_sha256: Some(format!("{:x}", Sha256::digest(manifest_content.as_bytes()))),
+        bytes: manifest_content.len(),
+    });
+
     let regime = match converted.license_tier {
         qualia_core_db::render::compile_10d::SourceLicenseTier::AuthorMoralRightsQualiaCcByNcNd => {
             crate::changelog_licensing::LicensingRegimeKind::QualiaCcByNcNd4
@@ -817,34 +960,51 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
     contract.attributed_to = vec![format!("{creator} — {attribution_notice}")];
     contract.upstream_source_license = Some(spdx_license.to_owned());
 
-    let src_sha = format!("{:x}", Sha256::digest(&source_bytes));
-    let (changelog, _) = crate::changelog_licensing::append_revision_and_license(
-        &out_dir,
-        asset_uri,
-        "Convert3D",
+    let human_actor = overrides.human_actor.unwrap_or_else(|| {
         crate::changelog_licensing::HumanActorRecord {
             did: creator.to_owned(),
             display_name: creator.to_owned(),
             ..Default::default()
-        },
-        crate::changelog_licensing::SoftwareAgentRecord::default(),
+        }
+    });
+    let software_agent = overrides.software_agent.unwrap_or_default();
+    let harness = overrides.harness.unwrap_or_else(|| {
         crate::changelog_licensing::HarnessEnvironmentRecord {
             harness_name: "Webizen AI Synth 3D Converter".into(),
             synth_version: crate::agent_index::RELEASE_VERSION.into(),
             synth_binary_sha256: None,
             gpu_backend: "native".into(),
             quality_profile: "production16".into(),
-        },
-        &src_sha,
-        None,
-        changed,
+        }
+    });
+    let economics = overrides.economics.unwrap_or_else(|| {
         crate::changelog_licensing::RevisionEconomicsTelemetry {
             currency: "AUD".into(),
             work_status: "SelfFunded".into(),
             ..Default::default()
-        },
+        }
+    });
+    let summary = overrides.summary_override.unwrap_or_else(|| {
+        format!(
+            "Converted 3D asset {} under license {}",
+            src_path.display(),
+            spdx_license
+        )
+    });
+
+    let (changelog, _) = crate::changelog_licensing::append_revision_and_license(
+        &out_dir,
+        asset_uri,
+        "Convert3D",
+        human_actor,
+        software_agent,
+        harness,
+        &src_sha,
+        overrides.epistemic_horizon_q42_sha256.as_deref(),
+        changed,
+        economics,
         &contract,
-        &format!("Converted 3D asset {} under license {}", src_path.display(), spdx_license),
+        &summary,
     )?;
 
     let decoded_mesh = decode_10d_mesh(&converted.archetype_10d).ok();
@@ -858,10 +1018,14 @@ pub fn convert_3d_scene_or_asset_cli_or_mcp(args: Value) -> Result<Value, String
         "archetype_10d_path": arch_path,
         "archetype_compiled_crc32c": converted.archetype_compiled_digest,
         "archetype_bytes": converted.archetype_10d.len(),
+        "provenance_n3_path": prov_n3_path,
+        "manifest_q42_yaml_path": manifest_path,
+        "ovoxel_sidecar_path": ovoxel_sidecar_path,
         "vertices": decoded_mesh.as_ref().map(|m| m.vertex_count()).unwrap_or(8),
         "triangles": decoded_mesh.as_ref().map(|m| m.triangle_count()).unwrap_or(12),
         "mode_b_scene_instances": written_instances,
         "extracted_textures": converted.texture_dependencies.len(),
+        "written_textures": written_textures,
         "emitted_nquins": converted.quins.len(),
         "license_tier": converted.license_tier.iri(),
         "changelog_head_rev": changelog.head_rev,

@@ -33,6 +33,7 @@ Spawn `C:\github\synth\target-prod\debug\synth-mcp.exe mcp` with `SYNTH_INPUT_RO
 | Validate Model (10D v2 / L0-L6) | `synth_validate_model` |
 | Inspect `.hmc` / `.10d` / `.q42` | `synth_package_inspect` |
 | Convert 3D (`.glb`/`.obj`/`.stl` -> `.10d` v2 + license `.q42`) | `synth_convert_3d` |
+| Colab Ultra Burst (`TRELLIS.2-4B` / `Hunyuan3D-2.1` / `PartCrafter` / `UniRig` / High-RAM `.q42`) | `synth_colab` (`action=routines` for decision guide) |
 | Audit Registry | `synth_audit_index` |
 | Operator | `synth_operator_status` / `GET /operator` |
 

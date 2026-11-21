@@ -79,7 +79,7 @@ Do not tell the user a catalog morphism or a rust-audit-indexed function does no
 
 ## First session
 
-1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.13`, 150 morphisms.
+1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.14`, 150 morphisms.
 2. Search: `synth_find` / `synth find <keyword>`.
 3. Open `agent-instructions/<category>.md` for that id (table below). Mapping table in this file is the DCC-name index.
 4. Check `synth_operation_contracts` (`id=` or `q=`) for the typed output recipe. Do not guess encoders from a namespace.
@@ -122,6 +122,7 @@ Grok prefixes names `synth__`. Antigravity, Codex, and `synth mcp-tools` use the
 | `synth_package_inspect` | Inspect sealed `.hmc` / `.10d` / `.q42` package headers, `HOLO` v2 status, `AREF`/`IOVR`/`INST` constituency, and SHA-256 digests. |
 | `synth_audit_index` | Query or verify `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` function registry. |
 | `synth_convert_3d` | Convert `.glb`/`.gltf`/`.obj`/`.stl` scenes or assets into Holographic 10D v2 `.10d` + `.q42` with mandatory `source-asset-licensing.n3` validation and `CBLD` sealing. |
+| `synth_colab` | Google Colab Ultra heavy-compute burst extension (`trellis2_image_to_3d`, `trellis2_multiview_to_3d`, `hunyuan3d_shape_and_pbr`, `partcrafter_decompose_3d`, `unirig_auto_skeleton`, `ontology_compile_q42`) with `action="routines"` decision matrix, over HTTPS tunnel or Google Drive queue, automatically sealing `.10d` v2 (`HOLO` `0x0306` + `PRV1` + `.ovoxel.json` `M64HoloRecord`/`VOX0`) and `.q42` locally. |
 | `synth_update` | `check\|upgrade\|verify\|apply` signed GitHub Releases. Never overwrites a locked exe. |
 | `synth_environment_bootstrap` | Tray/studio bootstrap + LLM vault scan. |
 | `query_sparql` / `query_graph` / `ingest_ontology` / `parse_rdf` / `parse_json` / `parse_csv` / `serialize_rdf` / `get_graph_stats` / `list_ontologies` | QualiaDB graph on this same server. Internal SPARQL over admitted Q42 ontologies. No public SPARQL HTTP server. |
@@ -156,6 +157,7 @@ synth validate-model --dir MODEL_DIR [--ledger LEDGER.json]
 synth package-inspect --path FILE.hmc|FILE.10d|FILE.q42
 synth audit-index [--query KEYWORD]
 synth convert-3d --input SCENE.glb --out-10d OUT.10d [--out-q42 OUT.q42] --license SPDX --attribution TEXT --source-uri URI
+synth colab status | routines | configure | export-notebook | submit | poll | ingest | list
 synth update check | upgrade | verify | apply
 ```
 

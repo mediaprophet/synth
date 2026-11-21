@@ -7,6 +7,10 @@
         "SYNTH_INPUT_ROOT": "C:\\github",
         "SYNTH_OUTPUT_ROOT": "C:\\github\\synth\\production"
       }
+    },
+    "colab-mcp": {
+      "command": "uvx",
+      "args": ["git+https://github.com/googlecolab/colab-mcp"]
     }
   }
 }

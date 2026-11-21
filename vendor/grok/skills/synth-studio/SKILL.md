@@ -5,7 +5,7 @@ description: Produce Synth / Hypermedia assets from Grok. Use when making 3D mod
 
 # Synth Studio for Grok
 
-Webizen AI Synth 0.0.41.13 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio (locus, manifold, radiance, surface, kinetics, geodesy). A `.vibe` names the work. Grok does not add a Rust compiler per species or organ.
+Webizen AI Synth 0.0.41.14 is the development tool (produce / preview / compile). QualiaPortal plus the world host is the visitor runtime. Hypermedia is the studio (locus, manifold, radiance, surface, kinetics, geodesy). A `.vibe` names the work. Grok does not add a Rust compiler per species or organ.
 
 **Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then open `C:\github\synth\agent-instructions\<category>.md` (index `agent-instructions/README.md`; house rules `AGENTS.md`). Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not re-audit the kernel in place of calling a morphism that is already listed.
 
@@ -15,6 +15,7 @@ Author logic as N3 (N3Logic + SHACL). Add scene assets as external HMC / `.10d` 
 - **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`).
 - **7-Layer Computational Hierarchy (`L0`–`L6`) & No-ASCII:** `yaml-ld-q42` v2 manifests map across `L0`–`L6` (`L6` = `L6QuantumPhysics`, encompassing quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.
 - **3D Conversion & Licensing (`synth__synth_convert_3d`):** Convert `.glb`/`.gltf`/`.obj`/`.stl` via `synth convert-3d` / MCP `synth__synth_convert_3d` with mandatory `source-asset-licensing.n3` metadata (`spdx_license`, `attribution`, `source_uri`). Validate models with `synth__synth_validate_model` and inspect packages with `synth__synth_package_inspect`.
+- **Google Colab Ultra Burst (`synth__synth_colab` + `colab-mcp`):** Offload heavy 24GB+ VRAM / 83GB High-RAM jobs (`trellis2_image_to_3d`, `trellis2_multiview_to_3d` for `microsoft/TRELLIS.2-4B` O-Voxel + 4K PBR, `hunyuan3d_shape_and_pbr` for `tencent/Hunyuan3D-2.1` shape & delighted PBR re-texturing, `partcrafter_decompose_3d` for compositional multi-part `AREF`/`INST` decomposition, `unirig_auto_skeleton` for `SKL1`/`SKL2` auto-rigging, or `ontology_compile_q42` for online/BioPortal OWL/RDF `.q42` compilation via the Linux `synth` CLI) via `synth__synth_colab` (`action=status|configure|routines|submit|poll|ingest|colab_mcp_cells|export_notebook`) and `colab-mcp` (`uvx git+https://github.com/googlecolab/colab-mcp`). Call `synth__synth_colab action=routines` for the model selection decision matrix. `synth__synth_colab action=ingest` verifies SHA-256 receipts and seals `.10d` v2 (`HOLO` `0x0306` + `PRV1` + `.ovoxel.json` `M64HoloRecord`/`VOX0`) and `.q42` locally.
 - **Orgs:** Made-world things live in `C:\github\poiesis\<thing-slug>\` (`qualia-poiesis`); biosphere species live in `C:\github\eco-intent\<species-slug>\` (`intenteco`).
 
 ## MCP

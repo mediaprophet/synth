@@ -135,6 +135,11 @@ const TOOLS: &[ToolHit] = &[
         haystack: "update upgrade release github signed ed25519 installer",
         invoke: "action=check|upgrade|verify|apply. Never overwrites a locked synth.exe.",
     },
+    ToolHit {
+        name: "synth_colab",
+        haystack: "colab ultra trellis trellis2 ovoxel 3d glb pbr a100 l4 burst image-to-3d multiview q42 ontology compile",
+        invoke: "action=status|configure|routines|submit|poll|ingest|export_notebook. Offloads TRELLIS.2-4B 3D O-Voxel/PBR and 83GB High-RAM .q42 compilation to Google Colab Ultra, then seals .10d v2 (HOLO 0x0306) and .q42 locally.",
+    },
 ];
 
 const NOTES: &[Note] = &[
@@ -165,6 +170,10 @@ const NOTES: &[Note] = &[
     Note {
         tokens: &["antigravity", "gemini", "codex", "grok", "client", "mcp", "agents", "category"],
         text: "Adapters: vendor/grok, vendor/codex, vendor/antigravity. Antigravity IDE reads .agents/mcp_config.json and ~/.gemini/config/mcp_config.json. Canonical contract is AGENTS.md; GEMINI.md is the always-on digest. Category tables live in agent-instructions/<category>.md.",
+    },
+    Note {
+        tokens: &["colab", "trellis", "trellis2", "ovoxel", "a100", "l4", "burst"],
+        text: "Heavy 24GB+ VRAM / 83GB High-RAM jobs (microsoft/TRELLIS.2-4B O-Voxel 3D + 4K PBR and multi-GB ontology .q42 compilation) run via synth_colab (CLI: synth colab) over HTTPS tunnel or Google Drive queue, automatically sealing Holographic .10d v2 (HOLO 0x0306) and .q42 volumes locally.",
     },
 ];
 

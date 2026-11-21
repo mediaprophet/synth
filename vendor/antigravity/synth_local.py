@@ -23,3 +23,12 @@ def synth_server():
             "SYNTH_OUTPUT_ROOT": os.environ.get("SYNTH_OUTPUT_ROOT", _DEFAULT_OUTPUT),
         },
     )
+
+
+def colab_mcp_server():
+    """Google Colab MCP Server (googlecolab/colab-mcp) for driving Colab Ultra A100/L4 runtimes."""
+    return McpStdioServer(
+        name="colab-mcp",
+        command=os.environ.get("UVX_BIN", "uvx"),
+        args=["git+https://github.com/googlecolab/colab-mcp"],
+    )

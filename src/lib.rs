@@ -1,5 +1,6 @@
 //! General-purpose VibeScript authoring, pluggable asset production and native HMC packaging.
 //! Domain-specific generators implement [`production::AssetProducer`].
+#![recursion_limit = "256"]
 pub mod agent;
 pub mod agent_index;
 pub mod changelog_licensing;

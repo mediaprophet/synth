@@ -27,6 +27,9 @@ pub mod q42;
 #[cfg(not(target_arch = "wasm32"))]
 #[path = "mcp_full/bioportal.rs"]
 pub mod bioportal;
+#[cfg(not(target_arch = "wasm32"))]
+#[path = "mcp_full/colab.rs"]
+pub mod colab;
 
 
 /// Convert `qualia_mcp::stable_mcp_tools()` descriptors into `AuthoringTool` entries.
@@ -291,6 +294,12 @@ impl StandaloneSynthMcp {
                     }),
                     vec![],
                 ),
+            },
+            #[cfg(not(target_arch = "wasm32"))]
+            AuthoringTool {
+                name: "synth_colab".into(),
+                description: "Google Colab Ultra Heavy-Compute Burst Extension (A100 40/80GB or L4 24GB + 83GB High-RAM). Dual transport: HTTPS tunnel (Bearer auth in gitignored .synth/secrets.json id='colab-ultra') or local Google Drive sync queue. Routines: trellis2_image_to_3d & trellis2_multiview_to_3d (microsoft/TRELLIS.2-4B O-Voxel 512^3-1536^3 -> 4K PBR .glb + .ovoxel.json multi-segment M64HoloRecord clusters & VOX0 DAG nodes -> automatic Holographic .10d v2 HOLO 0x0306 + CBLD + PROV + .synth/changelog.json conversion) and ontology_compile_q42 (83GB High-RAM OWL/RDF/BioPortal -> .q42 volume compilation).".into(),
+                input_schema: object(colab::colab_arg_schema_properties(), vec![]),
             },
             AuthoringTool {
                 name: "synth_jobs".into(),
@@ -568,6 +577,10 @@ impl StandaloneSynthMcp {
             #[cfg(not(target_arch = "wasm32"))]
             "synth_bioportal" | "synth.bioportal" => {
                 bioportal::dispatch_mcp(self, args)
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            "synth_colab" | "synth.colab" => {
+                colab::dispatch_mcp(self, args)
             }
             #[cfg(not(target_arch = "wasm32"))]
             "synth_jobs" | "synth.jobs" => {

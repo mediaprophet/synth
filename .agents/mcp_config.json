@@ -11,8 +11,15 @@
         "synth_find": { "eager": true },
         "synth_produce_present": { "eager": true },
         "synth_compile_q42": { "eager": true },
-        "synth_operation_contracts": { "eager": true }
+        "synth_operation_contracts": { "eager": true },
+        "synth_colab": { "eager": true },
+        "synth_convert_3d": { "eager": true }
       }
+    },
+    "colab-mcp": {
+      "command": "uvx",
+      "args": ["git+https://github.com/googlecolab/colab-mcp"],
+      "timeout": 30000
     }
   }
 }
