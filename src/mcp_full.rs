@@ -398,13 +398,14 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_validate_model".into(),
-                description: "Validate an asset's computational model parameters (required physical/anatomical/kinetic fields by subject_class, ClaimBasis/EpistemicTier classification, 1..N reference bindings, QUDT bounds, 5-layer topological containment / radial tissue depth d in [0,1] / cavity SDF phi <= -eps / enthesis UV lock, and .10d HOLO/MSTR/CBLD/KLOD0..KLOD3 sections) (REQ-7 & REQ-8).".into(),
+                description: "Validate an asset's computational model parameters (required physical/anatomical/kinetic fields by subject_class, ClaimBasis/EpistemicTier classification, 1..N reference bindings, QUDT bounds, 5-layer topological containment / radial tissue depth d in [0,1] / cavity SDF phi <= -eps / visceral tethering / enthesis UV lock & retinacular pulleys, 4-regime pathological mechanics with DOID/HP SHACL exception guard, ShEx ShapeMap streaming LoD & stratified cyclic recursion, and .10d HOLO/MSTR/CBLD/KLOD0..KLOD3 sections) (REQ-7 & REQ-8).".into(),
                 input_schema: object(
                     json!({
                         "subject_class": {"type":"string","enum":["VascularPlant","Flora","VertebrateFauna","HumanAnatomy","MechanicalVehicle","MadeArtefact"]},
                         "asset_10d_path": {"type":"string","maxLength":4096},
                         "fields": {"type":"array","items":{"type":"object"}},
-                        "topological_layers": {"type":"array","items":{"type":"object"},"description":"Optional radial tissue/botanical layer samples (entity_id, layer_kind, d_min, d_max, max_cavity_sdf_phi_m, cavity_clearance_eps_m, max_enthesis_uv_drift_m, volume_det_f)"},
+                        "topological_layers": {"type":"array","items":{"type":"object"},"description":"Optional radial tissue/botanical layer & pathological regime samples (entity_id, layer_kind, d_min, d_max, parent_cavity_id, suspended_by_id, enthesis_bindings, crosses_polyaxial_joint, retinaculum_or_compartment_id, diaphyseal_growth_s_range, max_cavity_sdf_phi_m, cavity_clearance_eps_m, max_enthesis_uv_drift_m, volume_det_f, pathology_regime, pathology_ontology_ref, is_encapsulated, boundary_behavior, authorized_exception, adipose_mean_cell_volume_pl, adipose_cell_density_per_mm3, retinacula_cutis_septa_tethers, tumor_to_host_stiffness_ratio, pathogen_causal_pathway, reaction_diffusion_pde_active, independent_rash_mesh_count)"},
+                        "shex_nodes": {"type":"array","items":{"type":"object"},"description":"Optional ShEx ShapeMap nodes (node_id, shape, did, ontology_ref, stream_state=LoadedHmcPayload|WireframeStub, sdf_buffer_offset, ten_d_vector_ref, bounding_sphere_radius, chunk_endpoint, cyclic_links)"},
                         "data_ttl": {"type":"string","maxLength":1048576,"description":"Optional Turtle/N3 data graph to validate against shapes_ttl using QualiaDB's native SHACL + modality extensions engine"},
                         "shapes_ttl": {"type":"string","maxLength":1048576,"description":"Optional SHACL Turtle shapes (supporting sh:deonticObligate/Permit/Forbid, sh:valuesConsentNonCoerced, sh:valuesHarmBelowCeiling, sh:not owl:Thing, etc.)"}
                     }),
@@ -1063,6 +1064,167 @@ mod tests {
             .unwrap();
         assert_eq!(ver["overall_technical_status"], "pass");
         assert!(ver["checked_count"].as_u64().unwrap() >= 1);
+
+        // Anatomical Modeling Constraints, ShEx Stratified Recursion, and 4-Regime Pathological Validation Gate
+        let anat_ok = mcp
+            .call(
+                "synth_validate_model",
+                json!({
+                    "subject_class": "HumanAnatomy",
+                    "fields": [
+                        {"name": "height_or_length_m", "value": 1.75, "qudt_unit": "qudt:Meter", "claim_basis": "Measured", "references": [{"source_id": "fma:20394", "kind": "q42_assertion"}]},
+                        {"name": "body_mass_kg", "value": 72.0, "qudt_unit": "qudt:Kilogram", "claim_basis": "Measured", "references": [{"source_id": "fma:20394", "kind": "q42_assertion"}]},
+                        {"name": "cortical_bmd_g_cm3", "value": 1.85, "claim_basis": "Measured", "references": [{"source_id": "fma:5018", "kind": "q42_assertion"}]},
+                        {"name": "kinematic_solver_regime", "value": "ArticulatedXpbdGeodesicRetinaculum", "claim_basis": "Described", "references": [{"source_id": "fma:71324", "kind": "q42_assertion"}]},
+                        {"name": "joint_swing_twist_limits", "value": "6dof_screw_cones", "claim_basis": "Measured", "references": [{"source_id": "fma:35175", "kind": "q42_assertion"}]},
+                        {"name": "musculotendon_actuation_pathways", "value": "barycentric_uv_enthesis_geodesic", "claim_basis": "Described", "references": [{"source_id": "fma:30316", "kind": "q42_assertion"}]},
+                        {"name": "multiscale_strata_l0_l6", "value": ["L0","L1","L2","L3","L4","L5","L6"], "claim_basis": "Described", "references": [{"source_id": "fma:20394", "kind": "q42_assertion"}]}
+                    ],
+                    "topological_layers": [
+                        {
+                            "entity_id": "fma:Heart",
+                            "ontology_ref": "http://purl.obolibrary.org/obo/UBERON_0000948",
+                            "layer_kind": "internal_organ",
+                            "d_min": 0.0,
+                            "d_max": 0.15,
+                            "parent_cavity_id": "did:qualia:anatomy:thoracic_cavity",
+                            "suspended_by_id": "did:qualia:anatomy:fibrous_pericardium",
+                            "max_cavity_sdf_phi_m": -0.004,
+                            "cavity_clearance_eps_m": 0.001,
+                            "volume_det_f": 1.00
+                        },
+                        {
+                            "entity_id": "fma:Femur_periosteum",
+                            "layer_kind": "periosteum_capsule",
+                            "d_min": 0.00,
+                            "d_max": 0.06,
+                            "diaphyseal_growth_s_range": [0.0, 1.0]
+                        },
+                        {
+                            "entity_id": "fma:Patellar_ligament",
+                            "layer_kind": "ligament_deep_tendon",
+                            "d_min": 0.06,
+                            "d_max": 0.18,
+                            "enthesis_bindings": ["did:qualia:anatomy:patella", "did:qualia:anatomy:tibia"],
+                            "crosses_polyaxial_joint": true,
+                            "retinaculum_or_compartment_id": "did:qualia:anatomy:extensor_retinaculum",
+                            "max_enthesis_uv_drift_m": 0.00002
+                        },
+                        {
+                            "entity_id": "fma:Rectus_femoris",
+                            "layer_kind": "musculature",
+                            "d_min": 0.18,
+                            "d_max": 0.72,
+                            "enthesis_bindings": ["did:qualia:anatomy:ilium_aiis", "did:qualia:anatomy:patella"],
+                            "crosses_polyaxial_joint": true,
+                            "retinaculum_or_compartment_id": "did:qualia:anatomy:fascia_lata_compartment",
+                            "max_enthesis_uv_drift_m": 0.00001,
+                            "volume_det_f": 1.01
+                        },
+                        {
+                            "entity_id": "uberon:Subcutaneous_adipose_depot",
+                            "layer_kind": "subcutis_fascia",
+                            "d_min": 0.75,
+                            "d_max": 0.90,
+                            "pathology_regime": "adipose_hypertrophy_hyperplasia",
+                            "pathology_ontology_ref": "http://purl.obolibrary.org/obo/CL_0000136",
+                            "adipose_mean_cell_volume_pl": 620.0,
+                            "adipose_cell_density_per_mm3": 1400.0,
+                            "retinacula_cutis_septa_tethers": 48,
+                            "visceral_ectopic_spillover_routed": true
+                        },
+                        {
+                            "entity_id": "doid:Subcutaneous_lipoma_cyst",
+                            "layer_kind": "subcutis_fascia",
+                            "d_min": 0.78,
+                            "d_max": 0.89,
+                            "pathology_regime": "encapsulated_cyst_benign",
+                            "pathology_ontology_ref": "http://purl.obolibrary.org/obo/DOID_3315",
+                            "is_encapsulated": true,
+                            "boundary_behavior": "displace_only",
+                            "volume_det_f": 1.00
+                        },
+                        {
+                            "entity_id": "doid:Invasive_ductal_carcinoma_margin",
+                            "layer_kind": "musculature",
+                            "d_min": 0.50,
+                            "d_max": 0.96,
+                            "pathology_regime": "malignant_invasive_neoplasm",
+                            "pathology_ontology_ref": "http://purl.obolibrary.org/obo/DOID_3008",
+                            "is_encapsulated": false,
+                            "boundary_behavior": "invasive_spiculated",
+                            "authorized_exception": "qualia:TissueInvasion",
+                            "proliferation_kinetics": "gompertzian",
+                            "tumor_to_host_stiffness_ratio": 4.5
+                        },
+                        {
+                            "entity_id": "hp:Urticaria_reaction_diffusion_dermal_shell",
+                            "layer_kind": "dermis_epidermis",
+                            "d_min": 0.92,
+                            "d_max": 1.00,
+                            "pathology_regime": "cutaneous_pathogen_rash",
+                            "pathology_ontology_ref": "http://purl.obolibrary.org/obo/HP_0001025",
+                            "boundary_behavior": "manifold_reaction_diffusion",
+                            "pathogen_causal_pathway": "systemic_visceral_ige_histamine_pulse",
+                            "reaction_diffusion_pde_active": true,
+                            "independent_rash_mesh_count": 0
+                        }
+                    ],
+                    "shex_nodes": [
+                        {
+                            "node_id": "bone_t5",
+                            "shape": "BoneOrgan",
+                            "did": "did:qualia:anatomy:vertebra_t5",
+                            "ontology_ref": "http://purl.obolibrary.org/obo/UBERON_0002347",
+                            "stream_state": "LoadedHmcPayload",
+                            "sdf_buffer_offset": 4096,
+                            "ten_d_vector_ref": "qualia://anatomy/thorax/t5.10d",
+                            "cyclic_links": ["joint_costovertebral_5"]
+                        },
+                        {
+                            "node_id": "joint_costovertebral_5",
+                            "shape": "SynovialJoint",
+                            "did": "did:qualia:anatomy:costovertebral_joint_5",
+                            "ontology_ref": "http://purl.obolibrary.org/obo/UBERON_0002221",
+                            "stream_state": "WireframeStub",
+                            "bounding_sphere_radius": 0.018,
+                            "chunk_endpoint": "qualia://anatomy/thorax/costovertebral_5.hmc",
+                            "cyclic_links": ["bone_t5", "bone_rib5"]
+                        },
+                        {
+                            "node_id": "bone_rib5",
+                            "shape": "BoneOrgan",
+                            "did": "did:qualia:anatomy:rib_5",
+                            "ontology_ref": "http://purl.obolibrary.org/obo/UBERON_0002228",
+                            "stream_state": "LoadedHmcPayload",
+                            "sdf_buffer_offset": 16384,
+                            "ten_d_vector_ref": "qualia://anatomy/thorax/rib5.10d",
+                            "cyclic_links": ["joint_costovertebral_5"]
+                        }
+                    ]
+                }),
+            )
+            .unwrap();
+        assert_eq!(
+            anat_ok["status"], "pass",
+            "expected pass for valid 5-layer anatomy + DOID-authorized invasion + ShEx cyclic loop, got violations: {:?}",
+            anat_ok["qudt_and_citation_violations"]
+        );
+        assert_eq!(
+            anat_ok["topological_and_radial_invariants"]["pathology_regime_checks"],
+            4
+        );
+        assert!(
+            anat_ok["topological_and_radial_invariants"]["authorized_pathology_exceptions"]
+                .as_array()
+                .unwrap()
+                .len()
+                >= 1
+        );
+        assert_eq!(
+            anat_ok["shex_shapemap_and_cyclic_topology"]["stratified_cyclic_links_verified"],
+            4
+        );
 
         let _ = std::fs::remove_dir_all(dir);
     }

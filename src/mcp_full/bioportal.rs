@@ -31,8 +31,6 @@ pub const BIOPORTAL_API_BASE: &str = "https://data.bioontology.org";
 pub const DEFAULT_BIOMEDICAL_DIR: &str = r"C:\github\ontology\biomedical";
 
 const RDF_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-const RDFS_LABEL: &str = "http://www.w3.org/2000/01/rdf-schema#label";
-const RDFS_COMMENT: &str = "http://www.w3.org/2000/01/rdf-schema#comment";
 const RDFS_SUBCLASS_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 const RDFS_SUBPROPERTY_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
 const RDFS_IS_DEFINED_BY: &str = "http://www.w3.org/2000/01/rdf-schema#isDefinedBy";
@@ -865,10 +863,38 @@ pub fn refactor_owl_to_linked_shacl_n3(
 
     writeln!(
         n3_out,
-        "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
-         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
-         @prefix skos: <http://www.w3.org/2004/02/skos/core#> .\n\
-         @prefix log: <http://www.w3.org/2000/10/swap/log#> .\n"
+        "@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+         @prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .\n\
+         @prefix skos:   <http://www.w3.org/2004/02/skos/core#> .\n\
+         @prefix log:    <http://www.w3.org/2000/10/swap/log#> .\n\
+         @prefix math:   <http://www.w3.org/2000/10/swap/math#> .\n\
+         @prefix fma:    <http://purl.org/sig/ont/fma/> .\n\
+         @prefix obo:    <http://purl.obolibrary.org/obo/> .\n\
+         @prefix qualia: <https://qualia.org/ns/anatomy#> .\n\
+         @prefix q42:    <https://webizen.org/q42#> .\n\
+         \n\
+         # 1. Transitive Anatomical Containment & Radial Depth Closure\n\
+         {{ ?a fma:contained_in ?b . ?b fma:contained_in ?c }} => {{ ?a fma:contained_in ?c }} .\n\
+         {{ ?a fma:deep_to ?b . ?b fma:deep_to ?c }} => {{ ?a fma:deep_to ?c }} .\n\
+         {{ ?a fma:superficial_to ?b }} => {{ ?b fma:deep_to ?a }} .\n\
+         {{ ?a obo:BFO_0000050 ?b . ?b obo:BFO_0000050 ?c }} => {{ ?a obo:BFO_0000050 ?c }} .\n\
+         \n\
+         # 2. Adipose Tissue Expandability Threshold & Visceral/Ectopic WAT Spillover Rule\n\
+         {{ ?depot a obo:CL_0000136 ;\n\
+                  qualia:subcutaneousSaturationRatio ?sat .\n\
+           ?sat math:greaterThan 1.0 }} => {{\n\
+           ?depot qualia:routesExcessLipidTo obo:UBERON_0014454 ;\n\
+                  qualia:activatesEctopicVisceralSpillover true }}\n\
+         .\n\
+         \n\
+         # 3. Non-Local Visceral Pathogen -> Systemic IgE/Histamine Pulse -> Cutaneous Reaction-Diffusion Rash\n\
+         {{ ?pathogen fma:contained_in obo:UBERON_0000160 ;\n\
+                     qualia:emitsSystemicPulse qualia:IgE_Histamine_Surge .\n\
+           ?dermalReceptor qualia:radialDepthMin ?d .\n\
+           ?d math:notLessThan 0.92 }} => {{\n\
+           ?dermalReceptor qualia:activatesBistableReactionDiffusion true ;\n\
+                           qualia:shaderChannels ( \"erythema_hemoglobin_sss\" \"edema_micro_displacement\" \"stratum_corneum_desquamation\" ) }}\n\
+         .\n"
     )
     .map_err(|e| e.to_string())?;
 
@@ -1026,7 +1052,12 @@ pub fn refactor_owl_to_linked_shacl_n3(
              sh:property [ sh:path q42:maxCavitySdfPhiM ; sh:datatype xsd:double ; sh:maxExclusive 0.0 ] ;\n\
              sh:property [ sh:path q42:maxEnthesisUvDriftM ; sh:datatype xsd:double ; sh:minInclusive 0.0 ; sh:maxInclusive 0.0001 ] ;\n\
              sh:property [ sh:path q42:volumeDetF ; sh:datatype xsd:double ; sh:minInclusive 0.85 ; sh:maxInclusive 1.15 ] ;\n\
-             sh:property [ sh:path q42:rcc8Relation ; sh:in ( \"NTPP\" \"TPP\" \"EQ\" ) ] .\n"
+             sh:property [ sh:path q42:rcc8Relation ; sh:in ( \"NTPP\" \"TPP\" \"EQ\" ) ] .\n\
+         \n\
+         q42:{acr_upper}_PathologicalLayerExceptionShape a sh:NodeShape ;\n\
+             sh:property [ sh:path q42:authorizedException ; sh:in ( \"qualia:TissueInvasion\" \"qualia:Ulceration\" \"qualia:FollicularPortal\" \"qualia:CystRupture\" ) ] ;\n\
+             sh:property [ sh:path q42:pathologyOntologyRef ; sh:minCount 1 ] ;\n\
+             sh:property [ sh:path q42:independentRashMeshCount ; sh:datatype xsd:integer ; sh:maxInclusive 0 ] .\n"
     )
     .map_err(|e| e.to_string())?;
 
@@ -1210,6 +1241,31 @@ pub fn refactor_owl_to_linked_shacl_n3(
              <WireframeStub> {{\n\
                hmc:boundingSphereRadius xsd:float ;\n\
                hmc:chunkEndpoint        IRI\n\
+             }}\n\
+             \n\
+             # Polymorphic Pathological & Dynamic Tissue Shapes (DOID / HP / MP / IDO / CL)\n\
+             ABSTRACT <PathologicalEntity> EXTENDS @<BiologicalEntity> {{\n\
+               qualia:pathologyOntologyRef IRI\n\
+             }}\n\
+             \n\
+             <EncapsulatedLesion> EXTENDS @<PathologicalEntity> {{\n\
+               qualia:isEncapsulated   [ true ] ;\n\
+               qualia:boundaryBehavior [ \"displace_only\" ] ;\n\
+               qualia:internalHydrostaticPressurePa xsd:float ?\n\
+             }}\n\
+             \n\
+             <InvasiveLesion> EXTENDS @<PathologicalEntity> {{\n\
+               qualia:boundaryBehavior      [ \"invasive_spiculated\" ] ;\n\
+               qualia:authorizedException   [ \"qualia:TissueInvasion\" \"qualia:Ulceration\" ] ;\n\
+               qualia:proliferationKinetics [ \"gompertzian\" \"logistic\" \"bertalanffy\" ] ? ;\n\
+               qualia:tumorToHostStiffnessRatio xsd:float ;\n\
+               qualia:invadesLayer          @<BiologicalEntity> +\n\
+             }}\n\
+             \n\
+             <CutaneousFieldPhenotype> EXTENDS @<PathologicalEntity> {{\n\
+               qualia:boundaryBehavior        [ \"manifold_reaction_diffusion\" ] ;\n\
+               qualia:reactionDiffusionBuffer IRI ;\n\
+               qualia:independentRashMeshes   [ 0 ]\n\
              }}\n"
         )
         .map_err(|e| e.to_string())?;

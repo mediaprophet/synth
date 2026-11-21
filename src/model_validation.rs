@@ -119,7 +119,9 @@ pub fn required_fields_for_subject_class(subject_class: &str) -> &'static [&'sta
     }
 }
 
-/// Anatomical, Botanical & Natural-World Topological Containment Layer (`d in [0, 1]`).
+/// Anatomical, Botanical & Natural-World Topological Containment Layer (`d in [0, 1]`)
+/// plus Dynamic Pathological & Metabolic Continuum Regimes (Adipose Hypertrophy/Hyperplasia,
+/// Encapsulated Cysts, Malignant Invasive Neoplasms, and Pathogen/Reaction-Diffusion Rashes).
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RadialLayerSample {
     pub entity_id: String,
@@ -127,7 +129,8 @@ pub struct RadialLayerSample {
     pub ontology_ref: Option<String>,
     /// Canonical layer name:
     /// - Anatomy/Fauna: `"periosteum_capsule"` [0.00, 0.08], `"ligament_deep_tendon"` [0.05, 0.20],
-    ///   `"musculature"` [0.15, 0.75], `"subcutis_fascia"` [0.75, 0.92], `"dermis_epidermis"` [0.92, 1.00]
+    ///   `"musculature"` [0.15, 0.75], `"subcutis_fascia"` [0.75, 0.92], `"dermis_epidermis"` [0.92, 1.00],
+    ///   `"internal_organ"` (visceral cavity organ requiring `parent_cavity_id` + `suspended_by_id`)
     /// - Flora/Botanical: `"pith_heartwood"` [0.00, 0.45], `"sapwood_xylem"` [0.45, 0.82],
     ///   `"cambium_phloem"` [0.82, 0.92], `"periderm_bark_cuticle"` [0.92, 1.00]
     pub layer_kind: String,
@@ -135,6 +138,21 @@ pub struct RadialLayerSample {
     pub d_max: f64,
     #[serde(default)]
     pub parent_cavity_id: Option<String>,
+    /// Compliant serous/fascial suspension anchor DID (e.g. pericardium, pleura, mesentery, retroperitoneal fascia).
+    #[serde(default)]
+    pub suspended_by_id: Option<String>,
+    /// Distinct Bone_organ or Fascia DIDs bound via barycentric UV surface patches (muscles & ligaments require >= 2).
+    #[serde(default)]
+    pub enthesis_bindings: Vec<String>,
+    /// Whether this muscle/tendon/ligament crosses a polyaxial joint (wrist, ankle, knee, glenohumeral, etc.).
+    #[serde(default)]
+    pub crosses_polyaxial_joint: Option<bool>,
+    /// Fascial retinaculum toroidal pulley or compartment DID preventing tendon/ligament bowstringing across polyaxial joints.
+    #[serde(default)]
+    pub retinaculum_or_compartment_id: Option<String>,
+    /// Normalized longitudinal epiphyseal growth axis coordinate range `s in [0, 1]` along the diaphyseal axis.
+    #[serde(default)]
+    pub diaphyseal_growth_s_range: Option<[f64; 2]>,
     /// Signed distance `phi_parent(p)` in metres (must satisfy `phi <= -epsilon_m` when inside a cavity).
     #[serde(default)]
     pub max_cavity_sdf_phi_m: Option<f64>,
@@ -146,13 +164,209 @@ pub struct RadialLayerSample {
     /// Volume preservation determinant `det(F)` under contraction / turgor deformation (target ~ 1.0 for incompressible tissue).
     #[serde(default)]
     pub volume_det_f: Option<f64>,
+    /// Dynamic pathological or metabolic regime:
+    /// `"adipose_hypertrophy_hyperplasia" | "encapsulated_cyst_benign" | "malignant_invasive_neoplasm" | "cutaneous_pathogen_rash"`
+    #[serde(default)]
+    pub pathology_regime: Option<String>,
+    /// Verified BioPortal pathology/cell/phenotype class IRI or CURIE (`DOID:*`, `HP:*`, `MP:*`, `IDO:*`, `NCBITaxon:*`, `CL:*`).
+    #[serde(default)]
+    pub pathology_ontology_ref: Option<String>,
+    /// Whether the lesion has an intact fibrous/epithelial capsule (`qualia:isEncapsulated = true` -> pure tissue displacement).
+    #[serde(default)]
+    pub is_encapsulated: Option<bool>,
+    /// `"displace_only" | "invasive_spiculated" | "manifold_reaction_diffusion"`
+    #[serde(default)]
+    pub boundary_behavior: Option<String>,
+    /// Explicit ontology-backed SHACL exception predicate permitting cross-layer penetration:
+    /// `"qualia:TissueInvasion" | "qualia:Ulceration" | "qualia:FollicularPortal" | "qualia:CystRupture"`
+    #[serde(default)]
+    pub authorized_exception: Option<String>,
+    /// Adipose hypertrophic state: mean adipocyte volume `V_cell` in picolitres (pL).
+    #[serde(default)]
+    pub adipose_mean_cell_volume_pl: Option<f64>,
+    /// Adipose hyperplastic state: adipocyte density `rho_cell` in cells/mm^3.
+    #[serde(default)]
+    pub adipose_cell_density_per_mm3: Option<f64>,
+    /// Number of inextensible `retinacula cutis` fibrous septa tethers anchoring superficial fascia (`d=0.75`) to dermis (`d=0.92`).
+    #[serde(default)]
+    pub retinacula_cutis_septa_tethers: Option<usize>,
+    /// Whether excess lipid beyond the SAT expandability threshold is routed to visceral WAT (`UBERON:0014454`) inside the peritoneum.
+    #[serde(default)]
+    pub visceral_ectopic_spillover_routed: Option<bool>,
+    /// Malignant tumor proliferation kinetics (`"gompertzian" | "logistic" | "bertalanffy"`).
+    #[serde(default)]
+    pub proliferation_kinetics: Option<String>,
+    /// Stiffness ratio `E_tumor / E_host` (malignant solid continuum core requires `> 1.0` for strain amplification / ECM tracks).
+    #[serde(default)]
+    pub tumor_to_host_stiffness_ratio: Option<f64>,
+    /// Pathogen/rash causal pathway:
+    /// `"direct_cutaneous_burrow" | "follicular_portal_abscess" | "systemic_visceral_ige_histamine_pulse"`
+    #[serde(default)]
+    pub pathogen_causal_pathway: Option<String>,
+    /// Whether cutaneous rash/erythema/urticaria is evaluated via a 2D manifold bistable reaction-diffusion PDE (`dc/dt = D nabla^2 c + f_bistable - gamma c`).
+    #[serde(default)]
+    pub reaction_diffusion_pde_active: Option<bool>,
+    /// Number of independent static 3D meshes emitted for rash macules/wheals (must be `0` to prevent memory explosion and layer clipping).
+    #[serde(default)]
+    pub independent_rash_mesh_count: Option<usize>,
 }
 
-/// Evaluate the 5-Layer Anatomical & Natural-World Topological Invariants:
-/// 1. Cavity SDF negative-distance containment (`phi_cavity <= -epsilon`),
-/// 2. Intrinsic radial tissue depth ordering (`d in [0, 1]`, no muscle-over-skin or xylem-over-bark inversion),
-/// 3. Barycentric UV enthesis / branch-collar zero-detachment lock (`||p_end - p_uv|| <= 1e-4`),
-/// 4. Incompressible soft-tissue / turgor volume preservation (`det(F) in [0.85, 1.15]`).
+/// ShEx (Shape Expressions) ShapeMap & Stratified Cyclic Recursion Sample (`node@Shape`).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ShExNodeSample {
+    pub node_id: String,
+    /// Target ShEx shape:
+    /// `"BoneOrgan" | "StructuralScaffoldOrgan" | "SynovialJoint" | "ArticularOrBranchJoint" | "AnatomicalCavity" | "CompliantTether" | "EncapsulatedLesion" | "InvasiveLesion" | "CutaneousFieldPhenotype"`
+    pub shape: String,
+    pub did: String,
+    pub ontology_ref: String,
+    /// `"LoadedHmcPayload" | "WireframeStub"`
+    pub stream_state: String,
+    #[serde(default)]
+    pub sdf_buffer_offset: Option<u64>,
+    #[serde(default)]
+    pub ten_d_vector_ref: Option<String>,
+    #[serde(default)]
+    pub bounding_sphere_radius: Option<f64>,
+    #[serde(default)]
+    pub chunk_endpoint: Option<String>,
+    /// Outgoing cyclic / recursive anatomical links (`articulatesWith`, `connectsBone`, `anastomosesWith`, `branchOf`).
+    #[serde(default)]
+    pub cyclic_links: Vec<String>,
+}
+
+fn has_verified_pathology_provenance(reference: Option<&str>) -> bool {
+    let Some(r) = reference.map(str::trim).filter(|s| !s.is_empty()) else {
+        return false;
+    };
+    let upper = r.to_ascii_uppercase();
+    upper.contains("DOID")
+        || upper.contains("HP_")
+        || upper.contains("HP:")
+        || upper.contains("MP_")
+        || upper.contains("MP:")
+        || upper.contains("IDO")
+        || upper.contains("NCBITAXON")
+        || upper.contains("MONDO")
+}
+
+fn has_verified_invasion_authorization(s: &RadialLayerSample) -> bool {
+    let exc_ok = matches!(
+        s.authorized_exception.as_deref(),
+        Some(
+            "qualia:TissueInvasion"
+                | "qualia:Ulceration"
+                | "qualia:FollicularPortal"
+                | "qualia:CystRupture"
+        )
+    );
+    if !exc_ok || !has_verified_pathology_provenance(s.pathology_ontology_ref.as_deref()) {
+        return false;
+    }
+    // An intact encapsulated benign lesion (cyst, lipoma) cannot cross layers unless CystRupture is authorized.
+    if s.is_encapsulated == Some(true)
+        && s.authorized_exception.as_deref() != Some("qualia:CystRupture")
+    {
+        return false;
+    }
+    true
+}
+
+/// Evaluate ShEx ShapeMap streaming `.hmc` contracts & stratified positive recursion over cyclic anatomical graphs.
+pub fn verify_shex_shapemap_and_cyclic_topology(
+    nodes: &[ShExNodeSample],
+    violations: &mut Vec<String>,
+) -> Value {
+    let mut loaded_count = 0usize;
+    let mut wireframe_stub_count = 0usize;
+    let mut cyclic_loops_verified = 0usize;
+
+    let known_ids: std::collections::HashSet<&str> =
+        nodes.iter().map(|n| n.node_id.as_str()).collect();
+
+    for n in nodes {
+        if !n.did.starts_with("did:") && !n.did.starts_with("urn:") && !n.did.starts_with("qualia://") {
+            violations.push(format!(
+                "ShEx violation on `{}`@{}: `hmc:did` (`{}`) must be a valid DID/URN/Qualia IRI",
+                n.node_id, n.shape, n.did
+            ));
+        }
+        let oref_lower = n.ontology_ref.to_ascii_lowercase();
+        if oref_lower.is_empty()
+            || oref_lower.contains("owl#thing")
+            || oref_lower.contains("owl:thing")
+            || oref_lower.contains("owl#nothing")
+            || oref_lower.contains("namedindividual")
+        {
+            violations.push(format!(
+                "ShEx ingestion gate violation on `{}`@{}: forbidden or empty `qualia:ontologyRef` (`{}`); owl:Thing scaffolding must be stripped",
+                n.node_id, n.shape, n.ontology_ref
+            ));
+        }
+        match n.stream_state.as_str() {
+            "LoadedHmcPayload" => {
+                loaded_count += 1;
+                if n.sdf_buffer_offset.is_none() || n.ten_d_vector_ref.as_deref().unwrap_or("").is_empty() {
+                    violations.push(format!(
+                        "ShEx `@<LoadedHmcPayload>` violation on `{}`: requires both `sdf_buffer_offset` and `ten_d_vector_ref`",
+                        n.node_id
+                    ));
+                }
+            }
+            "WireframeStub" => {
+                wireframe_stub_count += 1;
+                if n.bounding_sphere_radius.unwrap_or(0.0) <= 0.0
+                    || n.chunk_endpoint.as_deref().unwrap_or("").is_empty()
+                {
+                    violations.push(format!(
+                        "ShEx `@<WireframeStub>` violation on `{}`: requires positive `bounding_sphere_radius` and deferred `chunk_endpoint` IRI",
+                        n.node_id
+                    ));
+                }
+            }
+            other => {
+                violations.push(format!(
+                    "ShEx polymorphic union violation on `{}`: `hmc:streamState` must be `LoadedHmcPayload` or `WireframeStub`, got `{other}`",
+                    n.node_id
+                ));
+            }
+        }
+        if (n.shape == "SynovialJoint" || n.shape == "ArticularOrBranchJoint")
+            && n.cyclic_links.len() < 2
+        {
+            violations.push(format!(
+                "ShEx `@<{}>` cardinality violation on `{}`: `qualia:connectsBone` requires {{2,*}} connected scaffold nodes, got {}",
+                n.shape,
+                n.node_id,
+                n.cyclic_links.len()
+            ));
+        }
+        for target in &n.cyclic_links {
+            if known_ids.contains(target.as_str()) {
+                cyclic_loops_verified += 1;
+            }
+        }
+    }
+
+    json!({
+        "shex_nodes_evaluated": nodes.len(),
+        "loaded_hmc_payloads": loaded_count,
+        "wireframe_lod_stubs": wireframe_stub_count,
+        "stratified_cyclic_links_verified": cyclic_loops_verified,
+        "pipeline_stages": [
+            "1. ShEx + ShapeMaps + SemAct (BioPortal owl:Thing pruning, stratified cyclic recursion, streaming .hmc LoD union)",
+            "2. N3Logic (transitive spatial closures deep_to*/contained_in*, radial depth d in [0,1], adipose spillover & systemic IgE pulse rules)",
+            "3. SHACL + Etalon Solver (closed-world phi_cavity <= -eps, d_deep < d_superficial with DOID/HP exception guard, UV enthesis lock)"
+        ]
+    })
+}
+
+/// Evaluate the 5-Layer Anatomical & Natural-World Topological Invariants + 4-Regime Pathological Mechanics:
+/// 1. Cavity SDF negative-distance containment (`phi_cavity <= -epsilon`) & compliant visceral suspension tethers,
+/// 2. Intrinsic radial tissue depth ordering (`d in [0, 1]`, no muscle-over-skin or xylem-over-bark inversion, with SHACL Exception Guard for DOID/HP-authorized invasive lesions),
+/// 3. Barycentric UV enthesis / branch-collar zero-detachment lock (`||p_end - p_uv|| <= 1e-4`), `>= 2` distinct enthesis bindings, and polyaxial retinacular pulleys,
+/// 4. Incompressible soft-tissue / turgor volume preservation (`det(F) in [0.85, 1.15]`) & epiphyseal longitudinal growth `s in [0, 1]`,
+/// 5. Dynamic Pathological Regimes (Adipose hypertrophy/hyperplasia with `retinacula cutis` septa, encapsulated cysts, dual-zone malignant tumors, and 2D manifold reaction-diffusion rashes).
 pub fn verify_topological_and_radial_invariants(
     samples: &[RadialLayerSample],
     violations: &mut Vec<String>,
@@ -160,6 +374,8 @@ pub fn verify_topological_and_radial_invariants(
     let mut cavity_checks = 0usize;
     let mut radial_checks = 0usize;
     let mut enthesis_checks = 0usize;
+    let mut pathology_checks = 0usize;
+    let mut authorized_pathology_exceptions = Vec::new();
 
     for s in samples {
         radial_checks += 1;
@@ -172,6 +388,62 @@ pub fn verify_topological_and_radial_invariants(
                 s.entity_id, s.layer_kind, s.d_min, s.d_max
             ));
         }
+
+        // Epiphyseal longitudinal growth coordinate check (s in [0, 1])
+        if let Some([s_min, s_max]) = s.diaphyseal_growth_s_range {
+            if !(0.0..=1.0).contains(&s_min) || !(0.0..=1.0).contains(&s_max) || s_min > s_max {
+                violations.push(format!(
+                    "Epiphyseal growth parameterization violation on `{}`: diaphyseal coordinate s=[{:.3}, {:.3}] must lie in [0.0, 1.0]",
+                    s.entity_id, s_min, s_max
+                ));
+            }
+        }
+
+        // Internal organ visceral tethering completeness check
+        if s.layer_kind == "internal_organ" {
+            if s.parent_cavity_id.as_deref().unwrap_or("").is_empty() {
+                violations.push(format!(
+                    "SHACL internal organ containment violation on `{}`: must declare `parent_cavity_id` (`fma:contained_in` an explicit Anatomical_cavity DID)",
+                    s.entity_id
+                ));
+            }
+            if s.suspended_by_id.as_deref().unwrap_or("").is_empty() {
+                violations.push(format!(
+                    "SHACL visceral tethering violation on `{}`: internal organ must declare `suspended_by_id` (serous/fascial suspension anchor such as pericardium, pleura, or mesentery)",
+                    s.entity_id
+                ));
+            }
+        }
+
+        // Enthesis & retinaculum completeness check for muscles and ligaments
+        if !s.enthesis_bindings.is_empty() {
+            enthesis_checks += 1;
+            let mut unique_targets = s.enthesis_bindings.clone();
+            unique_targets.sort();
+            unique_targets.dedup();
+            if (s.layer_kind == "musculature" || s.layer_kind == "ligament_deep_tendon")
+                && unique_targets.len() < 2
+            {
+                violations.push(format!(
+                    "SHACL enthesis completeness violation on `{}` (`{}`): requires at least 2 distinct Bone_organ/Fascia UV surface-patch bindings, got {}",
+                    s.entity_id,
+                    s.layer_kind,
+                    unique_targets.len()
+                ));
+            }
+        }
+        if s.crosses_polyaxial_joint == Some(true)
+            && s.retinaculum_or_compartment_id
+                .as_deref()
+                .unwrap_or("")
+                .is_empty()
+        {
+            violations.push(format!(
+                "SHACL bowstringing guard violation on `{}`: crosses polyaxial joint without a `retinaculum_or_compartment_id` toroidal pulley / fascial compartment constraint",
+                s.entity_id
+            ));
+        }
+
         let expected_band = match s.layer_kind.as_str() {
             "periosteum_capsule" => Some((0.00, 0.12)),
             "ligament_deep_tendon" => Some((0.03, 0.25)),
@@ -186,10 +458,20 @@ pub fn verify_topological_and_radial_invariants(
         };
         if let Some((lo, hi)) = expected_band {
             if s.d_min < lo - 1e-3 || s.d_max > hi + 1e-3 {
-                violations.push(format!(
-                    "Radial tissue shell breach on `{}` (`{}`): d=[{:.3}, {:.3}] escapes canonical band [{:.2}, {:.2}] (risk of muscle/ligament rendering over skin or vascular tissue over bark)",
-                    s.entity_id, s.layer_kind, s.d_min, s.d_max, lo, hi
-                ));
+                if has_verified_invasion_authorization(s) {
+                    authorized_pathology_exceptions.push(json!({
+                        "entity_id": s.entity_id,
+                        "layer_kind": s.layer_kind,
+                        "d_range": [s.d_min, s.d_max],
+                        "authorized_exception": s.authorized_exception,
+                        "pathology_ontology_ref": s.pathology_ontology_ref
+                    }));
+                } else {
+                    violations.push(format!(
+                        "Radial tissue shell breach on `{}` (`{}`): d=[{:.3}, {:.3}] escapes canonical band [{:.2}, {:.2}] without verified DOID/HP invasion exception (risk of muscle/ligament rendering over skin or unauthorized cyst rupture)",
+                        s.entity_id, s.layer_kind, s.d_min, s.d_max, lo, hi
+                    ));
+                }
             }
         }
         if let Some(phi) = s.max_cavity_sdf_phi_m {
@@ -222,9 +504,86 @@ pub fn verify_topological_and_radial_invariants(
                 ));
             }
         }
+
+        // 4-Regime Pathological & Dynamic Tissue Validation
+        if let Some(regime) = s.pathology_regime.as_deref() {
+            pathology_checks += 1;
+            match regime {
+                "adipose_hypertrophy_hyperplasia" => {
+                    if s.adipose_mean_cell_volume_pl.unwrap_or(0.0) <= 0.0
+                        || s.adipose_cell_density_per_mm3.unwrap_or(0.0) <= 0.0
+                    {
+                        violations.push(format!(
+                            "Adipose depot violation on `{}`: must specify positive hypertrophic `adipose_mean_cell_volume_pl` (V_cell) and hyperplastic `adipose_cell_density_per_mm3` (rho_cell)",
+                            s.entity_id
+                        ));
+                    }
+                    if s.layer_kind == "subcutis_fascia"
+                        && s.retinacula_cutis_septa_tethers.unwrap_or(0) == 0
+                    {
+                        violations.push(format!(
+                            "Subcutaneous adipose tethering violation on `{}`: requires `retinacula_cutis_septa_tethers > 0` connecting superficial fascia (d=0.75) to dermis (d=0.92) to prevent uniform balloon inflation",
+                            s.entity_id
+                        ));
+                    }
+                }
+                "encapsulated_cyst_benign" => {
+                    if s.is_encapsulated != Some(true)
+                        || s.boundary_behavior.as_deref() != Some("displace_only")
+                    {
+                        violations.push(format!(
+                            "Encapsulated cyst/benign mass violation on `{}`: requires `is_encapsulated=true` and `boundary_behavior=\"displace_only\"` (pure hydrostatic mass-effect displacement)",
+                            s.entity_id
+                        ));
+                    }
+                }
+                "malignant_invasive_neoplasm" => {
+                    if !has_verified_pathology_provenance(s.pathology_ontology_ref.as_deref()) {
+                        violations.push(format!(
+                            "Malignant invasive neoplasm violation on `{}`: requires verified DOID/HP/MP `pathology_ontology_ref` authorizing `qualia:TissueInvasion`",
+                            s.entity_id
+                        ));
+                    }
+                    if s.tumor_to_host_stiffness_ratio.unwrap_or(1.0) <= 1.0 {
+                        violations.push(format!(
+                            "Malignant continuum core mechanics violation on `{}`: `tumor_to_host_stiffness_ratio` (E_tumor / E_host) must be > 1.0 to model solid core strain amplification and ECM fibrotic tracks",
+                            s.entity_id
+                        ));
+                    }
+                }
+                "cutaneous_pathogen_rash" => {
+                    if s.independent_rash_mesh_count.unwrap_or(0) > 0 {
+                        violations.push(format!(
+                            "Cutaneous rash representation violation on `{}`: `independent_rash_mesh_count` must be 0 (rashes must use 2D manifold bistable reaction-diffusion PDE shader/micro-displacement fields on d in [0.92, 1.00], never baked static macule meshes)",
+                            s.entity_id
+                        ));
+                    }
+                    if s.reaction_diffusion_pde_active != Some(true) {
+                        violations.push(format!(
+                            "Cutaneous rash PDE violation on `{}`: requires `reaction_diffusion_pde_active=true` driving erythema hemoglobin SSS, edema micro-displacement delta_d, and stratum corneum roughness",
+                            s.entity_id
+                        ));
+                    }
+                    if s.pathogen_causal_pathway.as_deref() == Some("direct_cutaneous_burrow")
+                        && s.d_min < 0.90
+                    {
+                        violations.push(format!(
+                            "Cutaneous burrowing parasite violation on `{}`: trajectory agent must stay within epidermal/stratum corneum manifold (d >= 0.90), got d_min={:.3}",
+                            s.entity_id, s.d_min
+                        ));
+                    }
+                }
+                other => {
+                    violations.push(format!(
+                        "Unknown `pathology_regime` `{other}` on `{}`; expected `adipose_hypertrophy_hyperplasia`, `encapsulated_cyst_benign`, `malignant_invasive_neoplasm`, or `cutaneous_pathogen_rash`",
+                        s.entity_id
+                    ));
+                }
+            }
+        }
     }
 
-    // Pairwise superficial vs deep radial ordering check
+    // Pairwise superficial vs deep radial ordering check (with SHACL Exception Guard for DOID/HP-authorized invasion)
     for i in 0..samples.len() {
         for j in (i + 1)..samples.len() {
             let a = &samples[i];
@@ -241,15 +600,33 @@ pub fn verify_topological_and_radial_invariants(
             };
             if let (Some(ra), Some(rb)) = (rank(&a.layer_kind), rank(&b.layer_kind)) {
                 if ra < rb && a.d_max > b.d_max + 1e-4 {
-                    violations.push(format!(
-                        "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3})",
-                        a.entity_id, a.layer_kind, a.d_max, b.entity_id, b.layer_kind, b.d_max
-                    ));
+                    if has_verified_invasion_authorization(a) {
+                        authorized_pathology_exceptions.push(json!({
+                            "deep_entity": a.entity_id,
+                            "superficial_entity": b.entity_id,
+                            "authorized_exception": a.authorized_exception,
+                            "pathology_ontology_ref": a.pathology_ontology_ref
+                        }));
+                    } else {
+                        violations.push(format!(
+                            "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3}) without DOID/HP invasion exception",
+                            a.entity_id, a.layer_kind, a.d_max, b.entity_id, b.layer_kind, b.d_max
+                        ));
+                    }
                 } else if rb < ra && b.d_max > a.d_max + 1e-4 {
-                    violations.push(format!(
-                        "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3})",
-                        b.entity_id, b.layer_kind, b.d_max, a.entity_id, a.layer_kind, a.d_max
-                    ));
+                    if has_verified_invasion_authorization(b) {
+                        authorized_pathology_exceptions.push(json!({
+                            "deep_entity": b.entity_id,
+                            "superficial_entity": a.entity_id,
+                            "authorized_exception": b.authorized_exception,
+                            "pathology_ontology_ref": b.pathology_ontology_ref
+                        }));
+                    } else {
+                        violations.push(format!(
+                            "Layer ordering inversion: deep tissue `{}` ({}, d_max={:.3}) pierces superficial layer `{}` ({}, d_max={:.3}) without DOID/HP invasion exception",
+                            b.entity_id, b.layer_kind, b.d_max, a.entity_id, a.layer_kind, a.d_max
+                        ));
+                    }
                 }
             }
         }
@@ -260,13 +637,16 @@ pub fn verify_topological_and_radial_invariants(
         "radial_depth_checks": radial_checks,
         "cavity_sdf_containment_checks": cavity_checks,
         "enthesis_uv_lock_checks": enthesis_checks,
+        "pathology_regime_checks": pathology_checks,
+        "authorized_pathology_exceptions": authorized_pathology_exceptions,
         "qualia_shacl_logic_extensions_active": {
             "total_modality_shapes_registered": qualia_core_db::modalities::logic::LOGIC_MODALITY_SHAPES.len(),
             "deontic_no_commodification": "DeonticConfigurationShape (sh:deonticForbid, sh:valuesConsentNonCoerced, sh:valuesHarmBelowCeiling)",
             "epistemic_evidence_tier": "EpistemicConfigurationShape (OP_KNOWS 0x20 / OP_BELIEVES 0x21 certainty >= 128)",
             "spatio_temporal_containment": "Rcc8ConfigurationShape + AllenIntervalConfigurationShape + LtlConfigurationShape",
             "geometry_asset_manifest": "GeometryAssetConfiguration (validate_geometry_manifest + SlgOpcode firewall)",
-            "biological_domain": "BiologicalDomainConfiguration (infrastructure_shacl.rs)"
+            "biological_domain": "BiologicalDomainConfiguration (infrastructure_shacl.rs)",
+            "pathology_layer_exception_guard": "Permits d(v_deep) >= d(v_superficial) only when paired with verified DOID/HP/MP/IDO provenance and qualia:TissueInvasion / qualia:Ulceration / qualia:FollicularPortal"
         },
         "canonical_radial_coordinate_system": {
             "anatomy_fauna_d_0_to_1": {
@@ -280,7 +660,7 @@ pub fn verify_topological_and_radial_invariants(
                 "pith_heartwood": [0.00, 0.45],
                 "sapwood_xylem": [0.45, 0.82],
                 "cambium_phloem": [0.82, 0.92],
-                "periderm_bark_cuticle": [0.92, 1.00]
+                "periderm_bark_cuticle": [0.88, 1.00]
             }
         }
     })
@@ -347,6 +727,13 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
         .unwrap_or_default();
     let topological_report =
         verify_topological_and_radial_invariants(&radial_samples, &mut violations);
+
+    let shex_nodes: Vec<ShExNodeSample> = args
+        .get("shex_nodes")
+        .and_then(|v| serde_json::from_value(v.clone()).ok())
+        .unwrap_or_default();
+    let shex_report =
+        verify_shex_shapemap_and_cyclic_topology(&shex_nodes, &mut violations);
 
     // Optional SHACL Turtle + N3/Turtle data validation via QualiaDB's native SHACL + modality extensions compiler
     let mut shacl_extension_validation = Value::Null;
@@ -446,6 +833,7 @@ pub fn validate_computational_model_form(args: Value) -> Result<Value, String> {
         "reference_sources_bound": reference_sources_bound,
         "qudt_and_citation_violations": violations,
         "topological_and_radial_invariants": topological_report,
+        "shex_shapemap_and_cyclic_topology": shex_report,
         "shacl_extension_validation": shacl_extension_validation,
         "container_10d_inspection": container_inspection
     }))
