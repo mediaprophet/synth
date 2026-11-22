@@ -4,7 +4,7 @@ Read `AGENTS.md` in this directory before claiming a tool is missing or writing 
 
 **Morphism tables live in `agent-instructions/<category>.md`.** Open only the file you need. Index: `agent-instructions/README.md`. Do not load every category file.
 
-**Webizen AI Synth 0.0.41.15 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+**Webizen AI Synth 0.0.41.19 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
 
 ## First session
 
@@ -13,7 +13,7 @@ Read `AGENTS.md` in this directory before claiming a tool is missing or writing 
 3. Invoke morphisms with `capability.invoke` **inside** `synth_produce_present` source. `vibe_invoke` is a different Poet snapshot.
 4. Inspect returned PNG / SVG / native review files. A file existing is not a visual review.
 
-CLI: `synth find xpbd`. Catalog tools are paged (default 40 summaries; pass `category`, `id`, `q`, `offset`, `limit`, `detail=ids|summary|full`). Count is **150**. Trust `AGENTS.md` over a stale MCP binary that still says 114 or 148.
+CLI: `synth find xpbd`. Catalog tools are paged (default 40 summaries; pass `category`, `id`, `q`, `offset`, `limit`, `detail=ids|summary|full`). Count is **400** (`150` base + `250` expansion across `58` categories and `1,200` `NQuin48` triples). Trust `AGENTS.md` over a stale MCP binary that still says 114, 148, 150, or 390.
 
 ## MCP (Antigravity names are unprefixed)
 

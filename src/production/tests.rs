@@ -5,6 +5,44 @@ let radius = render.spatial.skeletal_lerp_joint([8.0, 0.0, 0.0], [12.0, 0.0, 0.0
 let mut asset = { files: [{ key: "icons/dot.svg", kind: "svg", text: "<svg xmlns=\"http://www.w3.org/2000/svg\"><circle r=\"10\"/></svg>" }] };"##;
 
 #[test]
+fn generated_hmc_semantic_model_resolves_the_authored_10d_identity() {
+    use qualia_core_db::bundle::semantic_model::{open_semantic_model, SEMANTIC_MODEL_KEY};
+    use qualia_core_db::render::{assets::Mesh, compile_10d};
+
+    let iri = "urn:test:spatial:tetrahedron";
+    let mesh = Mesh {
+        positions: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
+        triangles: vec![[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]],
+        min: [0.; 3],
+        max: [1.; 3],
+    };
+    let base = compile_10d::compile_mesh_to_10d(&mesh).unwrap();
+    let spatial = compile_10d::upgrade_legacy_10d_to_holographic_v2(
+        &base,
+        iri,
+        1,
+        [0.; 10],
+    ).unwrap();
+    let output = [Resource { key: "part.10d".into(), kind: "10d".into(), bytes: spatial }];
+    let sources = ["fixture".into()];
+    let limits = ProductionLimits::default();
+    let first = super::package::build(&FilesProducer, &sources, &[], &output, &limits).unwrap();
+    let second = super::package::build(&FilesProducer, &sources, &[], &output, &limits).unwrap();
+    assert_eq!(first, second);
+
+    let bundle = BundleReader::parse(&first).unwrap();
+    let entry = bundle.entry(SEMANTIC_MODEL_KEY).unwrap();
+    assert_eq!(entry.offset % 4096, 0);
+    assert_eq!(bundle.get("outputs/part.10d").unwrap(), output[0].bytes.as_slice());
+    let model = open_semantic_model(&bundle).unwrap();
+    let mut page = vec![0; 1024 * 1024];
+    let mut spelling = [0; 128];
+    let len = model.lookup_lexicon_hash_into(qualia_core_db::q_hash(iri), &mut page, &mut spelling)
+        .unwrap().unwrap();
+    assert_eq!(&spelling[..len], iri.as_bytes());
+}
+
+#[test]
 fn original_files_v1_packages_reopen_with_original_semantics() {
     let limits = ProductionLimits::default();
     let cancel = AtomicBool::new(false);

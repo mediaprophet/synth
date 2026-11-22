@@ -1,12 +1,11 @@
-//! Paged MCP views of the 150-morphism catalogue so Grok-sized RPC budgets
-//! can list operations without the full ~326 KiB payload.
+//! Paged MCP views of the admitted morphism catalogue.
 use super::*;
 use qualia_mcp::authoring::ToolError;
 use serde::Deserialize;
 use serde_json::{json, Value};
 
 pub(super) const DEFAULT_PAGE: usize = 40;
-pub(super) const MAX_PAGE: usize = 150;
+pub(super) const MAX_PAGE: usize = 400;
 
 #[derive(Deserialize, Default)]
 #[serde(deny_unknown_fields)]
@@ -45,14 +44,15 @@ fn page_bounds(
     offset: Option<u64>,
     limit: Option<u64>,
 ) -> Result<(usize, usize, Option<usize>, usize), ToolError> {
-    let offset = offset.unwrap_or(0) as usize;
-    let limit = limit.unwrap_or(DEFAULT_PAGE as u64) as usize;
-    if limit == 0 || limit > MAX_PAGE {
+    let offset = usize::try_from(offset.unwrap_or(0)).unwrap_or(usize::MAX);
+    let requested_limit = limit.unwrap_or(DEFAULT_PAGE as u64);
+    if requested_limit == 0 || requested_limit > MAX_PAGE as u64 {
         return Err(ToolError::new(
             "invalid_arguments",
             format!("limit must be 1..={MAX_PAGE}"),
         ));
     }
+    let limit = requested_limit as usize;
     let start = offset.min(total);
     let end = (start + limit).min(total);
     let next = if end < total { Some(end) } else { None };
@@ -97,21 +97,38 @@ fn query_tokens(parsed: &CatalogArg) -> Vec<String> {
         .unwrap_or_default()
 }
 
+fn requested_catalogue_id(parsed: &CatalogArg) -> Option<&str> {
+    parsed.id.as_deref().map(|id| {
+        crate::production::assets::ontology::canonical_morphism_id(id).map_or(id, |canonical| canonical)
+    })
+}
+
 pub(super) fn operations(args: Value) -> Result<Value, ToolError> {
     let parsed: CatalogArg = serde_json::from_value(args)
         .map_err(|_| ToolError::new("invalid_arguments", "Invalid operations filter"))?;
     let detail = Detail::parse(parsed.detail.as_deref())?;
-    let morphisms: Vec<_> = crate::production::assets::ontology::MORPHISMS
-        .iter()
-        .filter(|m| {
-            parsed
-                .category
-                .as_deref()
-                .is_none_or(|cat| m.category == cat)
-                && parsed.id.as_deref().is_none_or(|id| m.id == id)
-                && crate::agent_index::morphism_matches(m, &query_tokens(&parsed))
-        })
-        .collect();
+    let tokens = query_tokens(&parsed);
+    let requested_id = requested_catalogue_id(&parsed);
+    let ontology = crate::production::assets::ontology::MORPHISMS;
+    let mut morphisms = Vec::new();
+    for (index, &(id, _, _)) in crate::production::assets::OPERATIONS.iter().enumerate() {
+        let m = ontology
+            .get(index)
+            .filter(|morphism| morphism.id == id)
+            .or_else(|| ontology.iter().find(|morphism| morphism.id == id))
+            .ok_or_else(|| {
+                ToolError::new("catalogue_drift", format!("Missing ontology descriptor for {id}"))
+            })?;
+        if parsed
+            .category
+            .as_deref()
+            .is_none_or(|cat| m.category == cat)
+            && requested_id.is_none_or(|id| m.id == id)
+            && crate::agent_index::morphism_matches(m, &tokens)
+        {
+            morphisms.push(m);
+        }
+    }
     let (start, end, next, limit) = page_bounds(morphisms.len(), parsed.offset, parsed.limit)?;
     let page = &morphisms[start..end];
     let items = match detail {
@@ -125,14 +142,10 @@ pub(super) fn operations(args: Value) -> Result<Value, ToolError> {
                 "summary": m.summary,
             }))
             .collect::<Vec<_>>()),
-        Detail::Full => {
-            let catalogue = crate::production::assets::catalogue();
-            let all = catalogue["operations"].as_array().cloned().unwrap_or_default();
-            json!(page
-                .iter()
-                .filter_map(|m| all.iter().find(|op| op["id"].as_str() == Some(m.id)).cloned())
-                .collect::<Vec<_>>())
-        }
+        Detail::Full => json!(page
+            .iter()
+            .map(|m| crate::production::assets::ontology::morphism_to_json(m))
+            .collect::<Vec<_>>()),
     };
     Ok(envelope(
         "synth.operations/v2",
@@ -152,6 +165,8 @@ pub(super) fn morphisms(args: Value) -> Result<Value, ToolError> {
     let parsed: CatalogArg = serde_json::from_value(args)
         .map_err(|_| ToolError::new("invalid_arguments", "Invalid category filter"))?;
     let detail = Detail::parse(parsed.detail.as_deref())?;
+    let tokens = query_tokens(&parsed);
+    let requested_id = requested_catalogue_id(&parsed);
     let morphisms: Vec<_> = crate::production::assets::ontology::MORPHISMS
         .iter()
         .filter(|m| {
@@ -159,8 +174,8 @@ pub(super) fn morphisms(args: Value) -> Result<Value, ToolError> {
                 .category
                 .as_deref()
                 .is_none_or(|cat| m.category == cat)
-                && parsed.id.as_deref().is_none_or(|id| m.id == id)
-                && crate::agent_index::morphism_matches(m, &query_tokens(&parsed))
+                && requested_id.is_none_or(|id| m.id == id)
+                && crate::agent_index::morphism_matches(m, &tokens)
         })
         .collect();
     let (start, end, next, limit) = page_bounds(morphisms.len(), parsed.offset, parsed.limit)?;
@@ -201,13 +216,15 @@ pub(super) fn contracts(args: Value) -> Result<Value, ToolError> {
     let parsed: CatalogArg = serde_json::from_value(args)
         .map_err(|_| ToolError::new("invalid_arguments", "Invalid contracts filter"))?;
     let detail = Detail::parse(parsed.detail.as_deref())?;
+    let requested_id = requested_catalogue_id(&parsed);
+    let tokens = query_tokens(&parsed);
     let full = contracts::catalogue();
     let all = full["operations"].as_array().cloned().unwrap_or_default();
     let filtered: Vec<Value> = all
         .into_iter()
         .filter(|op| {
             let id = op["id"].as_str().unwrap_or("");
-            parsed.id.as_deref().is_none_or(|want| id == want)
+            requested_id.is_none_or(|want| id == want)
                 && parsed.category.as_deref().is_none_or(|cat| {
                     crate::production::assets::ontology::MORPHISMS
                         .iter()
@@ -217,7 +234,7 @@ pub(super) fn contracts(args: Value) -> Result<Value, ToolError> {
                 && crate::production::assets::ontology::MORPHISMS
                     .iter()
                     .find(|m| m.id == id)
-                    .is_some_and(|m| crate::agent_index::morphism_matches(m, &query_tokens(&parsed)))
+                    .is_some_and(|m| crate::agent_index::morphism_matches(m, &tokens))
         })
         .collect();
     let (start, end, next, limit) = page_bounds(filtered.len(), parsed.offset, parsed.limit)?;
@@ -264,6 +281,6 @@ pub(super) fn filter_schema() -> Value {
         "q": {"type": "string", "maxLength": 128, "description": "Keyword search (xpbd, nla, ik, navmesh, gis, n3). Prefer synth_find."},
         "offset": {"type": "integer", "minimum": 0},
         "limit": {"type": "integer", "minimum": 1, "maximum": MAX_PAGE},
-        "detail": {"type": "string", "enum": ["ids", "summary", "full"], "description": "Default summary, 40 rows. Use detail=full with category, id, or q; the unpaged 150-op dump overflows Grok MCP."}
+        "detail": {"type": "string", "enum": ["ids", "summary", "full"], "description": "Default summary, 40 rows. Use detail=full with a category, id, or query to keep response sizes bounded."}
     })
 }

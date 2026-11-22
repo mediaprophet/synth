@@ -239,7 +239,36 @@ mod tests {
         let texture_bytes = b"original encoded texture payload".to_vec();
         let digest = super::super::digest(&texture_bytes);
         let texture = host.admit_encoded("png", texture_bytes.clone()).unwrap();
-        let mut encoded = host.admit_encoded("10d", b"compiled mesh transport fixture".to_vec()).unwrap();
+        let profile = host
+            .invoke(
+                "hypermedia.locus.construct",
+                &AssetValue::Record(BTreeMap::from([
+                    ("shape".into(), AssetValue::String("circle".into())),
+                    ("radius".into(), AssetValue::F64(4.0)),
+                ])),
+            )
+            .unwrap();
+        let mesh = host
+            .invoke(
+                "hypermedia.manifold.extrude",
+                &AssetValue::Record(BTreeMap::from([
+                    ("profile".into(), profile),
+                    (
+                        "path".into(),
+                        AssetValue::List(vec![
+                            AssetValue::List(vec![AssetValue::F64(0.0), AssetValue::F64(0.0), AssetValue::F64(0.0)]),
+                            AssetValue::List(vec![AssetValue::F64(0.0), AssetValue::F64(0.0), AssetValue::F64(4.0)]),
+                        ]),
+                    ),
+                ])),
+            )
+            .unwrap();
+        let mut encoded = host
+            .invoke(
+                "hypermedia.manifold.compile_10d",
+                &AssetValue::Record(BTreeMap::from([("mesh".into(), mesh)])),
+            )
+            .unwrap();
         let dependency = AssetValue::Record(BTreeMap::from([
             ("digest".into(), AssetValue::String(digest.clone())),
             ("mime_type".into(), AssetValue::String("image/png".into())),

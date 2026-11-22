@@ -1,6 +1,6 @@
 """Example Antigravity SDK agent wired to local Synth MCP.
 
-Uses vendor/antigravity/synth_local.py (target-prod synth-mcp.exe, 150 morphisms).
+Uses vendor/antigravity/synth_local.py (target-prod synth-mcp.exe, 400 morphisms).
 Do not point at target or target-studio. Do not kill live MCP children.
 
 This script constructs a real Agent with McpStdioServer. Running it issues a

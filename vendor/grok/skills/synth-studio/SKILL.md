@@ -9,7 +9,7 @@ Webizen AI Synth 0.0.41.14 is the development tool (produce / preview / compile)
 
 **Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then open `C:\github\synth\agent-instructions\<category>.md` (index `agent-instructions/README.md`; house rules `AGENTS.md`). Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`. Do not re-audit the kernel in place of calling a morphism that is already listed.
 
-Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`. Trust `AGENTS.md` and `operations_catalog.rs` over a connected MCP binary whose tool description still says 114 or 148.
+Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 400` (`150` baseline + `250` expansion, `ONTOLOGY_NQUINS.len() == 1200`). Trust `AGENTS.md` and `operations_catalog.rs` over a connected MCP binary whose tool description still says 114, 148, 150, or 390.
 
 Author logic as N3 (N3Logic + SHACL). Add scene assets as external HMC / `.10d` / `.q42` files; the host does not rebuild.
 - **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`).
@@ -50,7 +50,7 @@ C:\github\synth\vendor\grok\scripts\invoke.ps1 -Morphism hypermedia.manifold.rev
 
 ## Modelling tools to actually call
 
-The four-line subset that used to live here is **not** the catalog. The catalog is **150** morphisms. Call `synth_find` then open `C:\github\synth\agent-instructions\<category>.md`. Grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` before saying a function does not exist.
+The four-line subset that used to live here is **not** the catalog. The catalog is **400** morphisms (`150` base + `250` expansion across `58` categories). Call `synth_find` then open `C:\github\synth\agent-instructions\<category>.md`. Grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` before saying a function does not exist.
 
 A named organ (heart, lung, eye) is a vibe that lofts/revolves/booleans those parts. Do not call `hypermedia.manifold.compile_vertebrate_anatomy_10d` for a recognisable organ. That morphism currently emits an ellipsoid.
 

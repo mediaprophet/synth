@@ -5,7 +5,7 @@ description: Author and review local VibeScript assets with Synth, Hypermedia, Q
 
 # Local Synth production
 
-Read `C:\github\synth\AGENTS.md` before claiming a tool is absent or authoring a `.vibe`. Category tables live in `C:\github\synth\agent-instructions/<category>.md`. The 150-operation catalog and Hypermedia's `audit-docs/FUNCTIONS.md` are authoritative. QualiaDB owns codecs and geometry; Hypermedia is the studio; Synth is the producer; Etalon supplies render and signal providers. Reuse the existing operation that performs the requested work. Find with `synth_find`.
+Read `C:\github\synth\AGENTS.md` before claiming a tool is absent or authoring a `.vibe`. Category tables live in `C:\github\synth\agent-instructions/<category>.md`. The **400-operation catalog** (`150` baseline + `250` expansion across `58` categories and `1,200` `NQuin48` triples) and Hypermedia's `audit-docs/FUNCTIONS.md` are authoritative. QualiaDB owns codecs and geometry; Hypermedia is the studio; Synth is the producer; Etalon supplies render and signal providers. Reuse the existing operation that performs the requested work. Find with `synth_find`.
 
 - **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier scene constituency (`AREF`/`IOVR`/`INST`).
 - **7-Layer Hierarchy (`L0`–`L6`) & No-ASCII:** `yaml-ld-q42` v2 manifests map across `L0`–`L6` (`L6` = `L6QuantumPhysics`, encompassing quantum dynamics, quantum physics, and quantum chemistry). Use UTF-8/UTF-16 text and CBOR-LD (`CBLD`) binary sections.

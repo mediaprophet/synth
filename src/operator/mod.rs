@@ -25,6 +25,9 @@ pub mod jobs;
 pub mod update;
 pub use branding::APP_DISPLAY_NAME;
 
+#[cfg(test)]
+pub(crate) static TEST_ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default, deny_unknown_fields)]
 pub struct RuleRequest {

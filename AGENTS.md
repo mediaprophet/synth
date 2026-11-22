@@ -16,9 +16,9 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 **Category morphism tables live in `agent-instructions/<category>.md`.** This file is the index. Open only the category file you need. Directory index: [`agent-instructions/README.md`](agent-instructions/README.md).
 
-**Webizen AI Synth 0.0.41.15 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+**Webizen AI Synth 0.0.41.19 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
 
-**Find work with `synth_find`.** Pass `q=xpbd`, `q=nla`, `q=ik`, `q=navmesh`, `q=camera`, `q=input`, `q=gis`, `q=osm`, `q=n3`, `q=sparql`, `q=hmc`. CLI: `synth find xpbd`. MCP: `synth_find` (Grok names it `synth__synth_find`). The 150 morphisms are QualiaDB + Etalon + Hypermedia; they are not a third engine.
+**Find work with `synth_find`.** Pass `q=xpbd`, `q=nla`, `q=ik`, `q=navmesh`, `q=camera`, `q=input`, `q=gis`, `q=osm`, `q=n3`, `q=sparql`, `q=hmc`. CLI: `synth find xpbd`. MCP: `synth_find` (Grok names it `synth__synth_find`). The **400 morphisms** (`150` baseline + `250` expansion across `58` categories and `1,200` `NQuin48` contract facts) are QualiaDB + Etalon + Hypermedia; they are not a third engine.
 
 Synth (`C:\github\synth`) is the producer. Hypermedia (`C:\github\hypermedia-production`) is the studio. QualiaDB owns codecs, `.10d` / `.emf` / `.m64`, SPARQL, N3Logic, SHACL, and CPU geometry libraries. Etalon supplies render/signal/sim providers. A `.vibe` names the work. Author logic as **N3** (N3Logic + SHACL); `synth_compile_q42` seals `.q42`; `query_sparql` runs over admitted Q42 ontologies. Add scene assets as **external HMC / `.10d` / `.q42` files** -- the host does not rebuild. GIS maps bake through `hypermedia.geodesy.*` now; OSM/DEM/STAC ingest is opt-in later via `synth_jobs` and bookmarks `kind=gis`.
 
@@ -77,15 +77,15 @@ Every agent working in `synth` or `hypermedia-production` must enforce these inv
    - **3-Stage Semantic Pipeline (`ShEx` $\to$ `N3Logic` $\to$ `SHACL`):** Use **ShEx** (`_shapes.shex` / `shex_nodes`) for BioPortal `owl:Thing` pruning, stratified recursion over cyclic anatomical networks (vascular anastomoses, closed ribcage/pelvic loops), and streaming `.hmc` LoD unions (`@<LoadedHmcPayload>` OR `@<WireframeStub>`); **N3Logic** (`_rules.n3`) for transitive spatial closures (`fma:contained_in*`, `fma:deep_to*`), adipose spillover, and systemic `IgE_Histamine_Surge` pulse routing; **SHACL** (`_shapes.shacl.ttl` / `topological_layers`) for closed-world biomechanical bounds.
    - **4-Regime Dynamic Pathology & SHACL Exception Guard:** Model adipose depots via hypertrophic $V_{\text{cell}}$ + hyperplastic $\rho_{\text{cell}}$ + `retinacula_cutis_septa_tethers > 0` (routing excess lipid to visceral WAT `UBERON:0014454`); benign cysts via `is_encapsulated=true` and `boundary_behavior="displace_only"`; malignant tumors via dual-zone solid core (`tumor_to_host_stiffness_ratio > 1.0`) + invasive margin permitted to cross $d$ layers **only** with verified `DOID`/`HP` provenance and `authorized_exception="qualia:TissueInvasion"|"qualia:Ulceration"`; and cutaneous rashes via 2D manifold bistable reaction-diffusion PDE shader fields (`reaction_diffusion_pde_active=true`, `independent_rash_mesh_count=0`).
 
-**The 150 catalog morphisms exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
+**The 400 catalog morphisms (`150` base + `250` expansion) exist and dispatch.** They are not stubs. `unimplemented!` / `todo!` are absent from `asset-production-vibe`. If output looks poor, call the morphism that already does that job, then inspect PNG / SVG / `.10d` previews.
 
-Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Call `synth_find` first, then read `agent-instructions/<category>.md` and grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`.
+Do not tell the user a catalog morphism or a rust-audit-indexed function does not exist. Call `synth_find` first, then read `agent-instructions/<category>.md` (and `agent-instructions/README.md` for the 250 expansion search keys) and grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`.
 
 ---
 
 ## First session
 
-1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.15`, 150 morphisms.
+1. Confirm product: MCP `synth_capabilities` or CLI `synth capabilities`. Role is development tool, version `0.0.41.18`, **400 morphisms** (`150` base + `250` expansion).
 2. Search: `synth_find` / `synth find <keyword>`.
 3. Open `agent-instructions/<category>.md` for that id (table below). Mapping table in this file is the DCC-name index.
 4. Check `synth_operation_contracts` (`id=` or `q=`) for the typed output recipe. Do not guess encoders from a namespace.
@@ -111,12 +111,12 @@ Grok prefixes names `synth__`. Antigravity, Codex, and `synth mcp-tools` use the
 
 | Tool | Use |
 |---|---|
-| `synth_find` | Keyword search over 150 morphisms + MCP tools + notes. Required `q`. |
+| `synth_find` | Keyword search over 400 morphisms + MCP tools + notes. Required `q`. |
 | `synth_produce_present` | Production AssetHost. `capability.invoke` inside `source` / `source_path`. |
 | `synth_compile_q42` | N3 (preferred) / Turtle / NT -> create-only `.q42`. Then `query_sparql` `vault_path`. |
-| `synth_operations` | Paged catalog. `category`, `id`, `q`, `offset`, `limit`, `detail=ids\|summary\|full`. Default 40 summaries. `count` is always 150. |
-| `synth_ontology_morphisms` | Same 150 with teleology. Same paging. |
-| `synth_ontology_categories` | Twelve categories plus example ids. |
+| `synth_operations` | Paged catalog. `category`, `id`, `q`, `offset`, `limit`, `detail=ids\|summary\|full`. Default 40 summaries. `count` is always **400** (`150` base + `250` expansion). |
+| `synth_ontology_morphisms` | Same 400 with teleology and `NQuin48` contract spans. Same paging. |
+| `synth_ontology_categories` | All 58 categories plus example ids. |
 | `synth_operation_contracts` | Typed output recipes / execution host / handle lifetime. |
 | `synth_capabilities` | Product card + Vibe/Etalon providers. |
 | `synth_profiles` | AssetProducer profiles. |
@@ -194,19 +194,20 @@ The 128 MiB ring is the graphics-container exception. It is not the 42 MiB Q42 S
 | What | Path |
 |---|---|
 | **Category agent instructions** | [`agent-instructions/`](agent-instructions/README.md) -- one markdown file per category (locus through species). This is the morphism-table source of truth for agents. |
-| Vibe-callable catalog (150) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
-| Ontology, arguments, aliases | `...\src\ontology\morphisms_01.rs` ... `morphisms_09.rs` (`ALL_MORPHISMS`) |
+| Vibe-callable catalog (400 = 150 base + 250 expansion) | `C:\github\hypermedia-production\crates\asset-production-vibe\src\operations_catalog.rs` (`OPERATIONS`) |
+| Ontology, arguments, aliases | `...\src\ontology\morphisms_01.rs` ... `morphisms_34.rs` + `morphisms_swarm.rs` (`MORPHISMS`) |
 | Dispatch | `...\src\lib.rs` `invoke_inner` |
 | Function registry from source | `C:\github\hypermedia-production\audit-docs\` -- **903 files, 8745 functions, 69 modules** (generated 2026-11-10T12:07:10Z by rust-audit `docs`) |
 | Crate list | `C:\github\hypermedia-production\CRATES.md` (partial; rust-audit `modules/*.md` is complete) |
 
-Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`.
+Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 400` (`ONTOLOGY_NQUINS.len() == 1200`).
 
 ```
+Baseline 150:
 locus 15 + manifold 27 + surface 8 + radiance 30 + glyph 7 + layout 10
 + kinetics 16 + acoustics 9 + electromagnetics 6 + geodesy 7
 + discourse 9 + chronicle 5 + qualia.species.assemble_corpus 1
-= 150
+= 150 baseline + 250 expansion (WP-01..WP-40 across 58 categories) = 400
 ```
 
 ### rust-audit (local tool, not a crates.io package)

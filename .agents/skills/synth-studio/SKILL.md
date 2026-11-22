@@ -11,7 +11,7 @@ Always-on digest: `C:\github\synth\GEMINI.md`. House rules: `C:\github\synth\AGE
 
 **Find work with `synth_find`** (`q=xpbd`, `nla`, `ik`, `navmesh`, `camera`, `input`, `gis`, `osm`, `n3`, `sparql`, `hmc`). CLI: `synth find xpbd`. Then open the matching category file. Function-level index: `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md`.
 
-Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 150`. Trust `AGENTS.md` over a connected MCP binary whose tool description still says 114 or 148.
+Counts must match: `OPERATIONS.len() == ontology::MORPHISMS.len() == 400` (`150` baseline + `250` expansion, `ONTOLOGY_NQUINS.len() == 1200`). Trust `AGENTS.md` over a connected MCP binary whose tool description still says 114, 148, 150, or 390.
 
 Author logic as N3 (N3Logic + SHACL). Add scene assets as external HMC / `.10d` / `.q42` files; the host does not rebuild.
 - **Holographic 10D v2 Primacy (`HOLO` `0x0306`):** Every sealed `.10d` carries `FIELD_KIND_HOLOGRAPHIC_PHASE_SPACE` (`0x0306`, `M64HoloRecord` + `EulerianWavefieldRecord`), scale-space harmonic LODs $k=0..K$, Hamiltonian stationary-action trajectories ($\delta S = 0$), and two-tier constituency (`AREF`/`IOVR`/`INST`). Analytic `.10d` containers without explicit triangle soup synthesize a 12-triangle proxy lens on decode for Etalon's `< 32`-step raymarcher.
@@ -49,7 +49,7 @@ New-Item -ItemType Directory -Force -Path (Split-Path $run) | Out-Null
 
 ## Modelling
 
-The catalog is **150** morphisms. Call `synth_find`, then open `agent-instructions/<category>.md`. Grep `audit-docs/FUNCTIONS.md` before saying a function does not exist.
+The catalog is **400** morphisms (`150` base + `250` expansion across `58` categories). Call `synth_find`, then open `agent-instructions/<category>.md` (and `agent-instructions/README.md`). Grep `audit-docs/FUNCTIONS.md` before saying a function does not exist.
 
 A named organ (heart, lung, eye) is a vibe that lofts/revolves/booleans those parts. Do not call `hypermedia.manifold.compile_vertebrate_anatomy_10d` for a recognisable organ. That morphism currently emits an ellipsoid.
 

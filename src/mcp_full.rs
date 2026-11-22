@@ -168,7 +168,7 @@ impl StandaloneSynthMcp {
             },
             AuthoringTool {
                 name: "synth_ontology_categories".into(),
-                description: "Inspect the 12 Hypermedia/Synth categories (locus manifold surface radiance glyph layout kinetics acoustics electromagnetics geodesy discourse chronicle) with example morphism ids. Use synth_find to search.".into(),
+                description: "Inspect the admitted asset ontology categories with example morphism IDs. Use synth_find to search.".into(),
                 input_schema: object(json!({}), vec![]),
             },
             AuthoringTool {
@@ -681,13 +681,13 @@ impl StandaloneSynthMcp {
     }
 }
 
-/// Bounded standalone transport for the combined tool and full 150-operation catalog.
+/// Bounded standalone transport for the combined tool and full operation catalog.
 /// Authoring admits result objects at one eighth of the wire budget before making
-/// text+structured copies. The full operation catalog is ~326 KiB compact, above
-/// the former 256 KiB result ceiling; 4 MiB wire keeps a 512 KiB result ceiling.
+/// text+structured copies. The full 400-morphism operation catalog is ~560 KiB compact,
+/// above a 512 KiB result ceiling; 6 MiB wire keeps a 768 KiB result ceiling.
 pub fn comprehensive_protocol_limits() -> ProtocolLimits {
     ProtocolLimits {
-        max_message_bytes: 4 * 1024 * 1024,
+        max_message_bytes: 6 * 1024 * 1024,
         max_tools: 128,
         max_id_bytes: 256,
     }
@@ -756,15 +756,15 @@ mod tests {
     }
 
     #[test]
-    fn operations_and_catalogue_match_live_150_ontology_including_packing() {
-        assert_eq!(crate::production::assets::OPERATIONS.len(), 150);
-        assert_eq!(crate::production::assets::ontology::MORPHISMS.len(), 150);
+    fn operations_and_catalogue_match_live_ontology_including_packing() {
+        let expected = crate::production::assets::OPERATIONS.len();
+        assert_eq!(crate::production::assets::ontology::MORPHISMS.len(), expected);
         let catalogue = crate::production::assets::catalogue();
         let operations = catalogue["operations"]
             .as_array()
             .expect("catalogue operations array");
-        assert_eq!(operations.len(), 150);
-        assert_eq!(catalogue["count"], 150);
+        assert_eq!(operations.len(), expected);
+        assert_eq!(catalogue["count"], expected);
         assert!(
             packing_ids_present(operations),
             "live catalogue must include packing morphisms {PACKING_MORPHISMS:?}"
@@ -811,12 +811,8 @@ mod tests {
             .iter()
             .find(|t| t.name == "synth_operations")
             .expect("synth_operations");
-        assert!(morphisms.description.contains("150"));
-        assert!(operations_tool.description.contains("150"));
-        assert!(!morphisms.description.contains("114"));
-        assert!(!morphisms.description.contains("145"));
-        assert!(!operations_tool.description.contains("114"));
-        assert!(!operations_tool.description.contains("145"));
+        assert!(morphisms.description.contains(&format!("{expected} asset production morphisms")));
+        assert!(operations_tool.description.contains(&format!("{expected} admitted")));
 
         let mut mcp = StandaloneSynthMcp::default();
         let found = mcp.call("synth_find", json!({"q": "xpbd"})).unwrap();
@@ -828,41 +824,41 @@ mod tests {
             .call("synth_operations", json!({"q": "xpbd", "limit": 20}))
             .unwrap();
         assert!(ops_q["count"].as_u64().unwrap() >= 1);
-        assert!(ops_q["count"].as_u64().unwrap() < 150);
+        assert!(ops_q["count"].as_u64().unwrap() < expected as u64);
         let live_ops = mcp.call("synth_operations", json!({})).unwrap();
-        assert_eq!(live_ops["count"], 150);
+        assert_eq!(live_ops["count"], expected);
         assert_eq!(live_ops["returned"], 40);
         assert_eq!(live_ops["limit"], 40);
         assert_eq!(live_ops["next_offset"], 40);
         assert_eq!(live_ops["operations"].as_array().unwrap().len(), 40);
         let live_ops_full = mcp
-            .call("synth_operations", json!({"detail": "full", "limit": 150}))
+            .call("synth_operations", json!({"detail": "full", "limit": expected}))
             .unwrap();
         let live_ops_arr = live_ops_full["operations"].as_array().unwrap();
-        assert_eq!(live_ops_arr.len(), 150);
+        assert_eq!(live_ops_arr.len(), expected);
         assert!(packing_ids_present(live_ops_arr));
         let live_morphisms = mcp
             .call("synth_ontology_morphisms", json!({}))
             .unwrap();
-        assert_eq!(live_morphisms["count"], 150);
+        assert_eq!(live_morphisms["count"], expected);
         assert_eq!(live_morphisms["morphisms"].as_array().unwrap().len(), 40);
         let live_morphisms_full = mcp
             .call(
                 "synth_ontology_morphisms",
-                json!({"detail": "full", "limit": 150}),
+                json!({"detail": "full", "limit": expected}),
             )
             .unwrap();
-        assert_eq!(live_morphisms_full["morphisms"].as_array().unwrap().len(), 150);
+        assert_eq!(live_morphisms_full["morphisms"].as_array().unwrap().len(), expected);
         assert!(packing_ids_present(
             live_morphisms_full["morphisms"].as_array().unwrap()
         ));
 
         let mcp_tools = catalogue_json();
-        assert_eq!(mcp_tools["admitted_morphisms"], 150);
+        assert_eq!(mcp_tools["admitted_morphisms"], expected);
         let mcp_ops = mcp_tools["asset_operations"]["operations"]
             .as_array()
             .expect("mcp-tools asset_operations");
-        assert_eq!(mcp_ops.len(), 150);
+        assert_eq!(mcp_ops.len(), expected);
         assert!(
             packing_ids_present(mcp_ops),
             "mcp-tools JSON total must include packing morphisms"

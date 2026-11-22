@@ -1587,6 +1587,9 @@ mod tests {
     #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn bookmarks_http_upserts_sparql_url_without_storing_query_secrets() {
+        let _lock = crate::operator::TEST_ENV_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         let root = std::env::temp_dir().join(format!(
             "synth-http-bookmarks-{}-{}",
             std::process::id(),

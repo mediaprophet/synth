@@ -262,7 +262,9 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
             "standalone_wire_bytes":4*1024*1024},
         "resources": resources, "strict_replay_verified": true,
         "presentation_path": html, "native_reviews": [], "requested_reviews": previews.iter().map(|(key,path)| json!({"resource":key,"path":path,"status":"pending"})).collect::<Vec<_>>(),
-        "review_status": if previews.is_empty() {"not_requested"} else {"pending"}, "visual_acceptance": "pending inspection"
+        "review_status": if previews.is_empty() {"not_requested"} else {"pending"}, "visual_acceptance": "pending inspection",
+        "gpu_runtime_profile": crate::session_admission::detect_runtime_and_gpu_profile(parsed.gpu_backend.as_deref()),
+        "session_slot": json!(slot_lease),
     });
     // Persist provenance before GPU work. A failed review does not erase completed exports.
     save_receipt(export.as_deref(), receipt_path.as_deref(), &receipt)?;
@@ -333,9 +335,6 @@ pub(super) fn produce(mcp: &StandaloneSynthMcp, args: Value) -> Result<Value, To
             "Produced asset package via synth_produce_present",
         );
     }
-    let gpu_profile = crate::session_admission::detect_runtime_and_gpu_profile(parsed.gpu_backend.as_deref());
-    receipt["gpu_runtime_profile"] = gpu_profile;
-    receipt["session_slot"] = json!(slot_lease);
     if parsed.verify_outputs == Some(true) {
         if let Some(directory) = &export {
             if let Ok(ver_report) = crate::model_validation::verify_multi_format_outputs(json!({

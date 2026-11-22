@@ -53,7 +53,7 @@ fn admitted_input_export_matches_direct_production_and_has_durable_receipt() {
     assert_eq!(std::fs::read(fixture.0.join("exported/copies/reference.bin")).unwrap(), [1,4,9,16]);
     let receipt: Value = serde_json::from_slice(&std::fs::read(fixture.0.join("receipt.json")).unwrap()).unwrap();
     assert_eq!(receipt["hmc"]["sha256"], direct.candidate().unwrap().sha256());
-    assert_eq!(receipt["catalog"]["count"], 150);
+    assert_eq!(receipt["catalog"]["count"], crate::production::assets::OPERATIONS.len());
     assert_eq!(receipt["inputs"][0]["sha256"].as_str().unwrap().len(), 64);
     assert_eq!(receipt["binary"]["sha256"].as_str().unwrap().len(), 64);
     assert_eq!(result["receipt"], receipt);
@@ -95,9 +95,9 @@ fn wrong_host_error_reaches_mcp_is_error_and_initialize_names_production_host() 
 }
 
 #[test]
-fn declared_output_recipes_execute_and_contracts_cover_all_150_ids() {
+fn declared_output_recipes_execute_and_contracts_cover_the_catalogue() {
     let inventory = contracts::catalogue();
-    assert_eq!(inventory["count"],150);
+    assert_eq!(inventory["count"],crate::production::assets::OPERATIONS.len());
     for recipe in inventory["recipes"].as_array().unwrap() {
         let result = StandaloneSynthMcp::default().call("synth_produce_present", json!({"source":recipe["source"]})).unwrap();
         let resources=result["receipt"]["resources"].as_array().unwrap();
@@ -148,7 +148,7 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
             "\n",
             r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
             "\n",
-            r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"synth_operations","arguments":{"detail":"full","limit":150}}}"#,
+            r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"synth_operations","arguments":{"detail":"full","limit":400}}}"#,
             "\n"
         );
         let mut wire=Vec::new();
@@ -168,9 +168,9 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
     assert!(reply.get("error").is_none(),"{reply}");
     let result=&reply["result"];
     assert_eq!(result["isError"],false);
-    assert_eq!(result["structuredContent"]["count"],150);
-    assert_eq!(result["structuredContent"]["returned"],150);
-    assert_eq!(result["structuredContent"]["operations"].as_array().unwrap().len(),150);
+    assert_eq!(result["structuredContent"]["count"],crate::production::assets::OPERATIONS.len());
+    assert_eq!(result["structuredContent"]["returned"],crate::production::assets::OPERATIONS.len());
+    assert_eq!(result["structuredContent"]["operations"].as_array().unwrap().len(),crate::production::assets::OPERATIONS.len());
     let text:Value=serde_json::from_str(result["content"][0]["text"].as_str().unwrap()).unwrap();
     assert_eq!(text,result["structuredContent"],"both actual MCP payload representations remain complete");
     let small=ProtocolLimits{max_message_bytes:2*1024*1024,..comprehensive_protocol_limits()};
@@ -195,7 +195,7 @@ fn full_operation_catalogue_fits_real_stdio_transport_and_smaller_budget_refuses
     }
     let paged=exchange_default(small);
     assert!(paged.get("error").is_none(),"{paged}");
-    assert_eq!(paged["result"]["structuredContent"]["count"],150);
+    assert_eq!(paged["result"]["structuredContent"]["count"],crate::production::assets::OPERATIONS.len());
     assert_eq!(paged["result"]["structuredContent"]["returned"],40);
     assert_eq!(paged["result"]["structuredContent"]["limit"],40);
 }
@@ -427,6 +427,9 @@ fn biosphere_produce_without_evidence_is_blocked_and_ungated_produce_still_runs(
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn bookmarks_tool_upserts_and_refuses_inline_secrets_on_upsert() {
+    let _lock = crate::operator::TEST_ENV_LOCK
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
     let root = std::env::temp_dir().join(format!(
         "synth-mcp-bookmarks-{}-{}",
         std::process::id(),
@@ -460,6 +463,9 @@ fn bookmarks_tool_upserts_and_refuses_inline_secrets_on_upsert() {
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn jobs_tool_adds_compile_job_and_seals_local_turtle() {
+    let _lock = crate::operator::TEST_ENV_LOCK
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
     let stamp = format!(
         "{}-{}",
         std::process::id(),

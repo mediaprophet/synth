@@ -792,23 +792,29 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
 mod tests {
     use super::*;
 
-    struct Guard(PathBuf);
+    struct Guard {
+        path: PathBuf,
+        _lock: std::sync::MutexGuard<'static, ()>,
+    }
     impl Guard {
         fn new() -> Self {
+            let lock = crate::operator::TEST_ENV_LOCK
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
             let path = std::env::temp_dir().join(format!(
                 "synth-bookmarks-{}-{}",
                 std::process::id(),
-                now_secs()
+                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
             ));
             fs::create_dir_all(&path).unwrap();
             std::env::set_var("SYNTH_BOOKMARK_ROOT", path.to_str().unwrap());
-            Self(path)
+            Self { path, _lock: lock }
         }
     }
     impl Drop for Guard {
         fn drop(&mut self) {
             std::env::remove_var("SYNTH_BOOKMARK_ROOT");
-            let _ = fs::remove_dir_all(&self.0);
+            let _ = fs::remove_dir_all(&self.path);
         }
     }
 

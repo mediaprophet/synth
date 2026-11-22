@@ -1037,7 +1037,7 @@ fn write_snapshot(
         let dest = run_dir.join("snapshot.q42");
         let is_yaml = payload_name.ends_with(".yaml") || payload_name.ends_with(".yml");
         let count = if is_yaml {
-            compile_yaml_With_wrap_to_q42(
+            compile_yaml_with_wrap_to_q42(
                 &fetched.bytes,
                 wrap.as_bytes(),
                 &dest,
@@ -1142,7 +1142,7 @@ fn compile_rdf_with_wrap_to_q42(
     Ok(quins.len())
 }
 
-fn compile_yaml_With_wrap_to_q42(
+fn compile_yaml_with_wrap_to_q42(
     yaml_bytes: &[u8],
     wrap_ttl: &[u8],
     dest: &Path,
@@ -1417,10 +1417,18 @@ mod tests {
         bookmark: PathBuf,
         input: PathBuf,
         output: PathBuf,
+        _lock: std::sync::MutexGuard<'static, ()>,
     }
     impl Guard {
         fn new() -> Self {
-            let stamp = format!("{}-{}", std::process::id(), now_secs());
+            let lock = crate::operator::TEST_ENV_LOCK
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            let stamp = format!(
+                "{}-{}",
+                std::process::id(),
+                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
+            );
             let bookmark = std::env::temp_dir().join(format!("synth-jobs-{stamp}"));
             let input = std::env::temp_dir().join(format!("synth-jobs-in-{stamp}"));
             let output = std::env::temp_dir().join(format!("synth-jobs-out-{stamp}"));
@@ -1434,6 +1442,7 @@ mod tests {
                 bookmark,
                 input,
                 output,
+                _lock: lock,
             }
         }
     }

@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(report["sdk_parity_probe"]["passed"], true);
         assert_eq!(report["product"]["role"], crate::agent_index::ROLE);
         assert_eq!(report["product"]["version"], crate::agent_index::RELEASE_VERSION);
-        assert_eq!(report["product"]["morphisms"], 150);
+        assert_eq!(report["product"]["morphisms"], asset_production_vibe::OPERATIONS.len());
     }
 
     #[test]

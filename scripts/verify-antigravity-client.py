@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SDK = ROOT / "vendor/antigravity-sdk-python"
+FINAL_CATALOGUE_COUNT = 400
 
 def digest(path: Path) -> str:
     with path.open("rb") as file:
@@ -89,8 +90,8 @@ async def roundtrip(config, fixture: Path, run: Path) -> dict:
                 if not required <= names:
                     raise RuntimeError("Synth production tools are absent from the actual stdio catalog")
                 operations = await bounded(run, "operations", session.call_tool("synth_operations", {}))
-                if result_error(operations) or structured(operations).get("count") != 150:
-                    raise RuntimeError("Actual production catalog does not contain 150 operations")
+                if result_error(operations) or structured(operations).get("count") != FINAL_CATALOGUE_COUNT:
+                    raise RuntimeError(f"Actual production catalog does not contain {FINAL_CATALOGUE_COUNT} operations")
                 produced = await bounded(run, "produce", session.call_tool("synth_produce_present", {
                     "source": source, "inputs": bindings, "out_hmc": "antigravity.hmc",
                     "export_dir": "exported", "receipt_json": "production-receipt.json"}), 180)
@@ -105,7 +106,7 @@ async def roundtrip(config, fixture: Path, run: Path) -> dict:
                 if not result_error(unknown):
                     raise RuntimeError("Unknown argument was not refused by the actual client roundtrip")
                 outcome.update({"initialize": initialized.model_dump(mode="json", by_alias=True), "tool_count": len(names),
-                    "catalog_count": 150, "production": production,
+                    "catalog_count": FINAL_CATALOGUE_COUNT, "production": production,
                     "wrong_host_is_error": result_error(wrong_host), "unknown_key_is_error": result_error(unknown)})
     hmc = run / "antigravity.hmc"
     baseline = fixture / "cli.hmc"
@@ -122,7 +123,9 @@ async def roundtrip(config, fixture: Path, run: Path) -> dict:
             async with ClientSession(streams[0], streams[1], read_timeout_seconds=session_timeout(30)) as session:
                 await bounded(run, "fresh_initialize", session.initialize())
                 result = await bounded(run, "fresh_operations", session.call_tool("synth_operations", {}))
-                outcome["fresh_client_reconnect"] = not result_error(result) and structured(result)["count"] == 150
+                outcome["fresh_client_reconnect"] = (
+                    not result_error(result) and structured(result)["count"] == FINAL_CATALOGUE_COUNT
+                )
     receipt = json.loads((run / "production-receipt.json").read_text(encoding="utf-8"))
     if receipt["hmc"]["sha256"] != digest(hmc):
         raise RuntimeError("Durable production receipt does not match the saved package")

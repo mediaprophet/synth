@@ -1,4 +1,4 @@
-//! Agent discovery index for the 150 Hypermedia morphisms and Synth MCP tools.
+//! Agent discovery index for Hypermedia morphisms and Synth MCP tools.
 //!
 //! Synth is the development tool (produce / preview / compile). QualiaPortal and
 //! the world host are the visitor runtime. Agents look up work with `synth_find`
@@ -6,10 +6,12 @@
 use crate::production::assets::ontology::{AgenticMorphismSpec, MORPHISMS};
 use serde_json::{json, Value};
 
+const MAX_FIND_RESULTS: usize = 400;
+
 pub const SCHEMA: &str = "synth.find/v1";
 pub const PRODUCT_NAME: &str = "Webizen AI Synth";
 /// Public release id. Cargo.toml stays SemVer `0.1.0` (Cargo rejects four-part versions).
-pub const RELEASE_VERSION: &str = "0.0.41.18";
+pub const RELEASE_VERSION: &str = "0.0.41.19";
 pub const ROLE: &str = "development tool (produce, preview, compile)";
 pub const RUNTIME: &str = "QualiaPortal + world host";
 
@@ -37,6 +39,21 @@ const EXTRA: &[(&str, &str)] = &[
     ("hypermedia.geodesy.advect_m64_grid", "gis m64 advection"),
     ("hypermedia.geodesy.step_sector_continuum_3d", "gis sector continuum"),
     ("hypermedia.kinetics.evaluate_mobility_fracture_risk", "clinical mobility fracture risk skeleton"),
+    ("hypermedia.electromagnetics.reconstruct_sar_isar_tomography", "sar isar radar tomography delay multipath classroom phase-history"),
+    ("hypermedia.manifold.measure_semantic_sections", "section metrology contour area perimeter lumen wall hole annulus cutaway"),
+    ("qualia.accessibility.compile_scene_focus_graph", "wcag focus keyboard switch tab traversal trap accessibility scene cutaway"),
+    ("qualia.container.plan_hmc_semantic_working_set", "hmc working-set selective streamer http-range mmap byte-range lod stratum"),
+    ("qualia.provenance.rebase_hmc_review_anchors", "rebase review anchor annotation revision diff moved ambiguous provenance"),
+    ("qualia.accessibility.audit_affordance_equivalence", "affordance equivalence eont pointer keyboard switch modality counterexample"),
+    ("hypermedia.manifold.verify_semantic_lod_transition", "lod hausdorff semantic label wall lumen transition simplify"),
+    ("hypermedia.chronicle.bind_timed_semantic_cues", "webvtt vtt captions cues subtitles chapters rational-time seek"),
+    ("hypermedia.discourse.bind_evidence_fragments", "evidence citation quote annotation json-ld backlink document occurrence"),
+    ("hypermedia.radiance.plan_semantic_viewpoints", "viewpoint camera visibility pixel coverage occlusion instance id-buffer"),
+    ("hypermedia.kinetics.retarget_semantic_clip", "retarget animation clip skl2 skeleton rig motor joint correspondence"),
+    ("hypermedia.fabrication.embed_digital_mesh_stego", "stego steganography watermark sdfb attribution reed-solomon"),
+    ("hypermedia.fabrication.embed_physical_print_stego", "stego 3mf print calibration coupon finish attribution reed-solomon"),
+    ("qualia.crypto.evaluate_zk_mpc_and_vole_psi", "mpc psi vole poprf spdz cohort threshold aggregate privacy"),
+    ("qualia.poet.bind_pulse_aura_hypermedia", "poet pulse aura grant ed25519 eont shacl action"),
 ];
 
 const TOOLS: &[ToolHit] = &[
@@ -83,7 +100,7 @@ const TOOLS: &[ToolHit] = &[
     ToolHit {
         name: "synth_ontology_morphisms",
         haystack: "ontology morphisms category kinetics geodesy layout",
-        invoke: "Same 150 morphisms with teleology. Pass category or q.",
+        invoke: "Admitted morphisms with teleology. Pass category or q.",
     },
     ToolHit {
         name: "synth_operation_contracts",
@@ -205,10 +222,10 @@ pub fn product_card() -> Value {
         "sparql": "query_sparql over admitted Q42 ontologies (internal; not a public SPARQL HTTP server)",
         "scene_assets": "Add via external HMC / .10d / .q42 or convert 3D files with synth_convert_3d. The host does not rebuild.",
         "gis": "Produce-time geodesy morphisms are live. OSM/DEM/STAC ingest is opt-in later via synth_jobs + bookmarks kind=gis.",
-        "categories": [
-            "locus", "manifold", "surface", "radiance", "glyph", "layout",
-            "kinetics", "acoustics", "electromagnetics", "geodesy", "discourse", "chronicle"
-        ],
+        "categories": crate::production::assets::ontology::CATEGORIES
+            .iter()
+            .map(|c| c.id)
+            .collect::<Vec<_>>(),
     })
 }
 
@@ -293,7 +310,7 @@ fn tool_matches(tool: &ToolHit, tokens: &[String]) -> bool {
 
 pub fn search(q: &str, limit: usize) -> Value {
     let tokens = parse_tokens(q);
-    let limit = limit.clamp(1, 150);
+    let limit = limit.clamp(1, MAX_FIND_RESULTS);
     let morphisms: Vec<Value> = MORPHISMS
         .iter()
         .filter(|m| morphism_matches(m, &tokens))
@@ -373,7 +390,7 @@ pub fn find_arg_schema() -> Value {
         "limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 150,
+            "maximum": MAX_FIND_RESULTS,
             "description": "Max morphism hits. Default 20."
         }
     })
