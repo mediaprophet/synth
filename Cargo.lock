@@ -648,15 +648,10 @@ name = "anvil-core"
 version = "0.1.0"
 
 [[package]]
-name = "anvil-core"
-version = "0.1.0"
-source = "git+https://github.com/mediaprophet/anvil.git?rev=4d8e5be4dd8c0014fd0cb9acf42b4058af14ca3c#4d8e5be4dd8c0014fd0cb9acf42b4058af14ca3c"
-
-[[package]]
 name = "anvil-gpu"
 version = "0.1.0"
 dependencies = [
- "anvil-core 0.1.0",
+ "anvil-core",
 ]
 
 [[package]]
@@ -3091,7 +3086,7 @@ dependencies = [
 name = "etalon-agent"
 version = "0.0.2"
 dependencies = [
- "anvil-core 0.1.0",
+ "anvil-core",
  "anvil-gpu",
  "bytemuck",
  "etalon",
@@ -3341,7 +3336,7 @@ dependencies = [
 name = "etalon-resources"
 version = "0.0.2"
 dependencies = [
- "anvil-core 0.1.0",
+ "anvil-core",
  "anvil-gpu",
  "etalon",
 ]
@@ -7230,7 +7225,7 @@ version = "0.0.41"
 dependencies = [
  "aead 0.6.1",
  "aes-gcm",
- "anvil-core 0.1.0 (git+https://github.com/mediaprophet/anvil.git?rev=4d8e5be4dd8c0014fd0cb9acf42b4058af14ca3c)",
+ "anvil-core",
  "ark-bls12-381",
  "ark-ec",
  "ark-ff",
