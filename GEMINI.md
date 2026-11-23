@@ -4,7 +4,7 @@ Read `AGENTS.md` in this directory before claiming a tool is missing or writing 
 
 **Morphism tables live in `agent-instructions/<category>.md`.** Open only the file you need. Index: `agent-instructions/README.md`. Do not load every category file.
 
-**Webizen AI Synth 0.0.41.19 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+**Webizen AI Synth 0.0.41.20 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
 
 ## First session
 

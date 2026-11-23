@@ -16,7 +16,7 @@ Read this file before claiming a tool is missing, before re-auditing the kernel,
 
 **Category morphism tables live in `agent-instructions/<category>.md`.** This file is the index. Open only the category file you need. Directory index: [`agent-instructions/README.md`](agent-instructions/README.md).
 
-**Webizen AI Synth 0.0.41.19 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
+**Webizen AI Synth 0.0.41.20 is the development tool** (produce, preview, compile). QualiaPortal plus the world host is the visitor runtime. Do not mint a per-scene Rust file. Do not treat Synth as the player.
 
 **Find work with `synth_find`.** Pass `q=xpbd`, `q=nla`, `q=ik`, `q=navmesh`, `q=camera`, `q=input`, `q=gis`, `q=osm`, `q=n3`, `q=sparql`, `q=hmc`. CLI: `synth find xpbd`. MCP: `synth_find` (Grok names it `synth__synth_find`). The **400 morphisms** (`150` baseline + `250` expansion across `58` categories and `1,200` `NQuin48` contract facts) are QualiaDB + Etalon + Hypermedia; they are not a third engine.
 
