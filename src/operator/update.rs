@@ -516,9 +516,80 @@ fn download_to_file(url: &str, dest: &Path, max_bytes: u64) -> Result<u64, Strin
     Ok(written)
 }
 
+/// Atomically or live-rename-swap a verified binary onto a target path (e.g. `synth.exe` or `synth-mcp.exe`),
+/// moving any running locked binary aside to `<stem>.prev<ext>` so that Windows and Unix can place the new
+/// binary at the canonical executable path immediately while keeping `<stem>.new<ext>` staged.
+fn try_live_rename_swap_target(verified_artifact: &Path, target: &Path) -> Value {
+    let stem = target
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("synth");
+    let ext = target
+        .extension()
+        .and_then(|s| s.to_str())
+        .map(|e| format!(".{e}"))
+        .unwrap_or_default();
+    let parent = target.parent().unwrap_or_else(|| Path::new("."));
+    let prev_path = parent.join(format!("{stem}.prev{ext}"));
+
+    // 1. If a direct overwrite works (unlocked file), do it directly
+    if !would_overwrite_running_exe(target) {
+        if fs::copy(verified_artifact, target).is_ok() {
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = fs::set_permissions(target, fs::Permissions::from_mode(0o755));
+            }
+            return json!({
+                "target": target.display().to_string(),
+                "status": "replaced_direct"
+            });
+        }
+    }
+
+    // 2. Windows & Unix live-rename dance: clean up any old unlocked `.prev`, rename live target -> `.prev`, then copy new binary to target
+    let _ = fs::remove_file(&prev_path);
+    if target.exists() && fs::rename(target, &prev_path).is_ok() {
+        match fs::copy(verified_artifact, target) {
+            Ok(_) => {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    let _ = fs::set_permissions(target, fs::Permissions::from_mode(0o755));
+                }
+                return json!({
+                    "target": target.display().to_string(),
+                    "moved_running_to": prev_path.display().to_string(),
+                    "status": "live_rename_swapped"
+                });
+            }
+            Err(e) => {
+                // Roll back rename if copy failed
+                let _ = fs::rename(&prev_path, target);
+                return json!({
+                    "target": target.display().to_string(),
+                    "status": "staged_only",
+                    "detail": e.to_string()
+                });
+            }
+        }
+    }
+
+    json!({
+        "target": target.display().to_string(),
+        "status": "staged_only"
+    })
+}
+
 /// Download the latest signed portable, verify Ed25519, copy to a sibling
-/// `synth.new.exe` (or platform equivalent). Never overwrites the running exe.
+/// `synth.new.exe` (or platform equivalent), and live-rename-swap canonical
+/// `synth` / `synth-mcp` binaries in `dest_dir` (moving any running locked binary
+/// aside to `.prev.exe` without overwriting its mapped image in-place).
 pub fn upgrade_latest() -> Result<Value, String> {
+    upgrade_latest_in(None)
+}
+
+pub fn upgrade_latest_in(dest_dir: Option<&Path>) -> Result<Value, String> {
     let release = fetch_github_latest()?;
     let portable_url = release
         .get("portable_url")
@@ -552,7 +623,7 @@ pub fn upgrade_latest() -> Result<Value, String> {
         .ok()
         .and_then(|p| sha256_file(&p).ok())
         .map(|d| to_hex(&d));
-    if current_sha.as_deref() == Some(new_sha.as_str()) {
+    if dest_dir.is_none() && current_sha.as_deref() == Some(new_sha.as_str()) {
         return Ok(json!({
             "schema": "synth.update-upgrade/v1",
             "ok": true,
@@ -565,7 +636,13 @@ pub fn upgrade_latest() -> Result<Value, String> {
             "policy": "Running binary already matches the latest signed portable. The exe was not replaced."
         }));
     }
-    let dest = upgrade_install_dest()?;
+    let dest = if let Some(dir) = dest_dir {
+        fs::create_dir_all(dir).map_err(|e| format!("create {}: {e}", dir.display()))?;
+        let ext = if cfg!(windows) { ".exe" } else { "" };
+        dir.join(format!("synth.new{ext}"))
+    } else {
+        upgrade_install_dest()?
+    };
     if would_overwrite_running_exe(&dest) {
         return Err(
             "refusing to overwrite the running synth.exe; drop the MCP child or copy the sibling .new file"
@@ -573,6 +650,21 @@ pub fn upgrade_latest() -> Result<Value, String> {
         );
     }
     fs::copy(&artifact, &dest).map_err(|e| format!("copy to {}: {e}", dest.display()))?;
+
+    // Also attempt safe live-rename swap onto canonical `synth` and `synth-mcp` in the target directory
+    let target_dir = dest
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let ext = if cfg!(windows) { ".exe" } else { "" };
+    let synth_bin = target_dir.join(format!("synth{ext}"));
+    let synth_mcp_bin = target_dir.join(format!("synth-mcp{ext}"));
+    let mut swapped = Vec::new();
+    swapped.push(try_live_rename_swap_target(&artifact, &synth_bin));
+    if synth_mcp_bin.exists() || target_dir.join("synth-mcp.exe").exists() {
+        swapped.push(try_live_rename_swap_target(&artifact, &synth_mcp_bin));
+    }
+
     Ok(json!({
         "schema": "synth.update-upgrade/v1",
         "ok": true,
@@ -580,13 +672,14 @@ pub fn upgrade_latest() -> Result<Value, String> {
         "tag": release.get("tag"),
         "artifact": artifact.display().to_string(),
         "installed": dest.display().to_string(),
+        "live_swapped_targets": swapped,
         "sha256": new_sha,
         "bytes": downloaded,
         "installer": release.get("installer"),
         "installer_url": release.get("installer_url"),
         "auto_replace": false,
         "releases_url": release.get("html_url").cloned().unwrap_or_else(|| json!(RELEASES_URL)),
-        "policy": "Verified sibling written. Exit Webizen AI Synth, then replace the locked synth.exe with the .new file (or run the signed installer). The running exe was not overwritten."
+        "policy": "Verified sibling written (.new) and canonical synth/synth-mcp live-rename-swapped (.prev). Reload MCP (/mcps reload) to spawn the updated binary."
     }))
 }
 
@@ -620,7 +713,7 @@ pub fn dispatch(arg: UpdateArg) -> Result<Value, String> {
     let action = arg.action.as_deref().unwrap_or("check").to_ascii_lowercase();
     match action.as_str() {
         "check" => Ok(super::update_status(true)),
-        "upgrade" => upgrade_latest(),
+        "upgrade" => upgrade_latest_in(arg.dest.as_deref().map(Path::new)),
         "verify" => {
             let path = arg
                 .artifact
@@ -706,7 +799,7 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
             }
             super::update_status(true)
         }
-        "upgrade" => upgrade_latest()?,
+        "upgrade" => upgrade_latest_in(dest.as_deref())?,
         "verify" => {
             let path = artifact.ok_or("Usage: synth update verify --artifact FILE")?;
             verify_artifact(&path, sig.as_deref())?
