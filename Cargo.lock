@@ -1012,6 +1012,7 @@ dependencies = [
  "audio-aac-codec",
  "audio-timebase",
  "base64 0.22.1",
+ "biosphere-authoring-forge",
  "bitstream-codec",
  "blake3",
  "bytemuck",
@@ -1411,6 +1412,15 @@ name = "base64"
 version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
+
+[[package]]
+name = "biosphere-authoring-forge"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
 
 [[package]]
 name = "bit-set"
