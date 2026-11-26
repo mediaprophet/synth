@@ -113,6 +113,30 @@ pub fn launch_standalone_environment(
     Ok(())
 }
 
+/// Linux operator window over an already-running Studio HTTP listener (no second bind).
+pub fn launch_operator_native(portal_url: String) -> Result<(), String> {
+    crate::operator::branding::claim_toolkit_identity();
+    let environment = bootstrap_environment()?;
+    let attributes = aether_native::WindowAttributes::default()
+        .with_title(format!(
+            "Webizen AI Synth · {} · {portal_url}",
+            environment.mode.label()
+        ))
+        .with_surface_size(aether_native::LogicalSize::new(1280, 860));
+    aether_native::launch_cfg_with_props(
+        Monitor,
+        MonitorProps {
+            host: None,
+            cancellation: None,
+            environment,
+            portal_url,
+        },
+        Vec::new(),
+        vec![Box::new(attributes)],
+    );
+    Ok(())
+}
+
 #[allow(non_snake_case)]
 fn Monitor(props: MonitorProps) -> Element {
     let snap = use_hook(FullCapabilitiesSnapshot::collect);

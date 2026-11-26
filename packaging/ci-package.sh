@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Build a platform installer next to the signed portable binary.
-# Usage: packaging/ci-package.sh windows|macos|linux VERSION ARTIFACT
+# Usage: packaging/ci-package.sh windows|macos|linux VERSION ARTIFACT [ARCH]
+# ARCH is used for Linux .deb packages (amd64 | arm64). Defaults to amd64.
 set -euo pipefail
 OS="${1:?os}"
 VERSION="${2:?version}"
 ARTIFACT="${3:?artifact}"
+ARCH="${4:-amd64}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 VERSION="${VERSION#v}"
@@ -87,7 +89,11 @@ case "$OS" in
     echo "$installer"
     ;;
   linux)
-    installer="webizen-ai-synth_${VERSION}_amd64.deb"
+    case "$ARCH" in
+      amd64|arm64) ;;
+      *) echo "unsupported Debian arch $ARCH (expected amd64 or arm64)" >&2; exit 1 ;;
+    esac
+    installer="webizen-ai-synth_${VERSION}_${ARCH}.deb"
     stage="$DIST/deb"
     rm -rf "$stage"
     mkdir -p "$stage/DEBIAN" "$stage/usr/bin" \
@@ -97,7 +103,7 @@ case "$OS" in
     chmod 755 "$stage/usr/bin/synth"
     cp "$ROOT/packaging/linux/synth.desktop" "$stage/usr/share/applications/webizen-ai-synth.desktop"
     cp "$PNG256" "$stage/usr/share/icons/hicolor/256x256/apps/webizen-ai-synth.png"
-    sed "s/SYNTH_VERSION/$VERSION/g" "$ROOT/packaging/linux/control" > "$stage/DEBIAN/control"
+    sed -e "s/SYNTH_VERSION/$VERSION/g" -e "s/SYNTH_ARCH/${ARCH}/g" "$ROOT/packaging/linux/control" > "$stage/DEBIAN/control"
     echo "Installed-Size: $(du -sk "$stage/usr" | cut -f1)" >> "$stage/DEBIAN/control"
     dpkg-deb --root-owner-group --build "$stage" "$DIST/$installer" >&2
     echo "$installer"

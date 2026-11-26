@@ -2,9 +2,10 @@ Package: webizen-ai-synth
 Version: SYNTH_VERSION
 Section: devel
 Priority: optional
-Architecture: amd64
+Architecture: SYNTH_ARCH
 Maintainer: Webizen AI <https://github.com/mediaprophet/synth>
-Depends: libwebkit2gtk-4.1-0, libgtk-3-0, libayatana-appindicator3-1
+Depends: libc6 (>= 2.36), libvulkan1, libwayland-client0, libx11-6, libxkbcommon0, libfontconfig1, libasound2
 Description: Webizen AI Synth
- Webizen AI Synth operator tray and VibeScript asset production CLI.
+ Webizen AI Synth operator tray and VibeScript asset production CLI (Debian native aether-native).
 Homepage: https://github.com/mediaprophet/synth
+

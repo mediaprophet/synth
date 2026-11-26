@@ -17,7 +17,7 @@ const EMBEDDED_RULES: &str = include_str!("production-rules.json");
 const MAX_EVENT_BYTES: u64 = 256 * 1024;
 const MAX_EVENTS: usize = 120;
 
-#[cfg(feature = "native-ui")]
+#[cfg(all(feature = "native-ui", not(target_os = "linux")))]
 mod aether_tray;
 pub mod bookmarks;
 pub mod branding;
@@ -583,9 +583,14 @@ pub fn run_cli(args: &[String]) -> Result<(), String> {
     if open_browser {
         crate::web_server::open_in_system_browser(&operator_url);
     }
-    #[cfg(feature = "native-ui")]
+    #[cfg(all(feature = "native-ui", not(target_os = "linux")))]
     if !headless {
         aether_tray::launch(url);
+        return Ok(());
+    }
+    #[cfg(all(feature = "native-ui", target_os = "linux"))]
+    if !headless {
+        crate::native_ui::launch_operator_native(url)?;
         return Ok(());
     }
     #[cfg(not(feature = "native-ui"))]

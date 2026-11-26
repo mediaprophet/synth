@@ -33,9 +33,15 @@ ureq = { version = "2.12", default-features = false, features = ["tls", "gzip"] 
 asset-production-vibe = { git = "https://github.com/mediaprophet/hypermedia-production.git", rev = "ae3880f2fd7ec7546811bafca35e6dc9c9ce5926" }
 qualia-anatomy-pack = { path = "../qualiaDB/crates/qualia-anatomy-pack", optional = true }
 
-aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "third-party-renderer", "desktop"], optional = true }
 aether-native = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["vello-cpu-softbuffer", "system-fonts", "clipboard", "accessibility"], optional = true }
 futures-timer = { version = "=3.0.4", optional = true }
+
+# Linux native-ui uses pure aether-native (no Wry/WebKit2GTK). Windows/macOS keep the desktop tray.
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "third-party-renderer", "desktop"], optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+aether = { git = "https://github.com/mediaprophet/Aether.git", rev = "d5ccce3bb9d6cab2aa5d7ef185d57ad786737c27", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "native"], optional = true }
 
 [build-dependencies]
 winresource = "0.1"
@@ -94,3 +100,54 @@ lto = false
 codegen-units = 16
 opt-level = "s"
 incremental = false
+
+# Canonical Webizen Debian native Cargo profiles (PLAN-WEBIZEN-DEBIAN-NATIVE-PROFILES-2026-11-26).
+[profile.webizen-host]
+inherits = "release"
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+incremental = false
+
+[profile.webizen-desktop]
+inherits = "release"
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+incremental = false
+
+[profile.webizen-subsystem]
+inherits = "release"
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+incremental = false
+
+[profile.webizen-mobile]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = "symbols"
+incremental = false
+
+[profile.webizen-iot-headless]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+incremental = false
+
+[profile.webizen-iot-display]
+inherits = "release"
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+incremental = false
+
