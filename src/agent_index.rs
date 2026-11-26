@@ -11,7 +11,7 @@ const MAX_FIND_RESULTS: usize = 400;
 pub const SCHEMA: &str = "synth.find/v1";
 pub const PRODUCT_NAME: &str = "Webizen AI Synth";
 /// Public release id. Cargo.toml stays SemVer `0.1.0` (Cargo rejects four-part versions).
-pub const RELEASE_VERSION: &str = "0.0.41.20";
+pub const RELEASE_VERSION: &str = "0.0.41.21";
 pub const ROLE: &str = "development tool (produce, preview, compile)";
 pub const RUNTIME: &str = "QualiaPortal + world host";
 

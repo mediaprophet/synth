@@ -381,8 +381,15 @@ pub fn dispatch_annotations_mcp(args: serde_json::Value) -> Result<serde_json::V
             }))
         }
         "add" => {
+            let mut input = args;
+            let fields = input
+                .as_object_mut()
+                .ok_or("annotation args must be an object")?;
+            fields.entry("id").or_insert_with(|| json!(""));
+            fields.entry("created_at").or_insert_with(|| json!(""));
+            fields.entry("lane").or_insert_with(|| json!("working"));
             let item: Annotation =
-                serde_json::from_value(args).map_err(|e| format!("annotation args: {e}"))?;
+                serde_json::from_value(input).map_err(|e| format!("annotation args: {e}"))?;
             let saved = proj.add_annotation(item)?;
             Ok(json!({"status": "added", "annotation": saved}))
         }
@@ -539,6 +546,32 @@ fn now_rfc3339() -> String {
 mod tests {
     use super::*;
     use std::fs;
+
+    #[test]
+    fn annotation_mcp_assigns_generated_fields() {
+        let dir = std::env::temp_dir().join(format!("synth-project-{}", next_id()));
+        fs::create_dir_all(&dir).unwrap();
+        let added = dispatch_annotations_mcp(json!({
+            "action": "add",
+            "project_dir": dir,
+            "file": "heart.10d",
+            "comment": "Verified the native cutaway silhouette"
+        }))
+        .unwrap();
+
+        assert_eq!(added["status"], "added");
+        let item = &added["annotation"];
+        assert!(item["id"].as_str().unwrap().starts_with("ann-"));
+        assert!(!item["created_at"].as_str().unwrap().is_empty());
+        assert_eq!(item["lane"], "working");
+        let reopened = dispatch_annotations_mcp(json!({
+            "project_dir": dir,
+            "action": "list"
+        }))
+        .unwrap();
+        assert_eq!(&reopened["items"][0], item);
+        fs::remove_dir_all(dir).ok();
+    }
 
     #[test]
     fn annotation_requires_substance() {
