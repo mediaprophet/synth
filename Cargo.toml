@@ -100,6 +100,45 @@ vector-cpu-render-adapter = { path = "../hypermedia-production/crates/vector-cpu
 blitz-traits = { path = "../Aether/vendor/blitz/blitz-traits" }
 blitz-dom = { path = "../Aether/vendor/blitz/blitz-dom" }
 
+# Linux aether `native` enables aether-native/vello-hybrid, which type-checks
+# etalon::Device against gpu-device-context's Device. Aether pins 575bab54;
+# hypermedia 0.0.40.8.1 pins 8e8ab6c; sibling pixel-buffer-output pins
+# a8f12b3f; QualiaDB pins d4a6af1. Aether's workspace patches are ignored
+# for git consumers. Path-unify onto the sibling etalon tree (CI checkouts
+# mediaprophet/etalon at 27a3f2a, branch 0.0.41.3).
+[patch."https://github.com/mediaprophet/etalon.git"]
+naga = { path = "../etalon/naga" }
+naga-types = { path = "../etalon/naga-types" }
+etalon = { path = "../etalon/etalon" }
+etalon-hal = { path = "../etalon/etalon-hal" }
+etalon-core = { path = "../etalon/etalon-core" }
+etalon-types = { path = "../etalon/etalon-types" }
+etalon-sync = { path = "../etalon/etalon-sync" }
+etalon-naga-bridge = { path = "../etalon/etalon-naga-bridge" }
+etalon-core-deps-apple = { path = "../etalon/etalon-core/platform-deps/apple" }
+etalon-core-deps-emscripten = { path = "../etalon/etalon-core/platform-deps/emscripten" }
+etalon-core-deps-linux-android-bsd = { path = "../etalon/etalon-core/platform-deps/linux-android-bsd" }
+etalon-core-deps-wasm = { path = "../etalon/etalon-core/platform-deps/wasm" }
+etalon-core-deps-windows = { path = "../etalon/etalon-core/platform-deps/windows" }
+etalon-diagnostics = { path = "../etalon/crates/etalon-diagnostics" }
+etalon-agent = { path = "../etalon/crates/etalon-agent" }
+etalon-wgsl-forge = { path = "../etalon/crates/etalon-wgsl-forge" }
+etalon-nquin = { path = "../etalon/crates/etalon-nquin" }
+etalon-tensor = { path = "../etalon/crates/etalon-tensor" }
+etalon-render = { path = "../etalon/crates/etalon-render" }
+etalon-sim = { path = "../etalon/crates/etalon-sim" }
+etalon-signal = { path = "../etalon/crates/etalon-signal" }
+etalon-wasm = { path = "../etalon/crates/etalon-wasm" }
+etalon-model = { path = "../etalon/crates/etalon-model" }
+etalon-resources = { path = "../etalon/crates/etalon-resources" }
+etalon-inference-kernel = { path = "../etalon/crates/etalon-inference-kernel" }
+etalon-inference = { path = "../etalon/crates/etalon-inference" }
+etalon-inference-contract = { path = "../etalon/crates/etalon-inference-contract" }
+etalon-model-io = { path = "../etalon/crates/etalon-model-io" }
+etalon-inference-lab = { path = "../etalon/crates/etalon-inference-lab" }
+etalon-vibe = { path = "../etalon/crates/etalon-vibe" }
+etalon-sense-core = { path = "../etalon/crates/etalon-sense-core" }
+
 [profile.dev]
 debug = 0
 incremental = false

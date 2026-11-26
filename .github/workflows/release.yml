@@ -75,6 +75,12 @@ jobs:
           ref: a6b5fe1406e8d877b057a1cdf47d5c67b68dfa09
           path: Aether
 
+      - uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/etalon
+          ref: 27a3f2a68a847bc4c3dcb811a19019ba361920bf
+          path: etalon
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -223,6 +229,12 @@ jobs:
           repository: mediaprophet/Aether
           ref: a6b5fe1406e8d877b057a1cdf47d5c67b68dfa09
           path: Aether
+
+      - uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/etalon
+          ref: 27a3f2a68a847bc4c3dcb811a19019ba361920bf
+          path: etalon
 
       - name: Install Rust toolchain
         run: |
