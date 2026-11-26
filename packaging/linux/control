@@ -4,8 +4,8 @@ Section: devel
 Priority: optional
 Architecture: SYNTH_ARCH
 Maintainer: Webizen AI <https://github.com/mediaprophet/synth>
+Installed-Size: SYNTH_INSTALLED_SIZE
 Depends: libc6 (>= 2.36), libvulkan1, libwayland-client0, libx11-6, libxkbcommon0, libfontconfig1, libasound2
+Homepage: https://github.com/mediaprophet/synth
 Description: Webizen AI Synth
  Webizen AI Synth operator tray and VibeScript asset production CLI (Debian native aether-native).
-Homepage: https://github.com/mediaprophet/synth
-

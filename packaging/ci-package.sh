@@ -103,8 +103,14 @@ case "$OS" in
     chmod 755 "$stage/usr/bin/synth"
     cp "$ROOT/packaging/linux/synth.desktop" "$stage/usr/share/applications/webizen-ai-synth.desktop"
     cp "$PNG256" "$stage/usr/share/icons/hicolor/256x256/apps/webizen-ai-synth.png"
-    sed -e "s/SYNTH_VERSION/$VERSION/g" -e "s/SYNTH_ARCH/${ARCH}/g" "$ROOT/packaging/linux/control" > "$stage/DEBIAN/control"
-    echo "Installed-Size: $(du -sk "$stage/usr" | cut -f1)" >> "$stage/DEBIAN/control"
+    # Installed-Size must stay in the first control stanza. Appending after the
+    # template's trailing newline created a second paragraph and dpkg-deb
+    # rejected it ("several package info entries found, only one allowed").
+    size="$(du -sk "$stage/usr" | cut -f1)"
+    sed -e "s/SYNTH_VERSION/$VERSION/g" \
+        -e "s/SYNTH_ARCH/${ARCH}/g" \
+        -e "s/SYNTH_INSTALLED_SIZE/${size}/g" \
+        "$ROOT/packaging/linux/control" > "$stage/DEBIAN/control"
     dpkg-deb --root-owner-group --build "$stage" "$DIST/$installer" >&2
     echo "$installer"
     ;;
