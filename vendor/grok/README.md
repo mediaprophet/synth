@@ -2,7 +2,7 @@
 
 Antigravity’s SDK is `vendor/antigravity-sdk-python`. This directory is the Grok equivalent: MCP wiring, a Grok skill, and a JSON invoke helper. It does not add a modeller. Hypermedia morphisms stay in Synth; Grok calls them.
 
-Catalog: **150** morphisms (`OPERATIONS.len() == ontology::MORPHISMS.len() == 150`). Canonical contract: `C:\github\synth\AGENTS.md`.
+Catalog: **400** morphisms (`OPERATIONS.len() == ontology::MORPHISMS.len() == 400`, 150 baseline + 250 expansion). Canonical contract: `C:\github\synth\AGENTS.md`. Public identity: **0.0.41.21**.
 
 ## What this gives Grok
 
@@ -23,7 +23,7 @@ Merge only the Synth server entry, preserving unrelated project settings. In a G
 
 Do not write this into `~/.grok/config.toml` unless you want Synth MCP on every Grok project.
 
-Reload MCP (`/mcps` or a new session) after the files land so the spawned child is `target-prod` (150 morphisms). A session that still talks to `target-studio` will advertise 114 in the ontology tool description.
+Reload MCP (`/mcps` or a new session) after the files land so the spawned child is `target-prod` (400 morphisms, `synth-mcp.exe`). A session that still talks to `target-studio` will advertise a stale catalog.
 
 ## Binary
 
@@ -36,7 +36,7 @@ C:\github\synth\target-studio\debug\synth.exe
 Do not rebuild into `target` or `target-studio`. Default command in `config.toml` is the isolated preview CLI, measured 2026-11-17:
 
 ```
-C:\github\synth\target-prod\debug\synth.exe mcp
+C:\github\synth\target-prod\debug\synth-mcp.exe mcp
 ```
 
 `synth operations` on that binary reports `"count": 150`. `target-gap-review` still reports 148; `target-studio` is the locked live Studio process.

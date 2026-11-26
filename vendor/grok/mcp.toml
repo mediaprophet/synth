@@ -1,11 +1,12 @@
 # Snippet for Grok project config. Merge into .grok/config.toml
 # Tools appear as synth__<tool>, e.g. synth__synth_produce_present
 #
-# Isolated binary: target-prod (150 morphisms). Do not rebuild into
-# target or target-studio.
+# Isolated binary: target-prod (400 morphisms). Do not rebuild into
+# target or target-studio. Grok MCP uses the sidecar synth-mcp.exe because
+# Windows locks synth.exe while a previous stdio child is alive.
 
 [mcp_servers.synth]
-command = "C:\\github\\synth\\target-prod\\debug\\synth.exe"
+command = "C:\\github\\synth\\target-prod\\debug\\synth-mcp.exe"
 args = ["mcp"]
 enabled = true
 startup_timeout_sec = 60

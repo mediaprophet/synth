@@ -7,8 +7,8 @@ fn main() {
         res.set("FileDescription", "Webizen AI Synth operator");
         res.set("LegalCopyright", "Copyright (c) 2026 Timothy Charles Holborn (CC-BY-NC-ND-4.0)");
         res.set("CompanyName", "Webizen AI");
-        res.set("FileVersion", "0.0.41.13");
-        res.set("ProductVersion", "0.0.41.13");
+        res.set("FileVersion", "0.0.41.21");
+        res.set("ProductVersion", "0.0.41.21");
         if let Err(err) = res.compile() {
             println!("cargo:warning=winresource: {err}");
         }

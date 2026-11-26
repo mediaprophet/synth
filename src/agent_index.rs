@@ -157,6 +157,46 @@ const TOOLS: &[ToolHit] = &[
         haystack: "colab ultra trellis trellis2 ovoxel 3d glb pbr a100 l4 burst image-to-3d multiview q42 ontology compile",
         invoke: "action=status|configure|routines|submit|poll|ingest|export_notebook. Offloads TRELLIS.2-4B 3D O-Voxel/PBR and 83GB High-RAM .q42 compilation to Google Colab Ultra, then seals .10d v2 (HOLO 0x0306) and .q42 locally.",
     },
+    ToolHit {
+        name: "synth_convert_3d",
+        haystack: "convert 3d glb gltf obj stl 10d holographic license provenance attribution",
+        invoke: "Convert .glb/.gltf/.obj/.stl (or legacy .10d) to Holographic .10d v2. Requires source_path, out_dir, spdx_license, attribution_notice.",
+    },
+    ToolHit {
+        name: "synth_validate_model",
+        haystack: "validate model anatomy topology cavity sdf holo 10d shex shacl tissue pathology",
+        invoke: "Validate computational model fields, HOLO v2 sections, topological layers, and optional SHACL graphs.",
+    },
+    ToolHit {
+        name: "synth_bioportal",
+        haystack: "bioportal fma uberon owl biomedical ontology shacl n3logic q42",
+        invoke: "action=status|set_api_key|list_local|list_remote|download|mappings|refactor_owl|compile_biomedical. API key in gitignored .synth/secrets.json.",
+    },
+    ToolHit {
+        name: "synth_gpu",
+        haystack: "gpu adapter vulkan cuda dx12 metal discrete igpu backend",
+        invoke: "action=status|list|set. Default discrete-only; persists .synth/gpu-config.json.",
+    },
+    ToolHit {
+        name: "synth_annotations",
+        haystack: "annotation viewport camera comment rating review addressed",
+        invoke: "action=list|add|mark_addressed on project .synth/annotations.json.",
+    },
+    ToolHit {
+        name: "synth_sessions",
+        haystack: "session admission slot gpu runtime concurrent multi-agent",
+        invoke: "Inspect SYNTH_OUTPUT_ROOT/.synth/slots.json and GPU runtime profile.",
+    },
+    ToolHit {
+        name: "synth_changelog_license",
+        haystack: "changelog license royalty commons paydown cc-by-nc-nd contract",
+        invoke: "action=inspect|set_license on .synth/changelog.json and license-contract.json.",
+    },
+    ToolHit {
+        name: "synth_verify_outputs",
+        haystack: "verify outputs 10d png svg emf m64 q42 hmc crc render pass fail",
+        invoke: "Pass export_dir. Returns a pass|fail|error matrix over sealed deliverables.",
+    },
 ];
 
 const NOTES: &[Note] = &[
@@ -457,6 +497,28 @@ mod tests {
             .unwrap()
             .iter()
             .any(|t| t["name"] == "synth_produce_present"));
+    }
+
+    #[test]
+    fn find_convert_3d_and_gpu_and_verify() {
+        let conv = search("glb", 20);
+        assert!(conv["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|t| t["name"] == "synth_convert_3d"));
+        let gpu = search("vulkan", 20);
+        assert!(gpu["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|t| t["name"] == "synth_gpu"));
+        let ver = search("crc", 20);
+        assert!(ver["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|t| t["name"] == "synth_verify_outputs"));
     }
 
     #[test]

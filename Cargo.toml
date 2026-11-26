@@ -90,6 +90,16 @@ pixel-buffer-output = { path = "../hypermedia-production/crates/pixel-buffer-out
 pixel-window-render-adapter = { path = "../hypermedia-production/crates/pixel-window-render-adapter" }
 vector-cpu-render-adapter = { path = "../hypermedia-production/crates/vector-cpu-render-adapter" }
 
+# Aether a6b5fe1 native-dom uses extra Blitz event types (Resize, COUNT,
+# BeforeInput, …) that crates.io blitz 0.3.0-beta.4 does not export.
+# Aether's own [patch.crates-io] is ignored when Synth consumes Aether as a
+# git crate; consumers must opt in at this workspace root. Release CI
+# checkouts Aether next to synth. blitz-net is unused (aether-native `net`
+# is off).
+[patch.crates-io]
+blitz-traits = { path = "../Aether/vendor/blitz/blitz-traits" }
+blitz-dom = { path = "../Aether/vendor/blitz/blitz-dom" }
+
 [profile.dev]
 debug = 0
 incremental = false

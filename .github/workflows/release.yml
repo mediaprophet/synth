@@ -69,6 +69,12 @@ jobs:
           ref: 0.0.41.3
           path: hypermedia-production
 
+      - uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/Aether
+          ref: a6b5fe1406e8d877b057a1cdf47d5c67b68dfa09
+          path: Aether
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -211,6 +217,12 @@ jobs:
         with:
           repository: mediaprophet/qap-compiler
           path: qap-compiler
+
+      - uses: actions/checkout@v5
+        with:
+          repository: mediaprophet/Aether
+          ref: a6b5fe1406e8d877b057a1cdf47d5c67b68dfa09
+          path: Aether
 
       - name: Install Rust toolchain
         run: |

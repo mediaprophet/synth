@@ -125,9 +125,13 @@ Grok prefixes names `synth__`. Antigravity, Codex, and `synth mcp-tools` use the
 | `synth_operator_status` | Tray/operator snapshot. `fetch=true` ls-remote tags. Browser `GET /operator`. |
 | `synth_production_rules` | Biosphere evidence gate. |
 | `synth_validate_model` | Validate deliverable ledger, `yaml-ld-q42` v2 manifest (`L0`–`L6` strata), `.10d` `HOLO` v2 (`0x0306`), and `CBLD` CBOR-LD provenance. |
-| `synth_package_inspect` | Inspect sealed `.hmc` / `.10d` / `.q42` package headers, `HOLO` v2 status, `AREF`/`IOVR`/`INST` constituency, and SHA-256 digests. |
-| `synth_audit_index` | Query or verify `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` function registry. |
+| `synth_verify_outputs` | Pass `export_dir`. CRC/frustum/KLOD and multi-format pass\|fail\|error matrix for sealed `.10d` / `.png` / `.svg` / `.hmc` / `.q42`. |
 | `synth_convert_3d` | Convert `.glb`/`.gltf`/`.obj`/`.stl` scenes or assets into Holographic 10D v2 `.10d` + `.q42` with mandatory `source-asset-licensing.n3` validation and `CBLD` sealing. |
+| `synth_bioportal` | BioPortal OWL → linked refs + SHACL + N3Logic + `.q42`. `action=status\|set_api_key\|list_local\|list_remote\|download\|mappings\|refactor_owl\|compile_biomedical`. |
+| `synth_gpu` | Discrete-only GPU adapter preference and backend (`vulkan` default). `action=status\|list\|set`. |
+| `synth_annotations` | Viewport review loop on `{project}/.synth/annotations.json`. `action=list\|add\|mark_addressed`. |
+| `synth_sessions` | Multi-agent admission slots (`SYNTH_OUTPUT_ROOT/.synth/slots.json`) and GPU runtime profile. |
+| `synth_changelog_license` | Signed changelog + dual-regime license contract. `action=inspect\|set_license`. |
 | `synth_colab` | Google Colab Ultra heavy-compute burst extension (`trellis2_image_to_3d`, `trellis2_multiview_to_3d`, `hunyuan3d_shape_and_pbr`, `partcrafter_decompose_3d`, `unirig_auto_skeleton`, `ontology_compile_q42`) with `action="routines"` decision matrix, over HTTPS tunnel or Google Drive queue, automatically sealing `.10d` v2 (`HOLO` `0x0306` + `PRV1` + `.ovoxel.json` `M64HoloRecord`/`VOX0`) and `.q42` locally. |
 | `synth_update` | `check\|upgrade\|verify\|apply` signed GitHub Releases. Never overwrites a locked exe. |
 | `synth_environment_bootstrap` | Tray/studio bootstrap + LLM vault scan. |
@@ -160,9 +164,10 @@ synth job add URL | run ID | run-due
 synth operator                     # http://127.0.0.1:8787/operator  (tray with --features native-ui)
 synth serve --port 8787 --project DIR
 synth validate-model --dir MODEL_DIR [--ledger LEDGER.json]
-synth package-inspect --path FILE.hmc|FILE.10d|FILE.q42
-synth audit-index [--query KEYWORD]
+synth verify-outputs --export-dir DIR
 synth convert-3d --input SCENE.glb --out-10d OUT.10d [--out-q42 OUT.q42] --license SPDX --attribution TEXT --source-uri URI
+synth gpu status | list | set
+synth changelog inspect | set-license
 synth colab status | routines | configure | export-notebook | submit | poll | ingest | list
 synth update check | upgrade | verify | apply
 ```

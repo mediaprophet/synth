@@ -31,10 +31,12 @@ Spawn `C:\github\synth\target-prod\debug\synth-mcp.exe mcp` with `SYNTH_INPUT_RO
 | Fetch | `synth_jobs` (`kind=fetch\|ingest\|compile`) |
 | Contracts | `synth_operation_contracts` |
 | Validate Model (10D v2 / L0-L6) | `synth_validate_model` |
-| Inspect `.hmc` / `.10d` / `.q42` | `synth_package_inspect` |
+| Verify sealed outputs | `synth_verify_outputs` (`export_dir`) |
 | Convert 3D (`.glb`/`.obj`/`.stl` -> `.10d` v2 + license `.q42`) | `synth_convert_3d` |
 | Colab Ultra Burst (`TRELLIS.2-4B` / `Hunyuan3D-2.1` / `PartCrafter` / `UniRig` / High-RAM `.q42`) | `synth_colab` (`action=routines` for decision guide) |
-| Audit Registry | `synth_audit_index` |
+| BioPortal OWL | `synth_bioportal` |
+| GPU adapter | `synth_gpu` |
+| Function registry | grep `C:\github\hypermedia-production\audit-docs\FUNCTIONS.md` |
 | Operator | `synth_operator_status` / `GET /operator` |
 
 Present HTML is Antigravity-ready (`<agent-embed>`, Auxiliary Pane). Author logic as **N3**. Add scene assets as external HMC / `.10d` / `.q42`.
